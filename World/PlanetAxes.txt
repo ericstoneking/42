@@ -1,0 +1,11 @@
+Planet Axes (Assume in J2000, not ecliptic)
+Source: Wikipedia
+
+Mercury RA = 18h44m2s, Dec = 61.45 deg
+Venus RA = 18h11m2s, Dec = 67.16 deg
+Mars RA = 21h10m44s, Dec = 52.8865 deg
+Jupiter RA = 268.057 deg, Dec = 64.496 deg
+Saturn RA = 2h42m21s, Dec = 83.537 deg
+Uranus RA = 17h9m15s, Dec = -15.175 deg
+Neptune RA = 19h57m20s, Dec = 42.95 deg
+Pluto RA = 133.046 deg, Dec = -6.145 deg

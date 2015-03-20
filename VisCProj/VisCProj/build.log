@@ -1,0 +1,98 @@
+﻿Build started 3/28/2013 10:33:19 PM.
+     1>Project "C:\Users\hyou\Documents\ACSEB\42\trunk\42\VisCProj\VisCProj\VisCProj.vcxproj" on node 2 (rebuild target(s)).
+     1>_PrepareForClean:
+         Deleting file "..\..\Object\VisCProj.lastbuildstate".
+       InitializeBuildStatus:
+         Creating "..\..\Object\VisCProj.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I..\..\Include\ /I..\..\Kit\Include\ /I..\..\Kit\Source\ /I..\..\External\GLEE\ /I..\..\External\freeglut\include\GL\ /ZI /nologo /W4 /WX- /Od /Oy- /D _CRT_SECURE_NO_WARNINGS /D GLUT_DISABLE_ATEXIT_HACK /D GLUT_NO_WARNING_DISABLE /D GLUT_NO_LIB_PRAGMA /D _USE_SYSTEM_TIME_ /D _USE_SHADERS_ /D _USE_GUI_ /D WIN32 /D _DEBUG /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"..\..\Object\\" /Fd"..\..\Object\vc100.pdb" /Gd /TC /wd4054 /wd4055 /wd4244 /wd4305 /wd4100 /wd4210 /analyze- /errorReport:prompt ..\..\External\GLEE\GLee.c ..\..\Kit\Source\dcmkit.c ..\..\Kit\Source\envkit.c ..\..\Kit\Source\fswkit.c ..\..\Kit\Source\geomkit.c ..\..\Kit\Source\glkit.c ..\..\Kit\Source\iokit.c ..\..\Kit\Source\mathkit.c ..\..\Kit\Source\msis86kit.c ..\..\Kit\Source\orbkit.c ..\..\Kit\Source\sigkit.c ..\..\Kit\Source\timekit.c ..\..\Source\42actuators.c ..\..\Source\42cmd.c ..\..\Source\42dynam.c ..\..\Source\42environs.c ..\..\Source\42ephem.c ..\..\Source\42exec.c ..\..\Source\42fsw.c ..\..\Source\42GlutGui.c ..\..\Source\42init.c ..\..\Source\42main.c ..\..\Source\42perturb.c ..\..\Source\42report.c ..\..\Source\42sensors.c
+         42sensors.c
+     1>c:\users\hyou\documents\acseb\42\trunk\42\kit\include\mathkit.h(10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+         42report.c
+     1>c:\users\hyou\documents\acseb\42\trunk\42\kit\include\mathkit.h(10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+         42perturb.c
+     1>c:\users\hyou\documents\acseb\42\trunk\42\kit\include\mathkit.h(10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+         42main.c
+         42init.c
+     1>c:\users\hyou\documents\acseb\42\trunk\42\kit\include\mathkit.h(10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+         42GlutGui.c
+     1>c:\users\hyou\documents\acseb\42\trunk\42\kit\include\mathkit.h(10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>c:\users\hyou\documents\acseb\42\trunk\42\source\42glutgui.c(1369): warning C4101: 'sinlng' : unreferenced local variable
+     1>c:\users\hyou\documents\acseb\42\trunk\42\source\42glutgui.c(1347): warning C4101: 'coslat' : unreferenced local variable
+     1>c:\users\hyou\documents\acseb\42\trunk\42\source\42glutgui.c(1347): warning C4101: 'sinlat' : unreferenced local variable
+     1>c:\users\hyou\documents\acseb\42\trunk\42\source\42glutgui.c(1369): warning C4101: 'coslng' : unreferenced local variable
+     1>c:\users\hyou\documents\acseb\42\trunk\42\source\42glutgui.c(1348): warning C4101: 'SoP' : unreferenced local variable
+     1>c:\users\hyou\documents\acseb\42\trunk\42\source\42glutgui.c(1367): warning C4101: 'j' : unreferenced local variable
+         42fsw.c
+     1>c:\users\hyou\documents\acseb\42\trunk\42\kit\include\mathkit.h(10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+         42exec.c
+     1>c:\users\hyou\documents\acseb\42\trunk\42\kit\include\mathkit.h(10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+         42ephem.c
+     1>c:\users\hyou\documents\acseb\42\trunk\42\kit\include\mathkit.h(10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+         42environs.c
+     1>c:\users\hyou\documents\acseb\42\trunk\42\kit\include\mathkit.h(10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+         42dynam.c
+     1>c:\users\hyou\documents\acseb\42\trunk\42\kit\include\mathkit.h(10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+         42cmd.c
+     1>c:\users\hyou\documents\acseb\42\trunk\42\kit\include\mathkit.h(10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+         42actuators.c
+     1>c:\users\hyou\documents\acseb\42\trunk\42\kit\include\mathkit.h(10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+         timekit.c
+         sigkit.c
+         orbkit.c
+     1>c:\users\hyou\documents\acseb\42\trunk\42\kit\include\mathkit.h(10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+         msis86kit.c
+         mathkit.c
+     1>c:\users\hyou\documents\acseb\42\trunk\42\kit\include\mathkit.h(10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+         iokit.c
+         glkit.c
+     1>c:\users\hyou\documents\acseb\42\trunk\42\kit\include\mathkit.h(10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>c:\users\hyou\documents\acseb\42\trunk\42\kit\source\glkit.c(1768): warning C4101: 'newline' : unreferenced local variable
+     1>c:\users\hyou\documents\acseb\42\trunk\42\kit\source\glkit.c(1768): warning C4101: 'junk' : unreferenced local variable
+         Generating Code...
+         Compiling...
+         geomkit.c
+     1>c:\users\hyou\documents\acseb\42\trunk\42\kit\include\mathkit.h(10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+         fswkit.c
+     1>c:\users\hyou\documents\acseb\42\trunk\42\kit\include\mathkit.h(10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+         envkit.c
+     1>c:\users\hyou\documents\acseb\42\trunk\42\kit\include\mathkit.h(10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+         dcmkit.c
+     1>c:\users\hyou\documents\acseb\42\trunk\42\kit\include\mathkit.h(10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+         GLee.c
+         Generating Code...
+       Link:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"..\..\42.exe" /INCREMENTAL /NOLOGO /LIBPATH:..\..\External\freeglut\lib\ freeglut_static.lib /MANIFEST:NO /DEBUG /PDB:".\42.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"..\..\42.lib" /MACHINE:X86 ..\..\Object\GLee.obj
+         ..\..\Object\dcmkit.obj
+         ..\..\Object\envkit.obj
+         ..\..\Object\fswkit.obj
+         ..\..\Object\geomkit.obj
+         ..\..\Object\glkit.obj
+         ..\..\Object\iokit.obj
+         ..\..\Object\mathkit.obj
+         ..\..\Object\msis86kit.obj
+         ..\..\Object\orbkit.obj
+         ..\..\Object\sigkit.obj
+         ..\..\Object\timekit.obj
+         ..\..\Object\42actuators.obj
+         ..\..\Object\42cmd.obj
+         ..\..\Object\42dynam.obj
+         ..\..\Object\42environs.obj
+         ..\..\Object\42ephem.obj
+         ..\..\Object\42exec.obj
+         ..\..\Object\42fsw.obj
+         ..\..\Object\42GlutGui.obj
+         ..\..\Object\42init.obj
+         ..\..\Object\42main.obj
+         ..\..\Object\42perturb.obj
+         ..\..\Object\42report.obj
+         ..\..\Object\42sensors.obj
+         VisCProj.vcxproj -> C:\Users\hyou\Documents\ACSEB\42\trunk\42\VisCProj\VisCProj\..\..\42.exe
+       FinalizeBuildStatus:
+         Deleting file "..\..\Object\VisCProj.unsuccessfulbuild".
+         Touching "..\..\Object\VisCProj.lastbuildstate".
+     1>Done Building Project "C:\Users\hyou\Documents\ACSEB\42\trunk\42\VisCProj\VisCProj\VisCProj.vcxproj" (rebuild target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:08.87

@@ -1,0 +1,56 @@
+
+
+EGM96 File description:
+
+The file contains fully-normalized, unitless spherical harmonic coefficients 
+and their standard deviations, for a gravitational model complete from degree 2
+order 0, to degree and order 360. These coefficients (and their standard 
+deviations) are consistent with scaling values of GM and "a" appearing in 
+the following equation: 
+
+V(r,th,lam)=GM/r*(1+SUM(degree)(a/r)**n SUM(order) Cnm*Ynm(th,lam)) 
+
+equal to:
+GM=3986004.415E+8 m**3/s**2
+a=6378136.3	m
+
+The C(2,0) coefficient of this model is in the "tide-free" system, as far as 
+the permanent tide is concerned. The file contains 65338 records, each record 
+containing:
+
+(n,m,Cnm,Snm,sigmaCnm,sigmaSnm) --> FORMAT(2I4,2E20.12,2E16.8) 
+
+(The file, once uncompressed, can also be read with free FORMAT). 
+
+Note that the values concerning the transformation of C(2,0) from the "tide-free
+" to the "zero-tide" system, the rates of C(2,0), C(2,1) and S(2,1), and the 
+reference C(2,1) and S(2,1) at epoch Jan. 1 1986 are as specified below:
+  
+ C20(zero tide) = C20(tide free) - 3.11080e-8 * 0.3 / sqrt(5)
+
+This transformation is documented in NASA's Technical Memorandum 100775 
+'Consideration of Permanent Tidal Deformation in the Orbit Determination
+and Data Analysis for the Topex/Poseidon Mission' by Rapp et al., (1991).
+
+Coefficient Rates:
+ 
+ C20(dot) =  1.16275534e-11  (per year)
+ C21(dot) = -0.32e-11        (per year)
+ S21(dot) =  1.62e-11        (per year)
+  
+ The above rates are held fixed in the solution. No other rates are modeled.
+ The values of C21 and S21 at epoch 1986 Jan. 1 are held fixed at:
+ 
+ C21 = -.1869876359548955E-09
+ S21 =  .1195280120306540E-08
+ 
+ All values and rates above refer to unitless fully-normalized coefficients.
+
+==============================================================================
+Please look at our web page at http://cddisa.gsfc.nasa.gov/926/egm96/egm96.html
+===============================================================================
+This file last updated  on January 20, 1998.
+===============================================================================
+For questions send email to 
+   flemoine@olympus.gsfc.nasa.gov or npavlis@geodesy2.gsfc.nasa.gov
+===============================================================================

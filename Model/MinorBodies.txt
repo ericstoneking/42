@@ -1,0 +1,146 @@
+<<<<<<<<<<<<<<<<<<<<<<  Minor Body Inputs for 42  >>>>>>>>>>>>>>>>>>>>>>>>>>
+8                                  ! Number of Minor Bodies in this File
+*****************************  Minor Body  *********************************
+TRUE                               ! Exists
+"Bennu"                            ! Name
+Rockball                           ! Map File Name
+RQ36Crust05.obj                    ! Geometry Object File Name
+RQ36Color.ppm                      ! Color Texture File Name
+RQ36Bump.ppm                       ! Bump Texture File Name
+5.2                                ! mu, m^2/sec^3
+250.0                              ! Radius, m
+4.0613E-4                          ! Rotation rate, rad/sec
+86.6388 -65.1086                   ! RA, Dec of pole, deg
+1.685E11                           ! SMA, m
+0.2037                             ! Eccentricity
+0.5144                             ! Inclination, rad
+0.0077                             ! RAAN, rad
+1.1847                             ! Arg of Periapsis, rad
+2010  10  14  0                    ! Epoch Year, Month, Day, Hour
+0.9382                             ! True Anomaly at Epoch, rad
+*****************************  Minor Body  *********************************
+TRUE                               ! Exists
+"Eros"                             ! Name   
+Rockball                           ! Map File Name
+ErosCrust03.obj                    ! Geometry Object File Name   
+ErosColor.ppm                      ! Color Texture File Name  
+ErosBump.ppm                       ! Bump Texture File Name
+4.463E5                            ! mu, m^2/sec^3
+8420.0                             ! Radius, m
+3.3118e-04                         ! Rotation rate, rad/sec
+0.0   90.0                         ! RA, Dec of pole, deg
+2.1812e11                          ! SMA, m
+0.2228                             ! Eccentricity
+0.5376                             ! Inclination, rad
+5.9755                             ! RAAN, rad
+2.4236                             ! Arg of Periapsis, rad
+2010  10  14  0                    ! Epoch Year, Month, Day, Hour
+2.1829                             ! True Anomaly at Epoch, rad
+*****************************  Minor Body  *********************************
+TRUE                               ! Exists
+"67P/C-G"                          ! Name 
+Rockball                           ! Map File Name
+67P-CG.obj                         ! Geometry Object File Name 
+NONE                               ! Color Texture File Name
+NONE                               ! Bump Texture File Name
+667.0                              ! mu, m^2/sec^3
+2.0E3                              ! Radius, m
+1.4075E-4                          ! Rotation rate, rad/sec
+69.0  64.0                         ! RA, Dec of pole, deg
+518.06E9                           ! SMA, m
+0.64102                            ! Eccentricity
+0.12288                            ! Inclination, rad
+0.87523                            ! RAAN, rad
+0.22305                            ! Arg of Periapsis, rad
+2014  8  10  00                    ! Epoch Year, Month, Day, Hour
+5.3007                             ! True Anomaly at Epoch, rad (Value is Mean Anom.  Fix!)
+*****************************  Minor Body  *********************************
+FALSE                              ! Exists
+"Itokawa"                          ! Name 
+Rockball                           ! Map File Name
+ItokawaCrust03.obj                 ! Geometry Object File Name 
+ItokawaColor.ppm                   ! Color Texture File Name
+ItokawaBump.ppm                    ! Bump Texture File Name
+2.1                                ! mu, m^2/sec^3
+165.0                              ! Radius, m
+1.4386e-04                         ! Rotation rate, rad/sec
+0.0   90.0                         ! RA, Dec of pole, deg
+1.9809e11                          ! SMA, m
+0.2801                             ! Eccentricity
+0.4200                             ! Inclination, rad
+0.0649                             ! RAAN, rad
+3.9873                             ! Arg of Periapsis, rad
+2010  10  14  0                    ! Epoch Year, Month, Day, Hour
+1.8336                             ! True Anomaly at Epoch, rad
+*****************************  Minor Body  *********************************
+FALSE                              ! Exists
+"Wirtanen"                         ! Name
+Rockball                           ! Map File Name
+Wirtanen.obj                       ! Geometry Object File Name 
+WirtanenColor.ppm                  ! Color Texture File Name 
+WirtanenBump.ppm                   ! Bump Texture File Name
+27.2                               ! mu, m^2/sec^3
+580.0                              ! Radius, m
+2.91E-4                            ! Rotation rate, rad/sec
+326.0   73.0                       ! RA, Dec of pole, deg
+4.6375E11                          ! SMA, m
+0.6578                             ! Eccentricity
+0.20487                            ! Inclination, rad
+1.4342                             ! RAAN, rad
+-0.069813                          ! Arg of Periapsis, rad
+2002  8  26  18                    ! Epoch Year, Month, Day, Hour
+0.0                                ! True Anomaly at Epoch, rad
+*****************************  Minor Body  *********************************
+FALSE                              ! Exists
+"Haidea"                           ! Name
+Rockball                           ! Map File Name
+GenericAsteroid.obj                ! Geometry Object File Name 
+HaideaColor.ppm                    ! Color Texture File Name
+HaideaBump.ppm                     ! Bump Texture File Name
+1.2E7                              ! mu, m^2/sec^3
+35.0E3                             ! Radius, m
+2.03E-4                            ! Rotation rate, rad/sec
+0.0   90.0                         ! RA, Dec of pole, deg
+4.5953E11                          ! SMA, m
+0.200522                           ! Eccentricity
+0.136                              ! Inclination, rad
+3.9684                             ! RAAN, rad
+1.6023                             ! Arg of Periapsis, rad
+2013  4  18  0                     ! Epoch Year, Month, Day, Hour
+1.3089                             ! True Anomaly at Epoch, rad
+*****************************  Minor Body  *********************************
+FALSE                              ! Exists
+"Lacadiera"                        ! Name
+Rockball                           ! Map File Name
+Lacadiera.obj                      ! Geometry Object File Name 
+LacadieraColor.ppm                 ! Color Texture File Name
+LacadieraBump.ppm                  ! Bump Texture File Name
+1.78871E7                          ! mu, m^2/sec^3
+10.0E3                             ! Radius, m
+1.0E-4                             ! Rotation rate, rad/sec
+0.0   90.0                         ! RA, Dec of pole, deg
+3.3685e+11                         ! SMA, m
+0.09607858997237276                ! Eccentricity
+0.098649                           ! Inclination, rad
+4.1035                             ! RAAN, rad
+0.54502                            ! Arg of Periapsis, rad
+2013  7 16  4                      ! Epoch Year, Month, Day, Hour
+0.0                                ! True Anomaly at Epoch, rad
+*****************************  Minor Body  *********************************
+FALSE                              ! Exists
+"Hedwig"                           ! Name 
+Rockball                           ! Map File Name
+GenericAsteroid.obj                ! Geometry Object File Name 
+HedwigColor.ppm                    ! Color Texture File Name
+HedwigBump.ppm                     ! Bump Texture File Name
+1.0E7                              ! mu, m^2/sec^3
+10.0E3                             ! Radius, m
+1.0E-4                             ! Rotation rate, rad/sec
+0.0   90.0                         ! RA, Dec of pole, deg
+3.9639e+11                         ! SMA, m
+0.07409389379805467                ! Eccentricity
+0.19089                            ! Inclination, rad
+4.9996                             ! RAAN, rad
+0.0025304                          ! Arg of Periapsis, rad
+2013  4  3  21                     ! Epoch Year, Month, Day, Hour
+0.0                                ! True Anomaly at Epoch, rad

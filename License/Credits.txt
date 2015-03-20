@@ -1,0 +1,24 @@
+MSIS86 Model available via anonymous FTP:
+ccmc.gsfc.nasa.gov/modelweb/atmos/msis.html
+
+Earth map texture courtesy of the Blue Marble project:
+earthobservatory.nasa.gov
+"Most materials published on the Earth Observatory, including images, are freely available for re-publication or re-use, including commercial purposes, except for where copyright is indicated. In those cases you must obtain the copyright holder’s permission; we usually provide links to the organization that holds the copyright.  We ask that NASA’s Earth Observatory be given credit for its original materials; the only mandatory credit is NASA."
+
+
+Some maps courtesy NASA/JPL-Caltech:
+maps.jpl.nasa.gov
+"Unless otherwise noted, images and video on JPL public web sites (public sites ending with a jpl.nasa.gov address) may be used for any purpose without prior permission, ..."
+See http://www.jpl.nasa.gov/imagepolicy/ for the full image policy statement.
+
+Some planet maps from Bjorn Jonsson:
+http://www.mmedia.is/~bjj/data/planetary_maps.html
+"All the planetary maps available on these pages are publicly available. You do not need a special permission to use them but if you do then please mention their origin in your work, e.g. "created by Björn Jónsson" (or "Bjorn Jonsson" for all of you 8 bit character set challenged out there ;) or something equivalent."
+
+Some 3D spacecraft models courtesy of http://nasa3d.arc.nasa.gov
+"NASA still images; audio files; video; and computer files used in the rendition of 3-dimensional models, such as texture maps and polygon data in any format, generally are not copyrighted. You may use NASA imagery, video, audio, and data files used for the rendition of 3-dimensional models for educational or informational purposes, including photo collections, textbooks, public exhibits, computer graphical simulations and Internet Web pages. This general permission extends to personal Web pages."
+
+Luna bumpmap derived from LOLA altimeter data, provided by Erwan Mazarico.
+Luna colormap derived from LROC albedo data.  Pointer provided by Erwan Mazarico.
+
+The MSIS86 atmosphere model is courtesy of the Nation Space Science Data Center and the Community Coordinated Modeling Center at NASA Goddard Space Flight Center.  It is available (as Fortran code) via anonymous ftp from ftp://hanna.ccmc.gsfc.nasa.gov/pub/modelweb/  

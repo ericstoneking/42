@@ -1,0 +1,136 @@
+PDS_VERSION_ID            = PDS3                                              
+                                                                              
+RECORD_TYPE               = "FIXED_LENGTH"                                    
+RECORD_BYTES              = 88                                                
+FILE_RECORDS              = 135                                               
+                                                                              
+^TABLE                    = "N15ACOEFF.TAB"                                   
+                                                                              
+DATA_SET_ID               = "NEAR-A-5-COLLECTED-MODELS-V1.0"                  
+INSTRUMENT_HOST_NAME      = "NEAR EARTH ASTEROID RENDEZVOUS"                  
+TARGET_NAME               = "433 EROS"                                        
+INSTRUMENT_NAME           = "RADIO SCIENCE SUBSYSTEM"                         
+OBSERVATION_TYPE          = "GRAVITY FIELD"                                   
+ORIGINAL_PRODUCT_ID       = "NEAR15A"                                         
+PRODUCT_ID                = "NEARMOD-N15ACOEFF-200204"                        
+PRODUCT_NAME              = "NEAR15A GRAV SOLUTION SPHERICAL HARMONIC COEFF"  
+PRODUCT_RELEASE_DATE      = 2001-05-09                                        
+                                                                              
+                                                                              
+START_ORBIT_NUMBER        = 1                                                 
+STOP_ORBIT_NUMBER         = "NULL"                                            
+START_TIME                = 2000-02-14T16:00:00                               
+STOP_TIME                 = 2001-02-12T15:15:00                               
+PRODUCT_CREATION_TIME     = 2001-05-09T00:00:00                               
+PRODUCER_FULL_NAME        = "ALEX S. KONOPLIV"                                
+PRODUCER_INSTITUTION_NAME = "JET PROPULSION LABORATORY"                       
+PRODUCT_VERSION_TYPE      = "PRELIMINARY"                                     
+PRODUCER_ID               = "NEAR RSS TEAM"                                   
+SOFTWARE_NAME             = "SHAGRV.V1.0"                                     
+                                                                              
+DESCRIPTION               = "                                                 
+  This file contains the coefficients of the spherical harmonic               
+  gravity solution NEAR15A for 433 Eros.  NEAR15A is a 15th degree            
+  and order model obtained from radiometric tracking (Doppler and             
+  range data) and landmark tracking of the NEAR spacecraft in orbit           
+  about Eros. The gravity model includes data from the entire mission         
+  beginning with orbit insertion on Feb. 14, 2000 and ending with the         
+  first descent maneuver for landing on Feb. 12, 2001.                        
+                                                                              
+  The following parameters were supplied with the model:                      
+                                                                              
+                       Degree:  15                                            
+                        Order:  15                                            
+      Coefficients Normalized:  Yes                                           
+             Reference Radius:  16.0km                                        
+           Reference Latitude:   0.0 degrees                                  
+          Reference Longitude:   0.0 degrees                                  
+   Gravitational Constant, GM:   4.46275472004E-04 km^3/s^2                   
+                             +/- 2.19591611330E-09 km^3/s^2                   
+                                                                              
+    Eros-fixed reference frame (J2000):                                       
+             Right ascension =   11.363    degrees                            
+                 Declination =   17.232    degrees                            
+              Prime meridian =  326.08     degrees                            
+               Rotation rate = 1639.389232 degrees/day                        
+                                                                              
+  The original submitted file had the name 'JGE15A01.SHA'.                    
+                                                                              
+  The NEAR15A gravity model was produced at JPL by Alex Konopliv of           
+  the NEAR Radio Science Team."                                               
+                                                                              
+OBJECT     = TABLE                                                            
+  ROWS               = 135                                                    
+  ROW_BYTES          = 88                                                     
+  COLUMNS            = 6                                                      
+  INTERCHANGE_FORMAT = "ASCII"                                                
+                                                                              
+  OBJECT     = COLUMN                                                         
+    COLUMN_NUMBER = 1                                                         
+    NAME          = "DEGREE"                                                  
+    START_BYTE    = 4                                                         
+    BYTES         = 2                                                         
+    DATA_TYPE     = "ASCII_INTEGER"                                           
+    FORMAT        = "I2"                                                      
+    MINIMUM       = 1                                                         
+    MAXIMUM       = 15                                                        
+    DESCRIPTION   = "Coefficient degree"                                      
+  END_OBJECT = COLUMN                                                         
+                                                                              
+  OBJECT     = COLUMN                                                         
+    COLUMN_NUMBER = 2                                                         
+    NAME          = "ORDER"                                                   
+    START_BYTE    = 9                                                         
+    BYTES         = 2                                                         
+    DATA_TYPE     = "ASCII_INTEGER"                                           
+    FORMAT        = "I2"                                                      
+    MINIMUM       = 0                                                         
+    MAXIMUM       = 15                                                        
+    DESCRIPTION   = "Coefficient order"                                       
+  END_OBJECT = COLUMN                                                         
+                                                                              
+  OBJECT     = COLUMN                                                         
+    COLUMN_NUMBER = 3                                                         
+    NAME          = "CIJ"                                                     
+    START_BYTE    = 12                                                        
+    BYTES         = 18                                                        
+    DATA_TYPE     = "ASCII_REAL"                                              
+    FORMAT        = "E18.11"                                                  
+    DESCRIPTION   = "The Cij constant value, where 'i' is the degree          
+      and 'j' is the order"                                                   
+  END_OBJECT = COLUMN                                                         
+                                                                              
+  OBJECT     = COLUMN                                                         
+    COLUMN_NUMBER = 4                                                         
+    NAME          = "SIJ"                                                     
+    START_BYTE    = 31                                                        
+    BYTES         = 18                                                        
+    DATA_TYPE     = "ASCII_REAL"                                              
+    FORMAT        = "E18.11"                                                  
+    DESCRIPTION   = "The Sij constant value, where 'i' is the degree          
+      and 'j' is the order"                                                   
+  END_OBJECT = COLUMN                                                         
+                                                                              
+  OBJECT     = COLUMN                                                         
+    COLUMN_NUMBER = 5                                                         
+    NAME          = "CIJ_UNC"                                                 
+    START_BYTE    = 50                                                        
+    BYTES         = 18                                                        
+    DATA_TYPE     = "ASCII_REAL"                                              
+    FORMAT        = "E18.11"                                                  
+    DESCRIPTION   = "The uncertainty in the Cij constant value"               
+  END_OBJECT = COLUMN                                                         
+                                                                              
+  OBJECT     = COLUMN                                                         
+    COLUMN_NUMBER = 6                                                         
+    NAME          = "SIJ_UNC"                                                 
+    START_BYTE    = 69                                                        
+    BYTES         = 18                                                        
+    DATA_TYPE     = "ASCII_REAL"                                              
+    FORMAT        = "E18.11"                                                  
+    DESCRIPTION   = "The uncertainty in the Sij constant value"               
+  END_OBJECT = COLUMN                                                         
+                                                                              
+END_OBJECT = TABLE                                                            
+                                                                              
+END                                                                           

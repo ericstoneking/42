@@ -1,0 +1,54 @@
+
+             Earth Potential Field Models File Layout
+
+   Record 1 to 5  (Models 1 to 5)          Size=21,400
+ ------------------------------------------------------------------------
+   Byte        |  Description
+ ------------------------------------------------------------------------
+   1-4032      | CS(I,J): I=1,21; J=1,24 Unnormalized Harmonic coefficients
+   4033-4040   | GM: Earth Gravitational constant (km3/sec2)
+   4041-4048   | AB: Earth mean radius (km)
+   4049-4120   | DESCR(I): I = 1,5  Description of model
+   4121-4124   | MODNUM: Model Number
+   4125-4128   | NDEG:  Maximum Degree
+   4129-4132   | NORD:  Maximum Order
+   4133-4136   | NEPOT: Largest record number in use on file
+   4137-4140   | MAXEP: Maximum number of models permitted on file 
+               |        (max. number of records)
+   4141-4144   | IFLAG: Last maintenance operation performed indicator
+               |   =1, initiatlized
+               |   =2, add
+               |   =3, modify
+               |   =4, delete
+   4145-4152   | YMDHMS:  Date of last maintenance operation
+   4153-21400  | Spare
+ -------------------------------------------------------------------------    
+Model 1 = JGM-2  (21x21)
+Model 2 = GEM-10 (21x21)
+Model 3 = GEM T3 (21x21)
+Model 4 = GEM-10B(21x21)
+Model 5 = GEM-9  (21x21)
+
+  Record 6                              Size=21,400
+ -------------------------------------------------------------------------
+   Byte        |  Description
+ -------------------------------------------------------------------------
+ 1-21200       | CS(I,J): I=1,50; J=1,53 Normalized Harmonic coefficients
+ 21201-21208   | GM: Earth Gravitational constant (km3/sec2)
+ 21209-21216   | AB: Earth mean radius (km)
+ 21217-21288   | DESCR(I): I = 6  Description of model
+ 21289-21292   | MODNUM: Model Number (=6)
+ 21293-21296   | NDEG:  Maximum Degree
+ 21297-21300   | NORD:  Maximum Order
+ 21301-31304   | NEPOT: Largest record number in use on file
+ 21305-21308   | MAXEP: Maximum number of models permitted on file 
+               |        (max. number of records)
+ 21309-21312   | IFLAG: Last maintenance operation performed indicator
+               |   =1, initiatlized
+               |   =2, add
+               |   =3, modify
+               |   =4, delete
+ 21313-21320   | YMDHMS:  Date of last maintenance operation
+ 21321-21400   | Spare
+ -------------------------------------------------------------------------
+Model 6 = JGM-2 (50x50)

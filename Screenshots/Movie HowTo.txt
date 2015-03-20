@@ -1,0 +1,7 @@
+I use ffmpeg to make a sequence of PPM screenshots into an MP4 movie (suitable for QuickTime and other players).
+
+ffmpeg -r 25 -i CamFrame%05d.ppm -q:v 0 foo.mp4
+
+gives a frame rate of 25 fps, keeps full quality, and uses all the CamFrame screenshots in order, outputting foo.mp4.  ffmpeg can do many more things, or so I'm told.
+
+Unfortunately, video formats are many and varied, and the mp4 that ffmpeg generates may not be viewable on your setup.  If not, try some other formats, simply by changing the extension on the output file (foo) in the command.  Try avi and wmv.

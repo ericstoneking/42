@@ -1,0 +1,58 @@
+exec
+   InitSim
+      Read from Inp_Sim.txt
+      Load Materials
+      Find JulDay, AbsTime
+      LoadSun
+      LoadPlanets
+      Find GMST
+      Load Moons
+      Load Ground Stations
+      Locate Luna
+      Locate other moons
+      Load Asteroids
+      Init Lagrange Points
+      Load Tdrs
+   InitSpacecraft
+   InitFSW
+   CmdInterpreter
+   HandoffToGui
+      ReadGraphicsInputFile
+      InitColors
+      SetPovOrientation
+      UpdatePOV
+      InitWindows
+      glutMainLoop
+
+Idle
+   SimStep
+   DrawWindows
+
+SimStep
+   if (First) {
+      ManageFlags
+      Ephemerides
+      Environment
+      Perturbations
+      Sensors
+      Flight Software
+      Actuators
+      PartitionForces
+      Report      
+   }
+   ReportProgress
+   ManageFlags
+   CmdInterpreter
+   Dynamics
+   OrbitMotion
+   AdvanceTime
+   ManageBoundingBoxes
+   -----------
+   Ephemerides
+   Environment
+   Perturbations
+   Sensors
+   Flight Software
+   Actuators
+   PartitionForces
+   Report

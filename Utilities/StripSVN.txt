@@ -1,0 +1,5 @@
+#  This command recursively deletes .svn directories, stripping out 
+#  configuration management information.  Useful if an installation 
+#  is not expected to need to keep up with the svn repository.
+
+rm -rf ./*/.svn ./.svn

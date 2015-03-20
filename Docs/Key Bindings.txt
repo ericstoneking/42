@@ -1,0 +1,9 @@
+Key Bindings for 42
+
+q       Quit
+space   Hide/show onscreen overlays
+w       Show/hide watermarks
+F1      Screenshot Cam window
+F2      Screenshot Map window
+F3      Screenshot Prox Ops window
+c       Toggle Cam frame capture on/off.  See "./Screenshots/Movie HowTo.txt"

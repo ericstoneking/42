@@ -1,0 +1,11 @@
+COMMENT   5
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+CCCCC  ------------------------------------------------------------------  CCCCC
+CCCCC  Uranus -- French -- 1997                                            CCCCC
+CCCCC  ------------------------------------------------------------------  CCCCC
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+POTFIELD  4  0  0 0.0                  0.0                  1.0
+RECOEF    2  0   -1.49524076801029E-03
+RECOEF    3  0    0.00000000000000E+00
+RECOEF    4  0    9.61666666666667E-06
+END 

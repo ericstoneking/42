@@ -1,0 +1,230 @@
+# Basic material definitions for 42
+# using mtl format associated with Wavefront OBJ files
+# Augmented to support BRDF shading, other shading tricks
+
+newmtl default  
+d 1.0
+Ns 64.0
+Ka 0.7  0.7  0.7
+Kd 0.7  0.7  0.7
+Ks 0.3  0.3  0.3
+Ke 0.0  0.0  0.0
+
+newmtl CLEAR  
+d 0.0
+Ns 1.0
+Ka 0.0  0.0  0.0 
+Kd 0.0  0.0  0.0
+Ks 0.0  0.0  0.0
+Ke 0.0  0.0  0.0
+
+newmtl INTERIOR  
+d 1.0
+Ns 1.0
+Ka 1.0  1.0  1.0 
+Kd 1.0  1.0  1.0
+Ks 0.0  0.0  0.0
+Ke 0.0  0.0  0.0
+
+newmtl FLAT_BLACK  
+d 1.0
+Ns 1.0
+Ka 0.0  0.0  0.0 
+Kd 0.0  0.0  0.0
+Ks 0.0  0.0  0.0
+Ke 0.0  0.0  0.0
+
+newmtl FLAT_WHITE  
+d 1.0
+Ns 1.0
+Ka 1.0  1.0  1.0 
+Kd 1.0  1.0  1.0
+Ks 0.0  0.0  0.0
+Ke 0.0  0.0  0.0
+
+newmtl SHINY_GRAY  
+d 1.0
+Ns 1.0
+Ka 0.5  0.5  0.5 
+Kd 0.5  0.5  0.5
+Ks 0.5  0.5  0.5
+Ke 0.0  0.0  0.0
+
+newmtl SOLAR_CELL
+d 1.0
+Ns 50.0
+Ka 1.0  1.0  1.0
+Kd 1.0  1.0  1.0
+Ks 1.0  1.0  1.0
+Ke 0.0  0.0  0.0
+map_Kd BlairSolarCell.ppm
+
+newmtl NASA_LOGO 
+d 1.0
+Ns 50.0
+Ka 1.0  1.0  1.0 
+Kd 1.0  1.0  1.0
+Ks 0.0  0.0  0.0
+Ke 0.0  0.0  0.0
+map_Kd NASA_LOGO.ppm 
+
+
+newmtl FLAT_RED  
+d 1.0
+Ns 64.0
+Ka 1.0  0.0  0.0
+Kd 1.0  0.0  0.0
+Ks 0.0  0.0  0.0
+Ke 0.0  0.0  0.0
+
+newmtl SEE_THRU_WHITE  
+d 0.5
+Ns 1.0
+Ka 1.0  1.0  1.0 
+Kd 1.0  1.0  1.0
+Ks 0.0  0.0  0.0
+Ke 0.0  0.0  0.0
+
+newmtl ASTEROID_MATL  
+d 1.0
+Ns 20.0
+Ka 1.0  1.0  1.0 
+Kd 1.0  1.0  1.0
+Ks 0.1  0.1  0.1
+Ke 0.0  0.0  0.0
+NoiseCol
+map_Spectrum Asteroid
+NoiseGain 0.5 0.25 0.125 0.0625
+NoiseBias 0.0
+NoiseScale 50.0
+NoiseType 0
+
+newmtl GLAST_LOGO
+Ns 100.0
+d 1.0
+illum 2
+Kd 1.0 1.0 1.0
+Ka 1.0 1.0 1.0
+Ks 0.0 0.0 0.0
+Ke 0.0 0.0 0.0
+map_Kd GlastLogo.ppm
+
+newmtl GOLD_KAPTON
+Ns 20.0
+d 1.0
+illum 2
+Kd 0.75 0.5 0.0
+Ka 0.75 0.5 0.0
+Ks 0.25 0.1 0.0
+Ke 0.0 0.0 0.0
+NoiseBump
+
+newmtl SILVER_KAPTON
+Ns 20.0
+d 1.0
+illum 2
+Kd 0.75 0.75 0.75
+Ka 0.75 0.75 0.75
+Ks 0.15 0.15 0.25
+Ke 0.0 0.0 0.0
+NoiseBump
+
+newmtl METALLIC_GREEN
+Ns 5.0
+d 1.0
+illum 2
+Kd 0.0 0.0 0.0
+Ka 0.0 0.0 0.0
+Ks 0.0 0.387 0.109
+Ke 0.0 0.0 0.0
+Nu 20.0
+Nv 40.0
+
+newmtl MIRROR
+Ns 100.0
+d 1.0
+illum 2
+Kd 1.0 1.0 1.0
+Ka 1.0 1.0 1.0
+Ks 1.0 1.0 1.0
+Ke 0.0 0.0 0.0
+Refl 1.0
+
+newmtl SEE_THRU_RED
+Ns 100.0
+d 0.5
+illum 2
+Kd 0.55 0.0 0.0
+Ka 0.55 0.0 0.0
+Ks 0.0 0.0 0.0
+Ke 0.0 0.0 0.0
+
+newmtl GREEN
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.0 0.5 0.0
+Ka 0.0 0.5 0.0
+Ks 0.2 0.2 0.2
+Ke 0.0 0.0 0.0
+
+newmtl MARBLE  
+d 1.0
+Ns 1.0
+Ka 1.0  1.0  1.0 
+Kd 1.0  1.0  1.0
+Ks 0.0  0.0  0.0
+Ke 0.0  0.0  0.0
+NoiseCol
+map_Spectrum GreenMarble
+NoiseGain 6.0 3.0 1.5 0.75
+NoiseBias 0.0
+NoiseAxis 0.0 0.0 12.0
+NoiseType 4
+
+newmtl MOAI  
+d 1.0
+Ns 50.0
+Ka 1.0  1.0  1.0 
+Kd 1.0  1.0  1.0
+Ks 0.5  0.5  0.5
+Ke 0.0  0.0  0.0
+NoiseCol
+map_Spectrum Moai
+NoiseGain 0.04 0.01 0.0 0.0
+NoiseBias 0.0
+NoiseAxis 0.1 0.1 0.05
+NoiseType 5
+
+newmtl EROS_MATL  
+d 1.0
+Ns 20.0
+Ka 1.0  1.0  1.0 
+Kd 1.0  1.0  1.0
+Ks 0.1  0.1  0.1
+Ke 0.0  0.0  0.0
+map_Kd ErosColor.ppm
+map_Bump ErosBump.ppm
+
+newmtl GOLD
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.76024 0.543 0.0
+Ka 0.574 0.41 0.0
+Ks 1.0 0.707 0.0
+Ke 0.0 0.0 0.0
+
+newmtl 67P_MATL  
+d 1.0
+Ns 1.0
+Ka 1.0  1.0  1.0 
+Kd 1.0  1.0  1.0
+Ks 0.1  0.1  0.1
+Ke 0.0  0.0  0.0
+NoiseCol
+map_Spectrum Comet
+NoiseGain 0.5 0.25 0.125 0.0625
+NoiseBias 0.0
+NoiseScale 1000.0
+NoiseType 0

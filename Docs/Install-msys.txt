@@ -1,0 +1,91 @@
+Ab Nihilo Installation of 42 on Windows
+
+1)  Install MinGW and Msys
+   a)  From SourceForge, download the MinGW Installation Manager Setup Tool.
+   b)  Accept the default installation location, c:\MinGW
+   c)  Select the packages listed below by clicking on the box and selecting "Mark for installation":  
+      i.  mingw-developer-toolkit
+     ii.  mingw32-base
+   d)  From the Installation menu, select "Apply Changes > Apply".   
+
+2)  For convenience, make shortcuts for desktop:
+   a)  C:\MinGW\msys\1.0\home\yourusername\42 -> 42
+   b)  C:\MinGW\msys\1.0\msys.bat -> Msys
+   c)  If desired, change icon for Msys shortcut to one found in ...\msys\1.0\
+
+3)  Edit the file C:\MinGW\msys\1.0\etc\profile.  Change line 19 to read:
+  export PATH=".:/usr/local/bin:/c/mingw/bin:/bin:/c/42ExternalSupport/freeglut:$PATH"
+This adds the MinGW bin folder and the freeglut folder (to be added in the next step) to the default path.
+
+4)  Install TortoiseSVN from tortoisesvn.net
+
+For GSFC internal users:
+
+5)  Use TortoiseSVN to Checkout ACSEB/42/trunk/42 and ACSEB/42ExternalSupport/trunk/42ExternalSupport from the repository.  42ExternalSupport contains GLee and freeglut, which are needed for Windows installations to use OpenGL.
+
+For 42, the repository URL is:
+https://gs-mesavs4.ndc.nasa.gov/svn/ACSEB/42/trunk/42
+and the Checkout directory is:
+C:\MinGW\msys\1.0\home\yourusername\42
+For 42ExternalSupport, the repository URL is:
+https://gs-mesavs4.ndc.nasa.gov/svn/ACSEB/42ExternalSupport/trunk/42ExternalSupport
+and the Checkout directory is:
+C:\42ExternalSupport
+
+For sourceforge users:
+
+5a)  Download freeglut from freeglut.sourceforge.net.  Place it in C:\42ExternalSupport\
+5b)  Download GLEE (GL Easy Extension library) from elf-stone.com.  Place it in C:\42ExternalSupport\
+
+
+6)  Edit your Makefile, found in your 42 folder.
+   a)  Make sure your PLATFORM is __MSYS__ by commenting the first few lines appropriately.
+   b)  Make sure that SOCKETFLAG is blank
+   c)  Make sure EXTERNDIR = /c/42ExternalSupport/
+   d)  Save your changes
+
+
+
+Your installation is complete now.  The following steps are routine for compiling and running 42.  
+You'll do them many times.
+
+a)  To "clean up", enter this on the command line:
+
+make clean
+
+This deletes all object files, the executable, and all files in the InOut folder with the .42 extension (these are data files output by the 42 executable).  The first time you issue this command, you'll get some errors, since these files don't exist yet.  No problem.
+
+It is highly recommended that you do a make clean anytime you edit any header file, and as a first step in any bug hunt.  Weird things happen if headers get out of sync with source files, and make clean wipes the slate clean.
+
+b)  To compile and link, enter this on the command line:
+
+make
+
+This compiles (i.e. makes object files out of source files) any source files that have been edited since the last time "make" was done.  It then links (i.e. assembles all the object files into an executable) the program.
+
+c)  To run 42.exe, enter this on the command line:
+
+42
+
+Depending on your configuration, the graphics windows should pop up, and event messages will begin to appear in the terminal window.
+
+d)  You may interrupt 42 at any time by hitting the 'q' key when the Cam window is active, or Ctrl-C when the terminal window is active.  42 will terminate on its own when the sim has run its course.
+
+
+*******************************
+*  Other Associated Software  *
+*******************************
+
+42 is only part of the workflow.  Install these other applications for a complete analysis/simulation suite:
+
+1)  Wings3d (wings3d.com):  Easy-to-learn solid modeler.  Exports Wavefront OBJ files, which 42 uses for both visualization and for computation of surface forces.  Wings3d is free and multiplatform.
+
+2)  octave (www.gnu.org/software/octave):  Free multi-platform Matlab clone.  Some builds have suboptimal plotting capabilities, but decent solutions exist on at least Windows and OSX.
+
+3)  ffmpeg:  Command-line utility useful for making movies from screenshots.  Try homebrew (brew.sh).  Other, better, sources may exist.
+
+For Windows, try ffmpeg.zeranoe.com/builds.  The 32-bit static build should work fine.  You may need to install 7-zip first.
+
+4a)  Notepad++:  A code-friendly text editor for Windows.
+
+4b)  Textwrangler:  A code-friendly text editor for OSX.

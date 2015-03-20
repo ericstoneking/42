@@ -1,0 +1,254 @@
+# Exported from Wings 3D 1.2
+
+newmtl MAINTRUSS_MATL
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.84 0.84 0.84
+Ka 0.76 0.76 0.76
+Ks 0.2  0.2  0.2
+Ke 0.0 0.0 0.0
+
+newmtl SOLAR_TRUSS_MATL
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.84 0.84 0.84
+Ka 0.76 0.76 0.76
+Ks 0.2  0.2  0.2
+Ke 0.0 0.0 0.0
+
+newmtl USLAB_MATL
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.84 0.84 0.84
+Ka 0.76 0.76 0.76
+Ks 0.2  0.2  0.2
+Ke 0.0 0.0 0.0
+
+newmtl JEM_MATL
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.84 0.84 0.84
+Ka 0.76 0.76 0.76
+Ks 0.2  0.2  0.2
+Ke 0.0 0.0 0.0
+
+newmtl JEM1_MATL
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.84 0.84 0.84
+Ka 0.76 0.76 0.76
+Ks 0.2  0.2  0.2
+Ke 0.0 0.0 0.0
+
+newmtl FGB1_MATL
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.84 0.84 0.84
+Ka 0.76 0.76 0.76
+Ks 0.2  0.2  0.2
+Ke 0.0 0.0 0.0
+
+newmtl FGB2_MATL
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.84 0.84 0.84
+Ka 0.76 0.76 0.76
+Ks 0.2  0.2  0.2
+Ke 0.0 0.0 0.0
+
+newmtl FGBNODE_MATL
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.84 0.84 0.84
+Ka 0.76 0.76 0.76
+Ks 0.2  0.2  0.2
+Ke 0.0 0.0 0.0
+
+newmtl SM_FGB_NODE_MATL
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.84 0.84 0.84
+Ka 0.76 0.76 0.76
+Ks 0.2  0.2  0.2
+Ke 0.0 0.0 0.0
+
+newmtl NODE1_MATL
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.84 0.84 0.84
+Ka 0.76 0.76 0.76
+Ks 0.2  0.2  0.2
+Ke 0.0 0.0 0.0
+
+newmtl NODE2_MATL
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.84 0.84 0.84
+Ka 0.76 0.76 0.76
+Ks 0.2  0.2  0.2
+Ke 0.0 0.0 0.0
+
+newmtl NODE3_MATL
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.84 0.84 0.84
+Ka 0.76 0.76 0.76
+Ks 0.2  0.2  0.2
+Ke 0.0 0.0 0.0
+
+newmtl NODE2DOCKPORT_MATL
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.84 0.84 0.84
+Ka 0.76 0.76 0.76
+Ks 0.2  0.2  0.2
+Ke 0.0 0.0 0.0
+
+newmtl FGB_DOCKINGPORT_MATL
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.84 0.84 0.84
+Ka 0.76 0.76 0.76
+Ks 0.2  0.2  0.2
+Ke 0.0 0.0 0.0
+
+newmtl SERVICEMODULE_MATL
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.84 0.84 0.84
+Ka 0.76 0.76 0.76
+Ks 0.2  0.2  0.2
+Ke 0.0 0.0 0.0
+
+newmtl UNKNOWN_MATL
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.84 0.84 0.84
+Ka 0.76 0.76 0.76
+Ks 0.2  0.2  0.2
+Ke 0.0 0.0 0.0
+
+newmtl UDC_MATL
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.84 0.84 0.84
+Ka 0.76 0.76 0.76
+Ks 0.2  0.2  0.2
+Ke 0.0 0.0 0.0
+
+newmtl AIRLOCK_MATL
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.84 0.84 0.84
+Ka 0.76 0.76 0.76
+Ks 0.2  0.2  0.2
+Ke 0.0 0.0 0.0
+
+newmtl CUPOLA_MATL
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.84 0.84 0.84
+Ka 0.76 0.76 0.76
+Ks 0.2  0.2  0.2
+Ke 0.0 0.0 0.0
+
+newmtl PMA1_MATL
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.84 0.84 0.84
+Ka 0.76 0.76 0.76
+Ks 0.2  0.2  0.2
+Ke 0.0 0.0 0.0
+
+newmtl PMA2_MATL
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.84 0.84 0.84
+Ka 0.76 0.76 0.76
+Ks 0.2  0.2  0.2
+Ke 0.0 0.0 0.0
+
+newmtl PMA3_MATL
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.84 0.84 0.84
+Ka 0.76 0.76 0.76
+Ks 0.2  0.2  0.2
+Ke 0.0 0.0 0.0
+
+newmtl NODE2DOCKPORT_MATL
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.84 0.84 0.84
+Ka 0.76 0.76 0.76
+Ks 0.2  0.2  0.2
+Ke 0.0 0.0 0.0
+
+newmtl COLUMBUS_MATL
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.84 0.84 0.84
+Ka 0.76 0.76 0.76
+Ks 0.2  0.2  0.2
+Ke 0.0 0.0 0.0
+
+newmtl CDA1_MATL
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.84 0.84 0.84
+Ka 0.76 0.76 0.76
+Ks 0.2  0.2  0.2
+Ke 0.0 0.0 0.0
+
+newmtl CDA2_MATL
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.84 0.84 0.84
+Ka 0.76 0.76 0.76
+Ks 0.2  0.2  0.2
+Ke 0.0 0.0 0.0
+
+newmtl HGA_MATL
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.996 0.843 0.0
+Ka 0.996 0.843 0.0
+Ks 0.2  0.2  0.2
+Ke 0.0 0.0 0.0
+
+newmtl RADIATOR_MATL
+Ns 100.0
+d 1.0
+illum 2
+Kd 0.84 0.84 0.84
+Ka 0.76 0.76 0.76
+Ks 0.2  0.2  0.2
+Ke 0.0 0.0 0.0
+

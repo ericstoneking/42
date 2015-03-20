@@ -1,0 +1,70 @@
+\documentclass[12pt]{article}
+\usepackage{tensor}
+\usepackage{graphicx}
+\usepackage{geometry} % see geometry.pdf on how to lay out the page. There's lots.
+\newcommand{\dyad}[1]{\underline{\underline{#1}}}
+
+
+\begin{document}
+
+\begin{tabular}{@{} rl @{}}
+    {\bf To:} & Simulink Multi-body Dynamics Working Group (SMBDWG) \\ 
+    {\bf From:} & Eric Stoneking \\ 
+    {\bf Date:} &  \\ 
+    {\bf Subject:} & Nomenclature from 42 \\ 
+\hline
+\end{tabular}
+
+\vspace{1in}
+
+\begin{table}[h]
+\caption{Common Reference Frames}
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+$N$ & Inertial Frame ($N$ = Newton) \\
+$L$ & Local Vertical-Local Horizontal \\
+$R$ & Command Frame ($R$ = Reference) \\
+$B$ & Body Frame \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+  
+\begin{table}[h]
+\caption{Commonly-used Expressions}
+\begin{center}
+\begin{tabular}{|c|l|l|}
+\hline
+Written & Spoken & Coded \\ \hline
+$\tensor[^N]{\vec{\omega}}{^B}$ & Angular velocity of $B$ in $N$ & {\tt wbn, SC[i].B[j].wn} \\ \hline 
+${B^*}$ & Mass center of $B$, ``B star'' & {\tt SC[i].B[j].cm} \\ \hline
+$\tensor[^N]{\vec{v}}{^{B^*}}$ & Velocity of $B^*$ in $N$ & {\tt SC[i].B[j].vn} \\ \hline
+$\tensor[^B]{C}{^N}$ & DCM of $B$ in $N$ (or from $N$ to $B$) & {\tt CBN, SC[i].B[j].CN} \\ \hline
+$\tensor[^B]{q}{^N}$ & Quaternion of $B$ in $N$ (or from $N$ to $B$) & {\tt qbn, SC[i].B[j].qn} \\ \hline
+$\tensor[^A]{v}{}$ & Components of $v$ in $A$, $v$ expressed in $A$ & {\tt va} \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}[h]
+\caption{Common Constructions}
+\begin{center}
+\begin{tabular}{|c|l|}
+\hline
+Written & Coded \\ \hline
+$\tensor[^A]{v}{}=\tensor[^A]{C}{^B}\tensor[^B]{v}{}$ & {\tt MxV(CAB,vb,va)} \\ \hline
+$\tensor[^A]{v}{}=\tensor[^B]{v}{}\tensor[^B]{C}{^A}$ & {\tt VxM(vb,CBA,va)} \\ \hline
+$\tensor[^A]{v}{}=(\tensor[^B]{C}{^A})^T\tensor[^B]{v}{}$ & {\tt MTxV(CBA,vb,va)} \\ \hline
+$\tensor[^A]{v}{}=\tensor[^B]{v}{}(\tensor[^A]{C}{^B})^T$ & {\tt VxMT(vb,CAB,va)} \\ \hline
+Convert $\tensor[^B]{C}{^N}$ to $\tensor[^B]{q}{^N}$ & {\tt C2Q(CBN,qbn)} \\ \hline
+Convert $\tensor[^B]{q}{^N}$ to $\tensor[^B]{C}{^N}$ & {\tt Q2C(qbn,CBN)} \\ \hline
+Convert Euler Angles (2-1-3 Sequence) to DCM & {\tt A2C(213,ang1,ang2,ang3,C)} \\ \hline
+$\tensor[^N]{C}{^R} = (\tensor[^R]{C}{^N})^T$ & {\tt MT(CRN,CNR)} \\ \hline
+$\tensor[^B]{C}{^R} = \tensor[^B]{C}{^N}(\tensor[^R]{C}{^N})^T = \tensor[^B]{C}{^N}\tensor[^N]{C}{^R}$ & {\tt MxMT(CBN,CRN,CBR)} \\ \hline
+$\tensor[^B]{q}{^R} = \tensor[^B]{q}{^N}\otimes\tensor[^N]{q}{^R}$ & {\tt QxQT(qbn,qrn,qbr)} \\ \hline
+\end{tabular}  
+\end{center}
+\end{table}
+\end{document}
+
+

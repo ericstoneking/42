@@ -1,0 +1,65 @@
+<<<<<<<<<<<<<<<<<  42: The Mostly Harmless Simulator  >>>>>>>>>>>>>>>>>
+************************** Simulation Control **************************
+FAST                            !  Time Mode (FAST, REAL, or EXTERNAL)
+20000.0      0.1                !  Sim Duration, Step Size [sec]
+10.0                            !  File Output Interval [sec]
+TRUE                            !  Graphics Front End?
+Inp_Cmd.txt                     !  Command Script File Name
+**************************  Reference Orbits  **************************
+5                               !  Number of Reference Orbits
+TRUE   Orb_EOS.txt              !  Input file name for Orb 0
+TRUE   Orb_ISS.txt              !  Input file name for Orb 1
+TRUE   Orb_67P.txt              !  Input file name for Orb 2
+TRUE   Orb_Saturn.txt           !  Input file name for Orb 3
+TRUE   Orb_Jupiter.txt          !  Input file name for Orb 4
+*****************************  Spacecraft  *****************************
+7                               !  Number of Spacecraft
+TRUE  0 SC_Aura.txt             !  Existence, RefOrb, Input file for SC 0
+TRUE  1 SC_ISS.txt              !  Existence, RefOrb, Input file for SC 1
+TRUE  1 SC_Shuttle.txt          !  Existence, RefOrb, Input file for SC 2
+TRUE  2 SC_IonCruiser.txt       !  Existence, RefOrb, Input file for SC 3
+TRUE  3 SC_Voyager.txt          !  Existence, RefOrb, Input file for SC 4
+TRUE  4 SC_Moai.txt             !  Existence, RefOrb, Input file for SC 5
+TRUE  4 SC_BBM.txt              !  Existence, RefOrb, Input file for SC 7
+***************************** Environment  *****************************
+01 23 2015                      !  Date (Month, Day, Year)
+19 48 00.00                     !  Greenwich Mean Time (Hr,Min,Sec)
+0.0                             !  Time Offset (sec)
+USER_DEFINED                    !  Model Date Interpolation for Solar Flux and AP values?(TWOSIGMA_KP, NOMINAL or USER_DEFINED)
+230.0                           !  If USER_DEFINED, enter desired F10.7 value
+100.0                           !  If USER_DEFINED, enter desired AP value
+IGRF                            !  Magfield (NONE,DIPOLE,IGRF)
+8   8                           !  IGRF Degree and Order (<=10)
+2   0                           !  Earth Gravity Model N and M (<=18)
+2   0                           !  Mars Gravity Model N and M (<=18)
+2   0                           !  Luna Gravity Model N and M (<=18)
+FALSE                           !  Aerodynamic Forces & Torques
+FALSE                           !  Gravity Gradient Torques
+FALSE                           !  Solar Pressure Forces & Torques
+FALSE                           !  Gravity Perturbation Forces
+FALSE                           !  Passive Joint Torques
+FALSE                           !  Thruster Plume Forces & Torques
+FALSE                           !  RWA Imbalance Forces and Torques
+FALSE                           !  Output Environmental Torques to Files
+********************* Celestial Bodies of Interest *********************
+TRUE                            !  Mercury
+TRUE                            !  Venus
+TRUE                            !  Earth and Luna
+TRUE                            !  Mars and its moons
+TRUE                            !  Jupiter and its moons
+TRUE                            !  Saturn and its moons
+TRUE                            !  Uranus and its moons
+TRUE                            !  Neptune and its moons
+TRUE                            !  Pluto and its moons
+TRUE                            !  Asteroids and Comets
+***************** Lagrange Point Systems of Interest ******************
+FALSE                           !  Earth-Moon
+TRUE                            !  Sun-Earth
+FALSE                           !  Sun-Jupiter
+************************* Ground Stations ***************************
+5                                            ! Number of Ground Stations
+TRUE  EARTH  -77.0  37.0  "GSFC"             ! Exists, World, Lng, Lat, Label
+TRUE  EARTH  -155.6 19.0  "South Point"      ! Exists, World, Lng, Lat, Label
+TRUE  EARTH  115.4 -29.0  "Dongara"          ! Exists, World, Lng, Lat, Label
+TRUE  EARTH  -71.0 -33.0  "Santiago"         ! Exists, World, Lng, Lat, Label
+TRUE  LUNA   45.0  45.0   "Moon Base Alpha"  ! Exists, World, Lng, Lat, Label

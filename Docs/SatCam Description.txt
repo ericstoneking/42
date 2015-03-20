@@ -1,0 +1,9 @@
+Tool Name:  SatCam
+
+Description:  SatCam is a visualization tool to improve situational awareness for mission operations, including spacecraft checkout operations.  It was originally developed for GNC use, but has been adopted by other disciplines as well.  Using realtime telemetry, SatCam displays a virtual view of the spacecraft, showing its attitude, orientation of solar arrays and antennas, and relationships to the environment (Earth, Sun, Moon, stars).  Fields of view, TDRS visibility, and other features may be displayed.  SatCam also displays the spacecraft's groundtrack on a world map, showing it relationship to orbital eclipse, ground stations, and other features.
+
+Website:  None.
+
+POC:  Eric Stoneking
+
+Available by arrangement.

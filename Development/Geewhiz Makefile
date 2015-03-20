@@ -1,0 +1,47 @@
+SRC = f.cc d.cc
+EXEC_SRC = main.cc 
+OBJ = ${SRC:.cc=.o}
+EXEC_OBJ = ${EXEC_SRC:.cc=.o}
+EXEC = main
+
+CXXOPT  = -g -O2
+INCLUDE = 
+DEFINE  =
+LDOPT   =
+
+CXXFLAGS = ${CXXOPT} ${DEFINE} ${INCLUDE}
+LDFLAGS  = ${LDOPT}
+
+#RM = ${HOME}/bin/safe-rm -f
+CXX = c++
+
+# dependency generation aids
+DEPDIR = .deps
+df = ${DEPDIR}/$(*F)
+DEPS_MAGIC := $(shell mkdir -p ${DEPDIR} > /dev/null 2>&1 || :)
+MAKEDEPEND = ${COMPILE.c} -MMD -MF ${df}.d -o $@ $<
+
+..PHONY: default force clean clobber depend dep
+
+default: ${EXEC}
+
+${EXEC}: ${OBJ} ${EXEC_OBJ}
+	${CXX}  -o $@ ${OBJ} ${EXEC_OBJ} ${LDFLAGS}
+
+clean:
+	-${RM} ${OBJ} ${EXEC_OBJ}
+
+distclean-depend: 
+	-${RM} -r ${DEPDIR}
+
+clobber: clean distclean-depend
+	-${RM} ${EXEC} 
+
+%.o: %.cc
+	@echo '${COMPILE.cc} $<'; \
+	${MAKEDEPEND}
+	@-cp ${df}.d ${df}.P; \
+	  sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	      -e '/^$$/ d' -e 's/$$/ :/' < ${df}.d >> ${df}.P; \
+
+-include ${SRC:%.c=${DEPDIR}/%.P}

@@ -1,0 +1,12 @@
+COMMENT   6
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+CCCCC  ------------------------------------------------------------------  CCCCC
+CCCCC  Ganymede - From Physics Today April 2004                            CCCCC
+CCCCC  From Schubert et al. -- 2004                                        CCCCC
+CCCCC  ------------------------------------------------------------------  CCCCC
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+POTFIELD  2  2  0 0.0                  0.0                  1.0
+RECOEF    2  0   -5.70331498341096E-05
+RECOEF    2  1    0.00000000000000E+00 0.00000000000000E+00
+RECOEF    2  2    5.92721371303583E-05 0.00000000000000E+00
+END 

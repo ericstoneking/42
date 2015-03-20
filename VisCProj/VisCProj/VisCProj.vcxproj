@@ -1,0 +1,166 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{EFD01565-745B-427B-9D4D-7F01CA01694B}</ProjectGuid>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <Keyword>ManagedCProj</Keyword>
+    <RootNamespace>VisCProj</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CLRSupport>false</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CLRSupport>false</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>..\..\</OutDir>
+    <IntDir>$(OutDir)Object\</IntDir>
+    <TargetName>42</TargetName>
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>..\..\</OutDir>
+    <IntDir>$(OutDir)Object\</IntDir>
+    <TargetName>42</TargetName>
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLUT_DISABLE_ATEXIT_HACK;GLUT_NO_WARNING_DISABLE ;GLUT_NO_LIB_PRAGMA;_USE_SYSTEM_TIME_ ;_USE_SHADERS_;_USE_GUI_;WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <DisableLanguageExtensions>false</DisableLanguageExtensions>
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalIncludeDirectories>$(OutDir)Include\;$(OutDir)Kit\Include\;$(OutDir)Kit\Source\;$(OutDir)External\GLEE\;$(OutDir)External\freeglut\include\GL\</AdditionalIncludeDirectories>
+      <CompileAsManaged>false</CompileAsManaged>
+      <StructMemberAlignment>Default</StructMemberAlignment>
+      <DisableSpecificWarnings>4054;4055;4244;4305;4100;4210</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>freeglut_static.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir)External\freeglut\lib\</AdditionalLibraryDirectories>
+      <ProgramDatabaseFile>.\42.pdb</ProgramDatabaseFile>
+      <ProfileGuidedDatabase>.\42.pgd</ProfileGuidedDatabase>
+      <PreventDllBinding>
+      </PreventDllBinding>
+    </Link>
+    <BuildLog>
+      <Path>.\build.log</Path>
+    </BuildLog>
+    <Bscmake>
+      <OutputFile>.\42.bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLUT_DISABLE_ATEXIT_HACK;GLUT_NO_WARNING_DISABLE;GLUT_NO_LIB_PRAGMA;_USE_SYSTEM_TIME_;_USE_SHADERS_;_USE_GUI_;WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <AdditionalIncludeDirectories>$(OutDir)Include\;$(OutDir)Kit\Include\;$(OutDir)Kit\Source\;$(OutDir)External\GLEE\;$(OutDir)External\freeglut\include\GL\</AdditionalIncludeDirectories>
+      <CompileAsManaged>false</CompileAsManaged>
+      <CallingConvention>Cdecl</CallingConvention>
+      <CompileAs>CompileAsC</CompileAs>
+      <DisableSpecificWarnings>4054;4055;4244;4305;4100;4210</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <AdditionalDependencies>freeglut_static.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir)External\freeglut\lib\</AdditionalLibraryDirectories>
+      <ProgramDatabaseFile>
+      </ProgramDatabaseFile>
+      <ProfileGuidedDatabase>.\42.pgd</ProfileGuidedDatabase>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Kit\Source\CamShaders.glsl" />
+    <None Include="..\..\Kit\Source\MapShaders.glsl" />
+    <None Include="readme.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\External\GLEE\GLee.c" />
+    <ClCompile Include="..\..\Kit\Source\dcmkit.c" />
+    <ClCompile Include="..\..\Kit\Source\envkit.c" />
+    <ClCompile Include="..\..\Kit\Source\fswkit.c" />
+    <ClCompile Include="..\..\Kit\Source\geomkit.c" />
+    <ClCompile Include="..\..\Kit\Source\glkit.c" />
+    <ClCompile Include="..\..\Kit\Source\iokit.c" />
+    <ClCompile Include="..\..\Kit\Source\mathkit.c" />
+    <ClCompile Include="..\..\Kit\Source\msis86kit.c" />
+    <ClCompile Include="..\..\Kit\Source\orbkit.c" />
+    <ClCompile Include="..\..\Kit\Source\sigkit.c" />
+    <ClCompile Include="..\..\Kit\Source\timekit.c" />
+    <ClCompile Include="..\..\Source\42actuators.c" />
+    <ClCompile Include="..\..\Source\42cmd.c" />
+    <ClCompile Include="..\..\Source\42dynam.c" />
+    <ClCompile Include="..\..\Source\42environs.c" />
+    <ClCompile Include="..\..\Source\42ephem.c" />
+    <ClCompile Include="..\..\Source\42exec.c" />
+    <ClCompile Include="..\..\Source\42fsw.c" />
+    <ClCompile Include="..\..\Source\42GlutGui.c" />
+    <ClCompile Include="..\..\Source\42init.c" />
+    <ClCompile Include="..\..\Source\42main.c" />
+    <ClCompile Include="..\..\Source\42perturb.c" />
+    <ClCompile Include="..\..\Source\42report.c" />
+    <ClCompile Include="..\..\Source\42sensors.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\External\GLEE\GLee.h" />
+    <ClInclude Include="..\..\Include\42.h" />
+    <ClInclude Include="..\..\Include\42defines.h" />
+    <ClInclude Include="..\..\Include\42fsw.h" />
+    <ClInclude Include="..\..\Include\42GlutGui.h" />
+    <ClInclude Include="..\..\Include\42types.h" />
+    <ClInclude Include="..\..\Include\fswdefines.h" />
+    <ClInclude Include="..\..\Include\fswtypes.h" />
+    <ClInclude Include="..\..\Kit\Include\dcmkit.h" />
+    <ClInclude Include="..\..\Kit\Include\envkit.h" />
+    <ClInclude Include="..\..\Kit\Include\fswkit.h" />
+    <ClInclude Include="..\..\Kit\Include\geomkit.h" />
+    <ClInclude Include="..\..\Kit\Include\glkit.h" />
+    <ClInclude Include="..\..\Kit\Include\iokit.h" />
+    <ClInclude Include="..\..\Kit\Include\mathkit.h" />
+    <ClInclude Include="..\..\Kit\Include\msis86kit.h" />
+    <ClInclude Include="..\..\Kit\Include\orbkit.h" />
+    <ClInclude Include="..\..\Kit\Include\sigkit.h" />
+    <ClInclude Include="..\..\Kit\Include\timekit.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

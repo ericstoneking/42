@@ -1,0 +1,262 @@
+<<<<<<<<<<<<<<<<<  42: Spacecraft Description File   >>>>>>>>>>>>>>>>>
+Lunar Reconnaissance Orbiter  !  Description
+"LRO"                         !  Label
+LroSpriteAlpha.ppm            !  Sprite File Name
+PASSIVE_FSW                   !  Flight Software Identifier
+************************* Orbit Parameters ****************************
+FIXED                         !  Orbit Prop FIXED, EULER_HILL, or ENCKE
+CM                            !  Pos of CM or ORIGIN, wrt F
+0.0  0.0  0.0                 !  Pos wrt Formation (m), expressed in F
+0.0  0.0  0.0                 !  Vel wrt Formation (m/s), expressed in F
+*************************** Initial Attitude ***************************
+LAL                           ! Ang Vel wrt [NL], Att [QA] wrt [NLF]
+0.0    0.0    0.0             ! Ang Vel (deg/sec)
+0.0    0.0    0.0    1.0      ! Quaternion
+00.0  0.0    0.0    123      ! Angles (deg) & Euler Sequence
+***************************  Dynamics Flags  ***************************
+STEADY                        ! Rotation STEADY, KIN_JOINT, or DYN_JOINT
+TRUE                          ! Assume constant mass properties
+FALSE                         ! Passive Joint Forces and Torques Enabled
+FALSE                         ! Compute Constraint Forces and Torques
+REFPT_CM                      ! Mass Props referenced to REFPT_CM or REFPT_JOINT
+FALSE                         ! Flex Active
+FALSE                         ! Include 2nd Order Flex Terms
+2.0                           ! Drag Coefficient
+************************************************************************
+************************* Body Parameters ******************************
+************************************************************************
+8                             ! Number of Bodies
+================================ Body 0 ================================
+919.32                        ! Mass
+591.31  836.84  909.36        ! Moments of Inertia (kg-m^2)
+ 21.38 -20.96   27.93         ! Products of Inertia (xy,xz,yz)
+1.172 -0.055 -0.041           ! Location of mass center, m
+LRO_Main_Body.obj               ! Geometry Input File Name
+NONE                          ! Flex File Name
+================================ Body 1 ================================
+100.0                         ! Mass
+30.0  80.0  100.0             ! Moments of Inertia (kg-m^2)
+0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
+0.0  0.0  0.0                 ! Location of mass center, m
+LRO_SAS_Gimbal.obj            ! Geometry Input File Name
+NONE                          ! Flex File Name
+================================ Body 2 ================================
+100.0                         ! Mass
+30.0  80.0  100.0             ! Moments of Inertia (kg-m^2)
+0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
+0.0  0.0  0.0                 ! Location of mass center, m
+LRO_SAS_Center_Panel.obj      ! Geometry Input File Name
+NONE                          ! Flex File Name
+================================ Body 3 ================================
+100.0                         ! Mass
+30.0  80.0  100.0             ! Moments of Inertia (kg-m^2)
+0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
+0.0  0.0  0.0                 ! Location of mass center, m
+LRO_SAS_Left_Panel.obj        ! Geometry Input File Name
+NONE                          ! Flex File Name
+================================ Body 4 ================================
+100.0                         ! Mass
+30.0  80.0  100.0             ! Moments of Inertia (kg-m^2)
+0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
+0.0  0.0  0.0                 ! Location of mass center, m
+LRO_SAS_Right_Panel.obj       ! Geometry Input File Name
+NONE                          ! Flex File Name
+================================ Body 5 ================================
+100.0                         ! Mass
+30.0  80.0  100.0             ! Moments of Inertia (kg-m^2)
+0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
+0.0  0.0  -0.05               ! Location of mass center, m
+LRO_HGA_Boom.obj              ! Geometry Input File Name
+NONE                          ! Flex File Name
+================================ Body 6 ================================
+100.0                         ! Mass
+30.0  80.0  100.0             ! Moments of Inertia (kg-m^2)
+0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
+0.0  0.0  -0.05               ! Location of mass center, m
+LRO_HGA_Gimbal.obj            ! Geometry Input File Name
+NONE                          ! Flex File Name
+================================ Body 7 ================================
+100.0                         ! Mass
+30.0  80.0  100.0             ! Moments of Inertia (kg-m^2)
+0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
+0.0  0.0  -0.05               ! Location of mass center, m
+LRO_HGA_Dish.obj              ! Geometry Input File Name
+NONE                          ! Flex File Name
+************************************************************************
+*************************** Joint Parameters ***************************
+************************************************************************
+        (Number of Joints is Number of Bodies minus one)
+=============================== Joint 0 ================================
+0 1                           ! Inner, outer body indices
+1   213   GIMBAL              ! RotDOF, Seq, GIMBAL or SPHERICAL
+0   123                       ! TrnDOF, Seq
+FALSE  FALSE  FALSE           ! RotDOF Locked
+FALSE  FALSE  FALSE           ! TrnDOF Locked
+0.0    0.0    0.0             ! Initial Angles [deg]
+0.0    0.0    0.0             ! Initial Rates, deg/sec
+0.0    0.0    0.0             ! Initial Displacements [m]
+0.0    0.0    0.0             ! Initial Displacement Rates, m/sec
+0.0   0.0  0.0  312           ! Bi to Gi Static Angles [deg] & Seq
+0.0   0.0  0.0  312           ! Go to Bo Static Angles [deg] & Seq
+0.375 -1.164 0.002            ! Position wrt inner body origin, m
+0.00  0.148  0.00             ! Position wrt outer body origin, m
+0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
+0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
+0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
+0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
+============================== Joint 1 ================================
+1 2                           ! Inner, outer body indices
+1   123   GIMBAL              ! RotDOF, Seq, GIMBAL or SPHERICAL
+0   123                       ! TrnDOF, Seq
+FALSE  FALSE  FALSE           ! RotDOF Locked
+FALSE  FALSE  FALSE           ! TrnDOF Locked
+0.0    0.0    0.0             ! Initial Angles [deg]
+0.0    0.0    0.0             ! Initial Rates, deg/sec
+0.0    0.0    0.0             ! Initial Displacements [m]
+0.0    0.0    0.0             ! Initial Displacement Rates, m/sec
+0.0   0.0  0.0  231           ! Bi to Gi Static Angles [deg] & Seq
+45.0  0.0  0.0  123           ! Go to Bo Static Angles [deg] & Seq
+0.030 0.00 0.00               ! Position wrt inner body origin, m
+0.055 0.139 0.001             ! Position wrt outer body origin, m
+0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
+0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
+0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
+0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
+============================== Joint 2 ================================
+2 3                           ! Inner, outer body indices
+1   231   GIMBAL              ! RotDOF, Seq, GIMBAL or SPHERICAL
+0   123                       ! TrnDOF, Seq
+FALSE  FALSE  FALSE           ! RotDOF Locked
+FALSE  FALSE  FALSE           ! TrnDOF Locked
+0.0    0.0    0.0             ! Initial Angles [deg]
+0.0    0.0    0.0             ! Initial Rates, deg/sec
+0.0    0.0    0.0             ! Initial Displacements [m]
+0.0    0.0    0.0             ! Initial Displacement Rates, m/sec
+0.0   0.0  0.0  231           ! Bi to Gi Static Angles [deg] & Seq
+0.0   0.0  0.0  123           ! Go to Bo Static Angles [deg] & Seq
+0.777  -0.642 -0.030          ! Position wrt inner body origin, m
+0.0 -0.643 -0.033             ! Position wrt outer body origin, m
+0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
+0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
+0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
+0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
+============================== Joint 3 ================================
+2 4                           ! Inner, outer body indices
+1   231   GIMBAL              ! RotDOF, Seq, GIMBAL or SPHERICAL
+0   123                       ! TrnDOF, Seq
+FALSE  FALSE  FALSE           ! RotDOF Locked
+FALSE  FALSE  FALSE           ! TrnDOF Locked
+0.0    0.0    0.0             ! Initial Angles [deg]
+0.0    0.0    0.0             ! Initial Rates, deg/sec
+0.0    0.0    0.0             ! Initial Displacements [m]
+0.0    0.0    0.0             ! Initial Displacement Rates, m/sec
+0.0   0.0  0.0  231           ! Bi to Gi Static Angles [deg] & Seq
+0.0   0.0  0.0  123           ! Go to Bo Static Angles [deg] & Seq
+-0.727 -0.642 -0.060          ! Position wrt inner body origin, m
+0.00 -0.642 -0.054            ! Position wrt outer body origin, m
+0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
+0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
+0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
+0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
+============================== Joint 4 ================================
+0 5                           ! Inner, outer body indices
+1   231   GIMBAL              ! RotDOF, Seq, GIMBAL or SPHERICAL
+0   123                       ! TrnDOF, Seq
+FALSE  FALSE  FALSE           ! RotDOF Locked
+FALSE  FALSE  FALSE           ! TrnDOF Locked
+0.0    0.0    0.0             ! Initial Angles [deg]
+0.0    0.0    0.0             ! Initial Rates, deg/sec
+0.0    0.0    0.0             ! Initial Displacements [m]
+0.0    0.0    0.0             ! Initial Displacement Rates, m/sec
+0.0   0.0  0.0  312           ! Bi to Gi Static Angles [deg] & Seq
+0.0   0.0  0.0  312           ! Go to Bo Static Angles [deg] & Seq
+0.372 -0.295 -0.833           ! Position wrt inner body origin, m
+0.0   0.0  0.0                ! Position wrt outer body origin, m
+0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
+0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
+0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
+0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
+============================== Joint 5 ================================
+5 6                           ! Inner, outer body indices
+1   231   GIMBAL              ! RotDOF, Seq, GIMBAL or SPHERICAL
+0   123                       ! TrnDOF, Seq
+FALSE  FALSE  FALSE           ! RotDOF Locked
+FALSE  FALSE  FALSE           ! TrnDOF Locked
+0.0    0.0    0.0             ! Initial Angles [deg]
+0.0    0.0    0.0             ! Initial Rates, deg/sec
+0.0    0.0    0.0             ! Initial Displacements [m]
+0.0    0.0    0.0             ! Initial Displacement Rates, m/sec
+0.0   0.0  0.0  312           ! Bi to Gi Static Angles [deg] & Seq
+0.0   0.0  0.0  312           ! Go to Bo Static Angles [deg] & Seq
+0.00 -0.065 -1.795            ! Position wrt inner body origin, m
+0.00 -0.060 0.00              ! Position wrt outer body origin, m
+0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
+0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
+0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
+0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
+============================== Joint 6 ================================
+6 7                           ! Inner, outer body indices
+1   123   GIMBAL              ! RotDOF, Seq, GIMBAL or SPHERICAL
+0   123                       ! TrnDOF, Seq
+FALSE  FALSE  FALSE           ! RotDOF Locked
+FALSE  FALSE  FALSE           ! TrnDOF Locked
+0.0    0.0    0.0             ! Initial Angles [deg]
+0.0    0.0    0.0             ! Initial Rates, deg/sec
+0.0    0.0    0.0             ! Initial Displacements [m]
+0.0    0.0    0.0             ! Initial Displacement Rates, m/sec
+0.0   0.0  0.0  312           ! Bi to Gi Static Angles [deg] & Seq
+0.0   0.0  0.0  312           ! Go to Bo Static Angles [deg] & Seq
+0.009 -0.012 -0.219          ! Position wrt inner body origin, m
+0.014 0.0 0.0                 ! Position wrt outer body origin, m
+0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
+0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
+0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
+0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
+*************************** Wheel Parameters ***************************
+3                             ! Number of wheels
+=============================  Wheel 0  ================================
+0.0                           ! Initial Momentum, N-m-sec
+1.0   0.0   0.0               ! Wheel Axis Components, [X, Y, Z]
+0.14   50.0                   ! Max Torque (N-m), Momentum (N-m-sec)
+0.012                         ! Wheel Rotor Inertia, kg-m^2
+0.48                          ! Static Imbalance, g-cm
+13.7                          ! Dynamic Imbalance, g-cm^2
+0                             ! Flex Node Index
+=============================  Wheel 1  ================================
+0.0                           ! Initial Momentum, N-m-sec
+0.0   1.0   0.0               ! Wheel Axis Components, [X, Y, Z]
+0.14   50.0                   ! Max Torque (N-m), Momentum (N-m-sec)
+0.012                         ! Wheel Rotor Inertia, kg-m^2
+0.48                          ! Static Imbalance, g-cm
+13.7                          ! Dynamic Imbalance, g-cm^2
+0                             ! Flex Node Index
+=============================  Wheel 2  ================================
+0.0                           ! Initial Momentum, N-m-sec
+0.0   0.0   1.0               ! Wheel Axis Components, [X, Y, Z]
+0.14   50.0                   ! Max Torque (N-m), Momentum (N-m-sec)
+0.012                         ! Wheel Rotor Inertia, kg-m^2
+0.48                          ! Static Imbalance, g-cm
+13.7                          ! Dynamic Imbalance, g-cm^2
+0                             ! Flex Node Index
+**************************** MTB Parameters ****************************
+0                                   ! Number of MTBs
+==============================  MTB 0  =================================
+180.0                         ! Saturation (A-m^2)
+1.0   0.0   0.0               ! MTB Axis Components, [X, Y, Z]
+************************* Thruster Parameters **************************
+0                             ! Number of Thrusters
+==============================  Thr 0  =================================
+ 1.0                          ! Thrust Force (N)
+-1.0  0.0  0.0                ! Thrust Axis 
+ 1.0  1.0  1.0                ! Location in B0, m
+**************************** CMG Parameters ****************************
+0                             ! Number of CMGs
+===============================  CMG 0  ================================
+1                             ! CMG DOF (typically 1 or 2)
+0.0  0.0  0.0  123            ! Initial Gimbal Angles [deg] and Seq
+0.0  0.0  0.0                 ! Initial Gimbal Angle Rates, deg/sec
+-90.0  0.0  -54.74  123       ! Static Mounting Angles [deg] and Seq
+0.12                          ! Rotor Inertia, kg-m^2
+75.0                          ! Momentum, Nms
+1.0  0.0  0.0                 ! Max Gimbal Angle Rates, deg/sec
+
