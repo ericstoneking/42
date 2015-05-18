@@ -37,8 +37,8 @@ FILE *FileOpen(const char *Path, const char *File, const char *CtrlCode);
 void ByteSwapDouble(double *A);
 
 #ifdef _ENABLE_SOCKETS_
-int InitSocketServer(int Port);
-int InitSocketClient(const char *hostname, int Port);
+int InitSocketServer(int Port, int AllowBlocking);
+int InitSocketClient(const char *hostname, int Port, int AllowBlocking);
 #endif
 
 //#ifdef __cplusplus

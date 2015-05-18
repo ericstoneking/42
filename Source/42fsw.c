@@ -390,7 +390,7 @@ void FindCmdVecN(struct SCType *S, struct CmdVecType *CV)
             vn[0] = -CV->W[0]*SinPriMerAng - CV->W[1]*CosPriMerAng;
             vn[1] =  CV->W[0]*CosPriMerAng - CV->W[1]*SinPriMerAng;
             vn[2] = 0.0;
-            if (CV->TrgWorld == Orb[SC->RefOrb].center) {
+            if (CV->TrgWorld == Orb[SC->RefOrb].World) {
                for(i=0;i<3;i++) {
                   RelPosN[i] = pn[i] - S->PosN[i];
                   RelVelN[i] = vn[i] - S->VelN[i];
@@ -403,14 +403,8 @@ void FindCmdVecN(struct SCType *S, struct CmdVecType *CV)
                   RelPosH[i] = (W->PosH[i]+ph[i])-S->PosH[i];
                   RelVelH[i] = (W->VelH[i]+vh[i])-S->VelH[i];
                }
-               if (Orb[S->RefOrb].CenterType == WORLD) {
-                  MxV(World[Orb[S->RefOrb].center].CNH,RelPosH,RelPosN);
-                  MxV(World[Orb[S->RefOrb].center].CNH,RelVelH,RelVelN);
-               }
-               else {
-                  MxV(MinorBody[Orb[S->RefOrb].center].CNH,RelPosH,RelPosN);
-                  MxV(MinorBody[Orb[S->RefOrb].center].CNH,RelVelH,RelVelN);
-               }
+               MxV(World[Orb[S->RefOrb].World].CNH,RelPosH,RelPosN);
+               MxV(World[Orb[S->RefOrb].World].CNH,RelVelH,RelVelN);
             }
             CopyUnitV(RelPosN,CV->N);
             RelMotionToAngRate(RelPosN,RelVelN,CV->wn);
@@ -418,11 +412,11 @@ void FindCmdVecN(struct SCType *S, struct CmdVecType *CV)
          case TARGET_SC:
             if (SC[CV->TrgSC].RefOrb == S->RefOrb) {
                for(i=0;i<3;i++) {
-                  RelPosN[i] = SC[CV->TrgSC].Rrel[i]-S->Rrel[i];
-                  RelVelN[i] = SC[CV->TrgSC].Vrel[i]-S->Vrel[i];
+                  RelPosN[i] = SC[CV->TrgSC].PosR[i]-S->PosR[i];
+                  RelVelN[i] = SC[CV->TrgSC].VelR[i]-S->VelR[i];
                }
             }
-            else if (Orb[SC[CV->TrgSC].RefOrb].center == Orb[S->RefOrb].center) {
+            else if (Orb[SC[CV->TrgSC].RefOrb].World == Orb[S->RefOrb].World) {
                for(i=0;i<3;i++) {
                   RelPosN[i] = SC[CV->TrgSC].PosN[i]-S->PosN[i];
                   RelVelN[i] = SC[CV->TrgSC].VelN[i]-S->VelN[i];
@@ -433,8 +427,8 @@ void FindCmdVecN(struct SCType *S, struct CmdVecType *CV)
                   RelPosH[i] = SC[CV->TrgSC].PosH[i]-S->PosH[i];
                   RelVelH[i] = SC[CV->TrgSC].VelH[i]-S->VelH[i];
                }
-               MxV(World[Orb[S->RefOrb].center].CNH,RelPosH,RelPosN);
-               MxV(World[Orb[S->RefOrb].center].CNH,RelVelH,RelVelN);
+               MxV(World[Orb[S->RefOrb].World].CNH,RelPosH,RelPosN);
+               MxV(World[Orb[S->RefOrb].World].CNH,RelVelH,RelVelN);
             }
             CopyUnitV(RelPosN,CV->N);
             RelMotionToAngRate(RelPosN,RelVelN,CV->wn);
@@ -451,25 +445,25 @@ void FindCmdVecN(struct SCType *S, struct CmdVecType *CV)
             }
             if (SC[CV->TrgSC].RefOrb == S->RefOrb) {
                for(i=0;i<3;i++) {
-                  RelPosN[i] = SC[CV->TrgSC].Rrel[i] + pn[i] - S->Rrel[i];
-                  RelVelN[i] = SC[CV->TrgSC].Vrel[i] + vn[i] - S->Vrel[i];
+                  RelPosN[i] = SC[CV->TrgSC].PosR[i] + pn[i] - S->PosR[i];
+                  RelVelN[i] = SC[CV->TrgSC].VelR[i] + vn[i] - S->VelR[i];
                }
             }
-            else if (Orb[SC[CV->TrgSC].RefOrb].center == Orb[S->RefOrb].center) {
+            else if (Orb[SC[CV->TrgSC].RefOrb].World == Orb[S->RefOrb].World) {
                for(i=0;i<3;i++) {
                   RelPosN[i] = SC[CV->TrgSC].PosN[i] + pn[i] - S->PosN[i];
                   RelVelN[i] = SC[CV->TrgSC].VelN[i] + vn[i] - S->VelN[i];
                }
             }
             else {
-               MTxV(World[Orb[SC[CV->TrgSC].RefOrb].center].CNH,pn,ph);
-               MTxV(World[Orb[SC[CV->TrgSC].RefOrb].center].CNH,vn,vh);
+               MTxV(World[Orb[SC[CV->TrgSC].RefOrb].World].CNH,pn,ph);
+               MTxV(World[Orb[SC[CV->TrgSC].RefOrb].World].CNH,vn,vh);
                for(i=0;i<3;i++) {
                   RelPosH[i] = SC[CV->TrgSC].PosH[i] + ph[i] - S->PosH[i];
                   RelVelH[i] = SC[CV->TrgSC].VelH[i] + vh[i] - S->VelH[i];
                }
-               MxV(World[Orb[S->RefOrb].center].CNH,RelPosH,RelPosN);
-               MxV(World[Orb[S->RefOrb].center].CNH,RelVelH,RelVelN);
+               MxV(World[Orb[S->RefOrb].World].CNH,RelPosH,RelPosN);
+               MxV(World[Orb[S->RefOrb].World].CNH,RelVelH,RelVelN);
             }
             CopyUnitV(RelPosN,CV->N);
             RelMotionToAngRate(RelPosN,RelVelN,CV->wn);
@@ -1302,7 +1296,7 @@ void EarthToMoonFSW(struct SCType *S)
       double rhat[3],thhat[3],hhat[3];
       double CLN[3][3],x[3],v[3],magr;
       double h[3],ucmd,wcmd,vcirc;
-      double Rrel[3],Vrel[3];
+      double PosR[3],VelR[3];
       double a[3];
       double Kv,Kr,Kvy,Krc,Kvc;
       double xmax,zmax;
@@ -1319,7 +1313,7 @@ void EarthToMoonFSW(struct SCType *S)
       }
 
 /* .. Rendezvous with Luna */
-      if (Orb[S->RefOrb].center == EARTH) {
+      if (Orb[S->RefOrb].World == EARTH) {
          zmax = 500.0E6;
          xmax = 500.0E6;
          mu = World[EARTH].mu;
@@ -1338,8 +1332,8 @@ void EarthToMoonFSW(struct SCType *S)
          }
       }
       for(i=0;i<3;i++) {
-         Rrel[i] = S->PosN[i]-rc[i];
-         Vrel[i] = S->VelN[i]-vc[i];
+         PosR[i] = S->PosN[i]-rc[i];
+         VelR[i] = S->VelN[i]-vc[i];
       }
       magrc = CopyUnitV(rc,rchat);
       VxV(rc,vc,hc);
@@ -1363,7 +1357,7 @@ void EarthToMoonFSW(struct SCType *S)
       VxV(hhat,rhat,thhat);
 
       vcirc = sqrt(mu/magr);
-      RelRV2EHRV(magrc,n,CLN,Rrel,Vrel,x,v);
+      RelRV2EHRV(magrc,n,CLN,PosR,VelR,x,v);
 
       u = VoV(S->VelN,thhat);
       w = -VoV(S->VelN,rhat);
@@ -1575,11 +1569,11 @@ void ArcEllipseMode(struct SCType *S)
       FSW->GimCmd[3].Ang[0] = 60.0*D2R;
       FSW->GimCmd[4].Ang[0] = -30.0*D2R;
 
-      if (S->Reh[2] > 0.0 && OldZ < 0.0) {
+      if (S->PosEH[2] > 0.0 && OldZ < 0.0) {
          FSW->Mode = 2;  /* Approach */
          printf("Mode Transition to Approach\n");
       }
-      OldZ = S->Reh[2];
+      OldZ = S->PosEH[2];
 }
 /**********************************************************************/
 void ArcAcqAxis(struct SCType *S)
@@ -1603,7 +1597,7 @@ void ArcApproach(struct SCType *S)
       n = O->MeanMotion;
       n2 = n*n;
 
-      if (S->Reh[0] > -10.0) {
+      if (S->PosEH[0] > -10.0) {
          ucmd = 0.01;
       }
       else {
@@ -1612,18 +1606,18 @@ void ArcApproach(struct SCType *S)
 
       /* Translation Control */
       /* Feedforward cancellation of EH coupling */
-      Feh[0] = FSW->mass*(-2.0*n*S->Veh[2]);
-      Feh[1] = FSW->mass*(n2*S->Reh[1]);
-      Feh[2] = FSW->mass*(2.0*n*S->Veh[0] - 3.0*n2*S->Reh[2]);
+      Feh[0] = FSW->mass*(-2.0*n*S->VelEH[2]);
+      Feh[1] = FSW->mass*(n2*S->PosEH[1]);
+      Feh[2] = FSW->mass*(2.0*n*S->VelEH[0] - 3.0*n2*S->PosEH[2]);
 
       /* Add Closed-loop Control */
 
       Feh[0] += FSW->mass*
-         RateControl(S->Veh[0]-ucmd,1.0E-2,20.0);
+         RateControl(S->VelEH[0]-ucmd,1.0E-2,20.0);
       Feh[1] += FSW->mass*
-         RampCoastGlide(S->Reh[1],S->Veh[1],20.0,1.0E-2,1.0);
+         RampCoastGlide(S->PosEH[1],S->VelEH[1],20.0,1.0E-2,1.0);
       Feh[2] += FSW->mass*
-         RampCoastGlide(S->Reh[2],S->Veh[2],20.0,1.0E-2,1.0);
+         RampCoastGlide(S->PosEH[2],S->VelEH[2],20.0,1.0E-2,1.0);
       MTxV(S->CLN,Feh,FSW->IdealFrc);
       /* Attitude Control */
       MxMT(S->B[0].CN,S->CLN,CBR);
@@ -1645,7 +1639,7 @@ void ArcApproach(struct SCType *S)
       FSW->GimCmd[4].Ang[0] = -30.0*D2R;
 
       /* Mode Transition */
-      if (S->Reh[0] > -5.5) {
+      if (S->PosEH[0] > -5.5) {
          FSW->Mode = 3;  /* Capture */
          printf("Mode Transition to Capture\n");
       }
@@ -1668,12 +1662,12 @@ void ArcCapture(struct SCType *S)
       n2 = n*n;
 
       /* Translation Control */
-      Feh[0] = FSW->mass*(-2.0*n*S->Veh[2]);
-      Feh[1] = FSW->mass*(n2*S->Reh[1]);
-      Feh[2] = FSW->mass*(2.0*n*S->Veh[0] - 3.0*n2*S->Reh[2]);
+      Feh[0] = FSW->mass*(-2.0*n*S->VelEH[2]);
+      Feh[1] = FSW->mass*(n2*S->PosEH[1]);
+      Feh[2] = FSW->mass*(2.0*n*S->VelEH[0] - 3.0*n2*S->PosEH[2]);
       for(i=0;i<3;i++) {
          Feh[i] += FSW->mass*
-            RampCoastGlide(S->Reh[i]-PosCmd[i],S->Veh[i],20.0,1.0E-2,1.0);
+            RampCoastGlide(S->PosEH[i]-PosCmd[i],S->VelEH[i],20.0,1.0E-2,1.0);
       }
       MTxV(S->CLN,Feh,FSW->IdealFrc);
       /* Attitude Control */

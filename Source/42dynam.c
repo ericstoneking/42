@@ -2827,12 +2827,12 @@ void EnckeRK4(struct SCType *S)
       magr = sqrt(R[0]*R[0]+R[1]*R[1]+R[2]*R[2]);
       muR3 = O->mu/(magr*magr*magr);
 
-      u[0] = S->Rrel[0];
-      u[1] = S->Rrel[1];
-      u[2] = S->Rrel[2];
-      u[3] = S->Vrel[0];
-      u[4] = S->Vrel[1];
-      u[5] = S->Vrel[2];
+      u[0] = S->PosR[0];
+      u[1] = S->PosR[1];
+      u[2] = S->PosR[2];
+      u[3] = S->VelR[0];
+      u[4] = S->VelR[1];
+      u[5] = S->VelR[2];
 
 /* .. 4th Order Runga-Kutta Integration */
       EnckeEOM( u, m1, R, muR3, accel);
@@ -2844,15 +2844,15 @@ void EnckeRK4(struct SCType *S)
       EnckeEOM(uu, m4, R, muR3, accel);
       for(j=0;j<6;j++) u[j]+=DTSIM/6.0*(m1[j]+2.0*(m2[j]+m3[j])+m4[j]);
 
-      S->Rrel[0] = u[0];
-      S->Rrel[1] = u[1];
-      S->Rrel[2] = u[2];
-      S->Vrel[0] = u[3];
-      S->Vrel[1] = u[4];
-      S->Vrel[2] = u[5];
+      S->PosR[0] = u[0];
+      S->PosR[1] = u[1];
+      S->PosR[2] = u[2];
+      S->VelR[0] = u[3];
+      S->VelR[1] = u[4];
+      S->VelR[2] = u[5];
 
       RelRV2EHRV(O->SMA,O->MeanMotion,O->CLN,
-         S->Rrel,S->Vrel,S->Reh,S->Veh);
+         S->PosR,S->VelR,S->PosEH,S->VelEH);
 }
 /**********************************************************************/
 void CowellEOM(double u[6], double udot[6], double mu,
@@ -2866,9 +2866,9 @@ void CowellEOM(double u[6], double udot[6], double mu,
       udot[0] = u[3];
       udot[1] = u[4];
       udot[2] = u[5];
-      udot[3] = (Frc[0] - muR3*u[0])/mass;
-      udot[4] = (Frc[1] - muR3*u[1])/mass;
-      udot[5] = (Frc[2] - muR3*u[2])/mass;
+      udot[3] = Frc[0]/mass - muR3*u[0];
+      udot[4] = Frc[1]/mass - muR3*u[1];
+      udot[5] = Frc[2]/mass - muR3*u[2];
 }
 /**********************************************************************/
 /* Integration of orbital equations of motion using Cowell's method   */
@@ -2906,18 +2906,19 @@ void CowellRK4(struct SCType *S)
       S->VelN[2] = u[5];
 
       for(j=0;j<3;j++) {
-         S->Rrel[j] = S->PosN[j] - O->PosN[j];
-         S->Vrel[j] = S->VelN[j] - O->VelN[j];
+         S->PosR[j] = S->PosN[j] - O->PosN[j];
+         S->VelR[j] = S->VelN[j] - O->VelN[j];
       }
-      if (O->Type == ORB_ZERO) {
-         for(j=0;j<3;j++) {
-            S->Reh[j] = 0.0;
-            S->Veh[j] = 0.0;
-         }
+
+      if (O->Regime == ORB_CENTRAL) {
+         RelRV2EHRV(O->SMA,O->MeanMotion,O->CLN,
+            S->PosR,S->VelR,S->PosEH,S->VelEH);
       }
       else {
-         RelRV2EHRV(O->SMA,O->MeanMotion,O->CLN,
-            S->Rrel,S->Vrel,S->Reh,S->Veh);
+         for(j=0;j<3;j++) {
+            S->PosEH[j] = 0.0;
+            S->VelEH[j] = 0.0;
+         }
       }
 }
 /**********************************************************************/
@@ -2980,12 +2981,12 @@ void ThreeBodyEnckeRK4(struct SCType *S)
       MagR2 = sqrt(R2[0]*R2[0]+R2[1]*R2[1]+R2[2]*R2[2]);
       muR23 = O->mu2/(MagR2*MagR2*MagR2);
 
-      u[0] = S->Rrel[0];
-      u[1] = S->Rrel[1];
-      u[2] = S->Rrel[2];
-      u[3] = S->Vrel[0];
-      u[4] = S->Vrel[1];
-      u[5] = S->Vrel[2];
+      u[0] = S->PosR[0];
+      u[1] = S->PosR[1];
+      u[2] = S->PosR[2];
+      u[3] = S->VelR[0];
+      u[4] = S->VelR[1];
+      u[5] = S->VelR[2];
 
 /* .. 4th Order Runga-Kutta Integration */
       ThreeBodyEnckeEOM( u, m1, R1, muR13, R2, muR23, accel);
@@ -2997,15 +2998,15 @@ void ThreeBodyEnckeRK4(struct SCType *S)
       ThreeBodyEnckeEOM(uu, m4, R1, muR13, R2, muR23, accel);
       for(j=0;j<6;j++) u[j]+=DTSIM/6.0*(m1[j]+2.0*(m2[j]+m3[j])+m4[j]);
 
-      S->Rrel[0] = u[0];
-      S->Rrel[1] = u[1];
-      S->Rrel[2] = u[2];
-      S->Vrel[0] = u[3];
-      S->Vrel[1] = u[4];
-      S->Vrel[2] = u[5];
+      S->PosR[0] = u[0];
+      S->PosR[1] = u[1];
+      S->PosR[2] = u[2];
+      S->VelR[0] = u[3];
+      S->VelR[1] = u[4];
+      S->VelR[2] = u[5];
 
       RelRV2EHRV(MagR1,sqrt(muR13),O->CLN,
-         S->Rrel,S->Vrel,S->Reh,S->Veh);
+         S->PosR,S->VelR,S->PosEH,S->VelEH);
 }
 /************************************************************/
 /*  Euler-Hill linearized EOM for near-circular orbits.     */
@@ -3038,8 +3039,8 @@ void EulHillRK4(struct SCType *S)
       accelN[1] = S->Frc[1]/S->mass;
       accelN[2] = S->Frc[2]/S->mass;
       for(j=0;j<3;j++) {
-         u[j] = S->Reh[j];
-         u[3+j] = S->Veh[j];
+         u[j] = S->PosEH[j];
+         u[3+j] = S->VelEH[j];
       }
       MxV(O->CLN,accelN,accel);
 
@@ -3056,11 +3057,12 @@ void EulHillRK4(struct SCType *S)
       for(j=0;j<6;j++) u[j]+=DTSIM/6.0*(m1[j]+2.0*(m2[j]+m3[j])+m4[j]);
 
       for(j=0;j<3;j++) {
-         S->Reh[j] = u[j];
-         S->Veh[j] = u[3+j];
+         S->PosEH[j] = u[j];
+         S->VelEH[j] = u[3+j];
       }
 
-      EHRV2RelRV(R,O->MeanMotion,O->CLN,S->Reh,S->Veh,S->Rrel,S->Vrel);
+      EHRV2RelRV(R,O->MeanMotion,O->CLN,S->PosEH,S->VelEH,
+         S->PosR,S->VelR);
 }
 /**********************************************************************/
 void ThreeBodyOrbitEOM(double mu1, double mu2, double p[3],
@@ -3133,10 +3135,10 @@ void FixedOrbitPosition(struct SCType *S)
       O = &Orb[S->RefOrb];
       Fr = &Frm[S->RefOrb];
       if (Fr->FixedInFrame == 'L') {
-         MxV(O->CLN,S->Reh,S->Rrel);
+         MxV(O->CLN,S->PosEH,S->PosR);
       }
       else {
-         MTxV(O->CLN,S->Rrel,S->Reh);
+         MTxV(O->CLN,S->PosR,S->PosEH);
       }
 }
 /**********************************************************************/
@@ -3171,6 +3173,10 @@ void PartitionForces(struct SCType *S)
 /**********************************************************************/
 void Dynamics(struct SCType *S)
 {
+      struct OrbitType *O;
+
+      O = &Orb[S->RefOrb];
+
       switch(S->RotDOF) {
          case ROTDOF_STEADY :
             SteadyAttitudeMotion(S);
@@ -3188,20 +3194,48 @@ void Dynamics(struct SCType *S)
             }
       }
 
-      switch(S->OrbDOF) {
-         case ORBDOF_FIXED :
-            FixedOrbitPosition(S);
-            break;
-         case ORBDOF_EULER_HILL :
-            EulHillRK4(S);
-            break;
-         case ORBDOF_COWELL :
+      switch(O->Regime) {
+         case ORB_ZERO :
             CowellRK4(S);
             break;
+         case ORB_FLIGHT :
+            CowellRK4(S);
+            break;
+         case ORB_CENTRAL :
+            switch(S->OrbDOF) {
+               case ORBDOF_FIXED :
+                  FixedOrbitPosition(S);
+                  break;
+               case ORBDOF_EULER_HILL :
+                  EulHillRK4(S);
+                  break;
+               case ORBDOF_COWELL :
+                  CowellRK4(S);
+                  break;
+               default :
+                  EnckeRK4(S);
+            }
+            break;
+         case ORB_THREE_BODY :
+            switch(S->OrbDOF) {
+               case ORBDOF_FIXED :
+                  FixedOrbitPosition(S);
+                  break;
+               case ORBDOF_EULER_HILL :
+                  EulHillRK4(S);
+                  break;
+               case ORBDOF_COWELL :
+                  CowellRK4(S);
+                  break;
+               default :
+                  ThreeBodyEnckeRK4(S);
+            }
+            break;
          default :
-            if (Orb[S->RefOrb].Type == ORB_CENTRAL) EnckeRK4(S);
-            else ThreeBodyEnckeRK4(S);
+            printf("Unknown Orbit Regime in Dynamics.  Bailing out.\n");
+            exit(1);
       }
+
 }
 
 //#ifdef __cplusplus

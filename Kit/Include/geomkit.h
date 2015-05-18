@@ -40,6 +40,7 @@ struct PolyType {
    double Norm[3];
    double Uhat[3],Vhat[3]; /* In-plane basis vectors */
    double Centroid[3];
+   double radius; /* of bounding sphere centered on Centroid */
 };
 
 struct EdgeType {

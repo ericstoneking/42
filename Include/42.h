@@ -33,9 +33,10 @@
 #include "mathkit.h"
 #include "orbkit.h"
 #include "sigkit.h"
+#include "sphkit.h"
 #include "timekit.h"
 #include "fswkit.h"
-//#include "msis86kit.h"
+#include "msis86kit.h"
 
 //#ifdef __cplusplus
 //namespace _42 {
@@ -81,6 +82,7 @@ EXTERN long GravPertActive;
 EXTERN long JointTrqActive;
 EXTERN long ThrusterPlumesActive;
 EXTERN long RwaImbalanceActive;
+EXTERN long ContactActive;
 EXTERN long ComputeEnvTrq;
 
 /* Calendar Time */
@@ -128,7 +130,9 @@ EXTERN struct FBOType ShadowMap;
 
 /* Minor Bodies (Asteroids and Comets) */
 EXTERN long Nmb;
-EXTERN struct MinorBodyType *MinorBody;
+
+EXTERN long Nrgn;
+EXTERN struct RegionType *Rgn;
 
 long SimStep(void);
 void Ephemerides(void);

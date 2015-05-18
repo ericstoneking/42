@@ -1,10 +1,10 @@
 % Size Actuators
 load time.42
-load EnvTrq0.42
+load EnvTrq00.42
 N = max(size(time));
 
-Trq = EnvTrq0(:,1:3);
-Mom = EnvTrq0(:,4:6);
+Trq = EnvTrq00(:,1:3);
+Mom = EnvTrq00(:,4:6);
 
 AvgTrq = mean(Trq)
 SecMom = [AvgTrq(1)*time AvgTrq(2)*time AvgTrq(3)*time];

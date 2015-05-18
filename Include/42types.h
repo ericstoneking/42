@@ -305,10 +305,10 @@ struct SCType {
    double mass;
    double cm[3]; /* wrt B0 origin, expressed in B0 frame */
    double I[3][3]; /* Inertia matrix, wrt SC.cm, expressed in B0 frame */
-   double Rrel[3]; /* Position of cm wrt Reference Orbit (Orb[RefOrb], or R), m, expressed in N */
-   double Vrel[3]; /* Velocity of cm wrt R, m/sec, expressed in N */
-   double Reh[3];  /* Position of cm wrt R, m, in Euler-Hill coords */
-   double Veh[3];  /* Velocity of cm wrt R, m, in Euler-Hill coords */
+   double PosR[3]; /* Position of cm wrt Reference Orbit (Orb[RefOrb], or R), m, expressed in N */
+   double VelR[3]; /* Velocity of cm wrt R, m/sec, expressed in N */
+   double PosEH[3];  /* Position of cm wrt R, m, in Euler-Hill coords */
+   double VelEH[3];  /* Velocity of cm wrt R, m, in Euler-Hill coords */
    double PosN[3];   /* Position of cm wrt origin of N, m, expressed in N */
    double VelN[3];   /* Velocity of cm wrt origin of N, m/sec, expressed in N */
    double CLN[3][3]; /* Note that SC.CLN != Orb[RefOrb].CLN if SC.Rrel != 0 */
@@ -329,8 +329,8 @@ struct SCType {
    char SpriteFileName[40];
    unsigned int SpriteTexTag;
    /* The following are for OSCAR */
-   double pf[3]; /* Position of B0 origin wrt F, expressed in F */
-   double vf[3]; /* Velocity of B0 origin wrt F, expressed in F */
+   double PosF[3]; /* Position of B0 origin wrt F, expressed in F */
+   double VelF[3]; /* Velocity of B0 origin wrt F, expressed in F */
    double CF[3][3];  /* Attitude of B0 wrt F */
    /* These are computed in dynamics, used in accelerometer models */
    double asn[3];  /* Non-gravitational accel of SC.cm in N */
@@ -363,7 +363,6 @@ struct SCType {
 struct TargetType {
    long Type;
    long World;
-   long WorldType;
    long RefOrb;
    long SC;
    long Body;
@@ -412,31 +411,52 @@ struct POVType {
    double CmdPermute[3][3];
 };
 
-struct WorldType {
+struct RegionType {
    long Exists;
-   long Parent;
+   long World;
+   double Lng,Lat,Alt; /* Origin location */
+   double PosW[3];
+   double CW[3][3]; /* Region frame is East-North-Up */
+   double PosN[3];
+   double VelN[3];
+   double CN[3][3];
+   double wn[3]; /* Expressed in R frame */
+   double ElastCoef,DampCoef,FricCoef;
    char Name[20];
-   char MapFileName[40];
    char GeomFileName[40];
-   char ColTexFileName[40];
-   char BumpTexFileName[40];
+   long GeomTag;
+   float ModelMatrix[16]; /* For OpenGL */
+};
+
+struct WorldType {
+   /* Relationships */
+   long Exists;
+   long Type; /* STAR, PLANET, MOON, ASTEROID, COMET */
+   long Parent;
    long Nsat;
    long *Sat;
+
+   /* Physical Properties */
    double mu; /* Gravitation constant  */
    double rad; /* Radius */
    double w; /* Spin Rate */
    double RadOfInfluence; /* Radius of Sphere of Influence */
-   struct OrbitType eph; /* Ephemeris Parameters */
-   double PosH[3];         /* Position in H frame */
-   double VelH[3];         /* Velocity in H frame */
-   double CNH[3][3]; /* DCM from heliocentric ecliptic frame
-                        to world-centric equatorial inertial frame */
-   double PriMerAng; /* Angle from N1 to prime meridian */
-   double CWN[3][3]; /* DCM from world-centric inertial frame
-                        to world-centric rotating frame */
    double DipoleMoment;  /* Magnetic Field Dipole Moment, Wb-m */
    double DipoleAxis[3]; /* Magnetic Field Dipole Axis */
    double DipoleOffset[3]; /* Dipole Offset, m */
+   double RingInner, RingOuter;
+
+   /* Ephemeris */
+   struct OrbitType eph; /* Ephemeris Parameters */
+
+   /* Graphical Properties */
+   long HasAtmo;
+   long HasRing;
+   char Name[20];
+   char MapFileName[40];
+   char GeomFileName[40];
+   char ColTexFileName[40];
+   char BumpTexFileName[40];
    float Color[4];
    unsigned char Glyph[14];
    unsigned int TexTag;
@@ -447,29 +467,10 @@ struct WorldType {
    unsigned int BumpCubeTag;
    unsigned int CloudGlossCubeTag;
    long GeomTag;
-   long HasRing;
-   double RingInner, RingOuter;
    unsigned int RingTexTag;
    unsigned int RingList;
-   long Visibility; /* Too small to see, point-sized, or shows disk */
-   long Type; /* STAR, PLANET, MOON, ASTEROID, COMET */
-   float ModelMatrix[16];
-   long HasAtmo;
-};
 
-struct MinorBodyType {
-   long Exists;
-   char Name[20];
-   char MapFileName[40];
-   char GeomFileName[40];
-   char ColTexFileName[40];
-   char BumpTexFileName[40];
-   long GeomTag;
-   double mu; /* Gravitation constant  */
-   double rad; /* Radius */
-   double w; /* Spin Rate */
-   double RadOfInfluence; /* Radius of Sphere of Influence */
-   struct OrbitType eph; /* Ephemeris Parameters */
+   /* State Variables */
    double PosH[3];         /* Position in H frame */
    double VelH[3];         /* Velocity in H frame */
    double CNH[3][3]; /* DCM from heliocentric ecliptic frame
@@ -477,17 +478,7 @@ struct MinorBodyType {
    double PriMerAng; /* Angle from N1 to prime meridian */
    double CWN[3][3]; /* DCM from world-centric inertial frame
                         to world-centric rotating frame */
-   float Color[4];
-   unsigned char Glyph[14];
-   unsigned int TexTag;
-   unsigned int MapTexTag;
-   unsigned int ColTexTag;
-   unsigned int BumpTexTag;
-   unsigned int ColCubeTag;
-   unsigned int BumpCubeTag;
-   unsigned int CloudGlossCubeTag;
    long Visibility; /* Too small to see, point-sized, or shows disk */
-   long Type; /* ASTEROID, COMET */
    float ModelMatrix[16];
 };
 
@@ -556,7 +547,7 @@ struct FBOType {
 
 /* Orrery POV is different from POV */
 struct OrreryPOVType {
-   long Type;  /* CENTRAL or THREE_BODY */
+   long Regime;  /* CENTRAL or THREE_BODY */
    long CenterType;
    long World;
    long LagSys;

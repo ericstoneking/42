@@ -826,7 +826,7 @@ struct GeomType *LoadWingsObjFile(const char ModelPath[80],const char ObjFilenam
       FILE *TmpFile;
       char *txtptr;
       double V[3];
-      double r[3];
+      double r[3],magr;
       long V1,V2;
       long Ng,Ig,Iv,Im;
       long I,It,In,i,j,MatlIdx;
@@ -1152,6 +1152,18 @@ struct GeomType *LoadWingsObjFile(const char ModelPath[80],const char ObjFilenam
 
       /* Find Normals, Areas, Centroids for use in surface force models */
       SurfaceForceProps(G);
+
+      /* Find radius of bounding sphere for each poly */
+      for(Ipoly=0;Ipoly<G->Npoly;Ipoly++) {
+         P = &G->Poly[Ipoly];
+         P->radius = 0.0;
+         for(Iv=0;Iv<P->Nv;Iv++) {
+            Ivtx = P->V[Iv];
+            for(i=0;i<3;i++) r[i] = G->V[Ivtx][i] - P->Centroid[i];
+            magr = MAGV(r);
+            if (magr > P->radius) P->radius = magr;
+         }
+      }
 
       *Ngeom = Ng;
       *GeomTag = Ng-1;

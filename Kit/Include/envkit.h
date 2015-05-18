@@ -39,6 +39,8 @@ void DipoleMagField(double DipoleMoment, double DipoleAxis[3],
                     double PriMerAng,double MagVecN[3]);
 double JacchiaRoberts(double pbn[3],double svn[3],double F10p7,double Ap);
 double SimpleMSIS(double pbn[3], long Col);
+double NRLMSISE00(long Year, long DOY, long Hour, long Minute,
+   double Second, double PosW[3], double F10p7, double AP);
 double MarsAtmosphereModel(double r[3]);
 void SimpleEarthPrecNute(double JD,double C_TEME_TETE[3][3],
                                    double C_TETE_J2000[3][3]);

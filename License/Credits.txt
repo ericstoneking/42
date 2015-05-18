@@ -1,5 +1,3 @@
-MSIS86 Model available via anonymous FTP:
-ccmc.gsfc.nasa.gov/modelweb/atmos/msis.html
 
 Earth map texture courtesy of the Blue Marble project:
 earthobservatory.nasa.gov
@@ -21,4 +19,19 @@ Some 3D spacecraft models courtesy of http://nasa3d.arc.nasa.gov
 Luna bumpmap derived from LOLA altimeter data, provided by Erwan Mazarico.
 Luna colormap derived from LROC albedo data.  Pointer provided by Erwan Mazarico.
 
-The MSIS86 atmosphere model is courtesy of the Nation Space Science Data Center and the Community Coordinated Modeling Center at NASA Goddard Space Flight Center.  It is available (as Fortran code) via anonymous ftp from ftp://hanna.ccmc.gsfc.nasa.gov/pub/modelweb/  
+The MSIS86 atmosphere model is courtesy of the National Space Science Data Center and the Community Coordinated Modeling Center at NASA Goddard Space Flight Center.  It is available (as Fortran code) via anonymous ftp from ftp://hanna.ccmc.gsfc.nasa.gov/pub/modelweb/  
+From the readme:
+"The Mass-Spectrometer-Incoherent-Scatter-1986 (MSIS-86) neutral atmosphere 
+model describes the neutral temperature and the densities of He, O, N2, O2, 
+Ar, H, and N. The MSIS model is based on the extensive data compilation and 
+analysis work of A. E. Hedin and his collaborators [A. E. Hedin et al., J. 
+Geophys. Res. 82, 2139-2156, 1977; A. E. Hedin, J. Geophys. Res. 88, 10170-
+10188, 1983; A. E. Hedin, J. Geophys. Res. 92,  4649, 1987]. MSIS-86 
+constitutes the upper part of the COSPAR International Reference Atmosphere 
+(CIRA-86)."
+
+The NRLMSISE-00 atmosphere model is courtesy of the National Space Science Data Center and the Community Coordinated Modeling Center at NASA Goddard Space Flight Center.  It is available via anonymous ftp from ftp://hanna.ccmc.gsfc.nasa.gov/pub/modelweb/  
+References:
+K. Labitzke, J. J. Barnett, and B. Edwards (eds.), Handbook MAP 16, SCOSTEP, University of Illinois, Urbana, 1985.
+A. E. Hedin, Extension of the MSIS Thermospheric Model into the Middle and Lower Atmosphere, J. Geophys. Res. 96, 1159, 1991.
+J.M. Picone, A.E. Hedin, D.P. Drob, and A.C. Aikin, NRLMSISE-00 empirical model of the atmosphere: Statistical comparisons and scientific issues, J. Geophys. Res., 107(A12), 1468, doi:10.1029/2002JA009430, 2002.

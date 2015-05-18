@@ -140,7 +140,6 @@ void JD2YMDHMS(double JD,long *Year, long *Month, long *Day,
 /**********************************************************************/
 /*  Find Day of Year, given Month, Day                                */
 /*  Ref. Jean Meeus, 'Astronomical Algorithms', QB51.3.E43M42, 1991.  */
-
 long MD2DOY(long Year, long Month, long Day)
 {
       long K;
@@ -236,6 +235,9 @@ void DAY2HMS(double *DAY, double *HOUR, double *MINUTE, double *SECOND,
 }
 #if defined _USE_SYSTEM_TIME_
 /**********************************************************************/
+/* This function returns the number of microseconds since the Unix    */
+/* epoch, 00:00:00.0 Jan 1 1970.  Typically used as a tick/tock       */
+/* duration measurement.                                              */
 double usec(void)
 {
       struct timeval now;
@@ -248,26 +250,19 @@ double usec(void)
 void RealSystemTime(long *Year, long *DOY, long *Month, long *Day,
                    long *Hour, long *Minute, double *Second)
 {
-      struct tm *SysTime;
-      time_t RawTime;
+      struct timeval now;
+      double UnixTime,AbsTime,JD;
 
-      time(&RawTime);
-      SysTime = gmtime(&RawTime);
+      /* Unix Time is since 00:00:00.0 Jan 1 1970 */
+      gettimeofday(&now,NULL);
+      UnixTime = now.tv_sec + 1.0E-6*now.tv_usec;
 
-      /* gmtime returns years since 1900 */
-      *Year = SysTime->tm_year + 1900;
+      /* AbsTime is since J2000 */
+      AbsTime = UnixTime - 946728000.0;
 
-      /* gmtime returns 0-365 */
-      *DOY = SysTime->tm_yday + 1;
-
-      /* gmtime returns month as 0-11 */
-      *Month = SysTime->tm_mon + 1;
-
-      /* The rest are copy-paste */
-      *Day = SysTime->tm_mday;
-      *Hour = SysTime->tm_hour;
-      *Minute = SysTime->tm_min;
-      *Second = (double) SysTime->tm_sec;
+      JD = AbsTimeToJD(AbsTime);
+      JD2YMDHMS(JD,Year,Month,Day,Hour,Minute,Second);
+      *DOY = MD2DOY(*Year,*Month,*Day);
 }
 /**********************************************************************/
 double RealRunTime(double *RealTimeDT)

@@ -10,7 +10,7 @@ CM                            !  Pos of CM or ORIGIN, wrt F
 0.0  0.0  0.0                 !  Vel wrt Formation (m/s), expressed in F
 *************************** Initial Attitude ***************************
 NAL                           ! Ang Vel wrt [NL], Att [QA] wrt [NLF]
-0.0    0.2    0.0             ! Ang Vel (deg/sec)
+0.03    0.2    0.1             ! Ang Vel (deg/sec)
 0.0    0.0    0.0    1.0      ! Quaternion
 150.0  0.0    0.0    321      ! Angles (deg) & Euler Sequence
 ***************************  Dynamics Flags  ***************************

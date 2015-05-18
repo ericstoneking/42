@@ -74,7 +74,6 @@ void ManageFlags(void)
 long AdvanceTime(void)
 {
       static long itime = 0;
-      double dt;
       long Done;
 
       /* Advance time to next Timestep */
@@ -87,22 +86,14 @@ long AdvanceTime(void)
                AbsTime = AbsTime0 + SimTime;
                break;
             case REAL_TIME :
-               #if _USE_GUI_
-               if (!GLEnable) while(RealRunTime(&dt) < SimTime + DTSIM);
-               #else
-                  while(RealRunTime(&dt) < SimTime + DTSIM);
-               #endif
+               usleep(1.0E6*DTSIM);
                SimTime += DTSIM;
                itime = (long) ((SimTime+0.5*DTSIM)/(DTSIM));
                SimTime = ((double) itime)*DTSIM;
                AbsTime = AbsTime0 + SimTime;
                break;
             case EXTERNAL_TIME :
-               #if _USE_GUI_
-               if (!GLEnable) while(RealRunTime(&dt) < SimTime + DTSIM);
-               #else
-                  while(RealRunTime(&dt) < SimTime + DTSIM);
-               #endif
+               usleep(1.0E6*DTSIM);
                SimTime += DTSIM;
                itime = (long) ((SimTime+0.5*DTSIM)/(DTSIM));
                SimTime = ((double) itime)*DTSIM;

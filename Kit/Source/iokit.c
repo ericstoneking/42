@@ -47,7 +47,7 @@ void ByteSwapDouble(double *A)
 }
 #ifdef _ENABLE_SOCKETS_
 /**********************************************************************/
-int InitSocketServer(int Port)
+int InitSocketServer(int Port, int AllowBlocking)
 {
       int init_sockfd,sockfd,flags;
       socklen_t clilen;
@@ -66,6 +66,7 @@ int InitSocketServer(int Port)
          printf("Error on binding server socket.\n");
          exit(1);
       }
+      printf("Server is listening on port %i\n",Port);
       listen(init_sockfd,5);
       clilen = sizeof(Client);
       sockfd = accept(init_sockfd,(struct sockaddr *) &Client,&clilen);
@@ -77,13 +78,15 @@ int InitSocketServer(int Port)
       close(init_sockfd);
 
       /* Keep read() from waiting for message to come */
-      flags = fcntl(sockfd, F_GETFL, 0);
-      fcntl(sockfd,F_SETFL, flags|O_NONBLOCK);
+      if (!AllowBlocking) {
+         flags = fcntl(sockfd, F_GETFL, 0);
+         fcntl(sockfd,F_SETFL, flags|O_NONBLOCK);
+      }
 
       return(sockfd);
 }
 /**********************************************************************/
-int InitSocketClient(const char *hostname, int Port)
+int InitSocketClient(const char *hostname, int Port,int AllowBlocking)
 {
       int sockfd,flags;
       struct sockaddr_in Server;
@@ -104,6 +107,7 @@ int InitSocketClient(const char *hostname, int Port)
       memcpy((char *)&Server.sin_addr.s_addr,(char *)Host->h_addr,
          Host->h_length);
       Server.sin_port = htons(Port);
+      printf("Client connecting to Server on Port %i\n",Port);
       if (connect(sockfd,(struct sockaddr *) &Server,sizeof(Server)) < 0) {
          printf("Error connecting client socket: %s.\n",strerror(errno));
          exit(1);
@@ -111,8 +115,10 @@ int InitSocketClient(const char *hostname, int Port)
       printf("Client side of socket established.\n");
 
       /* Keep read() from waiting for message to come */
-      flags = fcntl(sockfd, F_GETFL, 0);
-      fcntl(sockfd,F_SETFL, flags|O_NONBLOCK);
+      if (!AllowBlocking) {
+         flags = fcntl(sockfd, F_GETFL, 0);
+         fcntl(sockfd,F_SETFL, flags|O_NONBLOCK);
+      }
 
       return(sockfd);
 }

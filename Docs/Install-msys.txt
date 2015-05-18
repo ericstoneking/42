@@ -19,21 +19,6 @@ This adds the MinGW bin folder and the freeglut folder (to be added in the next 
 
 4)  Install TortoiseSVN from tortoisesvn.net
 
-For GSFC internal users:
-
-5)  Use TortoiseSVN to Checkout ACSEB/42/trunk/42 and ACSEB/42ExternalSupport/trunk/42ExternalSupport from the repository.  42ExternalSupport contains GLee and freeglut, which are needed for Windows installations to use OpenGL.
-
-For 42, the repository URL is:
-https://gs-mesavs4.ndc.nasa.gov/svn/ACSEB/42/trunk/42
-and the Checkout directory is:
-C:\MinGW\msys\1.0\home\yourusername\42
-For 42ExternalSupport, the repository URL is:
-https://gs-mesavs4.ndc.nasa.gov/svn/ACSEB/42ExternalSupport/trunk/42ExternalSupport
-and the Checkout directory is:
-C:\42ExternalSupport
-
-For sourceforge users:
-
 5a)  Download freeglut from freeglut.sourceforge.net.  Place it in C:\42ExternalSupport\
 5b)  Download GLEE (GL Easy Extension library) from elf-stone.com.  Place it in C:\42ExternalSupport\
 

@@ -10,8 +10,8 @@ GUIFLAG = -D _USE_GUI_
 SHADERFLAG = -D _USE_SHADERS_
 #SHADERFLAG = 
 
-TIMEFLAG = 
-#TIMEFLAG = -D _USE_SYSTEM_TIME_
+#TIMEFLAG = 
+TIMEFLAG = -D _USE_SYSTEM_TIME_
 
 SOCKETFLAG = 
 #SOCKETFLAG = -D _ENABLE_SOCKETS_
@@ -101,15 +101,15 @@ ifeq ($(PLATFORM),__MSYS__)
    CINC = 
    EXTERNDIR = /c/42ExternalSupport/
    ifneq ($(strip $(GUIFLAG)),)
+      ifneq ($(strip $(PROXOPSFLAG)),)
+         GUIOBJ = $(OBJ)42GlutGui.o $(OBJ)glkit.o $(OBJ)GLee.o $(OBJ)42ProxOpsGui.o 
+      else
+         GUIOBJ = $(OBJ)42GlutGui.o $(OBJ)glkit.o $(OBJ)GLee.o
+      endif
       GLEE = $(EXTERNDIR)GLEE/
       GLUT = $(EXTERNDIR)freeglut/
       LIBS =  -lopengl32 -lglu32 -lfreeglut
       LFLAGS = -L $(GLUT)lib/ 
-      ifneq ($(strip $(PROXOPSFLAG)),)
-         GUIOBJ = $(OBJ)42GlutGui.o $(OBJ)glkit.o $(OBJ)GLee.o $(OBJ)42ProxOpsGui.o 
-      else
-         GUIOBJ = $(OBJ)42GlutGui.o $(OBJ)glkit.o $(OBJ)GLee.o 
-      endif
       GLINC = -I $(GLEE) -I $(GLUT)include/GL/
       ARCHFLAG = -D GLUT_NO_LIB_PRAGMA -D GLUT_NO_WARNING_DISABLE -D GLUT_DISABLE_ATEXIT_HACK
    else
@@ -147,7 +147,7 @@ $(OBJ)42init.o $(OBJ)42perturb.o $(OBJ)42report.o \
 $(OBJ)42sensors.o 
 
 KITOBJ = $(OBJ)dcmkit.o $(OBJ)envkit.o $(OBJ)fswkit.o $(OBJ)geomkit.o \
-$(OBJ)iokit.o $(OBJ)mathkit.o $(OBJ)orbkit.o $(OBJ)sigkit.o $(OBJ)timekit.o
+$(OBJ)iokit.o $(OBJ)mathkit.o $(OBJ)nrlmsise00kit.o $(OBJ)msis86kit.o $(OBJ)orbkit.o $(OBJ)sigkit.o $(OBJ)timekit.o
 
 ifneq ($(strip $(EMBEDDED)),)
    MATLABOBJ = $(OBJ)DetectorFSW.o $(OBJ)OpticsFSW.o
@@ -224,6 +224,9 @@ $(OBJ)iokit.o      : $(KITSRC)iokit.c
 
 $(OBJ)mathkit.o     : $(KITSRC)mathkit.c
 	$(CC) $(CFLAGS) -c $(KITSRC)mathkit.c -o $(OBJ)mathkit.o  
+
+$(OBJ)nrlmsise00kit.o   : $(KITSRC)nrlmsise00kit.c  
+	$(CC) $(CFLAGS) -c $(KITSRC)nrlmsise00kit.c -o $(OBJ)nrlmsise00kit.o  
 
 $(OBJ)msis86kit.o   : $(KITSRC)msis86kit.c $(KITINC)msis86kit.h 
 	$(CC) $(CFLAGS) -c $(KITSRC)msis86kit.c -o $(OBJ)msis86kit.o  

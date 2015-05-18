@@ -98,7 +98,7 @@ void Sensors(struct SCType *S)
          MxV(S->B[0].CN,S->svn,FSW->svb);
       }
       /* TAM */
-      if (Orb[S->RefOrb].center == EARTH) {
+      if (Orb[S->RefOrb].World == EARTH) {
          FSW->MagValid = TRUE;
          for(i=0;i<3;i++) FSW->bvb[i] = S->bvb[i];
       }
@@ -156,8 +156,8 @@ void Sensors(struct SCType *S)
       /* Formation Sensors */
       for (i=0;i<3;i++) {
          for (j=0;j<3;j++) FSW->CSF[i][j] = S->CF[i][j];
-         FSW->PosF[i] = S->pf[i];
-         FSW->PosF[i] = S->vf[i];
+         FSW->PosF[i] = S->PosF[i];
+         FSW->PosF[i] = S->PosF[i];
       }
 
 }

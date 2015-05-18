@@ -1,5 +1,5 @@
 <<<<<<<<<<<<<<< 42: InterProcess Comm Configuration File >>>>>>>>>>>>>>>>
-OFF                                     ! IPC Mode (OFF, TX, RX)
+OFF                                     ! IPC Mode (OFF, TX, RX, WRITEFILE, READFILE)
 SERVER                                  ! Socket Role (SERVER or CLIENT)
 localhost  4242                         ! Server Host Name, Port 
 TRUE                                    ! Echo to stdout
@@ -15,5 +15,5 @@ QBN                                     ! Quaternion
 SUNVEC                                  ! Sun Vector
 MAGVEC                                  ! Magnetic Field Vector
 ANGMOM                                  ! Angular Momentum Vector
-GIM                                     ! Gimbal ID, Angles
+JOINT                                   ! Joint ID, Angles, Trns
 HWHL                                    ! Wheel ID, Momentum

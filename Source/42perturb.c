@@ -77,8 +77,8 @@ void GravPertForce(struct SCType *S)
       long OrbCenter,SecCenter;
 
       O = &Orb[S->RefOrb];
-      if (O->Type == ORB_CENTRAL) {
-         OrbCenter = O->center;
+      if (O->Regime == ORB_CENTRAL) {
+         OrbCenter = O->World;
          SecCenter = -1; /* Nonsense value */
       }
       else {
@@ -113,7 +113,7 @@ void GravPertForce(struct SCType *S)
          }
       }
       /* Moons of SecCenter */
-      if (O->Type == ORB_THREE_BODY) {
+      if (O->Regime == ORB_THREE_BODY) {
          for(Im=0;Im<World[SecCenter].Nsat;Im++) {
             Iw = World[SecCenter].Sat[Im];
             for(j=0;j<3;j++) p[j] = World[Iw].eph.PosN[j];
@@ -159,7 +159,7 @@ void AeroFrcTrq(struct SCType *S)
       struct GeomType *G;
       struct PolyType *P;
 
-      OrbCenter = Orb[S->RefOrb].center;
+      OrbCenter = Orb[S->RefOrb].World;
 
 /* .. Find Velocity Relative to Atmosphere, expressed in N */
       VrelN[0] = S->VelN[0]
@@ -302,6 +302,158 @@ void RwaImbalance(struct SCType *S)
       }
 }
 /**********************************************************************/
+/* For each Poly in Body B, find force and torque due to contact with */
+/* each poly in Region R.                                             */
+void BodyRgnContactFrcTrq(struct SCType *S, long Ibody,
+   struct RegionType *R)
+{
+      struct GeomType *Gb,*Gr;
+      struct BodyType *B;
+      struct PolyType *Pb,*Pr;
+      struct EdgeType *E;
+      double FrcN[3] = {0.0,0.0,0.0};
+      double TrqB[3] = {0.0,0.0,0.0};
+      double pbn[3],rb[3],wxrb[3],wxrn[3],vbn[3];
+      double prn[3],vrn[3],pbrn[3],vbrn[3],CPR[3][3],CPN[3][3];
+      double PosP[3],VelP[3];
+      double FrcP[3];
+      double ContactArea;
+      double Dist,MinDist;
+      double PosR[3],RelPosR[3];
+      static long HitPoly = 0;
+      long OtherPoly;
+      long Ib,Ie,i,Done;
+      double Fn[3],Fb[3],Tb[3];
+
+      B = &S->B[Ibody];
+      Gb = &Geom[B->GeomTag];
+      Gr = &Geom[R->GeomTag];
+
+      for(i=0;i<3;i++) {
+         FrcN[i] = 0.0;
+         TrqB[i] = 0.0;
+      }
+
+      /* Loop through all Polys (Pb) in Gb */
+      for(Ib=0;Ib<Gb->Npoly;Ib++) {
+         Pb = &Gb->Poly[Ib];
+         /* Use Centroid for proximity */
+         /* Find position and velocity of Centroid wrt origin of R */
+         MTxV(B->CN,Pb->Centroid,pbn);
+         for(i=0;i<3;i++) pbn[i] += S->PosR[i] + B->pn[i];
+         for(i=0;i<3;i++) rb[i] = Pb->Centroid[i] - B->cm[i];
+         VxV(B->wn,rb,wxrb);
+         MTxV(B->CN,wxrb,wxrn);
+         for(i=0;i<3;i++) vbn[i] = S->VelR[i] + B->vn[i] + wxrn[i];
+         MxV(R->CN,pbn,PosR);
+
+         /* Find poly (Pr) in Gr closest to Pb */
+         Done = 0;
+         while(!Done) {
+            Done = 1;
+            for(i=0;i<3;i++) RelPosR[i] = PosR[i] - Gr->Poly[HitPoly].Centroid[i];
+            MinDist = MAGV(RelPosR);
+            /* Check neighboring polys */
+            for(Ie=0;Ie<3;Ie++) {
+               E = &Gr->Edge[Gr->Poly[HitPoly].E[Ie]];
+               if (E->Poly1 >= 0 && E->Poly2 >= 0) { /* Screen edges of region */
+                  OtherPoly = (E->Poly1 == HitPoly ? E->Poly2 : E->Poly1);
+                  for(i=0;i<3;i++) RelPosR[i] = PosR[i] - Gr->Poly[OtherPoly].Centroid[i];
+                  Dist = MAGV(RelPosR);
+                  if (Dist < MinDist) {
+                     MinDist = Dist;
+                     HitPoly = OtherPoly;
+                     Done = 0;
+                     break;
+                  }
+               }
+            }
+         }
+
+         /* Interact with selected poly */
+         Pr = &Gr->Poly[HitPoly];
+         MTxV(R->CN,Pr->Centroid,prn);
+         VxV(R->wn,Pr->Centroid,wxrb);
+         MTxV(R->CN,wxrb,vrn);
+
+         for(i=0;i<3;i++) {
+            pbrn[i] = pbn[i] - prn[i];
+            vbrn[i] = vbn[i] - vrn[i];
+            CPR[0][i] = Pr->Uhat[i];
+            CPR[1][i] = Pr->Vhat[i];
+            CPR[2][i] = Pr->Norm[i];
+         }
+         MxM(CPR,R->CN,CPN);
+         MxV(CPN,pbrn,PosP);
+         MxV(CPN,vbrn,VelP);
+
+         /* Find contact force */
+         //printf("Body %ld Poly %ld h = %lf\n",
+         //   Ibody,Ib,h);
+         FrcP[2] = 0.0;
+         FrcP[0] = 0.0;
+         FrcP[1] = 0.0;
+         if (PosP[2] < Pb->radius) {
+            if (PosP[2] > 0.0) {
+               ContactArea = (1.0-PosP[2]/Pb->radius)*Pb->Area;
+               FrcP[2] = -R->DampCoef*VelP[2]*ContactArea;
+               FrcP[0] = 0.0;
+               FrcP[1] = 0.0;
+            }
+            else {
+               FrcP[2] = -(R->ElastCoef*PosP[2] + R->DampCoef*VelP[2])*Pb->Area;
+               FrcP[0] = -R->FricCoef*FrcP[2]*VelP[0];
+               FrcP[1] = -R->FricCoef*FrcP[2]*VelP[1];
+            }
+         }
+
+         /* Transform into N, B frames */
+         MTxV(CPN,FrcP,Fn);
+         MxV(B->CN,Fn,Fb);
+         VxV(rb,Fb,Tb);
+         for(i=0;i<3;i++) {
+            FrcN[i] += Fn[i];
+            TrqB[i] += Tb[i];
+         }
+      }
+
+/* .. Limit Force and Torque to avoid adding Kinetic Energy */
+
+
+      for(i=0;i<3;i++) {
+         B->Frc[i] += FrcN[i];
+         B->Trq[i] += TrqB[i];
+      }
+}
+/**********************************************************************/
+void ContactFrcTrq(struct SCType *S)
+{
+      struct OrbitType *O;
+      struct RegionType *R;
+      double dx[3];
+      long Ir,i,Ib;
+
+      O = &Orb[S->RefOrb];
+
+/* .. Contact with Regions */
+      for(Ir=0;Ir<Nrgn;Ir++) {
+         R = &Rgn[Ir];
+         /* Cheap proximity checks */
+         if (!R->Exists) continue;
+         if (R->World != O->World) continue;
+         for(i=0;i<3;i++) dx[i] = S->PosN[i] - R->PosN[i];
+         if (MAGV(dx) > S->BBox.radius + Geom[R->GeomTag].BBox.radius) continue;
+
+         /* Check each body vs Region */
+         for(Ib=0;Ib<S->Nb;Ib++) {
+            BodyRgnContactFrcTrq(S,Ib,R);
+         }
+      }
+
+/* .. Contact with other S/C will follow a similar template */
+
+}
+/**********************************************************************/
 /* .. Resolve perturbation torque and force system to torques about   */
 /* .. the S/C cm.  Express these in a special Sun-orbit frame to      */
 /* .. determine actuator capacity requirements.                       */
@@ -395,6 +547,9 @@ void Perturbations(struct SCType *S)
 
 /* .. Reaction Wheel Static and Dynamic Imbalance Torques */
       if (RwaImbalanceActive) RwaImbalance(S);
+
+/* .. Contact Forces and Torques */
+      if (ContactActive) ContactFrcTrq(S);
 
 /* .. Find Momentum Accumulation for Actuator Sizing */
       if (ComputeEnvTrq) EnvTrq(S);

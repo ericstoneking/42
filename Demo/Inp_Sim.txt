@@ -40,6 +40,7 @@ FALSE                           !  Gravity Perturbation Forces
 FALSE                           !  Passive Joint Torques
 FALSE                           !  Thruster Plume Forces & Torques
 FALSE                           !  RWA Imbalance Forces and Torques
+FALSE                           !  Contact Forces and Torques
 FALSE                           !  Output Environmental Torques to Files
 ********************* Celestial Bodies of Interest *********************
 TRUE                            !  Mercury

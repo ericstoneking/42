@@ -1182,6 +1182,27 @@ void FindCLN(double r[3], double v[3], double CLN[3][3], double wln[3])
 
 }
 /**********************************************************************/
+void FindENU(double PosN[3],double WorldW, double CLN[3][3], double wln[3])
+{
+      double Zaxis[3] = {0.0,0.0,1.0};
+      double East[3],North[3],Up[3];
+      long i;
+
+      CopyUnitV(PosN,Up);
+      VxV(Zaxis,Up,East);
+      UNITV(East);
+      VxV(Up,East,North);
+      UNITV(North);
+      for(i=0;i<3;i++) {
+         CLN[0][i] = East[i];
+         CLN[1][i] = North[i];
+         CLN[2][i] = Up[i];
+      }
+      wln[0] = 0.0;
+      wln[1] = 0.0;
+      wln[2] = WorldW;
+}
+/**********************************************************************/
 /*  Consider the Circular Restricted Three-Body Problem, with two     */
 /*  massive bodies (masses m1 and m2, m2 < m1) and a body of          */
 /*  negligible mass.  The locations of the Lagrange points are        */

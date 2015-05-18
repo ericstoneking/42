@@ -93,39 +93,38 @@
 /* Pluto's moon */
 #define CHARON 54
 
-#define NWORLD 55
-
 /* Minor Bodies */
-#define MINORBODY_0 0
-#define MINORBODY_1 1
-#define MINORBODY_2 2
-#define MINORBODY_3 3
-#define MINORBODY_4 4
-#define MINORBODY_5 5
-#define MINORBODY_6 6
-#define MINORBODY_7 7
-#define MINORBODY_8 8
-#define MINORBODY_9 9
-#define MINORBODY_10 10
-#define MINORBODY_11 11
-#define MINORBODY_12 12
-#define MINORBODY_13 13
-#define MINORBODY_14 14
-#define MINORBODY_15 15
-#define MINORBODY_16 16
-#define MINORBODY_17 17
-#define MINORBODY_18 18
-#define MINORBODY_19 19
+#define MINORBODY_0 55
+#define MINORBODY_1 56
+#define MINORBODY_2 57
+#define MINORBODY_3 58
+#define MINORBODY_4 59
+#define MINORBODY_5 60
+#define MINORBODY_6 61
+#define MINORBODY_7 62
+#define MINORBODY_8 63
+#define MINORBODY_9 64
+
+#define NWORLD 65
 
 #define POSITIVE 1
 #define NEGATIVE 0
 
-#define CW 0
-#define CCW 1
+#define DIR_CW 0
+#define DIR_CCW 1
 
-#define ORB_CENTRAL 0
-#define ORB_THREE_BODY 1
-#define ORB_ZERO 2
+#define ORB_ZERO 0
+#define ORB_FLIGHT 1
+#define ORB_CENTRAL 2
+#define ORB_THREE_BODY 3
+
+#define INP_KEPLER 0
+#define INP_POSVEL 1
+#define INP_FILE 2
+#define INP_TLE 3
+#define INP_TRV 4
+#define INP_MODES 5
+#define INP_XYZ 6
 
 #define EARTHMOON  0
 #define SUNEARTH 1
@@ -225,9 +224,6 @@
 #define ASTEROID 3
 #define COMET 4
 
-#define WORLD 0
-#define MINORBODY 1
-
 /* FSW Tags */
 #define PASSIVE_FSW 0
 #define PROTOTYPE_FSW 1
@@ -269,13 +265,15 @@
 #define MNEM_SVB 6
 #define MNEM_BVB 7
 #define MNEM_HVB 8
-#define MNEM_GIM 9
+#define MNEM_JOINT 9
 #define MNEM_HWHL 10
 
 /* Modes for InterProcess Comm */
 #define IPC_OFF 0
 #define IPC_TX 1
 #define IPC_RX 2
+#define IPC_WRITEFILE 3
+#define IPC_READFILE 4
 /* Socket Roles for InterProcess Comm */
 #define IPC_SERVER 0
 #define IPC_CLIENT 1

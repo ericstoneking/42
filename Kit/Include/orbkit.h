@@ -57,8 +57,9 @@ struct OrbitType {
    long  Tag;   /* Orb[Tag].Tag = Tag */
    long  Exists;
    double Epoch;  /* Sec since J2000 epoch at which orbit elements are referenced */
-   long  Type;  /* Central (Two-body) or Three-body or ZERO */
-   long CenterType; /* WORLD or MINORBODY */
+   long  Regime;  /* ZERO, FLIGHT, CENTRAL (Two-body) or THREE_BODY */
+   long  World;
+   long Region;
    /* For Three-Body Orbit Description */
    long  Sys;  /* e.g. SUNEARTH, EARTHMOON, SUNJUPITER */
    long  LP;   /* Lagrange Point [0-4] */
@@ -68,7 +69,6 @@ struct OrbitType {
    double Ax,Bx,Cx,Dx,Ay,By,Cy,Dy,Az,Bz;  /* Modal parameters, m */
    double x,y,z,xdot,ydot,zdot;  /* Linearized motion about LP (X0,Y0), m and m/sec */
    /* For Central Orbit Description */
-   long  center;
    double mu;
    double SMA;  /* Semi-major axis */
    double ecc;
@@ -82,8 +82,8 @@ struct OrbitType {
    double rmin;  /* Periapsis radius.  Always well behaved */
    double PosN[3]; /* Position, m, expressed in N */
    double VelN[3]; /* Velocity, m/sec, expressed in N */
-   double CLN[3][3];
-   double wln[3];
+   double CLN[3][3]; /* For ZERO, L = N.  For FLIGHT, L = ENU.  For CENTRAL, L = LVLH.  For THREE_BODY, L = XYZ */
+   double wln[3]; /* Expressed in N */
    double Period;
    double MeanMotion;
    char FileName[20];
@@ -118,6 +118,7 @@ void LunaPosition(double JD, double r[3]);
 void LunaInertialFrame(double JulDay, double CNJ[3][3]);
 double LunaPriMerAng(double JulDay);
 void FindCLN(double r[3], double v[3], double CLN[3][3], double wln[3]);
+void FindENU(double PosN[3],double WorldW, double CLN[3][3], double wln[3]);
 void FindLagPtParms(struct LagrangeSystemType *LS);
 void FindLagPtPosVel(double SecSinceJ2000, struct LagrangeSystemType *S,
    long Ilp, double PosN[3], double VelN[3], double CLN[3][3]);

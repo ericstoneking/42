@@ -152,7 +152,7 @@ Refl 1.0
 
 newmtl SEE_THRU_RED
 Ns 100.0
-d 0.5
+d 0.2
 illum 2
 Kd 0.55 0.0 0.0
 Ka 0.55 0.0 0.0

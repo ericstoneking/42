@@ -268,18 +268,20 @@ void TwoSigmaAtmoParam(void)
 /**********************************************************************/
       void Environment(struct SCType *S)
 {
-      long Center;
+      struct OrbitType *O;
       struct WorldType *P;
+      double Alt;
+      double PosW[3];
 
-      Center = Orb[S->RefOrb].center;
-      P = &World[Center];
+      O = &Orb[S->RefOrb];
+      P = &World[O->World];
 
       /* .. Magnetic Field */
       if (MagModel.Type == DIPOLE) {
          DipoleMagField(P->DipoleMoment,P->DipoleAxis,
          P->DipoleOffset,S->PosN,P->PriMerAng,S->bvn);
       }
-      else if (MagModel.Type == IGRF && Center == EARTH) {
+      else if (MagModel.Type == IGRF && O->World == EARTH) {
          IGRFMagField(ModelPath,MagModel.N,MagModel.M,S->PosN,
          P->PriMerAng,S->bvn);
       }
@@ -301,15 +303,19 @@ void TwoSigmaAtmoParam(void)
          NominalAtmoParam();
       printf("AP 2Sigma value is %lf \n", GeomagIndex);
       printf("Flux 2Sigma value is %lf \n", Flux10p7);
-    }
+      }
       /* .. Atmospheric Density */
-      if (Orb[S->RefOrb].center == EARTH) {
-         //S->AtmoDensity = MSIS86(Year,doy,Hour,Minute,Second,
-         //S->PosN,P->PriMerAng,Flux10p7,GeomagIndex);
-         S->AtmoDensity = JacchiaRoberts(S->PosN,S->svn,Flux10p7,GeomagIndex);
+      if (O->World == EARTH) {
+         MxV(World[EARTH].CWN,S->PosN,PosW);
+         Alt = MAGV(PosW)-World[EARTH].rad;
+         if (Alt < 1000.0E3) { /* What is max alt of MSISE00 validity? */
+            S->AtmoDensity = NRLMSISE00(Year,doy,Hour,Minute,Second,PosW,
+                                        Flux10p7,GeomagIndex);
+         }
+         else S->AtmoDensity = 0.0;
       }
 
-      else if (Orb[S->RefOrb].center == MARS) {
+      else if (O->World == MARS) {
          S->AtmoDensity = MarsAtmosphereModel(S->PosN);
       }
 
