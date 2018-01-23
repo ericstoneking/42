@@ -1,0 +1,1 @@
+ffmpeg -r 25 -i CamFrame%05d.ppm -q:v 0 foo.mp4

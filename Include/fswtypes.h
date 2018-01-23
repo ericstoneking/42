@@ -15,9 +15,11 @@
 #ifndef __FSWTYPES_H__
 #define __FSWTYPES_H__
 
-//#ifdef __cplusplus
-//namespace _42 {
-//#endif
+/*
+** #ifdef __cplusplus
+** namespace _42 {
+** #endif
+*/
 
 struct CmdVecType {
    long Mode;
@@ -43,6 +45,9 @@ struct CmdType {
    double qrl[4];
    double qrn[4];
    double wrn[3];
+   double SpinRate;
+   double Hvr[3];
+   double Hvn[3];
    double OldCRN[3][3];
    struct CmdVecType PriVec;
    struct CmdVecType SecVec;
@@ -145,6 +150,11 @@ struct FSWType {
    double Fmax;
    double wmax[3];
 
+   /* For RampCoastGlide */
+   double RcgWC;
+   double RcgAmax;
+   double RcgVmax;
+
    /* Intermediate Variables */
    double CRN[3][3],CBR[3][3],CBN[3][3];
    double qbr[4];
@@ -158,8 +168,10 @@ struct FSWType {
    double Bold1,Bold2,xold,yold;
 };
 
-//#ifdef __cplusplus
-//}
-//#endif
+/*
+** #ifdef __cplusplus
+** }
+** #endif
+*/
 
 #endif /* __FSWTYPES_H__ */

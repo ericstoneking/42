@@ -15,9 +15,11 @@
 #ifndef __DCMKIT_H__
 #define __DCMKIT_H__
 
-//#ifdef __cplusplus
-//namespace Kit {
-//#endif
+/*
+** #ifdef __cplusplus
+** namespace Kit {
+** #endif
+*/
 
 void C2Q(double C[3][3], double Q[4]);
 void Q2C(double Q[4], double C[3][3]);
@@ -38,8 +40,10 @@ void W2ADOT(long Seq, double ang[3], double w[3], double adot[3]);
 void W2CDOT(double w[3], double C[3][3], double Cdot[3][3]);
 void CDOT2W(double C[3][3], double Cdot[3][3], double w[3]);
 
-//#ifdef __cplusplus
-//}
-//#endif
+/*
+** #ifdef __cplusplus
+** }
+** #endif
+*/
 
 #endif /* __DCMKIT_H__ */

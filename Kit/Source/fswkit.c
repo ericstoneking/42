@@ -18,9 +18,10 @@
 #include "mathkit.h"
 #include "dcmkit.h"
 
-//#ifdef __cplusplus
-//namespace Kit {
-//#endif
+/* #ifdef __cplusplus
+** namespace Kit {
+** #endif
+*/
 
 /**********************************************************************/
 void FindPDGains(double I, double w, double z, double *Kr, double *Kp)
@@ -425,6 +426,7 @@ void PointGimbalToTarget(long Seq, double CGiBi[3][3],
       double TargVec[3],BoreVec[3];
       double TargAng1,BoreAng1,TargAng2,BoreAng2;
       double t1,t2,t3,b1,b2,b3;
+      double Cycle;
 
       /* Form perpendicular basis for unrotated gimbal */
       /* Call it the A frame */
@@ -435,12 +437,14 @@ void PointGimbalToTarget(long Seq, double CGiBi[3][3],
          case 121 :
             a1 = Axis[0];
             a2 = Axis[1];
+            Cycle = 1.0;
          break;
          case 13  :
          case 132 :
          case 131 :
             a1 = Axis[0];
             a2 = Axis[2];
+            Cycle = -1.0;
          break;
          case 2   :
          case 23  :
@@ -448,12 +452,14 @@ void PointGimbalToTarget(long Seq, double CGiBi[3][3],
          case 232 :
             a1 = Axis[1];
             a2 = Axis[2];
+            Cycle = 1.0;
          break;
          case 21  :
          case 213 :
          case 212 :
             a1 = Axis[1];
             a2 = Axis[0];
+            Cycle = -1.0;
          break;
          case 3   :
          case 31  :
@@ -461,16 +467,19 @@ void PointGimbalToTarget(long Seq, double CGiBi[3][3],
          case 313 :
             a1 = Axis[2];
             a2 = Axis[0];
+            Cycle = 1.0;
          break;
          case 32  :
          case 321 :
          case 323 :
             a1 = Axis[2];
             a2 = Axis[1];
+            Cycle = -1.0;
          break;
          default :
             a1 = Axis[0];
             a2 = Axis[1];
+            Cycle = 1.0;
       }
       VxV(a1,a2,a3);
 
@@ -497,8 +506,8 @@ void PointGimbalToTarget(long Seq, double CGiBi[3][3],
       if (GimAngCmd[0] >  PI) GimAngCmd[0] -= TWOPI;
 
       /* Find rotation about a2 to move BoreVec into TargVec */
-      TargAng2 = asin(t1);
-      BoreAng2 = asin(b1);
+      TargAng2 = Cycle*asin(t1);
+      BoreAng2 = Cycle*asin(b1);
 
       GimAngCmd[1] =  TargAng2 - BoreAng2;
       if (GimAngCmd[1] < -PI) GimAngCmd[1] += TWOPI;
@@ -578,19 +587,68 @@ void CollisionAvoidanceLaw(double x[3], double v[3],
       }
 }
 /**********************************************************************/
+double BangBangSettle(double x, double v, double w0,
+                      double amax, double vmax)
+{
+      double a,vcmd,aswitch;
+      double xc,x0,vc;
+      double Kr,Kp;
+
+      aswitch = 0.9*amax; /* Reserve some authority */
+      xc = amax/w0/w0;
+      x0 = 0.5*xc;
+      vc = xc*w0;
+      Kr = 2.0*w0;
+      Kp = w0*w0;
+
+      if (fabs(x) < xc && fabs(v) < vc) {
+         a = -Kr*v-Kp*x;
+      }
+      else if (x > x0) {
+         vcmd = -sqrt(2.0*aswitch*(x-x0));
+         if (vcmd < -vmax) vcmd = -vmax;
+         if (v > vcmd) {
+            a = -(v - vcmd)*w0;
+            if (a < -amax) a = -amax;
+         }
+         else {
+            a = aswitch - (v - vcmd)*w0;
+            if (a > amax) a = amax;
+         }
+      }
+      else if (x < -x0) {
+         vcmd = sqrt(2.0*aswitch*(-x-x0));
+         if (vcmd > vmax) vcmd = vmax;
+         if (v < vcmd) {
+            a = -(v - vcmd)*w0;
+            if (a > amax) a = amax;
+         }
+         else {
+            a = -aswitch - (v - vcmd)*w0;
+            if (a < -amax) a = -amax;
+         }
+      }
+      else {
+         if (v > 0.0) a = -amax;
+         else a = amax;
+      }
+
+      return(a);
+}
+/**********************************************************************/
 /* Near (x=0,v=0) this is a critically damped PD law with time        */
 /* constant tau.  Far away from (0,0) this is a max-effort slew       */
 /* with rate limiting.                                                */
 /* Original algorithm by Eric Stoneking.                              */
 /* Corrections by Blair Carter, 2011.                                 */
-double RampCoastGlide(double x, double v, double tau,
+double RampCoastGlide(double x, double v, double w0,
                       double amax, double vmax)
 {
       double a,vcmd,aswitch;
       double xc,x0;
 
       aswitch = 0.9*amax; /* Reserve some authority */
-      xc = aswitch*tau*tau;
+      xc = aswitch/w0/w0;
       x0 = 0.5*xc;
 
       if (x > xc) {
@@ -600,7 +658,7 @@ double RampCoastGlide(double x, double v, double tau,
          }
          else {
             if (vcmd < -vmax) vcmd = -vmax;
-            a =  -(v-vcmd)/tau;
+            a =  -(v-vcmd)*w0;
             a = Limit(a,-amax,amax);
          }
       }
@@ -611,26 +669,26 @@ double RampCoastGlide(double x, double v, double tau,
          }
          else {
             if (vcmd > vmax) vcmd = vmax;
-            a =  -(v-vcmd)/tau;
+            a =  -(v-vcmd)*w0;
             a = Limit(a,-amax,amax);
          }
       }
       else {
-         /* PD, Kx = 1/(tau*tau), Kv = 2.0/tau */
-         a = -(x/tau+2.0*v)/tau;
+         /* PD, Kx = w0*w0, Kv = 2.0*w0 */
+         a = -(x*w0+2.0*v)*w0;
          a = Limit(a,-amax,amax);
       }
 
       return(a);
 }
 /**********************************************************************/
-double RateControl(double v, double amax, double tau)
+double RateControl(double v, double amax, double w0)
 {
-      double a = -v/tau;
+      double a = -v*w0;
       return(Limit(a,-amax,amax));
 }
 /**********************************************************************/
-void VectorRampCoastGlide(double Xvec[3], double Vvec[3], double tau,
+void VectorRampCoastGlide(double Xvec[3], double Vvec[3], double w0,
                       double amax, double vmax, double Avec[3])
 {
       double Axis[3],Xaxis[3],Yaxis[3];
@@ -641,20 +699,22 @@ void VectorRampCoastGlide(double Xvec[3], double Vvec[3], double tau,
          /* RampCoastGlide on line parallel to Xvec */
          x=CopyUnitV(Xvec,Axis);
          v=VoV(Vvec,Axis);
-         a=RampCoastGlide(x,v,tau,amax,vmax);
+         a=RampCoastGlide(x,v,w0,amax,vmax);
          /* RateControl on transverse axes */
          PerpBasis(Axis,Xaxis,Yaxis);
-         avx = RateControl(VoV(Vvec,Xaxis),amax,tau);
-         avy = RateControl(VoV(Vvec,Yaxis),amax,tau);
+         avx = RateControl(VoV(Vvec,Xaxis),amax,w0);
+         avy = RateControl(VoV(Vvec,Yaxis),amax,w0);
 
          for(i=0;i<3;i++)
             Avec[i] = a*Axis[i] + avx*Xaxis[i] + avy*Yaxis[i];
       }
       else {
-         for(i=0;i<3;i++) Avec[i] = RateControl(Vvec[i],amax,tau);
+         for(i=0;i<3;i++) Avec[i] = RateControl(Vvec[i],amax,w0);
       }
 }
 /**********************************************************************/
+/* Beta is angle between Sun vector and the orbit plane.              */
+/* It is positive toward the positive orbit normal.                   */
 double SolarBeta(double svn[3], double psn[3], double vsn[3])
 {
       double h[3];
@@ -1214,7 +1274,7 @@ double CMGLaw4x1DOF(double Tcmd[3], double Axis[4][3], double Gim[4][3],
 
       long i,j;
 
-      /* A = (gxa) */
+      /* Output axis A = (gxa) */
       for(i=0;i<4;i++) {
          A[0][i] = (Gim[i][1]*Axis[i][2]-Gim[i][2]*Axis[i][1]);
          A[1][i] = (Gim[i][2]*Axis[i][0]-Gim[i][0]*Axis[i][2]);
@@ -1289,6 +1349,7 @@ double CMGLaw4x1DOF(double Tcmd[3], double Axis[4][3], double Gim[4][3],
 
       return(Gain);
 }
-//#ifdef __cplusplus
-//}
-//#endif
+/* #ifdef __cplusplus
+** }
+** #endif
+*/

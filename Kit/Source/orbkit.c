@@ -14,9 +14,10 @@
 
 #include "orbkit.h"
 
-//#ifdef __cplusplus
-//namespace Kit {
-//#endif
+/* #ifdef __cplusplus
+** namespace Kit {
+** #endif
+*/
 
 /**********************************************************************/
 struct OrbitType *CloneOrbit(struct OrbitType *OldOrb, long *Norb,
@@ -1006,7 +1007,7 @@ void LunaInertialFrame(double JulDay, double CNJ[3][3])
 {
 #define D2R (1.74532925199E-2)
       double D,T;
-      double E1,E2,E3,E4,E5,E6,E7,E8,E9,E10,E11,E12,E13;
+      double E1,E2,E3,E4,E6,E7,E10,E12,E13;
       double SinE1,SinE2,SinE3,SinE4,SinE6;
       double SinE10,SinE13;
       double CosE1,CosE2,CosE3,CosE4,CosE6,CosE7,CosE10,CosE13;
@@ -1020,13 +1021,9 @@ void LunaInertialFrame(double JulDay, double CNJ[3][3])
       E2 = fmod(250.089 - 0.1059842*D,360.0)*D2R;
       E3 = fmod(260.008 + 13.0120009*D,360.0)*D2R;
       E4 = fmod(176.625 + 13.3407154*D,360.0)*D2R;
-      E5 = fmod(357.529 + 0.9856003*D,360.0)*D2R;
       E6 = fmod(311.589 + 26.4057084*D,360.0)*D2R;
       E7 = fmod(134.963 + 13.0649930*D,360.0)*D2R;
-      E8 = fmod(276.617 + 0.3287146*D,360.0)*D2R;
-      E9 = fmod(34.226 + 1.7484877*D,360.0)*D2R;
       E10 = fmod(15.134 - 0.1589763*D,360.0)*D2R;
-      E11 = fmod(119.743 + 0.0036096*D,360.0)*D2R;
       E12 = fmod(239.961 + 0.1643573*D,360.0)*D2R;
       E13 = fmod(25.053 + 12.9590088*D,360.0)*D2R;
 
@@ -1180,6 +1177,27 @@ void FindCLN(double r[3], double v[3], double CLN[3][3], double wln[3])
          CLN[2][i] = L3[i];
       }
 
+}
+/**********************************************************************/
+void FindENU(double PosN[3],double WorldW, double CLN[3][3], double wln[3])
+{
+      double Zaxis[3] = {0.0,0.0,1.0};
+      double East[3],North[3],Up[3];
+      long i;
+
+      CopyUnitV(PosN,Up);
+      VxV(Zaxis,Up,East);
+      UNITV(East);
+      VxV(Up,East,North);
+      UNITV(North);
+      for(i=0;i<3;i++) {
+         CLN[0][i] = East[i];
+         CLN[1][i] = North[i];
+         CLN[2][i] = Up[i];
+      }
+      wln[0] = 0.0;
+      wln[1] = 0.0;
+      wln[2] = WorldW;
 }
 /**********************************************************************/
 /*  Consider the Circular Restricted Three-Body Problem, with two     */
@@ -2510,7 +2528,7 @@ void FindLightLagOffsets(double AbsTime, struct OrbitType *Observer,
 }
 
 
-//#ifdef __cplusplus
-//}
-//#endif
-
+/* #ifdef __cplusplus
+** }
+** #endif
+*/

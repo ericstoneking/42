@@ -14,9 +14,10 @@
 
 #include "timekit.h"
 
-//#ifdef __cplusplus
-//namespace Kit {
-//#endif
+/* #ifdef __cplusplus
+** namespace Kit {
+** #endif
+*/
 
 /**********************************************************************/
 /* AbsTime is elapsed seconds since J2000 epoch                       */
@@ -52,9 +53,9 @@ double DateToAbsTime(long Year, long Month, long Day, long Hour,
       B = 2 - A + A/4;
 
       /* Days since J2000 Epoch (01 Jan 2000 12:00:00.0) */
-      Days = floor(365.25*(Year+4716))
+      Days = floor(365.25*(Year-2000))
                   + floor(30.6001*(Month+1))
-                  + Day + B - 1524.5 - 2451545.0;
+                  + Day + B - 50.5;
 
       /* Add fractional day */
       return(86400.0*Days + 3600.0*((double) Hour)
@@ -138,9 +139,65 @@ void JD2YMDHMS(double JD,long *Year, long *Month, long *Day,
 
 }
 /**********************************************************************/
+/*   Convert AbsTime to Year, Month, Day, Hour, Minute, and Second    */
+/*   AbsTime is seconds since J2000 epoch (01 Jan 2000 12:00:00.0)    */
+/*   Outputs are rounded to LSB to avoid loss of precision            */
+/*   Ref. Jean Meeus, 'Astronomical Algorithms', QB51.3.E43M42, 1991. */
+
+void AbsTimeToDate(double AbsTime, long *Year, long *Month, long *Day,
+                  long *Hour, long *Minute, double *Second, double LSB)
+{
+      double Z,F,A,B,C,D,E,alpha;
+		double FD,JD;
+
+      JD = AbsTime/86400.0 + 2451545.0;
+
+      Z= floor(JD+0.5);
+      F=(JD+0.5)-Z;
+
+      if (Z < 2299161.0) {
+         A = Z;
+      }
+      else {
+         alpha = floor((Z-1867216.25)/36524.25);
+         A = Z+1.0+alpha - floor(alpha/4.0);
+      }
+
+      B = A + 1524.0;
+      C = floor((B-122.1)/365.25);
+      D = floor(365.25*C);
+      E = floor((B-D)/30.6001);
+
+      FD = B - D - floor(30.6001*E) + F;
+      *Day = (long) FD;
+
+      if (E < 14.0) {
+         *Month = (long) (E - 1.0);
+         *Year = (long) (C - 4716.0);
+      }
+      else {
+         *Month = (long) (E - 13.0);
+         *Year = (long) (C - 4715.0);
+      }
+
+      FD = AbsTime-43200.0+0.5*LSB;
+      FD = FD - ((long) (FD/86400.0))*86400.0;
+      if (FD < 0.0) FD += 86400.0;
+
+      *Hour = (long) (FD/3600.0);
+
+      FD -= 3600.0*(*Hour);
+
+      *Minute = (long) (FD/60.0);
+
+      *Second = FD - 60.0*(*Minute);
+
+      /* Clean up roundoff */
+      *Second = ((long) (*Second/LSB))*LSB;
+}
+/**********************************************************************/
 /*  Find Day of Year, given Month, Day                                */
 /*  Ref. Jean Meeus, 'Astronomical Algorithms', QB51.3.E43M42, 1991.  */
-
 long MD2DOY(long Year, long Month, long Day)
 {
       long K;
@@ -206,71 +263,76 @@ double JD2GMST(double JD)
 
 }
 /**********************************************************************/
-/*  Separate non-integer day into integer day, hour, minute, second.  */
-
-void DAY2HMS(double *DAY, double *HOUR, double *MINUTE, double *SECOND,
-             double DTSIM)
+/* GPS Epoch is 6 Jan 1980 00:00:00.0 which is JD = 2444244.5         */
+/* GPS Time is expressed in weeks and seconds                         */
+/* GPS Time rolls over every 1024 weeks                               */
+double GpsTimeToJD(long GpsRollover, long GpsWeek, double GpsSecond)
 {
-      double TEMP;
+      double DaysSinceWeek,DaysSinceRollover,DaysSinceEpoch,JD;
 
-      TEMP=*DAY;
-      *DAY=floor(TEMP);
-      TEMP=(TEMP-*DAY)*24.0;
-      *HOUR=floor(TEMP);
-      TEMP=(TEMP-*HOUR)*60.0;
-      *MINUTE=floor(TEMP);
-      *SECOND=(TEMP-*MINUTE)*60.0;
-      *SECOND=floor(*SECOND/DTSIM+0.5)*DTSIM;
-      if (*SECOND == 60.0) {
-         *SECOND = 0.0;
-         *MINUTE += 1.0;
-         if (*MINUTE == 60.0) {
-            *MINUTE = 0.0;
-            *HOUR += 1.0;
-            if (*HOUR == 24.0) {
-               *HOUR = 0.0;
-               *DAY += 1.0;
-            }
-         }
-      }
+      DaysSinceWeek = GpsSecond/86400.0;
+      DaysSinceRollover = DaysSinceWeek + 7.0*GpsWeek;
+      DaysSinceEpoch = DaysSinceRollover + 7168.0*GpsRollover;
+      JD = DaysSinceEpoch + 2444244.5;
+
+      return(JD);
 }
+/**********************************************************************/
+/* GPS Epoch is 6 Jan 1980 00:00:00.0 which is JD = 2444244.5         */
+/* GPS Time is expressed in weeks and seconds                         */
+/* GPS Time rolls over every 1024 weeks                               */
+void JDToGpsTime(double JD, long *GpsRollover, long *GpsWeek, double *GpsSecond)
+{
+      double DaysSinceEpoch, DaysSinceRollover, DaysSinceWeek;
+
+      DaysSinceEpoch = JD - 2444244.5;
+      *GpsRollover = (long) (DaysSinceEpoch/7168.0);
+      DaysSinceRollover = DaysSinceEpoch - 7168.0*((double) *GpsRollover);
+      *GpsWeek = (long) (DaysSinceRollover/7.0);
+      DaysSinceWeek = DaysSinceRollover - 7.0*((double) *GpsWeek);
+      *GpsSecond = DaysSinceWeek*86400.0;
+}
+
 #if defined _USE_SYSTEM_TIME_
 /**********************************************************************/
+/* This function returns the number of microseconds since the Unix    */
+/* epoch, 00:00:00.0 Jan 1 1970.  Typically used as a tick/tock       */
+/* duration measurement.                                              */
 double usec(void)
 {
+
+#if (defined(__APPLE__) || defined(__linux__))
       struct timeval now;
 
       gettimeofday(&now,NULL);
       return(1.0E6*now.tv_sec+now.tv_usec);
+#else
+      return(0.0);
+#endif
+
 }
 /**********************************************************************/
 /* Get time from operating system, and convert to compatible format.  */
 void RealSystemTime(long *Year, long *DOY, long *Month, long *Day,
-                   long *Hour, long *Minute, double *Second)
+                   long *Hour, long *Minute, double *Second, double DT)
 {
-      struct tm *SysTime;
-      time_t RawTime;
+#if (defined(__APPLE__) || defined(__linux__))
+      struct timeval now;
+      double UnixTime,AbsTime;
 
-      time(&RawTime);
-      SysTime = gmtime(&RawTime);
+      /* Unix Time is since 00:00:00.0 Jan 1 1970 */
+      gettimeofday(&now,NULL);
+      UnixTime = now.tv_sec + 1.0E-6*now.tv_usec;
 
-      /* gmtime returns years since 1900 */
-      *Year = SysTime->tm_year + 1900;
+      /* AbsTime is since J2000 */
+      AbsTime = UnixTime - 946728000.0;
 
-      /* gmtime returns 0-365 */
-      *DOY = SysTime->tm_yday + 1;
-
-      /* gmtime returns month as 0-11 */
-      *Month = SysTime->tm_mon + 1;
-
-      /* The rest are copy-paste */
-      *Day = SysTime->tm_mday;
-      *Hour = SysTime->tm_hour;
-      *Minute = SysTime->tm_min;
-      *Second = (double) SysTime->tm_sec;
+      AbsTimeToDate(AbsTime,Year,Month,Day,Hour,Minute,Second,DT);
+      *DOY = MD2DOY(*Year,*Month,*Day);
+#endif
 }
 /**********************************************************************/
-double RealRunTime(double *RealTimeDT)
+double RealRunTime(double *RealTimeDT, double LSB)
 {
       static double RunTime = 0.0;
       static long First = 1;
@@ -292,24 +354,7 @@ double RealRunTime(double *RealTimeDT)
          ((double) SysFreq.QuadPart);
       OldSysCtr = SysCtr;
 
-#elif defined(__APPLE__)
-
-      static double OldSysTime;
-      double SysTime;
-      struct timeval now;
-
-      if (First) {
-         First = 0;
-         gettimeofday(&now,NULL);
-         OldSysTime = now.tv_sec + 1.0E-6*now.tv_usec;
-      }
-
-      gettimeofday(&now,NULL);
-      SysTime = now.tv_sec + 1.0E-6*now.tv_usec;
-      *RealTimeDT = SysTime-OldSysTime;
-      OldSysTime = SysTime;
-
-#elif defined(__linux__)
+#elif (defined(__APPLE__) || defined(__linux__))
 
       static double OldSysTime;
       double SysTime;
@@ -318,11 +363,11 @@ double RealRunTime(double *RealTimeDT)
 
       if (First) {
          First = 0;
-         RealSystemTime(&Year,&DOY,&Month,&Day,&Hour,&Minute,&Second);
+         RealSystemTime(&Year,&DOY,&Month,&Day,&Hour,&Minute,&Second,LSB);
          OldSysTime = DateToAbsTime(Year,Month,Day,Hour,Minute,Second);
       }
 
-      RealSystemTime(&Year,&DOY,&Month,&Day,&Hour,&Minute,&Second);
+      RealSystemTime(&Year,&DOY,&Month,&Day,&Hour,&Minute,&Second,LSB);
       SysTime = DateToAbsTime(Year,Month,Day,Hour,Minute,Second);
       *RealTimeDT = SysTime-OldSysTime;
       OldSysTime = SysTime;
@@ -333,14 +378,14 @@ double RealRunTime(double *RealTimeDT)
 #endif
 
       if (*RealTimeDT < 0.0) *RealTimeDT = 0.001;
-      //if (*RealTimeDT > 1.0) *RealTimeDT = 1.0;
+      /*if (*RealTimeDT > 1.0) *RealTimeDT = 1.0;*/
       RunTime += *RealTimeDT;
 
       return(RunTime);
 }
 #endif /* USE_SYSTEM_TIME */
 
-//#ifdef __cplusplus
-//}
-//#endif
-
+/* #ifdef __cplusplus
+** }
+** #endif
+*/

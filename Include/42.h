@@ -33,14 +33,17 @@
 #include "mathkit.h"
 #include "orbkit.h"
 #include "sigkit.h"
+#include "sphkit.h"
 #include "timekit.h"
 #include "fswkit.h"
-//#include "msis86kit.h"
+#include "msis86kit.h"
 
-//#ifdef __cplusplus
-//namespace _42 {
-//using namespace Kit;
-//#endif
+/*
+** #ifdef __cplusplus
+** namespace _42 {
+** using namespace Kit;
+** #endif
+*/
 
 /* Number of Reference Orbits */
 EXTERN long Norb;
@@ -75,12 +78,16 @@ EXTERN struct SphereHarmType EarthGravModel;  /* Degree and Order of Earth gravi
 EXTERN struct SphereHarmType MarsGravModel;  /* Degree and Order of Mars gravitational model */
 EXTERN struct SphereHarmType LunaGravModel;  /* Degree and Order of Luna gravitational model */
 EXTERN long AeroActive;
+EXTERN long AeroShadowsActive;
 EXTERN long GGActive;
 EXTERN long SolPressActive;
+EXTERN long SolPressShadowsActive;
 EXTERN long GravPertActive;
 EXTERN long JointTrqActive;
 EXTERN long ThrusterPlumesActive;
 EXTERN long RwaImbalanceActive;
+EXTERN long ContactActive;
+EXTERN long SloshActive;
 EXTERN long ComputeEnvTrq;
 
 /* Calendar Time */
@@ -88,6 +95,8 @@ EXTERN double AbsTime0; /* Time in sec since J2000 Epoch at Sim Start */
 EXTERN double JulDay;
 EXTERN long doy,Year,Month,Day,Hour,Minute;
 EXTERN double Second;
+EXTERN long GpsRollover,GpsWeek;
+EXTERN double GpsSecond;
 
 /* Parameters for environmental models  */
 EXTERN long UseFileForInterpolation; /*TWOSIGMA_KP, NOMINAL, USER_DEFINED*/
@@ -128,7 +137,16 @@ EXTERN struct FBOType ShadowMap;
 
 /* Minor Bodies (Asteroids and Comets) */
 EXTERN long Nmb;
-EXTERN struct MinorBodyType *MinorBody;
+
+EXTERN long Nrgn;
+EXTERN struct RegionType *Rgn;
+
+/* CFD execution control */
+EXTERN long ExecuteCFDStep;
+EXTERN long EndCFD;
+
+EXTERN SOCKET TxSocket,RxSocket;
+EXTERN long EchoEnabled;
 
 long SimStep(void);
 void Ephemerides(void);
@@ -158,6 +176,9 @@ void FindTotalAngMom(struct SCType *S);
 double FindTotalKineticEnergy(struct SCType *S);
 void UpdateScBoundingBox(struct SCType *S);
 void FindCmgAxisAndTrq(struct CMGType *C);
+void FindUnshadedAreas(struct SCType *S, double DirVecN[3]);
+void RadBelt(float RadiusKm, float MagLatDeg, int NumEnergies, 
+      float *ElectronEnergy, float *ProtonEnergy, double **Flux); 
 
 /* Debug Function Prototypes */
 void EchoPVel(struct SCType *S);
@@ -175,6 +196,11 @@ void InitLagrangePoints(void);
 
 long LoadTRVfromFile(const char *Path, const char *TrvFileName,
    const char *ElemLabel, double AbsTime, struct OrbitType *O);
+void SplineToPosVel(struct OrbitType *O);
+
+void CfdSlosh(struct SCType *S);
+void FakeCfdSlosh(struct SCType *S);
+void SendStatesToSpirent(void);
 
 #ifdef _ENABLE_SOCKETS_
    void InterProcessComm(void);
@@ -183,10 +209,11 @@ long LoadTRVfromFile(const char *Path, const char *TrvFileName,
 
 #undef EXTERN
 
-//#ifdef __cplusplus
-//}
-//#endif
-
+/*
+** #ifdef __cplusplus
+** }
+** #endif
+*/
 
 
 

@@ -15,9 +15,11 @@
 #ifndef __FSWKIT_H__
 #define __FSWKIT_H__
 
-//#ifdef __cplusplus
-//namespace Kit {
-//#endif
+/*
+** #ifdef __cplusplus
+** namespace Kit {
+** #endif
+*/
 
 void FindPDGains(double I, double w, double z, double *Kr, double *Kp);
 double Limit(double x,double min, double max);
@@ -38,10 +40,12 @@ void PointGimbalToTarget(long Seq, double CGiBi[3][3],
 void CollisionAvoidanceLaw(double x[3], double v[3],
    double xg[3], double xa[3], double Ra, double vmax, double amax,
    double wc, double zc, double a[3]);
-double RampCoastGlide(double x, double v, double tau,
+double BangBangSettle(double x, double v, double w0,
                       double amax, double vmax);
-double RateControl(double v, double amax, double tau);
-void VectorRampCoastGlide(double Xvec[3], double Vvec[3], double tau,
+double RampCoastGlide(double x, double v, double w0,
+                      double amax, double vmax);
+double RateControl(double v, double amax, double w0);
+void VectorRampCoastGlide(double Xvec[3], double Vvec[3], double w0,
                       double amax, double vmax, double Avec[3]);
 double SolarBeta(double svn[3], double psn[3], double vsn[3]);
 double ThrusterSelection(double **A, double *f, double *t,
@@ -61,8 +65,10 @@ void KFTimeUpdate(double *x, double **P, double **phi, double **gam,
 double CMGLaw4x1DOF(double Tcmd[3], double Axis[4][3], double Gim[4][3],
    double h[4], double AngRateCmd[4]);
 
-//#ifdef __cplusplus
-//}
-//#endif
+/*
+** #ifdef __cplusplus
+** }
+** #endif
+*/
 
 #endif /* __FSWKIT_H__ */

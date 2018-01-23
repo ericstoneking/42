@@ -1,0 +1,19 @@
+# Exported from Wings 3D 1.5.2
+newmtl FLAT_BLACK
+Ns 0.0
+d 1.0
+illum 2
+Kd 0.001 0.001 0.001
+Ka 1.0 1.0 1.0
+Ks 0.0 0.0 0.0
+Ke 0.0 0.0 0.0
+
+newmtl FLAT_WHITE
+Ns 0.0
+d 1.0
+illum 2
+Kd 1.0 1.0 1.0
+Ka 1.0 1.0 1.0
+Ks 0.0 0.0 0.0
+Ke 0.0 0.0 0.0
+

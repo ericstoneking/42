@@ -4,17 +4,17 @@ Big Black Monolith            !  Description
 GenScSpriteAlpha.ppm          !  Sprite File Name
 PASSIVE_FSW                   !  Flight Software Identifier
 ************************* Orbit Parameters ****************************
-FIXED                         !  Orbit Prop FIXED, EULER_HILL, or ENCKE
+ENCKE                         !  Orbit Prop FIXED, EULER_HILL, or ENCKE
 CM                            !  Pos of CM or ORIGIN, wrt F
--20.0  0.0  0.0                 !  Pos wrt Formation (m), expressed in F
-0.0  0.0  0.0                 !  Vel wrt Formation (m/s), expressed in F
+-20.0  0.0  0.0               !  Pos wrt Formation (m), expressed in F
+0.0    0.0  0.005              !  Vel wrt Formation (m/s), expressed in F
 *************************** Initial Attitude ***************************
 NAN                           ! Ang Vel wrt [NL], Att [QA] wrt [NLF]
-0.0    0.1    0.0             ! Ang Vel (deg/sec)
+0.1    5.0    0.0             ! Ang Vel (deg/sec)
 0.0    0.0    0.0    1.0      ! Quaternion
 0.0    0.0    0.0    123      ! Angles (deg) & Euler Sequence
 ***************************  Dynamics Flags  ***************************
-STEADY                        ! Rotation STEADY, KIN_JOINT, or DYN_JOINT
+DYN_JOINT                     ! Rotation STEADY, KIN_JOINT, or DYN_JOINT
 TRUE                          ! Assume constant mass properties
 FALSE                         ! Passive Joint Forces and Torques Enabled
 FALSE                         ! Compute Constraint Forces and Torques
@@ -28,9 +28,10 @@ FALSE                         ! Include 2nd Order Flex Terms
 1                             ! Number of Bodies
 ================================ Body 0 ================================
 1.0                           ! Mass
-2.0  3.0  1.2                 ! Moments of Inertia (kg-m^2)
+1.0  2.0  4.0                 ! Moments of Inertia (kg-m^2)
 0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
 0.0  0.0  0.0                 ! Location of mass center, m
+0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
 BBM.obj                       ! Geometry Input File Name
 NONE                          ! Flex File Name
 ************************************************************************

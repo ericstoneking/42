@@ -19,16 +19,16 @@
 #include <math.h>
 #include <stdio.h>
 
-#define EXTERN extern
 #include "glkit.h"
-#undef EXTERN
 
-//#ifdef __cplusplus
-//namespace _42 {
-//using namespace Kit;
-//#endif
+/*
+** #ifdef __cplusplus
+** namespace _42 {
+** using namespace Kit;
+** #endif
+*/
 
-#define CAM_MENU_SIZE 17
+#define CAM_MENU_SIZE 18
 #define N_AXES 0
 #define L_AXES 1
 #define F_AXES 2
@@ -39,13 +39,14 @@
 #define B_GRID 7
 #define G_GRID 8
 #define CAM_FOV 9
-#define TDRS 10
-#define CAM_SHADOWS 11
-#define ASTRO 12
-#define TRUTH_VECTORS 13
-#define FSW_VECTORS 14
-#define MILKY_WAY 15
-#define FERMI_SKY 16
+#define PROX_OPS 10
+#define TDRS 11
+#define CAM_SHADOWS 12
+#define ASTRO 13
+#define TRUTH_VECTORS 14
+#define FSW_VECTORS 15
+#define MILKY_WAY 16
+#define FERMI_SKY 17
 
 #define MAP_MENU_SIZE 4
 #define MAP_CLOCK 0
@@ -59,185 +60,168 @@
 #define ONSCREEN 0
 #define OFFSCREEN 1
 
-long MapWindowExists, OrreryWindowExists;
+EXTERN long MapWindowExists, OrreryWindowExists;
 
-double RunTime,FrameRate,RealTimeDT;
-long TimerHasExpired;
-int TimerDuration;
+EXTERN double RunTime,FrameRate,RealTimeDT;
+EXTERN long TimerHasExpired;
+EXTERN int TimerDuration;
 
-int MouseClickX,MouseClickY;
-long PauseFlag;
-long PausedByMouse;
-long CamWidth, CamHeight;
-char CamTitle[80];
-long CamShow[CAM_MENU_SIZE];
-char CamShowLabel[CAM_MENU_SIZE][40];
-long MapWidth, MapHeight;
-char MapTitle[80];
-long MapShow[MAP_MENU_SIZE];
-char MapShowLabel[MAP_MENU_SIZE][40];
-long ShowHUD;
-GLuint CamWindow;
-GLuint MapWindow;
-double MouseScaleFactor;
-long CaptureCam, CamFrame;
-GLuint SunTexTag;
-GLuint SunlightTexTag;
-GLuint SunlightRingTexTag[3];
-GLuint RockballTexTag;
-GLuint RockballColCubeTag;
-GLuint RockballBumpCubeTag;
-GLuint IceballTexTag;
-GLuint IceballColCubeTag;
-GLuint NullTexTag;
-GLuint NullColCubeTag;
-GLuint NullBumpCubeTag;
-GLuint NullCloudGlossCubeTag;
-GLuint NullRingTexTag;
-GLuint ShadowTexTag;
-GLint MapSunVecLoc;
-GLint MapCosEclLoc;
-GLint MoonMapSunVecLoc;
-GLint MoonMapCosEclLoc;
-GLuint NASAWatermarkTexTag;
-GLuint GSFCWatermarkTexTag;
-GLuint FortyTwoWatermarkTexTag;
+EXTERN int MouseClickX,MouseClickY;
+EXTERN long PauseFlag;
+EXTERN long PausedByMouse;
+EXTERN long CamWidth, CamHeight;
+EXTERN char CamTitle[80];
+EXTERN long CamShow[CAM_MENU_SIZE];
+EXTERN char CamShowLabel[CAM_MENU_SIZE][40];
+EXTERN long MapWidth, MapHeight;
+EXTERN char MapTitle[80];
+EXTERN long MapShow[MAP_MENU_SIZE];
+EXTERN char MapShowLabel[MAP_MENU_SIZE][40];
+EXTERN long ShowHUD;
+EXTERN GLuint CamWindow;
+EXTERN GLuint MapWindow;
+EXTERN double MouseScaleFactor;
+EXTERN long CaptureCam, CamFrame;
+EXTERN GLuint SunTexTag;
+EXTERN GLuint SunlightTexTag;
+EXTERN GLuint SunlightRingTexTag[3];
+EXTERN GLuint RockballTexTag;
+EXTERN GLuint RockballColCubeTag;
+EXTERN GLuint RockballBumpCubeTag;
+EXTERN GLuint IceballTexTag;
+EXTERN GLuint IceballColCubeTag;
+EXTERN GLuint NullTexTag;
+EXTERN GLuint NullColCubeTag;
+EXTERN GLuint NullBumpCubeTag;
+EXTERN GLuint NullCloudGlossCubeTag;
+EXTERN GLuint NullRingTexTag;
+EXTERN GLuint ShadowTexTag;
+EXTERN GLint MapSunVecLoc;
+EXTERN GLint MapCosEclLoc;
+EXTERN GLint MoonMapSunVecLoc;
+EXTERN GLint MoonMapCosEclLoc;
+EXTERN GLuint NASAWatermarkTexTag;
+EXTERN GLuint GSFCWatermarkTexTag;
+EXTERN GLuint FortyTwoWatermarkTexTag;
 
-GLuint OrreryWindow;
-long OrreryWidth;
-long OrreryHeight;
-char OrreryTitle[40];
-struct OrreryPOVType Orrery;
-GLuint OrrerySphereList;
-GLuint OrreryRingList;
+EXTERN GLuint OrreryWindow;
+EXTERN long OrreryWidth;
+EXTERN long OrreryHeight;
+EXTERN char OrreryTitle[40];
+EXTERN struct OrreryPOVType Orrery;
+EXTERN GLuint OrrerySphereList;
+EXTERN GLuint OrreryRingList;
 
-/*ProxOps Variables*/
-long ProxOpsWindowExists;
-GLuint ProxOpsWindow;
-long ProxOpsWidth;
-long ProxOpsHeight;
-long ProxOpsZoom;
-long ProxOpsView;
-double ProxOpsRadius;
-double ProxOpsTrans[2];
-double ProxOpsScale[30];
-char ProxOpsTitle[40];
-struct WidgetType ProxOpsWidget;
+EXTERN GLuint DayNightTexTag;
+EXTERN GLuint EarthMapTexTag;
+EXTERN GLuint SunSpriteTexTag;
+EXTERN GLuint AntiSunSpriteTexTag;
+EXTERN GLuint MoonSpriteTexTag;
+EXTERN GLuint LogoTexTag;
 
-GLuint DayNightTexTag;
-GLuint EarthMapTexTag;
-GLuint SunSpriteTexTag;
-GLuint AntiSunSpriteTexTag;
-GLuint MoonSpriteTexTag;
-GLuint LogoTexTag;
+EXTERN char StarCatFileName[80];
+EXTERN double BuckyPf[32][3];
+EXTERN long BuckyNeighbor[32][6];
 
-char StarCatFileName[80];
-double BuckyPf[32][3];
-long BuckyNeighbor[32][6];
+EXTERN double SkyDistance;
+EXTERN double GammaCorrection;
 
-double SkyDistance;
-double GammaCorrection;
+EXTERN GLuint MilkyWayList;
+EXTERN GLuint StarList[32];
+EXTERN GLuint FermiSkyList;
+EXTERN GLuint EgretSourceList[32];
+EXTERN GLuint FermiSourceList[32];
+EXTERN GLuint PulsarList[32];
+EXTERN GLuint NSkyGridList;
+EXTERN GLuint LSkyGridList;
+EXTERN GLuint FSkyGridList;
+EXTERN GLuint BSkyGridList;
+EXTERN GLuint PlanetList[11];
+EXTERN GLuint NightList;
+EXTERN GLuint MajSkyGridList;
+EXTERN GLuint MinSkyGridList;
+EXTERN GLuint SphereList;
 
-GLuint MilkyWayList;
-GLuint StarList[32];
-GLuint FermiSkyList;
-GLuint EgretSourceList[32];
-GLuint FermiSourceList[32];
-GLuint PulsarList[32];
-GLuint NSkyGridList;
-GLuint LSkyGridList;
-GLuint FSkyGridList;
-GLuint BSkyGridList;
-GLuint PlanetList[11];
-GLuint NightList;
-GLuint MajSkyGridList;
-GLuint MinSkyGridList;
-GLuint SphereList;
+EXTERN GLfloat DistantAmbientLightColor[4];
+EXTERN GLfloat LocalAmbientLightColor[4];
+EXTERN GLfloat DistantDiffuseLightColor[4];
+EXTERN GLfloat LocalDiffuseLightColor[4];
+EXTERN GLfloat SpecularLightColor[4];
+EXTERN GLfloat NBrightColor[4];
+EXTERN GLfloat NDimColor[4];
+EXTERN GLfloat LBrightColor[4];
+EXTERN GLfloat LDimColor[4];
+EXTERN GLfloat FBrightColor[4];
+EXTERN GLfloat FDimColor[4];
+EXTERN GLfloat BBrightColor[4];
+EXTERN GLfloat BDimColor[4];
+EXTERN GLfloat GBrightColor[4];
+EXTERN GLfloat GDimColor[4];
+EXTERN GLfloat HUDColor[4];
+EXTERN GLfloat TdrsColor[4];
 
-GLfloat DistantAmbientLightColor[4];
-GLfloat LocalAmbientLightColor[4];
-GLfloat DistantDiffuseLightColor[4];
-GLfloat LocalDiffuseLightColor[4];
-GLfloat SpecularLightColor[4];
-GLfloat NBrightColor[4];
-GLfloat NDimColor[4];
-GLfloat LBrightColor[4];
-GLfloat LDimColor[4];
-GLfloat FBrightColor[4];
-GLfloat FDimColor[4];
-GLfloat BBrightColor[4];
-GLfloat BDimColor[4];
-GLfloat GBrightColor[4];
-GLfloat GDimColor[4];
-GLfloat HUDColor[4];
-GLfloat TdrsColor[4];
+EXTERN struct WidgetType PovWidget;
+EXTERN struct WidgetType HostWidget;
+EXTERN struct WidgetType TargetWidget;
+EXTERN struct WidgetType CamShowWidget;
 
-struct WidgetType PovWidget;
-struct WidgetType HostWidget;
-struct WidgetType TargetWidget;
-struct WidgetType CamShowWidget;
+EXTERN struct WidgetType OrreryWidget;
 
-struct WidgetType OrreryWidget;
+EXTERN long TlmIsStatic;
+EXTERN long UseEphFromTlm;
+EXTERN long ShowTdrsVis;
+EXTERN long ShowWatermark;
 
-long TlmIsStatic;
-long UseEphFromTlm;
-long ShowTdrsVis;
-long ShowWatermark;
+EXTERN GLint ColorTexSamplerLoc;
+EXTERN GLint BumpTexSamplerLoc;
+EXTERN GLint EnvMapSamplerLoc;
+EXTERN GLint NoiseTexSamplerLoc;
+EXTERN GLint SpectrumTexSamplerLoc;
+EXTERN GLint ShadowSamplerLoc;
+EXTERN GLint NoiseGainLoc;
+EXTERN GLint NoiseBiasLoc;
+EXTERN GLint NoiseScaleLoc;
+EXTERN GLint NoiseAxisLoc;
+EXTERN GLint NoiseTypeLoc;
+EXTERN GLint ColorTexEnabledLoc;
+EXTERN GLint BumpTexEnabledLoc;
+EXTERN GLint ReflectEnabledLoc;
+EXTERN GLint NoiseColEnabledLoc;
+EXTERN GLint NoiseBumpEnabledLoc;
+EXTERN GLint ShadowsEnabledLoc;
+EXTERN GLint CNELoc;
+EXTERN GLint ShadowMatrixLoc;
 
-GLint ColorTexSamplerLoc;
-GLint BumpTexSamplerLoc;
-GLint EnvMapSamplerLoc;
-GLint NoiseTexSamplerLoc;
-GLint SpectrumTexSamplerLoc;
-GLint ShadowSamplerLoc;
-GLint NoiseGainLoc;
-GLint NoiseBiasLoc;
-GLint NoiseScaleLoc;
-GLint NoiseAxisLoc;
-GLint NoiseTypeLoc;
-GLint ColorTexEnabledLoc;
-GLint BumpTexEnabledLoc;
-GLint ReflectEnabledLoc;
-GLint NoiseColEnabledLoc;
-GLint NoiseBumpEnabledLoc;
-GLint ShadowsEnabledLoc;
-GLint CNELoc;
-GLint ShadowMatrixLoc;
+EXTERN GLuint SkyCube;
+EXTERN GLuint NoiseTex;
 
-GLuint SkyCube;
-GLuint NoiseTex;
+EXTERN long ShadowsEnabled;
+EXTERN long RiftEnabled;
+EXTERN long SeeThruPassNeeded;
+EXTERN GLfloat ShadowMatrix[16];
 
-long ShadowsEnabled;
-long RiftEnabled;
-long SeeThruPassNeeded;
-GLfloat ShadowMatrix[16];
+EXTERN long NearWorld;
 
-long NearWorld;
+EXTERN GLfloat LightPosN[4];
 
-GLfloat LightPosN[4];
-
-GLfloat ShadowFromNMatrix[16]; /* 4x4 Matrix transforms from N frame to Shadow Texture space */
-GLfloat CNE[9]; /* DCM between N and Eye frame */
+EXTERN GLfloat ShadowFromNMatrix[16]; /* 4x4 Matrix transforms from N frame to Shadow Texture space */
+EXTERN GLfloat CNE[9]; /* DCM between N and Eye frame */
 
 
-char Banner[120];
-GLfloat BannerColor[4];
+EXTERN char Banner[120];
+EXTERN GLfloat BannerColor[4];
 
 void GeomToDisplayLists(struct GeomType *G);
 
 void DrawWidget(struct WidgetType *W);
-void DrawProxOpsHUD(void);
-void DrawProxOps(void);
-void ProxOpsMouseButtonHandler(int Button, int State, int x, int y);
-void InitProxOpsWidget(void);
-void ProxOpsReshapeHandler(int width, int height);
-void InitProxOpsWindow(void);
 void Idle(void);
 void AsciiKeyHandler(unsigned char CharCode, int x, int y);
 
 
-//#ifdef __cplusplus
-//}
-//#endif
+/*
+** #ifdef __cplusplus
+** }
+** #endif
+*/
 
 #endif /* __42GLUTGUI_H__ */

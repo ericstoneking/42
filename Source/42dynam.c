@@ -14,10 +14,11 @@
 
 #include "42.h"
 
-//#ifdef __cplusplus
-//namespace _42 {
-//using namespace Kit;
-//#endif
+/* #ifdef __cplusplus
+** namespace _42 {
+** using namespace Kit;
+** #endif
+*/
 
 /**********************************************************************/
 void FindCmgAxisAndTrq(struct CMGType *C)
@@ -400,7 +401,7 @@ void FindTotalAngMom(struct SCType *S) {
       struct BodyType *B;
       struct WhlType *W;
       struct CMGType *C;
-      double Iw[3],Iwn[3],mv[3],rxmv[3],Hwn[3],Hcn[3];
+      double Hb[3],Hn[3],mv[3],rxmv[3],Hwn[3],Hcn[3];
       double Hwb[3] = {0.0,0.0,0.0};
       double Hcb[3] = {0.0,0.0,0.0};
       long Ib,i,Iwhl,Icmg;
@@ -414,11 +415,12 @@ void FindTotalAngMom(struct SCType *S) {
       /* Bodies */
       for(Ib=0;Ib<S->Nb;Ib++) {
          B = &S->B[Ib];
-         MxV(B->I,B->wn,Iw);
-         MTxV(B->CN,Iw,Iwn);
+         MxV(B->I,B->wn,Hb);
+         for(i=0;i<3;i++) Hb[i] += B->Hgyro[i];
+         MTxV(B->CN,Hb,Hn);
          SxV(B->mass,B->vn,mv);
          VxV(B->pn,mv,rxmv);
-         for(i=0;i<3;i++) S->Hvn[i] += Iwn[i] + rxmv[i];
+         for(i=0;i<3;i++) S->Hvn[i] += Hn[i] + rxmv[i];
       }
 
       /* Wheels */
@@ -467,6 +469,13 @@ double FindTotalKineticEnergy(struct SCType *S)
       for(Icmg=0;Icmg<S->Ncmg;Icmg++) {
          C = &S->CMG[Icmg];
          KE += 0.5*C->H*C->H/C->J;
+      }
+
+      if (Orb[S->RefOrb].Regime == ORB_ZERO) {
+          KE += 0.5*S->mass*VoV(S->VelN,S->VelN);
+      }
+      else if (Orb[S->RefOrb].Regime == ORB_FLIGHT) {
+          KE += 0.5*S->mass*VoV(S->VelR,S->VelR);
       }
 
       return(KE);
@@ -1379,6 +1388,7 @@ void FindInertiaTrq(struct SCType *S)
       B = &S->B[0];
       MxV(B->I,B->wn,H);
       for(i=0;i<3;i++) {
+         H[i] += B->Hgyro[i];
          for(j=0;j<S->Nw;j++) {
             H[i] += S->Whl[j].H*S->Whl[j].A[i];
          }
@@ -1396,6 +1406,7 @@ void FindInertiaTrq(struct SCType *S)
       for(Ib=1;Ib<S->Nb;Ib++) {
          B = &S->B[Ib];
          MxV(B->I,B->wn,H);
+         for(i=0;i<3;i++) H[i] += B->Hgyro[i];
          VxV(B->wn,H,wxH);
          MxV(B->I,B->AlphaR,Ia);
          for(i=0;i<3;i++) B->InertiaTrq[i] = -Ia[i] - wxH[i];
@@ -1951,9 +1962,9 @@ void KaneNBodyEOM(double *u, double *x, double *h,
       }
 
 /* .. Solve EOM */
-      //EchoPVel(S);
-      //EchoRemAcc(S);
-      //EchoEOM(D->COEF,D->DynState,D->RHS,D->Ns);
+      /* EchoPVel(S); */
+      /* EchoRemAcc(S); */
+      /* EchoEOM(D->COEF,D->DynState,D->RHS,D->Ns); */
       LINSOLVE(D->COEF,D->DynState,D->RHS,D->Ns);
 
 /* .. Map out result */
@@ -1997,7 +2008,6 @@ void KaneNBodyEOM(double *u, double *x, double *h,
 void FindPAngVelc(struct SCType *S)
 {
       struct DynType *D;
-      struct BodyType *Bib;
       struct JointType *G;
       double CGo[3][3],CG[3][3];
       long Ib,i,j,k,i0,j0;
@@ -2007,7 +2017,6 @@ void FindPAngVelc(struct SCType *S)
 
       for(Ib=1;Ib<S->Nb;Ib++) {
          Ig = S->B[Ib].Gin;
-         Bib = &S->B[Ib];
          G = &S->G[Ig];
          i0 = 3*Ib;
          j0 = G->Rotc0;
@@ -2049,7 +2058,7 @@ void FindPAngVelc(struct SCType *S)
 void FindPVelc(struct SCType *S)
 {
       struct DynType *D;
-      struct BodyType *Bib,*Bjb;
+      struct BodyType *Bjb;
       struct JointType *G;
       double RC[3][3];
       double RCB[3][3],RCG[3][3];
@@ -2059,7 +2068,6 @@ void FindPVelc(struct SCType *S)
       D = &S->Dyn;
 
       for(Ib=1;Ib<S->Nb;Ib++) {
-         Bib = &S->B[Ib];
          i0 = 3*Ib;
          Jb = Ib;
          while (Jb > 0) {
@@ -2107,9 +2115,31 @@ void KaneNBodyConstraints(struct SCType *S)
       struct DynType *D;
       struct BodyType *B;
       struct JointType *G;
-      long Ig,Ib,i,j;
+      struct CMGType *C;
+      long Ig,Ib,Icmg,i,j;
+      double WhlTrq[3] = {0.0,0.0,0.0};
+      double TrqBo[3],TrqGo[3],TrqBi[3];
+      double FrcBo[3],FrcGo[3],FrcBi[3],FrcGi[3];
+      double FrcBiN[3], FrcBoN[3];
+      double rxFi[3],rxFo[3];
 
       D = &S->Dyn;
+
+      /* Apply wheel torque to B[0] */
+      for (i=0;i<3;i++) {
+         for (j=0;j<S->Nw;j++) {
+            WhlTrq[i] -= S->Whl[j].Trq*S->Whl[j].A[i];
+         }
+      }
+
+      /* Apply CMG torque to B[0] */
+      for(Icmg=0;Icmg<S->Ncmg;Icmg++) {
+         C = &S->CMG[Icmg];
+         FindCmgAxisAndTrq(C);
+         for(i=0;i<3;i++) {
+            WhlTrq[i] += C->Trq[i];
+         }
+      }
 
       MapStateVectorToBodyStates(D->u,D->x,D->uf,D->xf,S);
 
@@ -2133,20 +2163,77 @@ void KaneNBodyConstraints(struct SCType *S)
       FindInertiaTrq(S);
       FindInertiaFrc(S);
 
+      /* Non-actuator-induced joint torques */
+      if(S->PassiveJointFrcTrqEnabled) PassiveJointFrcTrq(D->u,D->x,S);
+
+      /* "F-bendy" and "T-bendy", Spring/Damping, and nonlinear terms */
+      if (S->FlexActive) {
+         FindFlexFrc(S);
+         FindFlexInertiaFrc(S);
+      }
+
+      /* Assemble BodyTrq, BodyFrc, and FlexFrc Terms */
+      B = &S->B[0];
+      for(i=0;i<3;i++) {
+         D->BodyTrq[i] = B->Trq[i] + WhlTrq[i] + B->InertiaTrq[i];
+         D->BodyFrc[i] = B->Frc[i] + B->InertiaFrc[i];
+      }
+      for(Ib=1;Ib<S->Nb;Ib++) {
+         B = &S->B[Ib];
+         for(i=0;i<3;i++) {
+            D->BodyTrq[3*Ib+i] = B->Trq[i] + B->InertiaTrq[i];
+            D->BodyFrc[3*Ib+i] = B->Frc[i] + B->InertiaFrc[i];
+         }
+      }
+      /* Applied Joint Torques and Forces */
+      for(Ig=0;Ig<S->Ng;Ig++) {
+         G = &S->G[Ig];
+         for(i=0;i<3;i++) {
+            FrcGi[i] = 0.0;
+            TrqGo[i] = 0.0;
+            for(j=0;j<G->RotDOF;j++) {
+               TrqGo[i] += G->Gamma[i][j]*(G->Trq[j]+G->PassiveTrq[j]);
+            }
+            for(j=0;j<G->TrnDOF;j++) {
+               FrcGi[i] += G->Delta[i][j]*(G->Frc[j]+G->PassiveFrc[j]);
+            }
+         }
+
+         /* Force Transformations*/
+         MxV(G->CGoGi,FrcGi,FrcGo);
+         MTxV(G->CTrqBi,FrcGo,FrcBi);
+         MTxV(G->CTrqBo,FrcGo,FrcBo);
+         MTxV(S->B[G->Bin].CN,FrcBi,FrcBiN);
+         MTxV(S->B[G->Bout].CN,FrcBo,FrcBoN);
+         VxV(G->rin,FrcBi,rxFi);
+         VxV(G->rout,FrcBo,rxFo);
+
+         /* Torque Transformations */
+         MTxV(G->CTrqBi,TrqGo,TrqBi);
+         MTxV(G->CTrqBo,TrqGo,TrqBo);
+
+         for(i=0;i<3;i++) {
+            D->BodyTrq[3*G->Bin+i]  -= TrqBi[i] + rxFi[i];
+            D->BodyTrq[3*G->Bout+i] += TrqBo[i] + rxFo[i];
+            D->BodyFrc[3*G->Bin+i]  -= FrcBiN[i];
+            D->BodyFrc[3*G->Bout+i] += FrcBoN[i];
+         }
+      }
+
       /* Assemble Total Trq, Total Frc */
       for(i=0;i<3*S->Nb;i++) {
-         D->TotalTrq[i] = 0.0;
-         D->TotalFrc[i] = 0.0;
+         D->TotalTrq[i] = D->BodyTrq[i];
+         D->TotalFrc[i] = D->BodyFrc[i];
          for(j=0;j<D->Nu;j++) {
-            D->TotalTrq[i] += D->IPAngVel[i][j]*D->du[j];
-            D->TotalFrc[i] += D->mPVel[i][j]*D->du[j];
+            D->TotalTrq[i] -= D->IPAngVel[i][j]*D->du[j];
+            D->TotalFrc[i] -= D->mPVel[i][j]*D->du[j];
          }
       }
       for(Ib=0;Ib<S->Nb;Ib++) {
          B = &S->B[Ib];
          for(i=0;i<3;i++) {
-            D->TotalTrq[3*Ib+i] -= B->InertiaTrq[i];
-            D->TotalFrc[3*Ib+i] -= B->InertiaFrc[i];
+            D->TotalTrq[3*Ib+i] += B->InertiaTrq[i];
+            D->TotalFrc[3*Ib+i] += B->InertiaFrc[i];
          }
       }
 
@@ -2154,17 +2241,58 @@ void KaneNBodyConstraints(struct SCType *S)
       for(i=0;i<D->Nc;i++) {
          D->GenConstraintFrc[i] = 0.0;
          for(j=0;j<3*S->Nb;j++) {
-            D->GenConstraintFrc[i] +=
+            D->GenConstraintFrc[i] -=
                D->PAngVelc[j][i]*D->TotalTrq[j]
              + D->PVelc[j][i]*D->TotalFrc[j];
          }
       }
 }
 /**********************************************************************/
+void FindBodyAccelerations(struct SCType *S)
+{
+      struct DynType *D;
+      struct BodyType *B;
+      long Ib,i,j;
+
+      D = &S->Dyn;
+
+      for(Ib=0;Ib<S->Nb;Ib++) {
+         B = &S->B[Ib];
+         for(i=0;i<3;i++) {
+            B->alpha[i] = B->AlphaR[i];
+            B->accel[i] = S->Frc[i]/S->mass + B->AccR[i];
+            for(j=0;j<D->Nu;j++) {
+               B->alpha[i] += D->PAngVel[3*Ib+i][j]*D->du[j];
+               B->accel[i] += D->PVel[3*Ib+i][j]*D->du[j];
+            }
+         }
+      }
+}
+/**********************************************************************/
+void ReportUdot(struct SCType *S)
+{
+      struct DynType *D;
+      long i;
+      static FILE *outfile;
+      static long First = 1;
+
+      if (First) {
+         First = 0;
+         outfile = FileOpen(InOutPath,"udot.42","wt");
+      }
+
+      D = &S->Dyn;
+      for(i=0;i<D->Nu;i++) {
+         fprintf(outfile,"%le ",D->du[i]);
+      }
+      fprintf(outfile,"\n");
+}
+/**********************************************************************/
 void KaneNBodyRK4(struct SCType *S)
 {
       struct DynType *D;
       struct JointType *G;
+      struct WhlType *W;
       double *u,*uu,*du,*udot;
       double *x,*xx,*dx,*xdot;
       double *h,*hh,*dh,*hdot;
@@ -2273,6 +2401,8 @@ void KaneNBodyRK4(struct SCType *S)
       if (S->ConstraintsRequested) {
          KaneNBodyConstraints(S);
       }
+      FindBodyAccelerations(S);
+      /* if (OutFlag) ReportUdot(S); */
 
       /* Second Call */
       KaneNBodyEOM(uu,xx,hh,uuf,xxf,du,dx,dh,duf,dxf,S);
@@ -2371,9 +2501,13 @@ void KaneNBodyRK4(struct SCType *S)
       SCMassProps(S);
 
 /* .. Wheels */
-      for(i=0;i<S->Nw;i++) {
-         S->Whl[i].H = h[i];
-         S->Whl[i].w = h[i]/S->Whl[i].J;
+      for(i=0;i<Nw;i++) {
+         W = &S->Whl[i];
+         W->H = h[i];
+         W->w = h[i]/W->J;
+         /* Hi-fi isn't needed for wheel rotor angle */
+         W->ang += W->w*DTSIM;
+         W->ang = fmod(W->ang,TwoPi);
       }
 
 /* .. CMGs */
@@ -2412,6 +2546,7 @@ void OneBodyEOM(double *u, double *x, double *h,
 /* .. Build H's */
       MxV(B->I,u,Hb);
       for (i=0;i<3;i++) {
+         Hb[i] += B->Hgyro[i];
          for (j=0;j<S->Nw;j++){
             Hb[i]+= h[j]*S->Whl[j].A[i];
          }
@@ -2501,6 +2636,7 @@ void OneBodyRK4(struct SCType *S)
       struct BodyType *B;
       struct DynType *D;
       struct FlexNodeType *FN;
+      struct WhlType *W;
       double *u,*uu,*du,*udot;
       double *x,*xx,*dx,*xdot;
       double *h,*hh,*dh,*hdot;
@@ -2567,6 +2703,9 @@ void OneBodyRK4(struct SCType *S)
       for(i=0;i<S->Ncmg;i++) {
          for(j=0;j<3;j++) S->CMG[i].ang[j] += 0.5*DTSIM*S->CMG[i].angrate[j];
       }
+
+      /* if (OutFlag) ReportBodyAccelerations(S); */
+      /* if (OutFlag) ReportUdot(S); */
 
       /* Second Call */
       OneBodyEOM(uu,xx,hh,uuf,xxf,du,dx,dh,duf,dxf,S);
@@ -2649,8 +2788,12 @@ void OneBodyRK4(struct SCType *S)
 
 /* .. Wheels */
       for(i=0;i<Nw;i++) {
-         S->Whl[i].H = h[i];
-         S->Whl[i].w = h[i]/S->Whl[i].J;
+         W = &S->Whl[i];
+         W->H = h[i];
+         W->w = h[i]/W->J;
+         /* Hi-fi isn't needed for wheel rotor angle */
+         W->ang += W->w*DTSIM;
+         W->ang = fmod(W->ang,TwoPi);
       }
 
 /* .. CMGs */
@@ -2827,12 +2970,12 @@ void EnckeRK4(struct SCType *S)
       magr = sqrt(R[0]*R[0]+R[1]*R[1]+R[2]*R[2]);
       muR3 = O->mu/(magr*magr*magr);
 
-      u[0] = S->Rrel[0];
-      u[1] = S->Rrel[1];
-      u[2] = S->Rrel[2];
-      u[3] = S->Vrel[0];
-      u[4] = S->Vrel[1];
-      u[5] = S->Vrel[2];
+      u[0] = S->PosR[0];
+      u[1] = S->PosR[1];
+      u[2] = S->PosR[2];
+      u[3] = S->VelR[0];
+      u[4] = S->VelR[1];
+      u[5] = S->VelR[2];
 
 /* .. 4th Order Runga-Kutta Integration */
       EnckeEOM( u, m1, R, muR3, accel);
@@ -2844,15 +2987,15 @@ void EnckeRK4(struct SCType *S)
       EnckeEOM(uu, m4, R, muR3, accel);
       for(j=0;j<6;j++) u[j]+=DTSIM/6.0*(m1[j]+2.0*(m2[j]+m3[j])+m4[j]);
 
-      S->Rrel[0] = u[0];
-      S->Rrel[1] = u[1];
-      S->Rrel[2] = u[2];
-      S->Vrel[0] = u[3];
-      S->Vrel[1] = u[4];
-      S->Vrel[2] = u[5];
+      S->PosR[0] = u[0];
+      S->PosR[1] = u[1];
+      S->PosR[2] = u[2];
+      S->VelR[0] = u[3];
+      S->VelR[1] = u[4];
+      S->VelR[2] = u[5];
 
       RelRV2EHRV(O->SMA,O->MeanMotion,O->CLN,
-         S->Rrel,S->Vrel,S->Reh,S->Veh);
+         S->PosR,S->VelR,S->PosEH,S->VelEH);
 }
 /**********************************************************************/
 void CowellEOM(double u[6], double udot[6], double mu,
@@ -2866,9 +3009,9 @@ void CowellEOM(double u[6], double udot[6], double mu,
       udot[0] = u[3];
       udot[1] = u[4];
       udot[2] = u[5];
-      udot[3] = (Frc[0] - muR3*u[0])/mass;
-      udot[4] = (Frc[1] - muR3*u[1])/mass;
-      udot[5] = (Frc[2] - muR3*u[2])/mass;
+      udot[3] = Frc[0]/mass - muR3*u[0];
+      udot[4] = Frc[1]/mass - muR3*u[1];
+      udot[5] = Frc[2]/mass - muR3*u[2];
 }
 /**********************************************************************/
 /* Integration of orbital equations of motion using Cowell's method   */
@@ -2905,19 +3048,19 @@ void CowellRK4(struct SCType *S)
       S->VelN[1] = u[4];
       S->VelN[2] = u[5];
 
-      for(j=0;j<3;j++) {
-         S->Rrel[j] = S->PosN[j] - O->PosN[j];
-         S->Vrel[j] = S->VelN[j] - O->VelN[j];
-      }
-      if (O->Type == ORB_ZERO) {
+      if (O->Regime == ORB_CENTRAL) {
          for(j=0;j<3;j++) {
-            S->Reh[j] = 0.0;
-            S->Veh[j] = 0.0;
+            S->PosR[j] = S->PosN[j] - O->PosN[j];
+            S->VelR[j] = S->VelN[j] - O->VelN[j];
          }
+         RelRV2EHRV(O->SMA,O->MeanMotion,O->CLN,
+            S->PosR,S->VelR,S->PosEH,S->VelEH);
       }
       else {
-         RelRV2EHRV(O->SMA,O->MeanMotion,O->CLN,
-            S->Rrel,S->Vrel,S->Reh,S->Veh);
+         for(j=0;j<3;j++) {
+            S->PosEH[j] = 0.0;
+            S->VelEH[j] = 0.0;
+         }
       }
 }
 /**********************************************************************/
@@ -2980,12 +3123,12 @@ void ThreeBodyEnckeRK4(struct SCType *S)
       MagR2 = sqrt(R2[0]*R2[0]+R2[1]*R2[1]+R2[2]*R2[2]);
       muR23 = O->mu2/(MagR2*MagR2*MagR2);
 
-      u[0] = S->Rrel[0];
-      u[1] = S->Rrel[1];
-      u[2] = S->Rrel[2];
-      u[3] = S->Vrel[0];
-      u[4] = S->Vrel[1];
-      u[5] = S->Vrel[2];
+      u[0] = S->PosR[0];
+      u[1] = S->PosR[1];
+      u[2] = S->PosR[2];
+      u[3] = S->VelR[0];
+      u[4] = S->VelR[1];
+      u[5] = S->VelR[2];
 
 /* .. 4th Order Runga-Kutta Integration */
       ThreeBodyEnckeEOM( u, m1, R1, muR13, R2, muR23, accel);
@@ -2997,15 +3140,15 @@ void ThreeBodyEnckeRK4(struct SCType *S)
       ThreeBodyEnckeEOM(uu, m4, R1, muR13, R2, muR23, accel);
       for(j=0;j<6;j++) u[j]+=DTSIM/6.0*(m1[j]+2.0*(m2[j]+m3[j])+m4[j]);
 
-      S->Rrel[0] = u[0];
-      S->Rrel[1] = u[1];
-      S->Rrel[2] = u[2];
-      S->Vrel[0] = u[3];
-      S->Vrel[1] = u[4];
-      S->Vrel[2] = u[5];
+      S->PosR[0] = u[0];
+      S->PosR[1] = u[1];
+      S->PosR[2] = u[2];
+      S->VelR[0] = u[3];
+      S->VelR[1] = u[4];
+      S->VelR[2] = u[5];
 
       RelRV2EHRV(MagR1,sqrt(muR13),O->CLN,
-         S->Rrel,S->Vrel,S->Reh,S->Veh);
+         S->PosR,S->VelR,S->PosEH,S->VelEH);
 }
 /************************************************************/
 /*  Euler-Hill linearized EOM for near-circular orbits.     */
@@ -3038,8 +3181,8 @@ void EulHillRK4(struct SCType *S)
       accelN[1] = S->Frc[1]/S->mass;
       accelN[2] = S->Frc[2]/S->mass;
       for(j=0;j<3;j++) {
-         u[j] = S->Reh[j];
-         u[3+j] = S->Veh[j];
+         u[j] = S->PosEH[j];
+         u[3+j] = S->VelEH[j];
       }
       MxV(O->CLN,accelN,accel);
 
@@ -3056,11 +3199,12 @@ void EulHillRK4(struct SCType *S)
       for(j=0;j<6;j++) u[j]+=DTSIM/6.0*(m1[j]+2.0*(m2[j]+m3[j])+m4[j]);
 
       for(j=0;j<3;j++) {
-         S->Reh[j] = u[j];
-         S->Veh[j] = u[3+j];
+         S->PosEH[j] = u[j];
+         S->VelEH[j] = u[3+j];
       }
 
-      EHRV2RelRV(R,O->MeanMotion,O->CLN,S->Reh,S->Veh,S->Rrel,S->Vrel);
+      EHRV2RelRV(R,O->MeanMotion,O->CLN,S->PosEH,S->VelEH,
+         S->PosR,S->VelR);
 }
 /**********************************************************************/
 void ThreeBodyOrbitEOM(double mu1, double mu2, double p[3],
@@ -3133,10 +3277,10 @@ void FixedOrbitPosition(struct SCType *S)
       O = &Orb[S->RefOrb];
       Fr = &Frm[S->RefOrb];
       if (Fr->FixedInFrame == 'L') {
-         MxV(O->CLN,S->Reh,S->Rrel);
+         MxV(O->CLN,S->PosEH,S->PosR);
       }
       else {
-         MTxV(O->CLN,S->Rrel,S->Reh);
+         MTxV(O->CLN,S->PosR,S->PosEH);
       }
 }
 /**********************************************************************/
@@ -3171,14 +3315,19 @@ void PartitionForces(struct SCType *S)
 /**********************************************************************/
 void Dynamics(struct SCType *S)
 {
+      struct OrbitType *O;
+
+      O = &Orb[S->RefOrb];
+
       switch(S->RotDOF) {
          case ROTDOF_STEADY :
             SteadyAttitudeMotion(S);
             break;
-//         case ROTDOF_KIN_JOINT :
-//            if (S->Nb == 1) OneBodyRK4(S);
-//            else KinJointNBodyRK4(S);
-//            break;
+         /* case ROTDOF_KIN_JOINT :
+         **   if (S->Nb == 1) OneBodyRK4(S);
+         **   else KinJointNBodyRK4(S);
+         **   break;
+         */
          default :
             if (S->Nb > 1) {
                KaneNBodyRK4(S);
@@ -3188,22 +3337,51 @@ void Dynamics(struct SCType *S)
             }
       }
 
-      switch(S->OrbDOF) {
-         case ORBDOF_FIXED :
-            FixedOrbitPosition(S);
-            break;
-         case ORBDOF_EULER_HILL :
-            EulHillRK4(S);
-            break;
-         case ORBDOF_COWELL :
+      switch(O->Regime) {
+         case ORB_ZERO :
             CowellRK4(S);
             break;
+         case ORB_FLIGHT :
+            CowellRK4(S);
+            break;
+         case ORB_CENTRAL :
+            switch(S->OrbDOF) {
+               case ORBDOF_FIXED :
+                  FixedOrbitPosition(S);
+                  break;
+               case ORBDOF_EULER_HILL :
+                  EulHillRK4(S);
+                  break;
+               case ORBDOF_COWELL :
+                  CowellRK4(S);
+                  break;
+               default :
+                  EnckeRK4(S);
+            }
+            break;
+         case ORB_THREE_BODY :
+            switch(S->OrbDOF) {
+               case ORBDOF_FIXED :
+                  FixedOrbitPosition(S);
+                  break;
+               case ORBDOF_EULER_HILL :
+                  EulHillRK4(S);
+                  break;
+               case ORBDOF_COWELL :
+                  CowellRK4(S);
+                  break;
+               default :
+                  ThreeBodyEnckeRK4(S);
+            }
+            break;
          default :
-            if (Orb[S->RefOrb].Type == ORB_CENTRAL) EnckeRK4(S);
-            else ThreeBodyEnckeRK4(S);
+            printf("Unknown Orbit Regime in Dynamics.  Bailing out.\n");
+            exit(1);
       }
+
 }
 
-//#ifdef __cplusplus
-//}
-//#endif
+/* #ifdef __cplusplus
+** }
+** #endif
+*/

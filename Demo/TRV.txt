@@ -1,0 +1,11 @@
+************************************************************************
+**                             DISCLAIMER                             **
+** These elements are for visualization and casual use only.  They    **
+** are provided as is, with no warranty or claim of suitability for   **
+** any purpose.  If you want assurances of accuracy, reliability, or  **
+** continuity into the future, you are out of luck.                   **
+************************************************************************
+OREX                           
+CENTRAL  SOL  2016-9-10 00:00:0.0
+1.46686450854031e+11  -3.19829341363507e+10  -2.17060745625388e+03
+0.300007375931974e+03   29.266927688228005e+03   -0.109595812286728e+03

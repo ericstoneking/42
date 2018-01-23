@@ -1,5 +1,6 @@
+# Nv = 80  Nvt = 134  Nvn = 372  Npoly = 124
 # Exported from Wings 3D 0.99.04a
-mtllib Sunflower.mtl
+mtllib 42.mtl
 o cylinder19
 #80 vertices, 124 faces
 v 0.38268343 0.92387953 0.25000000
@@ -669,7 +670,7 @@ f 78/82/362 77/106/357 74/83/342
 f 78/73/363 79/57/368 77/72/358
 f 80/118/370 79/87/364 76/107/350
 g cylinder19_GOLD_FOIL
-usemtl GOLD_FOIL
+usemtl GOLD_KAPTON
 f 1/92/1 8/10/36 2/128/4
 f 1/88/2 9/90/46 8/5/41
 f 2/128/7 8/10/40 3/130/12

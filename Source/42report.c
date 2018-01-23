@@ -14,10 +14,11 @@
 
 #include "42.h"
 
-//#ifdef __cplusplus
-//namespace _42 {
-//using namespace Kit;
-//#endif
+/* #ifdef __cplusplus
+** namespace _42 {
+** using namespace Kit;
+** #endif
+*/
 
 /*********************************************************************/
 double FindTotalProjectedArea(struct SCType *S,double VecN[3])
@@ -41,6 +42,35 @@ double FindTotalProjectedArea(struct SCType *S,double VecN[3])
             VoN = VoV(VecB,P->Norm);
             if (VoN > 0.0) {
                ProjArea += VoN*P->Area;
+            }
+         }
+      }
+      return(ProjArea);
+}
+/*********************************************************************/
+double FindTotalUnshadedProjectedArea(struct SCType *S,double VecN[3])
+{
+      struct BodyType *B;
+      struct GeomType *G;
+      struct PolyType *P;
+      double ProjArea = 0.0;
+      double VecB[3],VoN;
+      long Ib,Ipoly;
+
+      FindUnshadedAreas(S,VecN);
+
+      for(Ib=0;Ib<S->Nb;Ib++) {
+         B = &S->B[Ib];
+
+         /* Transform Direction Vector from N to B */
+         MxV(B->CN,VecN,VecB);
+
+         G = &Geom[B->GeomTag];
+         for(Ipoly=0;Ipoly<G->Npoly;Ipoly++) {
+            P = &G->Poly[Ipoly];
+            VoN = VoV(VecB,P->Norm);
+            if (VoN > 0.0) {
+               ProjArea += VoN*P->UnshadedArea;
             }
          }
       }
@@ -128,6 +158,8 @@ void Report(void)
       static FILE **xfile, **ufile, **xffile, **uffile;
       static FILE **ConstraintFile;
       static FILE *PosNfile,*VelNfile,*qbnfile,*wbnfile;
+      static FILE *PosWfile,*VelWfile;
+      static FILE *PosRfile,*VelRfile;
       static FILE *Hvnfile,*KEfile;
       static FILE *RPYfile;
       static FILE *ProjAreaFile;
@@ -135,7 +167,9 @@ void Report(void)
       long Isc,i;
       struct DynType *D;
       double CBL[3][3],Roll,Pitch,Yaw;
+      double PosW[3],VelW[3],PosR[3],VelR[3];
       char s[40];
+      double ZAxis[3] = {0.0,0.0,1.0};
 
       if (First) {
          First = FALSE;
@@ -167,6 +201,10 @@ void Report(void)
          }
          PosNfile = FileOpen(InOutPath,"PosN.42","w");
          VelNfile = FileOpen(InOutPath,"VelN.42","w");
+         PosWfile = FileOpen(InOutPath,"PosW.42","w");
+         VelWfile = FileOpen(InOutPath,"VelW.42","w");
+         PosRfile = FileOpen(InOutPath,"PosR.42","w");
+         VelRfile = FileOpen(InOutPath,"VelR.42","w");
          qbnfile = FileOpen(InOutPath,"qbn.42","w");
          wbnfile = FileOpen(InOutPath,"wbn.42","w");
          Hvnfile = FileOpen(InOutPath,"Hvn.42","w");
@@ -204,6 +242,18 @@ void Report(void)
                SC[0].PosN[0],SC[0].PosN[1],SC[0].PosN[2]);
             fprintf(VelNfile,"%le %le %le\n",
                SC[0].VelN[0],SC[0].VelN[1],SC[0].VelN[2]);
+            MxV(World[EARTH].CWN,SC[0].PosN,PosW);
+            MxV(World[EARTH].CWN,SC[0].VelN,VelW);
+            fprintf(PosWfile,"%18.12le %18.12le %18.12le ",
+               PosW[0],PosW[1],PosW[2]);
+            fprintf(VelWfile,"%18.12le %18.12le %18.12le ",
+               VelW[0],VelW[1],VelW[2]);
+            MxV(Rgn[Orb[SC[0].RefOrb].Region].CN,SC[0].PosR,PosR);
+            MxV(Rgn[Orb[SC[0].RefOrb].Region].CN,SC[0].VelR,VelR);
+            fprintf(PosRfile,"%le %le %le\n",
+               PosR[0],PosR[1],PosR[2]);
+            fprintf(VelRfile,"%le %le %le\n",
+               VelR[0],VelR[1],VelR[2]);
             fprintf(qbnfile,"%le %le %le %le\n",
                SC[0].B[0].qn[0],SC[0].B[0].qn[1],SC[0].B[0].qn[2],SC[0].B[0].qn[3]);
             fprintf(wbnfile,"%le %le %le\n",
@@ -211,8 +261,9 @@ void Report(void)
             fprintf(Hvnfile,"%18.12le %18.12le %18.12le\n",
                SC[0].Hvn[0],SC[0].Hvn[1],SC[0].Hvn[2]);
             fprintf(KEfile,"%18.12le\n",FindTotalKineticEnergy(&SC[0]));
-            fprintf(ProjAreaFile,"%18.12le\n",
-               FindTotalProjectedArea(&SC[0],SC[0].CLN[0]));
+            //fprintf(ProjAreaFile,"%18.12le %18.12le\n",
+            //   FindTotalProjectedArea(&SC[0],ZAxis),
+            //   FindTotalUnshadedProjectedArea(&SC[0],ZAxis));
             MxMT(SC[0].B[0].CN,SC[0].CLN,CBL);
             C2A(123,CBL,&Roll,&Pitch,&Yaw);
             fprintf(RPYfile,"%lf %lf %lf\n",Roll*R2D,Pitch*R2D,Yaw*R2D);
@@ -229,6 +280,7 @@ void Report(void)
 
 }
 
-//#ifdef __cplusplus
-//}
-//#endif
+/* #ifdef __cplusplus
+** }
+** #endif
+*/

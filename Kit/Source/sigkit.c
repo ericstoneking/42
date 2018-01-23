@@ -14,9 +14,10 @@
 
 #include "sigkit.h"
 
-//#ifdef __cplusplus
-//namespace Kit {
-//#endif
+/* #ifdef __cplusplus
+** namespace Kit {
+** #endif
+*/
 
 #define IA 16807
 #define IM 2147483647
@@ -208,6 +209,33 @@ double CubicStep(double a, double b, double x)
       return(x*x*(3.0-2.0*x));
 }
 /**********************************************************************/
+/*        (B[0] + B[1]*z^-1 + B[2]*z^-2...)                           */
+/* Y/X = -----------------------------------                          */
+/*        (A[0] + A[1]*z^-1 + A[2]*z^-2...)                           */
+struct FilterType *CreateGeneralFilter(long Ns, double *A, double *B,
+   double dxmax, double ymin)
+{
+      struct FilterType *F;
+      long i;
+
+      F = (struct FilterType *) calloc(1,sizeof(struct FilterType));
+
+      F->A = (double *) calloc(Ns,sizeof(double));
+      F->B = (double *) calloc(Ns,sizeof(double));
+      F->x = (double *) calloc(Ns,sizeof(double));
+      F->y = (double *) calloc(Ns,sizeof(double));
+
+      F->Ns = Ns;
+      for(i=0;i<Ns;i++) {
+         F->A[i] = A[i];
+         F->B[i] = B[i];
+      }
+      F->dxmax = dxmax;
+      F->ymin = ymin;
+
+      return(F);
+}
+/**********************************************************************/
 /*  Discrete Filter by Pole-Zero Mapping                              */
 /*  See Franklin and Powell, sec 3.3                                  */
 struct FilterType *CreateFirstOrderLowpassFilter(double w, double T,
@@ -341,6 +369,39 @@ void DestroyFilter(struct FilterType *F)
       free(F);
 }
 /**********************************************************************/
+/*  y(k) = (B[0]*x(k)+B[1]*x(k-1)+...+B[Ns-1]*x(k-Ns+1)               */
+/*                  - A[1]*y(k-1)-...-A[Ns-1]*y(k-Ns+1))/A[0]         */
+double GeneralFilter(struct FilterType *F, double x)
+{
+      double Xmax,Xmin;
+      double Bx,Ay;
+      long k;
+
+      /* Clamp spikes */
+      F->x[0] = x;
+      Xmax = F->x[1] + F->dxmax;
+      if (F->x[0] > Xmax) F->x[0] = Xmax;
+      Xmin = F->x[1] - F->dxmax;
+      if (F->x[0] < Xmin) F->x[0] = Xmin;
+
+      /* Filter */
+      Bx = 0.0;
+      Ay = 0.0;
+      for(k=0;k<F->Ns;k++) Bx += F->B[k]*F->x[k];
+      for(k=1;k<F->Ns;k++) Ay += F->A[k]*F->y[k];
+      F->y[0] = (Bx-Ay)/F->A[0];
+
+      /* Trap underflow */
+      if (fabs(F->y[0]) < F->ymin) F->y[0] = 0.0;
+
+      for(k=F->Ns-1;k>0;k--) {
+         F->x[k] = F->x[k-1];
+         F->y[k] = F->y[k-1];
+      }
+
+      return(F->y[0]);
+}
+/**********************************************************************/
 /*  Discrete Filter by Pole-Zero Mapping                              */
 /*  See Franklin and Powell, sec 3.3                                  */
 double FirstOrderLowpassFilter(struct FilterType *F, double x)
@@ -412,7 +473,8 @@ double SecondOrderLowpassFilter(struct FilterType *F, double x)
       if (F->x[0] < Xmin) F->x[0] = Xmin;
 
       /* Filter */
-      F->y[0] = F->A[0]*F->y[1]+F->A[1]*F->y[2]+F->B[0]*(F->x[0]+2.0*F->x[1]+F->x[2]);
+      F->y[0] = F->A[0]*F->y[1]+F->A[1]*F->y[2]
+               +F->B[0]*(F->x[0]+2.0*F->x[1]+F->x[2]);
 
       /* Trap underflow */
       if (fabs(F->y[0]) < F->ymin) F->y[0] = 0.0;
@@ -453,6 +515,7 @@ double SecondOrderHighpassFilter(struct FilterType *F, double x)
       return(F->y[0]);
 }
 
-//#ifdef __cplusplus
-//}
-//#endif
+/* #ifdef __cplusplus
+** }
+** #endif
+*/

@@ -1,0 +1,29 @@
+How to set up, run, and archive a Monte Carlo simulation campaign.
+
+1)  Copy desired InOut folder into the MonteCarlo folder.  I have renamed it 
+    "Baseline", but you are free to rename it to anything.
+2)  Tailor RunMC.m to this campaign.
+    a) Set the BasePath (e.g. './Baseline')
+    b) Set the number of runs, Nrun
+    c) Set the maximum number of CPU cores to use, MaxCore
+    d) Allocate any output variables
+    e) Modify "Modify Input Files" section to generate variables
+       and insert them into input files as needed
+    f) Under "Process Run in Matlab/Octave", perform any desired processing
+       of each run's output data.  Note that some of this processing might
+       be much faster if done within 42 (say, in 42report.c) than if done
+       in Matlab/Octave.
+    g) Edit "Save only selected *.42 files" as desired
+    h) Under "Delete unaltered *.txt files", comment out deletion of any 
+       input files that were altered.
+    i) Edit "Post-processing" as desired to find and present the campaign-
+       level results.
+3)  In Matlab/Octave, set working directory to MonteCarlo.
+4)  Call RunMC.m from Matlab/Octave command line.
+
+On completion, the MonteCarlo folder contains the Baseline sim case inputs, 
+any input and output files you spared from deletion (we recommend saving the altered input files as part of the record), and any campaign-level results you saved from your post-processing.  The MonteCarlo folder is thus a self-contained record of the campaign, suitable for archiving.
+
+There is nothing special about the MonteCarlo folder itself.  Multiple campaigns may coexist, each in their own folder, e.g. "LVTipOffCampaign", "MC_SafeholdEntry", and "XprodSurvey".  If they are moved up or down in the directory structure, then some paths in RunMC.m must be modified appropriately.
+
+RunMC.m calls BatchRun.sh and OverwriteLineInFile.m.  Both are in 42/Utilities.

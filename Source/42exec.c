@@ -16,10 +16,11 @@
 #include "42.h"
 #undef DECLARE_GLOBALS
 
-//#ifdef __cplusplus
-//namespace _42 {
-//using namespace Kit;
-//#endif
+/* #ifdef __cplusplus
+** namespace _42 {
+** using namespace Kit;
+** #endif
+*/
 
 #ifdef _USE_GUI_
    extern int HandoffToGui(int argc, char **argv);
@@ -74,7 +75,6 @@ void ManageFlags(void)
 long AdvanceTime(void)
 {
       static long itime = 0;
-      double dt;
       long Done;
 
       /* Advance time to next Timestep */
@@ -87,36 +87,30 @@ long AdvanceTime(void)
                AbsTime = AbsTime0 + SimTime;
                break;
             case REAL_TIME :
-               #if _USE_GUI_
-               if (!GLEnable) while(RealRunTime(&dt) < SimTime + DTSIM);
-               #else
-                  while(RealRunTime(&dt) < SimTime + DTSIM);
-               #endif
+               usleep(1.0E6*DTSIM);
                SimTime += DTSIM;
                itime = (long) ((SimTime+0.5*DTSIM)/(DTSIM));
                SimTime = ((double) itime)*DTSIM;
                AbsTime = AbsTime0 + SimTime;
                break;
             case EXTERNAL_TIME :
-               #if _USE_GUI_
-               if (!GLEnable) while(RealRunTime(&dt) < SimTime + DTSIM);
-               #else
-                  while(RealRunTime(&dt) < SimTime + DTSIM);
-               #endif
+               usleep(1.0E6*DTSIM);
                SimTime += DTSIM;
                itime = (long) ((SimTime+0.5*DTSIM)/(DTSIM));
                SimTime = ((double) itime)*DTSIM;
-               RealSystemTime(&Year,&doy,&Month,&Day,&Hour,&Minute,&Second);
+               RealSystemTime(&Year,&doy,&Month,&Day,&Hour,&Minute,&Second,DTSIM);
                AbsTime = DateToAbsTime(Year,Month,Day,Hour,Minute,Second+AbsTimeOffset);
                JulDay = AbsTimeToJD(AbsTime);
+               JDToGpsTime(JulDay,&GpsRollover,&GpsWeek,&GpsSecond);
                AbsTime0 = AbsTime - SimTime;
                break;
-            //case SSUP_TIME:
-            //   RealSystemTime(&Year,&doy,&Month,&Day,&Hour,&Minute,&Second);
-            //   AbsTime = DateToAbsTime(Year,Month,Day,Hour,Minute,Second+AbsTimeOffset);
-            //   JulDay = AbsTimeToJD(AbsTime);
-            //   SimTime = AbsTime - AbsTime0;
-            //   break;
+            /* case SSUP_TIME:
+            **   RealSystemTime(&Year,&doy,&Month,&Day,&Hour,&Minute,&Second);
+            **   AbsTime = DateToAbsTime(Year,Month,Day,Hour,Minute,Second+AbsTimeOffset);
+            **   JulDay = AbsTimeToJD(AbsTime);
+            **   SimTime = AbsTime - AbsTime0;
+            **   break;
+            */
          }
       #else
          SimTime += DTSIM;
@@ -196,6 +190,28 @@ void ManageBoundingBoxes(void)
       }
 }
 /**********************************************************************/
+/* Zero forces and torques                                            */
+void ZeroFrcTrq(void)
+{
+      struct SCType *S;
+      long Isc,Ib;
+
+      for(Isc=0;Isc<Nsc;Isc++) {
+         S = &SC[Isc];
+         S->Frc[0] = 0.0;
+         S->Frc[1] = 0.0;
+         S->Frc[2] = 0.0;
+         for(Ib=0;Ib<S->Nb;Ib++) {
+            S->B[Ib].Frc[0] = 0.0;
+            S->B[Ib].Frc[1] = 0.0;
+            S->B[Ib].Frc[2] = 0.0;
+            S->B[Ib].Trq[0] = 0.0;
+            S->B[Ib].Trq[1] = 0.0;
+            S->B[Ib].Trq[2] = 0.0;
+         }
+      }
+}
+/**********************************************************************/
 long SimStep(void)
 {
       long Isc;
@@ -209,11 +225,13 @@ long SimStep(void)
          SimTime = 0.0;
          #if defined _USE_SYSTEM_TIME_
             /* First call just initializes timer */
-            RealRunTime(&TotalRunTime);
+            RealRunTime(&TotalRunTime,DTSIM);
          #endif
          ManageFlags();
 
          Ephemerides(); /* Sun, Moon, Planets, Spacecraft, Useful Auxiliary Frames */
+
+         ZeroFrcTrq();
          for(Isc=0;Isc<Nsc;Isc++) {
             S = &SC[Isc];
             if (S->Exists) {
@@ -248,6 +266,7 @@ long SimStep(void)
          InterProcessComm(); /* Send and receive from external processes */
       #endif
       Ephemerides(); /* Sun, Moon, Planets, Spacecraft, Useful Auxiliary Frames */
+      ZeroFrcTrq();
       for(Isc=0;Isc<Nsc;Isc++) {
          S = &SC[Isc];
          if (S->Exists) {
@@ -265,7 +284,7 @@ long SimStep(void)
       if (SimComplete) {
          #if defined _USE_SYSTEM_TIME_
             if (TimeMode == FAST_TIME) {
-               RealRunTime(&TotalRunTime);
+               RealRunTime(&TotalRunTime,DTSIM);
                printf("     Total Run Time = %9.2lf sec\n", TotalRunTime);
                printf("     Sim Speed = %8.2lf x Real\n",
                   STOPTIME/TotalRunTime);
@@ -281,7 +300,7 @@ int exec(int argc,char **argv)
       long Isc;
       long Done = 0;
 
- 	   InitSim(argc,argv);
+      InitSim(argc,argv);
       for (Isc=0;Isc<Nsc;Isc++) {
          if (SC[Isc].Exists) {
             InitSpacecraft(&SC[Isc]);
@@ -309,6 +328,7 @@ int exec(int argc,char **argv)
       return(0);
 }
 
-//#ifdef __cplusplus
-//}
-//#endif
+/* #ifdef __cplusplus
+** }
+** #endif
+*/

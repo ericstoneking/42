@@ -1,6 +1,7 @@
 Key Bindings for 42
 
 q       Quit
+p       Pause
 space   Hide/show onscreen overlays
 w       Show/hide watermarks
 F1      Screenshot Cam window

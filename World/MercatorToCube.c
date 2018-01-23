@@ -5,9 +5,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#define RES 1024
+
 unsigned char *Tex;
-unsigned char Cube[6*256*256*3];
-//unsigned char Cube[6*1024*1024*3];
+unsigned char Cube[6*RES*RES*3];
+unsigned char CloudGlossCube[6*RES*RES*3];
 
 long Nh,Nw;
 
@@ -16,7 +18,7 @@ FILE *OpenFile(char *Path, char *File, char *CtrlCode)
 {
       FILE *FilePtr;
       char FileName[80];
-      
+
       strcpy(FileName,Path);
       strcat(FileName,File);
       FilePtr=fopen(FileName,CtrlCode);
@@ -53,7 +55,7 @@ void PpmToTex(char path[40], char filename[40],long BytesPerPixel)
       long N,i;
       long junk;
       char comment[80];
-      
+
       infile = OpenFile(path,filename,"rb");
       fscanf(infile,"P6\n%[^\n]\n%li %li\n%li\n",comment,&Nw,&Nh,&junk); /* Header */
       N = Nw*Nh*BytesPerPixel;
@@ -81,7 +83,7 @@ void VecToCube(long N, double p[3], long *f, long *i, long *j)
       double MaxComponent = 0.0;
       double MidPoint = 0.5*(N-1.0);
       long k;
-      
+
       for(k=0;k<3;k++) {
          if (fabs(p[k]) > MaxComponent) {
             MaxComponent = fabs(p[k]);
@@ -89,7 +91,7 @@ void VecToCube(long N, double p[3], long *f, long *i, long *j)
             if (p[k] < 0.0) *f += 3;
          }
       }
-      
+
       if (*f == 0) {
          *i = (long) (MidPoint*(1.0-p[1]/p[0]));
          *j = (long) (MidPoint*(1.0-p[2]/p[0]));
@@ -160,7 +162,7 @@ void CubeToVec(long N, long f, long i, long j, double p[3])
       UNITV(p);
 }
 /**********************************************************************/
-void CubeToPpm(unsigned char Cube[6*256*256*3], long N, 
+void CubeToPpm(unsigned char Cube[6*RES*RES*3], long N,
    char pathname[40],char filename[40])
 {
       FILE *outfile;
@@ -198,12 +200,14 @@ int main(int argc, char **argv)
       double p[3];
       long F,I,J,k;
       double Pi,TwoPi,HalfPi;
-      char WorldFileName[80],MercFileName[80];
+      char WorldFileName[80],MercFileName[80],CloudGlossFileName[80];
+      double Red,Grn,Blu;
+      int Gloss;
 
       Pi = 4.0*atan(1.0);
       TwoPi = 2.0*Pi;
       HalfPi = 0.5*Pi;
-      
+
       if (argc != 2) {
          printf("Need World File Name (w/o extension) as argument\n");
          exit(1);
@@ -214,22 +218,38 @@ int main(int argc, char **argv)
       PpmToTex("./",MercFileName,3);
 
       for(F=0;F<6;F++) {
-         for(I=0;I<256;I++) {
-            for(J=0;J<256;J++) {
-               CubeToVec(256,F,I,J,p);
+         for(I=0;I<RES;I++) {
+            for(J=0;J<RES;J++) {
+               CubeToVec(RES,F,I,J,p);
                lat = asin(p[2]);
                lng = atan2(p[1],p[0]);
-               i = (long) (511.0*(-lat+HalfPi)/Pi+0.5); 
-               j = (long) (1023.0*(lng+Pi)/TwoPi+0.5);
-               for(k=0;k<3;k++) Cube[256*256*3*F+256*3*I+3*J+k] = Tex[1024*3*i+3*j+k];
-               //i = (long) (1799.0*(-lat+HalfPi)/Pi+0.5); 
+               i = (long) (2047.0*(-lat+HalfPi)/Pi+0.5);
+               j = (long) (4095.0*(lng+Pi)/TwoPi+0.5);
+               for(k=0;k<3;k++) {
+                  Cube[RES*RES*3*F+RES*3*I+3*J+k] = Tex[4096*3*i+3*j+k];
+               }
+               /* Gloss */
+               Red = (double) Tex[4096*3*i+3*j+0];
+               Grn = (double) Tex[4096*3*i+3*j+1];
+               Blu = (double) Tex[4096*3*i+3*j+2];
+               if (Blu > Red+Grn) {
+                  Gloss = (char) (255.0*Blu/(Red+Grn+Blu));
+               }
+               else Gloss = 0;
+               CloudGlossCube[RES*RES*3*F+RES*3*I+3*J] = 0;
+               CloudGlossCube[RES*RES*3*F+RES*3*I+3*J+1] = Gloss;
+               CloudGlossCube[RES*RES*3*F+RES*3*I+3*J+2] = 0;
+               //i = (long) (1799.0*(-lat+HalfPi)/Pi+0.5);
                //j = (long) (3599.0*(lng+Pi)/TwoPi+0.5);
                //for(k=0;k<3;k++) Cube[1024*1024*3*F+1024*3*I+3*J+k] = Tex[3600*3*i+3*j+k];
             }
          }
       }
 
-      CubeToPpm(Cube,256,"./",WorldFileName);
+      CubeToPpm(Cube,RES,"./",WorldFileName);
+
+      sprintf(CloudGlossFileName,"%sCloudGloss",WorldFileName);
+      CubeToPpm(CloudGlossCube,RES,"./",CloudGlossFileName);
 
       return(0);
 }

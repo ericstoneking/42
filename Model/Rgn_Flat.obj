@@ -1,0 +1,8 @@
+# Nv = 3  Nvt = 0  Nvn = 1  Npoly = 1
+mtllib 42.mtl
+v  20.0  0.0 0.0
+v -20.0 20.0 0.0
+v -20.0 -20.0 0.0
+vn 0.0 0.0 1.0
+usemtl ASTEROID_MATL
+f 1//1 2//1 3//1

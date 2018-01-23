@@ -16,9 +16,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "mathkit.h"
-//#ifdef __cplusplus
-//namespace Kit {
-//#endif
+
+/* #ifdef __cplusplus
+** namespace Kit {
+** #endif
+*/
 
 /**********************************************************************/
 /*    Convert direction cosine matrix to quaternion.  Bulletproof.    */
@@ -470,6 +472,18 @@ void QW2QDOT(double Q[4],double W[3],double QDOT[4])
       QDOT[3] = 0.5*(-W[0]*Q[0]-W[1]*Q[1]-W[2]*Q[2]);
 
 }
+
+/****************************************************************************/
+/*  Given body rates and quaternion,find qdot. ref Zimmerman, GSFC, 1969    */
+/*void MQW2QDOT(double Q[4], double W[3], double DT, double QDOT[4])        */
+/*{                                                                         */
+/*    QDOT[0] = 0.5*( W[0]*Q[3]-W[1]*Q[2]+W[2]*Q[1])+DT*(1-(Q[0]*Q[0]+Q[1]*Q[1]+Q[2]*Q[2]+Q[3]*Q[3]))*Q[0];*/
+/*    QDOT[1] = 0.5*( W[0]*Q[2]+W[1]*Q[3]-W[2]*Q[0])+DT*(1-(Q[0]*Q[0]+Q[1]*Q[1]+Q[2]*Q[2]+Q[3]*Q[3]))*Q[1];*/
+/*    QDOT[2] = 0.5*(-W[0]*Q[1]+W[1]*Q[0]+W[2]*Q[3])+DT*(1-(Q[0]*Q[0]+Q[1]*Q[1]+Q[2]*Q[2]+Q[3]*Q[3]))*Q[2];*/
+/*    QDOT[3] = 0.5*(-W[0]*Q[0]-W[1]*Q[1]-W[2]*Q[2])+DT*(1-(Q[0]*Q[0]+Q[1]*Q[1]+Q[2]*Q[2]+Q[3]*Q[3]))*Q[3];*/
+
+/*}*/
+
 /**********************************************************************/
 /*  Parallel axis theorem.                                            */
 /*     IB:  Central inertia matrix of a body B                        */
@@ -777,6 +791,7 @@ void CDOT2W(double C[3][3], double Cdot[3][3], double w[3])
 
 
 
-//#ifdef __cplusplus
-//}
-//#endif
+/* #ifdef __cplusplus
+** }
+** #endif
+*/

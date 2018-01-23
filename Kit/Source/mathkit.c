@@ -17,9 +17,10 @@
 #include <stdio.h>
 #include "mathkit.h"
 
-//#ifdef __cplusplus
-//namespace Kit {
-//#endif
+/* #ifdef __cplusplus
+** namespace Kit {
+** #endif
+*/
 
 /**********************************************************************/
 double signum(double x)
@@ -35,8 +36,7 @@ double sinc(double x)
       double x2;
 
       if(x < -3.14159265358979 || x > 3.14159265358979) {
-         printf("Argument out of range in sinc: %lf\n",x);
-         exit(1);
+         return(sin(x)/x);
       }
       else {
          x2 = x*x;
@@ -282,7 +282,7 @@ double UNITV(double V[3])
          V[2]/=A;
       }
       else {
-         printf("Attempted divide by zero in UNITV (Line 271 of mathkit.c)\n");
+         printf("Attempted divide by zero in UNITV (Line %d of mathkit.c)\n",__LINE__);
          V[0] = 0.0;
          V[1] = 0.0;
          V[2] = 0.0;
@@ -302,7 +302,7 @@ double CopyUnitV(double V[3], double W[3])
          W[2] = V[2]/A;
       }
       else {
-         printf("Attempted divide by zero in COPYUNITV (Line 291 of mathkit.c)\n");
+         printf("Attempted divide by zero in COPYUNITV (Line %d of mathkit.c)\n",__LINE__);
          W[0] = 0.0;
          W[1] = 0.0;
          W[2] = 0.0;
@@ -653,10 +653,10 @@ void SphericalHarmonics(long N, long M, double r, double phi,
       else
          gradV[2] = dVdphi/(r*sth);
 
-      //printf("N,M,n,m: %ld %ld %ld %ld\n",N,M,n,m);
-      //printf("Rern1,CcSs,ScCs: %lf %lf %lf \n",Rern1,CcSs,ScCs);
-      //printf("gradV: %lf %lf %lf\n",gradV[0],gradV[1],gradV[2]);
-
+      /*printf("N,M,n,m: %ld %ld %ld %ld\n",N,M,n,m);
+      **printf("Rern1,CcSs,ScCs: %lf %lf %lf \n",Rern1,CcSs,ScCs);
+      **printf("gradV: %lf %lf %lf\n",gradV[0],gradV[1],gradV[2]);
+      */
 }
 #undef NMAX
 /**********************************************************************/
@@ -837,7 +837,17 @@ double **CreateMatrix(long n, long m)
       long i;
 
       A = (double **) calloc(n,sizeof(double *));
-      for(i=0;i<n;i++) A[i] = (double *) calloc(m,sizeof(double));
+      if (A == NULL) {
+         printf("calloc failed in CreateMatrix.  Bailing out.\n");
+         exit(1);
+      }
+      for(i=0;i<n;i++) {
+         A[i] = (double *) calloc(m,sizeof(double));
+         if (A[i] == NULL) {
+            printf("calloc failed in CreateMatrix.  Bailing out.\n");
+            exit(1);
+         }
+      }
       return(A);
 }
 /**********************************************************************/
@@ -1356,7 +1366,7 @@ void SphereInterp(double q1[4], double q2[4], double u, double q[4])
          Theta = asin(SinTheta);
          SinU = sin(u*Theta);
          Sin1mU = sin((1.0-u)*Theta);
-         for(k=0;k<4;k++) q[k] = (SinU*q1[k] + Sin1mU*q2[k])/SinTheta;
+         for(k=0;k<4;k++) q[k] = (SinU*q2[k] + Sin1mU*q1[k])/SinTheta;
       }
 }
 /**********************************************************************/
@@ -1471,6 +1481,137 @@ long ProjectPointOntoPoly(double Point[3], double DirVec[3],
       /* If Nwrap is odd, then ProjPoint lies within polygon */
       return(Nwrap%2 || OnEdge);
 }
-//#ifdef __cplusplus
-//}
-//#endif
+/*********************************************************************/
+/* Given Triangle ABC, a point Pt, and a direction vector,           */
+/* find the projection of Pt onto ABC.  Barycentric coords have      */
+/* fourth element, so that                                           */
+/* Pt = Bary[0]*A + Bary[1]*B + Bary[2]*C + Bary[3]*DirVec           */
+long ProjectPointOntoTriangle(double A[3], double B[3], double C[3],
+      double DirVec[3], double Pt[3], double ProjPt[3], double Bary[4])
+{
+      double Den,NumA,NumB,NumC,NumD;
+      double A1B2mA2B1,A0B2mA2B0,A0B1mA1B0;
+      double C1D2mC2D1,C0D2mC2D0,C0D1mC1D0;
+      double M[4][3],Mplus[3][4];
+      long InPoly,i;
+
+      A1B2mA2B1 = A[1]*B[2]-A[2]*B[1];
+      A0B2mA2B0 = A[0]*B[2]-A[2]*B[0];
+      A0B1mA1B0 = A[0]*B[1]-A[1]*B[0];
+      C1D2mC2D1 = C[1]*DirVec[2]-C[2]*DirVec[1];
+      C0D2mC2D0 = C[0]*DirVec[2]-C[2]*DirVec[0];
+      C0D1mC1D0 = C[0]*DirVec[1]-C[1]*DirVec[0];
+
+      Den =  (A[0]-B[0])*C1D2mC2D1
+            -(A[1]-B[1])*C0D2mC2D0
+            +(A[2]-B[2])*C0D1mC1D0
+            -DirVec[0]*A1B2mA2B1
+            +DirVec[1]*A0B2mA2B0
+            -DirVec[2]*A0B1mA1B0;
+
+      if (fabs(Den) < 1.0E-12) {
+         /* If DirVec is in plane of ABC, then problem reduces to... */
+         for(i=0;i<3;i++) {
+            M[i][0] = A[i];
+            M[i][1] = B[i];
+            M[i][2] = C[i];
+            M[3][i] = 1.0;
+         }
+         PINV4x3(M,Mplus);
+         Bary[0] = Mplus[0][0]*Pt[0]+Mplus[0][1]*Pt[1]+Mplus[0][2]*Pt[2];
+         Bary[1] = Mplus[1][0]*Pt[0]+Mplus[1][1]*Pt[1]+Mplus[1][2]*Pt[2];
+         Bary[2] = Mplus[2][0]*Pt[0]+Mplus[2][1]*Pt[1]+Mplus[2][2]*Pt[2];
+         Bary[3] = 0.0;
+      }
+      else {
+
+         NumA =  (Pt[0]-B[0])*C1D2mC2D1
+                -(Pt[1]-B[1])*C0D2mC2D0
+                +(Pt[2]-B[2])*C0D1mC1D0
+                -DirVec[0]*(Pt[1]*B[2]-Pt[2]*B[1])
+                +DirVec[1]*(Pt[0]*B[2]-Pt[2]*B[0])
+                -DirVec[2]*(Pt[0]*B[1]-Pt[1]*B[0]);
+
+         NumB =  (A[0]-Pt[0])*C1D2mC2D1
+                -(A[1]-Pt[1])*C0D2mC2D0
+                +(A[2]-Pt[2])*C0D1mC1D0
+                -DirVec[0]*(A[1]*Pt[2]-A[2]*Pt[1])
+                +DirVec[1]*(A[0]*Pt[2]-A[2]*Pt[0])
+                -DirVec[2]*(A[0]*Pt[1]-A[1]*Pt[0]);
+
+         NumC =  (A[0]-B[0])*(Pt[1]*DirVec[2]-Pt[2]*DirVec[1])
+                -(A[1]-B[1])*(Pt[0]*DirVec[2]-Pt[2]*DirVec[0])
+                +(A[2]-B[2])*(Pt[0]*DirVec[1]-Pt[1]*DirVec[0])
+                -DirVec[0]*A1B2mA2B1
+                +DirVec[1]*A0B2mA2B0
+                -DirVec[2]*A0B1mA1B0;
+
+         NumD =  (A[0]-B[0])*(C[1]*Pt[2]-C[2]*Pt[1])
+                -(A[1]-B[1])*(C[0]*Pt[2]-C[2]*Pt[0])
+                +(A[2]-B[2])*(C[0]*Pt[1]-C[1]*Pt[0])
+                +(C[0]-Pt[0])*A1B2mA2B1
+                -(C[1]-Pt[1])*A0B2mA2B0
+                +(C[2]-Pt[2])*A0B1mA1B0;
+
+         Bary[0] = NumA/Den;
+         Bary[1] = NumB/Den;
+         Bary[2] = NumC/Den;
+         Bary[3] = NumD/Den;
+      }
+
+      ProjPt[0] = Bary[0]*A[0]+Bary[1]*B[0]+Bary[2]*C[0];
+      ProjPt[1] = Bary[0]*A[1]+Bary[1]*B[1]+Bary[2]*C[1];
+      ProjPt[2] = Bary[0]*A[2]+Bary[1]*B[2]+Bary[2]*C[2];
+
+      InPoly  = (Bary[0] >= 0.0 && Bary[1] >= 0.0 && Bary[2] >= 0.0 ? 1 : 0);
+
+      return(InPoly);
+}
+/**********************************************************************/
+double CubicSpline(double x, double X[4], double Y[4])
+{
+      double DY0,DY2,DY3;
+      double Det,u0,u3,u;
+      double z0,z3,u02,u32;
+      double a,b,c,d;
+
+      u = (x-X[1])/(X[2]-X[1]);
+
+      if (isnan(u)) {
+         printf("Bad spline interval in CubicSpline.\n");
+         exit(1);
+      }
+      if (u < 0.0 || u > 1.0) {
+         printf("Interpolant out of range in CubicSpline.\n");
+         exit(1);
+      }
+
+      DY0 = Y[0]-Y[1];
+      DY2 = Y[2]-Y[1];
+      DY3 = Y[3]-Y[1];
+
+      u0 = (X[0]-X[1])/(X[2]-X[1]);
+      u3 = (X[3]-X[1])/(X[2]-X[1]);
+
+      z0 = u0 - 1.0;
+      z3 = u3 - 1.0;
+      u02 = u0*u0;
+      u32 = u3*u3;
+
+      Det = (u3-1.0)*(u0-1.0)*(u3-u0)*u0*u3;
+      if (fabs(Det) < 1.0E-9) {
+         printf("Matrix is close to singular in CubicSpline.\n");
+         exit(1);
+      }
+      a = Y[1];
+      b = (-z3*u32*DY0 + (u3-u0)*u02*u32*DY2 + z0*u02*DY3)/Det;
+      c = (z3*(u3+1.0)*u3*DY0 - (u3-u0)*(u3+u0)*u0*u3*DY2 - z0*(u0+1.0)*u0*DY3)/Det;
+      d = (-z3*u3*DY0 + (u3-u0)*u0*u3*DY2 + z0*u0*DY3)/Det;
+
+      return(a+u*(b+u*(c+u*d)));
+}
+
+/* #ifdef __cplusplus
+** }
+** #endif
+*/

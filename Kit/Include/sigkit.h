@@ -19,9 +19,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-//#ifdef __cplusplus
-//namespace Kit {
-//#endif
+/*
+** #ifdef __cplusplus
+** namespace Kit {
+** #endif
+*/
 
 struct RandomProcessType {
    /* For UniformRandom */
@@ -51,6 +53,8 @@ double Step(double a,double x);
 double Clamp(double a,double b,double x);
 double RampStep(double a,double b,double x);
 double CubicStep(double a, double b, double x);
+struct FilterType *CreateGeneralFilter(long Ns, double *A, double *B,
+   double dxmax, double ymin);
 struct FilterType *CreateFirstOrderLowpassFilter(double w, double T,
    double dxmax, double ymin);
 struct FilterType *CreateFirstOrderHighpassFilter(double w, double T,
@@ -60,14 +64,16 @@ struct FilterType *CreateSecondOrderLowpassFilter(double w, double z,
 struct FilterType *CreateSecondOrderHighpassFilter(double w, double z,
    double T, double dxmax, double ymin);
 void DestroyFilter(struct FilterType *F);
+double GeneralFilter(struct FilterType *F, double x);
 double FirstOrderLowpassFilter(struct FilterType *F, double x);
 double FirstOrderHighpassFilter(struct FilterType *F, double x);
 double SecondOrderLowpassFilter(struct FilterType *F, double x);
 double SecondOrderHighpassFilter(struct FilterType *F, double x);
 
-//#ifdef __cplusplus
-//}
-//#endif
-
+/*
+** #ifdef __cplusplus
+** }
+** #endif
+*/
 #endif /* __SIGKIT_H__ */
 

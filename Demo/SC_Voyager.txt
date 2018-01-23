@@ -2,14 +2,14 @@
 Voyager                       !  Description
 "Voyager"                     !  Label
 GenScSpriteAlpha.ppm          !  Sprite File Name
-PROTOTYPE_FSW                 !  Flight Software Identifier
+AD_HOC_FSW                    !  Flight Software Identifier
 ************************* Orbit Parameters ****************************
 FIXED                         !  Orbit Prop FIXED, EULER_HILL, or ENCKE
 CM                            !  Pos of CM or ORIGIN, wrt F
 0.0  0.0  0.0                 !  Pos wrt Formation (m), expressed in F
 0.0  0.0  0.0                 !  Vel wrt Formation (m/s), expressed in F
 *************************** Initial Attitude ***************************
-LAL                           ! Ang Vel wrt [NL], Att [QA] wrt [NLF]
+NAN                           ! Ang Vel wrt [NL], Att [QA] wrt [NLF]
 0.0    0.0    0.0             ! Ang Vel (deg/sec)
 0.0    0.0    0.0    1.0      ! Quaternion
 30.0    0.0    0.0    213      ! Angles (deg) & Euler Sequence
@@ -31,6 +31,7 @@ FALSE                         ! Include 2nd Order Flex Terms
 100.0  200.0  300.0           ! Moments of Inertia (kg-m^2)
 0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
 0.0  0.0  0.0                 ! Location of mass center, m
+0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
 Voyager.obj                   ! Geometry Input File Name
 NONE                          ! Flex File Name
 ************************************************************************

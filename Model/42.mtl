@@ -152,7 +152,7 @@ Refl 1.0
 
 newmtl SEE_THRU_RED
 Ns 100.0
-d 0.5
+d 0.2
 illum 2
 Kd 0.55 0.0 0.0
 Ka 0.55 0.0 0.0
@@ -191,9 +191,9 @@ Ks 0.5  0.5  0.5
 Ke 0.0  0.0  0.0
 NoiseCol
 map_Spectrum Moai
-NoiseGain 0.04 0.01 0.0 0.0
-NoiseBias 0.0
-NoiseAxis 0.1 0.1 0.05
+NoiseGain 0.2  0.1  0.05  0.025
+NoiseBias -0.1
+NoiseAxis 1.0 1.0 0.5
 NoiseType 5
 
 newmtl EROS_MATL  
@@ -228,3 +228,28 @@ NoiseGain 0.5 0.25 0.125 0.0625
 NoiseBias 0.0
 NoiseScale 1000.0
 NoiseType 0
+
+newmtl LZ_MATL  
+d 1.0
+Ns 20.0
+Ka 1.0  1.0  1.0 
+Kd 1.0  1.0  1.0
+Ks 0.1  0.1  0.1
+Ke 0.0  0.0  0.0
+NoiseCol
+map_Spectrum Mars
+NoiseGain 0.5 0.25 0.125 0.0625
+NoiseBias 0.0
+NoiseScale 50.0
+NoiseType 0
+
+newmtl CUBE_BLUE
+Ns 20.0
+d 1.0
+illum 2
+Kd 0.2 0.3 1.0
+Ka 0.2 0.3 1.0
+Ks 0.25 0.25 0.25
+Ke 0.0 0.0 0.0
+NoiseBump
+NoiseScale 0.01

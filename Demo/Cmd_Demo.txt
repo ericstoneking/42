@@ -1,0 +1,201 @@
+<<<<<<<<<<<<<<<<<  42:  Command Script File  >>>>>>>>>>>>>>>>>
+0.0 SC[0] qrl = [0.0 0.0 0.0 1.0]
+#0.0 Point SC[0].B[1] Primary Vector [0.0 0.0 1.0] at SUN
+0.0 Point SC[1].B[0] Primary Vector [0.0 0.0 -1.0] at SUN
+#0.0 Align SC[1].B[0] Secondary Vector [0.0 1.0 0.0] with L-frame Vector [0.0 1.0 0.0]
+0.0 Point SC[2].B[0] Primary Vector [0.0 0.0 -1.0] at SC[1]
+0.0 Align SC[2].B[0] Secondary Vector [0.0 1.0 0.0] with L-frame Vector [0.0 1.0 0.0]
+0.0 Align SC[3].B[0] Primary Vector [0.0 0.0 1.0] with L-frame Vector [1.0 0.0 1.0]
+0.0 Point SC[3].B[0] Secondary Vector [1.0 0.0 0.0] at SUN
+
+0.0 SC[4] Cmd Angles = [-90.0 -90.0 0.0] deg, Seq = 131 wrt N Frame
+
+1.0 ShowHUD FALSE
+1.0 ShowWatermark TRUE
+
+# Voyager
+1.0 ShowShadows TRUE
+1.0 Banner = "42 goes anywhere in the Solar System"
+1.0 BannerColor = [1.0 1.0 1.0 0.5]
+1.0 POV CmdRange = 60.0
+1.0 POV Frame = L
+1.0 POV CmdSeq = 123
+1.0 POV CmdAngle = [0.0 0.0 0.0] deg
+1.0 POV CmdPermute = [1.0 0.0 0.0; 0.0 -1.0 0.0; 0.0 0.0 -1.0]
+1.0 POV TimeToGo = 300.0
+
+#2.0 CaptureCam TRUE
+
+
+# Aura
+500.0 POV.Host.SC 0
+500.0 ShowShadows TRUE
+500.0 Banner = "Spacecraft may be composed of multiple rigid, flexible bodies"
+500.0 POV CmdRange = 50.0
+500.0 POV Frame = B
+500.0 POV CmdSeq = 312
+500.0 POV CmdAngle = [80.0 60.0 0.0] deg
+500.0 POV CmdPermute = [1.0 0.0 0.0; 0.0 -1.0 0.0; 0.0 0.0 -1.0]
+500.0 POV TimeToGo = 500.0
+800.0 Banner = "42 includes standard models for atmospheric density, geomagnetic field"
+1000.0 Banner = "Shape Models support computation of aero, solar pressure forces"
+1200.0 Banner = "(EOS Aura overflies the Arctic)"
+
+# ISS
+1500.0 POV.Host.SC 1
+1500.0 ShowShadows FALSE
+1500.0 Banner = "Multiple Spacecraft support Prox Ops, Formation Flying"
+1500.0 POV CmdRange = 200.0
+1500.0 POV Frame = L
+1500.0 POV CmdSeq = 312
+1500.0 POV CmdAngle = [-80.0 50.0 0.0] deg
+1500.0 POV CmdPermute = [1.0 0.0 0.0; 0.0 -1.0 0.0; 0.0 0.0 -1.0]
+1500.0 POV TimeToGo = 200.0
+
+# Atlantis
+2000.0 POV.Host.SC 2
+2000.0 ShowShadows FALSE
+2000.0 Banner = "(Atlantis underflies ISS)"
+2000.0 POV CmdRange = 100.0
+2000.0 POV Frame = B
+2000.0 POV CmdSeq = 132
+2000.0 POV CmdAngle = [170.0 0.0 0.0] deg
+2000.0 POV CmdPermute = [1.0 0.0 0.0; 0.0 -1.0 0.0; 0.0 0.0 -1.0]
+2000.0 POV TimeToGo = 300.0
+
+# 67P
+2500.0 POV.Host.SC 3
+2500.0 ShowShadows TRUE
+2500.0 Banner = "Comets and asteroids may be added as needed."
+2500.0 POV CmdRange = 50.0
+2500.0 POV Frame = L
+2500.0 POV CmdSeq = 312
+2500.0 POV CmdAngle = [45.0 0.0 0.0] deg
+2500.0 POV CmdPermute = [1.0 0.0 0.0; 0.0 -1.0 0.0; 0.0 0.0 -1.0]
+2500.0 POV TimeToGo = 1.0
+2650.0 Banner = "(This is 67P/Churyumov-Gerasimenko, from Rosetta data.)"
+2850.0 Banner = "Contact forces enable study of touch-and-go, landing ops."
+
+# Big Black Monolith
+3000.0 POV.Host.SC 6
+3000.0 ShowShadows TRUE
+3000.0 Banner = "Big Black Monolith in Jupiter Orbit"
+3000.0 POV CmdRange = 80.0
+3000.0 POV Frame = L
+3000.0 POV CmdSeq = 123
+3000.0 POV CmdAngle = [0.0 0.0 0.0] deg
+3000.0 POV CmdPermute = [1.0 0.0 0.0; 0.0 -1.0 0.0; 0.0 0.0 -1.0]
+3000.0 POV TimeToGo = 400.0
+
+# Moai
+3500.0 POV.Host.SC 5
+3500.0 ShowShadows TRUE
+3500.0 Banner = "Moai in space, casting shadows"
+3500.0 POV CmdRange = 120.0
+3500.0 POV Frame = L
+3500.0 POV CmdSeq = 123
+3500.0 POV CmdAngle = [20.0 0.0 0.0] deg
+3500.0 POV CmdPermute = [1.0 0.0 0.0; 0.0 -1.0 0.0; 0.0 0.0 -1.0]
+3500.0 POV TimeToGo = 400.0
+
+# Cubesat Formation
+4200.0 POV.Host.RefOrb 5
+4200.0 ShowProxOps TRUE
+4200.0 ShowShadows TRUE
+4200.0 Banner = "Three Cubesats Flying Formation in Low Earth Orbit"
+4200.0 POV CmdRange = 20.0
+4200.0 POV Frame = L
+4200.0 POV CmdSeq = 132
+4200.0 POV CmdAngle = [80.0 0.0 0.0] deg
+4200.0 POV CmdPermute = [1.0 0.0 0.0; 0.0 -1.0 0.0; 0.0 0.0 -1.0]
+4200.0 POV TimeToGo = 300.0
+4700.0 POV CmdRange = 40.0
+4700.0 POV TimeToGo = 300.0
+
+4500.0 Banner = "42 supports both rotational and orbital DOF"
+4800.0 Banner = "Euler-Hill (aka Clohessy-Wiltshire) ideas simplify formation coordination"
+5100.0 Banner = "Orbital propagation uses exact nonlinear EOM (Encke's method) for accuracy"
+5500.0 Banner = "42 supports all stages of GNC development, from concept studies to operations"
+6000.0 Banner = "42 is open source (NASA Open Source Agreement)"
+6500.0 Banner = "sourceforge.net/projects/fortytwospacecraftsimulation"
+6900.0 Banner = "github/ericstoneking/42"
+
+7000.0 CaptureCam FALSE
+
+
+EOF
+
+##############################################################
+# All lines after EOF are ignored
+# Comment lines begin with #, %, or //
+# Blank lines are permitted
+
+# Here are recognized command formats.
+#  %lf means that a floating-point number is expected
+#  %ld means that an integer is expected
+#  %s means that a string is expected
+#  %c means that a character is expected
+#  Look in functions SimCmdInterpreter, GuiCmdInterpreter, 
+#     and FswCmdInterpreter for strings and characters that 
+#     are meaningful in a particular context
+#  The first %lf is always the SimTime of command execution.
+
+# Sim-related commands
+%lf DTSIM = %lf
+%lf SC[%ld].RotDOF %s
+%lf SC[%ld].G[%ld].RotLocked[%ld] %s
+%lf SC[%ld].G[%ld].TrnLocked[%ld] %s
+%lf Impart Impulsive Delta-V of [%lf %lf %lf] m/s in Frame %c to Orb[%ld]
+   %c can be N or L
+
+# GUI-related commands
+%lf POV.Host.SC %ld
+%lf CaptureCam %s
+%lf CamSnap %s
+%lf MapSnap %s
+%lf Banner = "Banner in Quotes"
+%lf GL Output Step = %lf
+%lf POV CmdRange = %lf
+%lf POV CmdSeq = %li
+%lf POV CmdAngle = [%lf %lf %lf] deg
+%lf POV CmdPermute = [%lf %lf %lf; %lf %lf %lf; %lf %lf %lf]
+%lf POV TimeToGo = %lf
+%lf POV Frame = %c
+%lf ShowHUD %s
+%lf ShowWatermark %s
+%lf ShowShadows %s
+%lf ShowProxOps %s
+%lf ShowFOV %s
+%lf FOV[%ld].NearExists =  %s
+%lf FOV[%ld].FarExists =  %s
+
+# FSW-related commands
+%lf SC[%ld] FswTag = %s
+   # %s is PASSIVE_FSW, PROTOTYPE_FSW, etc.
+%lf SC[%ld] qrn = [%lf %lf %lf %lf]
+%lf SC[%ld] qrl = [%lf %lf %lf %lf]
+%lf SC[%ld] Cmd Angles = [%lf %lf %lf] deg, Seq = %ld wrt %c Frame
+   # %c is either N or L
+%lf SC[%ld].G[%ld] Cmd Angles = [%lf %lf %lf] deg
+#  In the following, the (first) %s is either "Primary" or "Secondary"
+%lf Point SC[%ld].B[%ld] %s Vector [%lf %lf %lf] at RA = %lf deg, Dec = %lf deg
+%lf Point SC[%ld].B[%ld] %s Vector [%lf %lf %lf] at World[%ld] Lng = %lf deg, Lat = %lf deg, Alt = %lf km
+%lf Point SC[%ld].B[%ld] %s Vector [%lf %lf %lf] at World[%ld]
+%lf Point SC[%ld].B[%ld] %s Vector [%lf %lf %lf] at GroundStation[%ld]
+%lf Point SC[%ld].B[%ld] %s Vector [%lf %lf %lf] at %s
+   # Last %s is SUN, MOON, any planet, VELOCITY, or MAGFIELD
+%lf Point SC[%ld].B[%ld] %s Vector [%lf %lf %lf] at SC[%ld]
+%lf Point SC[%ld].B[%ld] %s Vector [%lf %lf %lf] at SC[%ld].B[%ld] point [%lf %lf %lf]
+%lf Align SC[%ld].B[%ld] %s Vector [%lf %lf %lf] with %c-frame Vector [%lf %lf %lf]
+   # %c-frame can be H, N, or L
+%lf Align SC[%ld].B[%ld] %s Vector [%lf %lf %lf] with SC[%ld].B[%ld] vector [%lf %lf %lf]
+%lf SC[%ld].Thr[%ld] %s
+   %s is OFF or ON
+Event Eclipse Entry SC[%ld] qrl = [%lf %lf %lf %lf]
+Event Eclipse Exit SC[%ld] qrl = [%lf %lf %lf %lf]
+Event Eclipse Entry SC[%ld] Cmd Angles = [%lf %lf %lf] deg, Seq = %ld wrt %c Frame
+   # %c is either N or L
+Event Eclipse Exit SC[%ld] Cmd Angles = [%lf %lf %lf] deg, Seq = %ld wrt %c Frame
+   # %c is either N or L
+%lf Set SC[%ld] RampCoastGlide wc = %lf Hz, amax = %lf, vmax = %lf
+%lf Spin SC[%ld] about Primary Vector at %lf deg/sec

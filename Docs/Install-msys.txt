@@ -1,5 +1,11 @@
 Ab Nihilo Installation of 42 on Windows
 
+On OSX or Linux, 42 runs right out of the box.  Windows requires some help.  I know that some of y'all are Windows users through no fault of your own, so I'll keep the commentary to a minimum.
+
+What follows is a step-by-step recipe for obtaining the things that 42 depends on to run on Windows.  This is, as far as I know, the easiest way to go about it.  I wish it were easier, but it is what it is.
+
+We need a C compiler --- we'll use MinGW, which includes msys as a command-line environment.  (I tried CygWin once, but it and something else were having compatibility problems at the time, so I went with MinGW.)  We also need some OpenGL support --- freeglut and glew.
+
 1)  Install MinGW and Msys
    a)  From SourceForge, download the MinGW Installation Manager Setup Tool.
    b)  Accept the default installation location, c:\MinGW
@@ -14,40 +20,38 @@ Ab Nihilo Installation of 42 on Windows
    c)  If desired, change icon for Msys shortcut to one found in ...\msys\1.0\
 
 3)  Edit the file C:\MinGW\msys\1.0\etc\profile.  Change line 19 to read:
-  export PATH=".:/usr/local/bin:/c/mingw/bin:/bin:/c/42ExternalSupport/freeglut:$PATH"
-This adds the MinGW bin folder and the freeglut folder (to be added in the next step) to the default path.
+   export PATH=".:/usr/local/bin:/c/mingw/bin:/bin:/c/42ExternalSupport/freeglut/bin:/c/42ExternalSupport/glew/lib:$PATH"
+  This adds the MinGW bin folder, freeglut folder, and glew folders (to be added in the next steps) to the default path.
 
-4)  Install TortoiseSVN from tortoisesvn.net
+4)  Download freeglut from freeglut.sourceforge.net.  You want the pre-packaged release.  Place it in C:\42ExternalSupport\
 
-For GSFC internal users:
+5)  Download glew (GL Extension Wrangler) source (zipped) from
+glew.sourceforge.net.  (There are various kinds of libraries, apparently, and the online binaries don't support the kind that MinGW wants, so we need to build them from source.)  
+   a)  Extract the glew folder (mine is glew-1.13.0), rename it to just "glew" and place it in C:\42ExternalSupport.
+   b)  Copy 42/Utilities/buildglew.sh to the glew folder
+   c)  In your msys terminal, cd to the glew folder and run buildglew.sh by entering "buildglew.sh" at the command prompt.
 
-5)  Use TortoiseSVN to Checkout ACSEB/42/trunk/42 and ACSEB/42ExternalSupport/trunk/42ExternalSupport from the repository.  42ExternalSupport contains GLee and freeglut, which are needed for Windows installations to use OpenGL.
+   Alternatively to (b) and (c) above, copy/paste the commands between the **** lines below.  And give thanks to sunandblackcat, because I for one would never have been able to figure this one out on my own.
 
-For 42, the repository URL is:
-https://gs-mesavs4.ndc.nasa.gov/svn/ACSEB/42/trunk/42
-and the Checkout directory is:
-C:\MinGW\msys\1.0\home\yourusername\42
-For 42ExternalSupport, the repository URL is:
-https://gs-mesavs4.ndc.nasa.gov/svn/ACSEB/42ExternalSupport/trunk/42ExternalSupport
-and the Checkout directory is:
-C:\42ExternalSupport
+**************  These lines thanks to http://www.sunandblackcat.com/tipFullView.php%3Fl%3Deng%26topicid%3D1 **************
+gcc -DGLEW_NO_GLU -O2 -Wall -W -Iinclude -DGLEW_BUILD -o src/glew.o -c src/glew.c
+gcc -shared -Wl,-soname,libglew32.dll -Wl,--out-implib,lib/libglew32.dll.a -o lib/glew32.dll src/glew.o -L/mingw/lib -lglu32 -lopengl32 -lgdi32 -luser32 -lkernel32
+ar cr lib/libglew32.a src/glew.o
+**************************************************************************************************************************
 
-For sourceforge users:
+If you get a build error like this:  multiple definition of `DllMainCRTStartup@12', consider adding the option -nostdlib to the link command.  See this link for a caution, though:
+http://stackoverflow.com/questions/38673228/multiple-definition-of-dllmaincrtstartup12-while-building-glew-on-windows-wit
 
-5a)  Download freeglut from freeglut.sourceforge.net.  Place it in C:\42ExternalSupport\
-5b)  Download GLEE (GL Easy Extension library) from elf-stone.com.  Place it in C:\42ExternalSupport\
+6) Move your 42 folder into the msys directory structure, to C:\MinGW\msys\1.0\home\yourusername\42
 
-
-6)  Edit your Makefile, found in your 42 folder.
+7)  Edit your Makefile, found in your 42 folder.
    a)  Make sure your PLATFORM is __MSYS__ by commenting the first few lines appropriately.
-   b)  Make sure that SOCKETFLAG is blank
-   c)  Make sure EXTERNDIR = /c/42ExternalSupport/
-   d)  Save your changes
-
+   b)  Make sure EXTERNDIR = /c/42ExternalSupport/
+   c)  Save your changes
 
 
 Your installation is complete now.  The following steps are routine for compiling and running 42.  
-You'll do them many times.
+You'll do them many times.  These assume that your current directory is C:\MinGW\msys\1.0\home\yourusername\42.
 
 a)  To "clean up", enter this on the command line:
 
@@ -67,7 +71,13 @@ c)  To run 42.exe, enter this on the command line:
 
 42
 
+or (according to some reports)
+
+42.exe
+
 Depending on your configuration, the graphics windows should pop up, and event messages will begin to appear in the terminal window.
+
+If 42 stops with an error dialog about "DLL not found", there is a problem with the path to freeglut.dll or glew.dll.  Check the path (from step 3 above) against their actual location, and make adjustments if needed.
 
 d)  You may interrupt 42 at any time by hitting the 'q' key when the Cam window is active, or Ctrl-C when the terminal window is active.  42 will terminate on its own when the sim has run its course.
 

@@ -14,31 +14,30 @@
 
 #include "42.h"
 
-//#ifdef __cplusplus
-//namespace _42 {
-//using namespace Kit;
-//#endif
+/* #ifdef __cplusplus
+** namespace _42 {
+** using namespace Kit;
+** #endif
+*/
 
 /**********************************************************************/
 void ThrModel(double ImpulseCmd,double DT,double cm[3],
-              double Fmax, double A[3], double p[3],
-              double Frc[3], double Trq[3])
+              struct ThrusterType *Thr)
 {
 
-      double f;
       double r[3];
       long i;
 
-      f = ImpulseCmd/DT;
-      if (f < 0.0) f = 0.0;
-      if (f > Fmax) f = Fmax;
+      Thr->F = ImpulseCmd/DT;
+      if (Thr->F < 0.0) Thr->F = 0.0;
+      if (Thr->F > Thr->Fmax) Thr->F = Thr->Fmax;
 
-      Frc[0] = f*A[0];
-      Frc[1] = f*A[1];
-      Frc[2] = f*A[2];
+      Thr->Frc[0] = Thr->F*Thr->A[0];
+      Thr->Frc[1] = Thr->F*Thr->A[1];
+      Thr->Frc[2] = Thr->F*Thr->A[2];
 
-      for(i=0;i<3;i++) r[i] = p[i] - cm[i];
-      VxV(r,Frc,Trq);
+      for(i=0;i<3;i++) r[i] = Thr->r[i] - cm[i];
+      VxV(r,Thr->Frc,Thr->Trq);
 
 }
 /**********************************************************************/
@@ -242,10 +241,7 @@ void Actuators(struct SCType *S)
 
       /* Thrusters */
       for(i=0;i<S->Nthr;i++) {
-         ThrModel(FSW->Thrcmd[i],DTSIM,
-                 S->B[0].cm,S->Thr[i].Fmax,
-                 S->Thr[i].A,S->Thr[i].r,
-                 S->Thr[i].Frc,S->Thr[i].Trq);
+         ThrModel(FSW->Thrcmd[i],DTSIM,S->B[0].cm,&S->Thr[i]);
          MTxV(S->B[0].CN,S->Thr[i].Frc,FrcN);
          for(j=0;j<3;j++) {
             S->B[0].Trq[j] += S->Thr[i].Trq[j];
@@ -258,7 +254,8 @@ void Actuators(struct SCType *S)
 
 }
 
-//#ifdef __cplusplus
-//}
-//#endif
+/* #ifdef __cplusplus
+** }
+** #endif
+*/
 

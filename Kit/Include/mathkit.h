@@ -15,9 +15,11 @@
 #ifndef __MATHKIT_H__
 #define __MATHKIT_H__
 
-//#ifdef __cplusplus
-//namespace Kit {
-//#endif
+/*
+** #ifdef __cplusplus
+** namespace Kit {
+** #endif
+*/
 
 #ifndef __MINGW32__
    #ifdef WIN32
@@ -102,9 +104,14 @@ double DistanceToLine(double LineEnd1[3], double LineEnd2[3],
    double Point[3], double VecToLine[3]);
 long ProjectPointOntoPoly(double Point[3], double DirVec[3],
    double **Vtx, long Nvtx, double ProjPoint[3], double *Distance);
+long ProjectPointOntoTriangle(double A[3], double B[3], double C[3],
+      double DirVec[3], double Pt[3], double ProjPt[3], double Bary[4]);
+double CubicSpline(double x, double X[4], double Y[4]);
 
-//#ifdef __cplusplus
-//}
-//#endif
+/*
+** #ifdef __cplusplus
+** }
+** #endif
+*/
 
 #endif /* __MATHKIT_H__ */

@@ -2,7 +2,7 @@
 EOS Aura                      !  Description
 "Aura"                        !  Label
 GenScSpriteAlpha.ppm          !  Sprite File Name
-PROTOTYPE_FSW                 !  Flight Software Identifier
+THREE_AXIS_FSW                !  Flight Software Identifier
 ************************* Orbit Parameters ****************************
 FIXED                         !  Orbit Prop FIXED, EULER_HILL, or ENCKE
 CM                            !  Pos of CM or ORIGIN, wrt F
@@ -31,6 +31,7 @@ FALSE                         ! Include 2nd Order Flex Terms
 1000.0  2000.0  2000.0        ! Moments of Inertia (kg-m^2)
 0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
 2.0  0.0  0.0                 ! Location of mass center, m
+0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
 Aura_MainBody.obj             ! Geometry Input File Name
 NONE                          ! Flex File Name
 ================================ Body 1 ================================
@@ -38,6 +39,7 @@ NONE                          ! Flex File Name
 100.0  20.0  100.0            ! Moments of Inertia (kg-m^2)
 0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
 0.0  -8.0  0.0                ! Location of mass center, m
+0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
 Aura_SolarArray.obj           ! Geometry Input File Name
 NONE                          ! Flex File Name
 ************************************************************************
@@ -63,20 +65,42 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
 0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 *************************** Wheel Parameters ***************************
-0                             ! Number of wheels
+3                             ! Number of wheels
 =============================  Wheel 0  ================================
 0.0                           ! Initial Momentum, N-m-sec
 1.0   0.0   0.0               ! Wheel Axis Components, [X, Y, Z]
-0.14   50.0                   ! Max Torque (N-m), Momentum (N-m-sec)
-0.012                         ! Wheel Rotor Inertia, kg-m^2
-0.48                          ! Static Imbalance, g-cm
-13.7                          ! Dynamic Imbalance, g-cm^2
+0.5   100.0                   ! Max Torque (N-m), Momentum (N-m-sec)
+0.2                           ! Wheel Rotor Inertia, kg-m^2
+0.2                           ! Static Imbalance, g-cm
+10.0                          ! Dynamic Imbalance, g-cm^2
+0                             ! Flex Node Index
+=============================  Wheel 1  ================================
+0.0                           ! Initial Momentum, N-m-sec
+0.0   1.0   0.0               ! Wheel Axis Components, [X, Y, Z]
+0.5   100.0                   ! Max Torque (N-m), Momentum (N-m-sec)
+0.2                           ! Wheel Rotor Inertia, kg-m^2
+0.2                           ! Static Imbalance, g-cm
+10.0                          ! Dynamic Imbalance, g-cm^2
+0                             ! Flex Node Index
+=============================  Wheel 2  ================================
+0.0                           ! Initial Momentum, N-m-sec
+0.0   0.0   1.0               ! Wheel Axis Components, [X, Y, Z]
+0.5   100.0                   ! Max Torque (N-m), Momentum (N-m-sec)
+0.2                           ! Wheel Rotor Inertia, kg-m^2
+0.2                           ! Static Imbalance, g-cm
+10.0                          ! Dynamic Imbalance, g-cm^2
 0                             ! Flex Node Index
 **************************** MTB Parameters ****************************
-0                                   ! Number of MTBs
+3                                   ! Number of MTBs
 ==============================  MTB 0  =================================
-180.0                         ! Saturation (A-m^2)
+300.0                         ! Saturation (A-m^2)
 1.0   0.0   0.0               ! MTB Axis Components, [X, Y, Z]
+==============================  MTB 1  =================================
+300.0                         ! Saturation (A-m^2)
+0.0   1.0   0.0               ! MTB Axis Components, [X, Y, Z]
+==============================  MTB 2  =================================
+300.0                         ! Saturation (A-m^2)
+0.0   0.0   1.0               ! MTB Axis Components, [X, Y, Z]
 ************************* Thruster Parameters **************************
 0                             ! Number of Thrusters
 ==============================  Thr 0  =================================

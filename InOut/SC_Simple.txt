@@ -31,6 +31,7 @@ FALSE                         ! Include 2nd Order Flex Terms
 100.0  200.0  300.0           ! Moments of Inertia (kg-m^2)
 0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
 0.0  0.0  0.0                 ! Location of mass center, m
+0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
 IonCruiser.obj                ! Geometry Input File Name
 NONE                          ! Flex File Name
 ************************************************************************

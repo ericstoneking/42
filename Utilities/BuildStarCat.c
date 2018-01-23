@@ -1,4 +1,4 @@
-/* Cull and parse Skymap for Agora */
+/* Cull and parse Skymap for 42 */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,12 +14,12 @@ int main(int argc, char **argv)
       char OutFileName[80];
       char R1a[15],R2a[15],R3a[15],Mva[15],Mvpa[15];
 
-      infile = fopen("/Users/estoneking/Wisdom/SkyMap/ATT_sky2kv5.cat","rt");
-      for(Im=4;Im<10;Im++) {
+      infile = fopen("/Users/estoneki/Wisdom/SkyMap/ATT_sky2kv5.cat","rt");
+      for(Im=0;Im<10;Im++) {
          printf("Processing Mag Limit %i\n",Im);
          MagLimit = (float) Im;
          sprintf(OutFileName,"../Model/Skymap%02i.txt",Im);
-      
+
          outfile = fopen(OutFileName,"wt");
          fprintf(outfile,"00000000\n");
          Nstar = 0;
@@ -50,6 +50,6 @@ int main(int argc, char **argv)
          rewind(infile);
       }
       fclose(infile);
-      
+
       return(0);
 }

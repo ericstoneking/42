@@ -13,13 +13,348 @@
 
 
 #include "42.h"
+#define EXTERN
 #include "42GlutGui.h"
+#undef EXTERN
 
-//#ifdef __cplusplus
-//namespace _42 {
-//using namespace Kit;
-//#endif
+/* #ifdef __cplusplus
+** namespace _42 {
+** using namespace Kit;
+** #endif
+*/
 
+/**********************************************************************/
+double OpticalDepth(double z1, double z2, double DeltaAngle,
+   double R, double H)
+{
+      double D,Num,Den,th0,Rz0,dth,th,cth,z;
+      long i,N;
+
+      if (DeltaAngle == 0.0) {
+         D = exp(-z1/H)-exp(-z2/H);
+      }
+      else {
+         Num = -((R+z1)-(R+z2)*cos(DeltaAngle));
+         Den =  (-(R+z2)*sin(DeltaAngle));
+         th0 = atan(Num/Den);
+
+         Rz0 = (R+z1)*cos(-th0);
+
+         N = 10;
+         dth = (DeltaAngle)/((double) N);
+         D = 0;
+         for(i=0;i<N;i++) {
+            th = ((double) i)*dth;
+            cth = cos(th-th0);
+            z = Rz0/cth - R;
+            D = D + exp(-z/H)*Rz0/(cth*cth)*dth;
+         }
+         D /= H;
+      }
+
+      return(D);
+}
+/**********************************************************************/
+void DrawDiskSector(double az1, double az2, long Nring, long *k1, long *k2,
+   long *Nk, double **pw, double **nw,
+   double CLW[3][3], double Alt, double R, double ZenW[3])
+{
+      double az,el;
+      long k,i,Ir,Ib,ko,ro,ri,ki;
+      double sinel,cosel,versel;
+      double elmax,del;
+      double pl[3],nl[3];
+
+      if (Alt < 100.0) elmax = acos(R/(R+100.0));
+      else elmax = acos(R/(R+Alt));
+      del = elmax/((double) Nring);
+
+      /* Local origin is sub-POV point on ground */
+      pl[0] = 0.0;
+      pl[1] = 0.0;
+      pl[2] = 0.0;
+      MTxV(CLW,pl,pw[0]);
+      /* Local zenith is up */
+      nl[0] = 0.0;
+      nl[1] = 0.0;
+      nl[2] = 1.0;
+      MTxV(CLW,nl,nw[0]);
+      for(Ir=0;Ir<Nring;Ir++) {
+         el = ((double) (Ir+1))*del;
+         cosel = cos(el);
+         versel = 2.0*sin(el/2.0)*sin(el/2.0); /* versine(x) = 1-cos(x) = 2*sin^2(x/2) */
+         sinel = sin(el);
+         for(k=k1[Ir];k<=k2[Ir];k++) {
+            az = az1 + ((double) (k-k1[Ir]))/((double) (Nk[Ir]-1))*(az2-az1);
+            pl[0] = R*sinel*cos(az);
+            pl[1] = R*sinel*sin(az);
+            pl[2] = -R*versel;
+            MTxV(CLW,pl,pw[k]);
+            nl[0] = sinel*cos(az);
+            nl[1] = sinel*sin(az);
+            nl[2] = cosel;
+            MTxV(CLW,nl,nw[k]);
+         }
+      }
+
+      glBegin(GL_TRIANGLES);
+         glNormal3dv(nw[2]);
+         glVertex3dv(pw[2]);
+         glNormal3dv(nw[0]);
+         glVertex3dv(pw[0]);
+         glNormal3dv(nw[1]);
+         glVertex3dv(pw[1]);
+      glEnd();
+
+      for(Ib=1;Ib<Nring;Ib++) {
+         ro = Ib;
+         ri = Ib-1;
+         glBegin(GL_TRIANGLE_STRIP);
+            for(i=Nk[ri];i>0;i--) {
+               ki = k1[ri]+i-1;
+               ko = k1[ro]+i;
+               glNormal3dv(nw[ko]);
+               glVertex3dv(pw[ko]);
+               glNormal3dv(nw[ki]);
+               glVertex3dv(pw[ki]);
+            }
+            glNormal3dv(nw[k1[ro]]);
+            glVertex3dv(pw[k1[ro]]);
+         glEnd();
+      }
+
+}
+/**********************************************************************/
+void DrawSkySector(struct WorldType *W, double Alt,
+   double az1, double az2, long Nring, long *k1,
+   long *k2, long *Nk, double **pl, double **nl)
+{
+      struct AtmoType *A;
+      double az,el;
+      long k,i,Ir,Ib,ko,ro,ri,ki;
+      double sinel,cosel;
+      double elmax,del;
+
+      A = &W->Atmo;
+
+      if (Alt < 100.0) elmax = acos(W->rad/(W->rad+100.0));
+      else elmax = acos(W->rad/(W->rad+Alt));
+      del = elmax/((double) Nring);
+
+      /* Local origin is sub-POV point on ground */
+      pl[0][0] = 0.0;
+      pl[0][1] = 0.0;
+      pl[0][2] = A->MaxHt;
+      /* Local zenith is up */
+      nl[0][0] = 0.0;
+      nl[0][1] = 0.0;
+      nl[0][2] = 1.0;
+      for(Ir=0;Ir<Nring;Ir++) {
+         el = ((double) (Ir+1))*del;
+         cosel = cos(el);
+         sinel = sin(el);
+         for(k=k1[Ir];k<=k2[Ir];k++) {
+            az = az1 + ((double) (k-k1[Ir]))/((double) (Nk[Ir]-1))*(az2-az1);
+            pl[k][0] = A->rad*sinel*cos(az);
+            pl[k][1] = A->rad*sinel*sin(az);
+            pl[k][2] = A->rad*cosel - W->rad;
+            nl[k][0] = sinel*cos(az);
+            nl[k][1] = sinel*sin(az);
+            nl[k][2] = cosel;
+         }
+      }
+
+/* .. Cap of Sky */
+      if (Alt < A->MaxHt) {
+         glBegin(GL_TRIANGLES);
+            glNormal3dv(nl[1]);
+            glVertex3dv(pl[1]);
+            glNormal3dv(nl[0]);
+            glVertex3dv(pl[0]);
+            glNormal3dv(nl[2]);
+            glVertex3dv(pl[2]);
+         glEnd();
+
+         for(Ib=1;Ib<Nring;Ib++) {
+            ro = Ib;
+            ri = Ib-1;
+            glBegin(GL_TRIANGLE_STRIP);
+               for(i=0;i<Nk[ri];i++) {
+                  ki = k1[ri]+i;
+                  ko = k1[ro]+i;
+                  glNormal3dv(nl[ko]);
+                  glVertex3dv(pl[ko]);
+                  glNormal3dv(nl[ki]);
+                  glVertex3dv(pl[ki]);
+               }
+               glNormal3dv(nl[k2[ro]]);
+               glVertex3dv(pl[k2[ro]]);
+            glEnd();
+         }
+      }
+
+/* .. Horizon */
+      glBegin(GL_QUAD_STRIP);
+         ro = Nring-1;
+         for(i=0;i<Nk[ro];i++) {
+            ko = k1[ro]+i;
+            glNormal3dv(nl[ko]);
+            glVertex3d(pl[ko][0]-A->MaxHt*nl[ko][0],
+                       pl[ko][1]-A->MaxHt*nl[ko][1],
+                       pl[ko][2]-A->MaxHt*nl[ko][2]);
+            glVertex3dv(pl[ko]);
+         }
+      glEnd();
+
+}
+/**********************************************************************/
+void DrawWorldDisk(struct WorldType *W,double PosN[3],double svn[3])
+{
+#define NRING 50
+
+      struct AtmoType *A;
+      long Is,Ir,k;
+      double az1,az2;
+      static long k1[NRING],k2[NRING],Nk[NRING];
+      static double **pw, **nw, **pl, **nl;
+      double CLN[3][3],CLW[3][3];
+      double svw[3],svl[3];
+      double PosW[3];
+      double ZenN[3],ZenW[3];
+      double Alt;
+      GLint PovLoc,HasAtmoLoc,AtmoColorLoc;
+      GLint AltLoc,MaxHtLoc,GasColorLoc,DustColorLoc,RadLoc;
+      GLfloat Black[4] = {0.0,0.0,0.0,1.0};
+      GLfloat White[4] = {1.0,1.0,1.0,1.0};
+      GLfloat SpecColor[4] = {0.25,0.25,0.5,1.0};
+      GLfloat LightPos[4] = {0.0,0.0,0.0,0.0};
+      static long First = 1;
+
+      if (First) {
+         First = 0;
+
+         k1[0] = 1;
+         k2[0] = 2;
+         Nk[0] = 2;
+         for(Ir=1;Ir<NRING;Ir++) {
+            k1[Ir] = k2[Ir-1]+1;
+            k2[Ir] = k1[Ir]+Ir+1;
+            Nk[Ir] = Ir+2;
+         }
+         pw = CreateMatrix(k2[NRING-1]+1,3);
+         nw = CreateMatrix(k2[NRING-1]+1,3);
+         pl = CreateMatrix(k2[NRING-1]+1,3);
+         nl = CreateMatrix(k2[NRING-1]+1,3);
+      }
+
+      A = &W->Atmo;
+      Alt = MAGV(PosN) - W->rad;
+
+      glMaterialfv(GL_FRONT,GL_AMBIENT,White);
+      glMaterialfv(GL_FRONT,GL_DIFFUSE,White);
+      glMaterialfv(GL_FRONT,GL_SPECULAR,SpecColor);
+      glMaterialfv(GL_FRONT,GL_EMISSION,Black);
+      glMaterialf(GL_FRONT,GL_SHININESS,10.0);
+
+      /* Before Push, H frame, origin at POV */
+      glPushMatrix();
+      RotateR2L(W->CNH);
+      CopyUnitV(PosN,ZenN);
+      glTranslated(-Alt*ZenN[0],-Alt*ZenN[1],-Alt*ZenN[2]);
+
+      CopyUnitV(ZenN,CLN[2]);
+      PerpBasis(CLN[2],CLN[0],CLN[1]);
+      MxMT(CLN,W->CWN,CLW);
+      MxV(W->CWN,PosN,PosW);
+      MxV(W->CWN,ZenN,ZenW);
+
+      /* Before Push, N frame, origin at subsat surface */
+      glPushMatrix();
+      RotateR2L(W->CWN);
+
+      MxV(W->CWN,svn,svw);
+      for(k=0;k<3;k++) LightPos[k] = svw[k];
+      glLightfv(GL_LIGHT0,GL_POSITION,LightPos);
+
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_CUBE_MAP,W->ColCubeTag);
+      glActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_CUBE_MAP,W->BumpCubeTag);
+      glActiveTexture(GL_TEXTURE2);
+      glBindTexture(GL_TEXTURE_CUBE_MAP,W->CloudGlossCubeTag);
+      glActiveTexture(GL_TEXTURE3);
+      glBindTexture(GL_TEXTURE_1D,W->RingTexTag);
+
+      glUseProgram(WorldShaderProgram);
+      PovLoc = glGetUniformLocation(WorldShaderProgram,"PovPosW");
+      HasAtmoLoc = glGetUniformLocation(WorldShaderProgram,"HasAtmo");
+      AtmoColorLoc = glGetUniformLocation(WorldShaderProgram,"AtmoColor");
+      MaxHtLoc = glGetUniformLocation(WorldShaderProgram,"MaxHt");
+      glUniform3f(PovLoc,PosW[0]/W->rad,PosW[1]/W->rad,PosW[2]/W->rad);
+      glUniform1i(HasAtmoLoc,W->Atmo.Exists);
+      glUniform3f(AtmoColorLoc,W->Atmo.GasColor[0],W->Atmo.GasColor[1],
+         W->Atmo.GasColor[2]);
+      glUniform1f(MaxHtLoc,W->Atmo.MaxHt/W->rad);
+
+/* .. Draw six sectors of ground */
+      for(Is=0;Is<6;Is++) {
+         az1 = ((double) Is)*Pi/3.0;
+         az2 = ((double) (Is+1))*Pi/3.0;
+         DrawDiskSector(az1,az2,NRING,k1,k2,Nk,pw,nw,CLW,Alt,W->rad,ZenW);
+      }
+      glUseProgram(0);
+
+      if (W->Atmo.Exists) {
+
+         /* glPolygonMode(GL_FRONT, GL_LINE); */
+         glUseProgram(AtmoShaderProgram);
+         AltLoc = glGetUniformLocation(AtmoShaderProgram,"Alt");
+         MaxHtLoc = glGetUniformLocation(AtmoShaderProgram,"MaxHt");
+         GasColorLoc = glGetUniformLocation(AtmoShaderProgram,"GasColor");
+         DustColorLoc = glGetUniformLocation(AtmoShaderProgram,"DustColor");
+         RadLoc = glGetUniformLocation(AtmoShaderProgram,"WorldRadius");
+         glUniform1f(AltLoc,Alt);
+         glUniform1f(MaxHtLoc,A->MaxHt);
+         glUniform3f(GasColorLoc,W->Atmo.GasColor[0],W->Atmo.GasColor[1],
+            W->Atmo.GasColor[2]);
+         glUniform3f(DustColorLoc,W->Atmo.DustColor[0],W->Atmo.DustColor[1],
+            W->Atmo.DustColor[2]);
+         glUniform1f(RadLoc,W->rad);
+
+         RotateR2L(CLW);
+         MxV(CLW,svw,svl);
+         for(k=0;k<3;k++) LightPos[k] = svl[k];
+         glLightfv(GL_LIGHT0,GL_POSITION,LightPos);
+
+         /* Draw six sectors of sky */
+         for(Is=0;Is<6;Is++) {
+            az1 = ((double) Is)*Pi/3.0;
+            az2 = ((double) (Is+1))*Pi/3.0;
+            DrawSkySector(W,Alt,az1,az2,NRING,k1,k2,Nk,pl,nl);
+         }
+
+         glUseProgram(0);
+         /* glPolygonMode(GL_FRONT, GL_FILL); */
+      }
+
+      glPopMatrix();  /* After Pop: N frame, origin at subsat surface */
+      glPopMatrix();  /* After Pop: H frame, origin at POV */
+
+      if (W->HasRing) {
+         glPushMatrix();
+         RotateR2L(W->CNH);
+         glTranslated(-PosN[0],-PosN[1],-PosN[2]);
+         /* RotateR2L(W->CWN); */
+         glScalef(W->rad,W->rad,W->rad);
+         glActiveTexture(GL_TEXTURE0);
+         glBindTexture(GL_TEXTURE_1D,W->RingTexTag);
+         glUseProgram(RingShaderProgram);
+         glCallList(W->RingList);
+         glUseProgram(0);
+         glActiveTexture(GL_TEXTURE0);
+         glPopMatrix();
+      }
+}
 /**********************************************************************/
 void GeomToDisplayLists(struct GeomType *G)
 {
@@ -36,7 +371,7 @@ void GeomToDisplayLists(struct GeomType *G)
 
       for(Im=0;Im<G->Nmatl;Im++) {
          M = &Matl[G->Matl[Im]];
-         //if (M->Kd[3] == 1.0) { /* Only opaque polys cast shadows */
+         /* if (M->Kd[3] == 1.0) { *//* Only opaque polys cast shadows */
             /* Sweep for triangles */
             glBegin(GL_TRIANGLES);
             for(Ip=0;Ip<G->Npoly;Ip++) {
@@ -76,7 +411,7 @@ void GeomToDisplayLists(struct GeomType *G)
                   }
                }
             }
-         //}
+         /*}*/
       }
       glEndList();
 
@@ -249,6 +584,11 @@ void GeomToDisplayLists(struct GeomType *G)
                   }
                }
             }
+
+            if (M->Refl > 0.0) {
+               glActiveTexture(GL_TEXTURE2);
+               glDisable(GL_TEXTURE_CUBE_MAP);
+            }
          }
       }
       glEndList();
@@ -366,15 +706,10 @@ void DrawPlanetLabels(GLfloat length)
 
       glPushMatrix();
       O = &Orb[POV.Host.RefOrb];
-      if (O->CenterType == MINORBODY) {
-         RotateL2R(MinorBody[O->center].CNH);
-      }
-      else {
-         RotateL2R(World[O->center].CNH);
-      }
+      RotateL2R(World[O->World].CNH);
 
       glDisable(GL_LIGHTING);
-      for(i=SOL;i<=PLUTO;i++) {
+      for(i=SOL;i<=LUNA;i++) {
          if (World[i].Exists) {
             glColor4fv(World[i].Color);
             for(j=0;j<3;j++) Vec[j] = World[i].PosH[j]-SC[POV.Host.SC].PosH[j];
@@ -512,6 +847,7 @@ void DrawCamHUD(void)
       double RA,Dec;
       GLfloat BoxColor[4] = {0.133,0.545,0.133,1.0};
       GLfloat ClockColor[4] = {0.604,0.804,0.196,1.0};
+      GLfloat ProxOpsGridColor[4] = {1.0,1.0,1.0,0.5};
       GLfloat Black[4] = {0.0,0.0,0.0,1.0};
       int i;
       struct WidgetType *W;
@@ -602,16 +938,13 @@ void DrawCamHUD(void)
       glRasterPos2i((W->xmin+W->xmax)/2-16,W->ymin+15);
       DrawBitmapString(GLUT_BITMAP_8_BY_13,"Host");
 
-      if (O->Type == ORB_CENTRAL || O->Type == ORB_ZERO) {
-         if (O->CenterType == WORLD)
-            strcpy(WorldName,World[POV.Host.World].Name);
-         else
-            strcpy(WorldName,MinorBody[POV.Host.World].Name);
-      }
-      else {
+      if (O->Regime == ORB_THREE_BODY) {
          sprintf(WorldName,"%s-%s",
             World[Orb[POV.Host.RefOrb].Body1].Name,
             World[Orb[POV.Host.RefOrb].Body2].Name);
+      }
+      else {
+         strcpy(WorldName,World[POV.Host.World].Name);
       }
       glRasterPos2i(W->xmin+30,W->ymin+30);
       sprintf(s,"  World: %s",WorldName);
@@ -656,11 +989,8 @@ void DrawCamHUD(void)
       glRasterPos2i((W->xmin+W->xmax)/2-24,W->ymin+15);
       DrawBitmapString(GLUT_BITMAP_8_BY_13,"Target");
 
-      if (O->Type == ORB_CENTRAL || O->Type == ORB_ZERO) {
-         if (O->CenterType == WORLD)
-            strcpy(WorldName,World[POV.Host.World].Name);
-         else
-            strcpy(WorldName,MinorBody[POV.Host.World].Name);
+      if (O->Regime == ORB_CENTRAL || O->Regime == ORB_ZERO) {
+         strcpy(WorldName,World[POV.Host.World].Name);
       }
       else {
          sprintf(WorldName,"%s-%s",
@@ -733,6 +1063,26 @@ void DrawCamHUD(void)
          DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
       }
 
+/* .. ProxOps Grid Spacing */
+      if (CamShow[PROX_OPS]) {
+         glColor4fv(ProxOpsGridColor);
+         glLineWidth(2.5);
+         glBegin(GL_LINE_STRIP);
+            glVertex2i(CamWidth-120,CamHeight-106);
+            glVertex2i(CamWidth-120,CamHeight-100);
+            glVertex2i(CamWidth-40,CamHeight-100);
+            glVertex2i(CamWidth-40,CamHeight-106);
+         glEnd();
+         if (POV.GridSpacing < 1000.0) {
+            sprintf(s,"%ld m",(long) POV.GridSpacing);
+         }
+         else {
+            sprintf(s,"%ld km",(long) (POV.GridSpacing/1000.0));
+         }
+         glRasterPos2i(CamWidth-80-4*strlen(s),CamHeight-104);
+         DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
+      }
+
       glColor4fv(Black);
       glEnable(GL_LIGHTING);
 
@@ -765,7 +1115,7 @@ void DrawWatermarks(void)
 
 /* Use of the following watermarks is restricted to NASA and GSFC,    */
 /* respectively.  Feel free to substitute your own watermarks.        */
-#if 1
+#if _USE_GSFC_WATERMARK_
       glBindTexture(GL_TEXTURE_2D,NASAWatermarkTexTag);
       glBegin(GL_QUADS);
          glTexCoord2f(0.0,1.0);
@@ -816,7 +1166,7 @@ void DrawWatermarks(void)
       glMatrixMode(GL_MODELVIEW);
 }
 /**********************************************************************/
-long ScIsVisible(long RefOrb, long Isc, double Rrel[3])
+long ScIsVisible(long RefOrb, long Isc, double PosR[3])
 {
       struct SCType *S;
       long ScVisible = 0;
@@ -827,12 +1177,11 @@ long ScIsVisible(long RefOrb, long Isc, double Rrel[3])
 
       if (S->RefOrb == RefOrb) {
          ScVisible = 1;
-         for(i=0;i<3;i++) Rrel[i] = S->Rrel[i];
+         for(i=0;i<3;i++) PosR[i] = S->PosR[i];
       }
-      else if (Orb[RefOrb].CenterType == Orb[S->RefOrb].CenterType &&
-         Orb[RefOrb].center == Orb[S->RefOrb].center) {
-         for(i=0;i<3;i++) Rrel[i] = S->PosN[i]-Orb[RefOrb].PosN[i];
-         if (MAGV(Rrel) < SkyDistance) {
+      else if (Orb[RefOrb].World == Orb[S->RefOrb].World) {
+         for(i=0;i<3;i++) PosR[i] = S->PosN[i]-Orb[RefOrb].PosN[i];
+         if (MAGV(PosR) < SkyDistance) {
             ScVisible = 1;
          }
          else ScVisible = 0;
@@ -851,16 +1200,16 @@ void DrawFarScene(void)
       double C[3][3];
       static long WorldOrder[NWORLD],TempWO;
       double Zdepth[NWORLD],rh[NWORLD][3],TempZ;
-      double WorldNearPlaneDepth[3] = {4.9E4,1.0E6,1.0E9};
-      double WorldFarPlaneDepth[3] = {1.01E6,1.0E9,1.0E12};
+      double WorldNearPlaneDepth[4] = {1.0,1.0E3,1.0E6,1.0E9};
+      double WorldFarPlaneDepth[4] = {1.0E3,1.0E6,1.0E9,1.0E12};
       long Done;
       struct WorldType *W;
       struct SCType *S;
-      double CWH[3][3],svh[3],PosH[3],PosN[3];
+      double svh[3],PosH[3],PosN[3],svn[3];
       double VisCoef,PixRad,r[3],magr;
       double NearExtent,FarExtent;
-      long WorldDepthFlag[NWORLD][3],Idepth;
-      long DepthIsNotEmpty[3] = {0,0,0};
+      long WorldDepthFlag[NWORLD][4],Idepth;
+      long DepthIsNotEmpty[4] = {0,0,0,0};
       GLfloat Black[4] = {0.0,0.0,0.0,1.0};
       GLubyte TdrsGlyph[32] = {0x01,0x80, 0x02,0x40, 0x04,0x20, 0x08,0x10,
                                0x10,0x08, 0x20,0x04, 0x40,0x02, 0x80,0x01,
@@ -905,9 +1254,9 @@ void DrawFarScene(void)
       if (CamShow[FERMI_SKY]) glCallList(FermiSkyList);
       else if (CamShow[MILKY_WAY]) glCallList(MilkyWayList);
       DrawStars(LoS,BuckyPf,StarList);
-      //if (CamShow[FERMI_SOURCES]) Draw1FGL(LoS,BuckyPf,FermiSourceList);
-      //if (CamShow[EGRET_SOURCES]) DrawEgret(LoS,BuckyPf,EgretSourceList);
-      //if (CamShow[PULSAR_SOURCES]) DrawPulsars(LoS,BuckyPf,PulsarList);
+      /*if (CamShow[FERMI_SOURCES]) Draw1FGL(LoS,BuckyPf,FermiSourceList);*/
+      /*if (CamShow[EGRET_SOURCES]) DrawEgret(LoS,BuckyPf,EgretSourceList);*/
+      /*if (CamShow[PULSAR_SOURCES]) DrawPulsars(LoS,BuckyPf,PulsarList);*/
 
       glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -922,8 +1271,8 @@ void DrawFarScene(void)
             FarExtent  = -Zdepth[i]+4.0*World[Iw].rad;
          }
          else {
-            NearExtent = -Zdepth[i]-World[Iw].rad;
-            FarExtent  = -Zdepth[i]+World[Iw].rad;
+            NearExtent = -Zdepth[i]-1.1*World[Iw].rad;
+            FarExtent  = -Zdepth[i]+1.1*World[Iw].rad;
          }
          if (World[Iw].Type == SUN) World[Iw].Visibility = WORLD_IS_SUN;
          else if (FarExtent < 0.0) World[Iw].Visibility = WORLD_IS_OUT_OF_POV;
@@ -938,7 +1287,7 @@ void DrawFarScene(void)
                World[Iw].Visibility = WORLD_SHOWS_DISK;
             }
          }
-         for(Idepth=0;Idepth<3;Idepth++) {
+         for(Idepth=0;Idepth<4;Idepth++) {
             if (!(FarExtent < WorldNearPlaneDepth[Idepth] ||
                 NearExtent > WorldFarPlaneDepth[Idepth])) {
                WorldDepthFlag[Iw][Idepth] = 1;
@@ -971,7 +1320,7 @@ void DrawFarScene(void)
       glLightfv(GL_LIGHT0,GL_DIFFUSE,DistantDiffuseLightColor);
       glLightfv(GL_LIGHT0,GL_SPECULAR,SpecularLightColor);
 
-      for(Idepth=2;Idepth>=0;Idepth--) {
+      for(Idepth=3;Idepth>=0;Idepth--) {
          if (DepthIsNotEmpty[Idepth]) {
             glClear(GL_DEPTH_BUFFER_BIT);
             glMatrixMode(GL_PROJECTION);
@@ -991,8 +1340,6 @@ void DrawFarScene(void)
                      }
                      else if (World[Iw].Visibility == WORLD_IS_POINT_SIZED) {
                         W = &World[Iw];
-                        //glPointSize(8.0);
-                        //glMaterialfv(GL_FRONT,GL_EMISSION,WorldColor);
                         glPointSize(2.0);
                         glMaterialfv(GL_FRONT,GL_EMISSION,W->Color);
                         glBegin(GL_POINTS);
@@ -1001,17 +1348,24 @@ void DrawFarScene(void)
                      }
                      else if (World[Iw].Visibility == WORLD_SHOWS_DISK) {
                         W = &World[Iw];
-                        MxM(W->CWN,W->CNH,CWH);
                         for(j=0;j<3;j++) svh[j] = -W->PosH[j];
                         UNITV(svh);
-                        switch (W->Type) {
-                           case PLANET :
-                           case MOON :
-                              DrawWorld(LoS,W->rad,rh[Iw],CWH,svh,W->HasRing,
-                                 W->HasAtmo,W->Color,W->TexTag,W->ColCubeTag,
-                                 W->BumpCubeTag,W->CloudGlossCubeTag,
-                                 W->RingTexTag,SphereList,W->RingList);
-                              break;
+                        if (W->GeomTag == 0) {  /* World is sphere */
+                           MxV(W->CNH,rh[Iw],PosN);
+                           MxV(W->CNH,svh,svn);
+                           DrawWorldDisk(W,PosN,svn);
+                        }
+                        else {
+                           glUseProgram(BodyShaderProgram);
+                           glUniform1i(ShadowsEnabledLoc,ShadowsEnabled);
+                           glUniformMatrix3fv(CNELoc,1,0,CNE);
+                           glPushMatrix();
+                           glTranslated(-rh[Iw][0],-rh[Iw][1],-rh[Iw][2]);
+                           RotateR2L(W->CNH);
+                           RotateR2L(W->CWN);
+                           glCallList(Geom[W->GeomTag].OpaqueListTag);
+                           glPopMatrix();
+                           glUseProgram(0);
                         }
                      }
                   }
@@ -1032,13 +1386,11 @@ void DrawFarScene(void)
                      }
                      else if (World[Iw].Visibility == WORLD_SHOWS_DISK) {
                         W = &World[Iw];
-                        MxM(W->CWN,W->CNH,CWH);
                         for(j=0;j<3;j++) svh[j] = -W->PosH[j];
                         UNITV(svh);
-                        DrawWorld(LoS,W->rad,rh[Iw],CWH,svh,W->HasRing,
-                           W->HasAtmo,W->Color,W->TexTag,W->ColCubeTag,
-                           W->BumpCubeTag,W->CloudGlossCubeTag,
-                           W->RingTexTag,SphereList,W->RingList);
+                        MxV(W->CNH,rh[Iw],PosN);
+                        MxV(W->CNH,svh,svn);
+                        DrawWorldDisk(W,PosN,svn);
                      }
                   }
                }
@@ -1060,10 +1412,11 @@ void DrawFarScene(void)
       if (CamShow[ASTRO]) {
          glDisable(GL_LIGHTING);
          glColor4fv(WorldColor);
-         for(Iw=SOL;Iw<=PLUTO;Iw++) {
+         for(Iw=SOL;Iw<=LUNA;Iw++) {
             if(World[Iw].Exists) {
                if (World[Iw].Visibility == WORLD_IS_TOO_SMALL_TO_SEE ||
-                   World[Iw].Visibility == WORLD_IS_POINT_SIZED) {
+                   World[Iw].Visibility == WORLD_IS_POINT_SIZED ||
+                   Iw == LUNA) {
                   CopyUnitV(rh[Iw],r);
                   for(i=0;i<3;i++) r[i] *= SkyDistance;
                   glRasterPos3d(-r[0],-r[1],-r[2]);
@@ -1098,19 +1451,13 @@ void DrawFarScene(void)
                      MajSkyGridList,MinSkyGridList);
       }
       if (CamShow[G_GRID]) {
-         if (POV.Host.WorldType == WORLD) {
-            MxMT(CGH,World[POV.Host.World].CNH,C);
-         }
-         else {
-            MxMT(CGH,MinorBody[POV.Host.World].CNH,C);
-         }
+         MxMT(CGH,World[POV.Host.World].CNH,C);
          DrawSkyGrid(GBrightColor,GDimColor,C,
                      MajSkyGridList,MinSkyGridList);
       }
 
 /* .. Draw TDRS */
-      if (CamShow[TDRS] && POV.Host.World == EARTH &&
-         POV.Host.WorldType == WORLD) {
+      if (CamShow[TDRS] && POV.Host.World == EARTH) {
          glDisable(GL_LIGHTING);
          glColor4fv(TdrsColor);
          for(i=0;i<10;i++) {
@@ -1133,10 +1480,7 @@ void DrawFarScene(void)
          if (S->RefOrb != POV.Host.RefOrb) {
             glColor4fv(ScColor);
             for(i=0;i<3;i++) PosH[i] = S->PosH[i] - POV.PosH[i];
-            if (POV.Host.WorldType == WORLD)
-               MxV(World[POV.Host.World].CNH,PosH,PosN);
-            else
-               MxV(MinorBody[POV.Host.World].CNH,PosH,PosN);
+            MxV(World[POV.Host.World].CNH,PosH,PosN);
             UNITV(PosN);
             for(i=0;i<3;i++) PosN[i] *= SkyDistance;
             glRasterPos3d(PosN[0],PosN[1],PosN[2]);
@@ -1147,11 +1491,168 @@ void DrawFarScene(void)
       glEnable(GL_LIGHTING);
 }
 /**********************************************************************/
+void DrawProxOps(void)
+{
+      struct SCType *S;
+      struct OrbitType *O;
+      GLfloat PlaneColor[4] = {1.0,1.0,1.0,0.05};
+      GLfloat GridColor[4] = {1.0,1.0,1.0,0.16};
+      GLfloat AxisColor[4] = {1.0,1.0,1.0,0.5};
+      GLfloat OrbitColor[4] = {1.0,0.8,0.5,0.25};
+      GLfloat Black[4] = {0.0,0.0,0.0,1.0};
+      double GridSpacing[20] = {1.0,2.0,4.0,8.0,
+                              10.0,20.0,40.0,80.0,
+                              100.0,200.0,400.0,800.0,
+                              1000.0,2000.0,4000.0,8000.0,
+                              10000.0,20000.0,40000.0,80000.0};
+      long Isc,i;
+      double A,Bc,Bs,C,Dc,Ds;
+      double t,r[3],v[3];
+      double R,dr,AxisLength;
+
+      glDisable(GL_LIGHTING);
+      glDepthMask(GL_FALSE);
+
+      O = &Orb[POV.Host.RefOrb];
+      glPushMatrix();
+      RotateR2L(O->CLN);
+
+/* .. Draw Orbit Traces */
+      glLineWidth(4.0);
+      glPointSize(4.0);
+
+      for(Isc=0;Isc<Nsc;Isc++) {
+         if (SC[Isc].Exists && SC[Isc].RefOrb == POV.Host.RefOrb) {
+            S = &SC[Isc];
+            EHRV2EHModes(S->PosEH,S->VelEH,O->MeanMotion,0.0,
+                         &A,&Bc,&Bs,&C,&Dc,&Ds);
+
+            /* Orbit */
+            glColor4fv(OrbitColor);
+            glBegin(GL_LINE_STRIP);
+               for(t=-3600.0;t<=3600.0;t+=60.0) {
+                  EHModes2EHRV(A,Bc,Bs,C,Dc,Ds,O->MeanMotion,
+                     O->MeanMotion*t,r,v);
+                  glVertex3dv(r);
+               }
+            glEnd();
+
+            /* Knots */
+            #if 0
+            for(t=-3600.0;t<=3600.0;t+=600.0) {
+               if (t<0.0) {
+                  KnotColor[0] = 1.0;
+                  KnotColor[1] = 0.5+0.5*(3600.0+t)/3600.0;
+                  KnotColor[2] = KnotColor[1];
+               }
+               else {
+                  KnotColor[0] = 0.5+0.5*(3600.0-t)/3600.0;
+                  KnotColor[1] = KnotColor[0];
+                  KnotColor[2] = 1.0;
+               }
+               glColor4fv(KnotColor);
+               EHModes2EHRV(A,Bc,Bs,C,Dc,Ds,O->MeanMotion,
+                  O->MeanMotion*t,r,v);
+               glBegin(GL_POINTS);
+                  glVertex3dv(r);
+               glEnd();
+            }
+            #endif
+         }
+      }
+      glLineWidth(1.0);
+      glPointSize(1.0);
+
+      i = 0;
+      while(POV.Range/5.0 > GridSpacing[i] && i<19) i++;
+      POV.GridSpacing = GridSpacing[i];
+      R = 5.0*POV.GridSpacing;
+
+/* .. Draw Euler-Hill Planes */
+      glColor4fv(PlaneColor);
+      glBegin(GL_QUADS);
+         /* X-Y */
+         glVertex3d( R, R,0.0);
+         glVertex3d(-R, R,0.0);
+         glVertex3d(-R,-R,0.0);
+         glVertex3d( R,-R,0.0);
+         glVertex3d( R, R,0.0);
+         glVertex3d( R,-R,0.0);
+         glVertex3d(-R,-R,0.0);
+         glVertex3d(-R, R,0.0);
+         /* X-Z */
+         glVertex3d( R,0.0, R);
+         glVertex3d(-R,0.0, R);
+         glVertex3d(-R,0.0,-R);
+         glVertex3d( R,0.0,-R);
+         glVertex3d( R,0.0, R);
+         glVertex3d( R,0.0,-R);
+         glVertex3d(-R,0.0,-R);
+         glVertex3d(-R,0.0, R);
+         /* Y-Z */
+         glVertex3d(0.0, R, R);
+         glVertex3d(0.0,-R, R);
+         glVertex3d(0.0,-R,-R);
+         glVertex3d(0.0, R,-R);
+         glVertex3d(0.0, R, R);
+         glVertex3d(0.0, R,-R);
+         glVertex3d(0.0,-R,-R);
+         glVertex3d(0.0,-R, R);
+      glEnd();
+
+/* .. Draw Euler-Hill Grids */
+      glColor4fv(GridColor);
+      glBegin(GL_LINES);
+         for(i=0;i<6;i++) {
+            dr = i*POV.GridSpacing;
+            /* X */
+            glVertex3d( dr, R,0.0);
+            glVertex3d( dr,-R,0.0);
+            glVertex3d( dr,0.0, R);
+            glVertex3d( dr,0.0,-R);
+            glVertex3d(-dr, R,0.0);
+            glVertex3d(-dr,-R,0.0);
+            glVertex3d(-dr,0.0, R);
+            glVertex3d(-dr,0.0,-R);
+            /* Y */
+            glVertex3d( R, dr,0.0);
+            glVertex3d(-R, dr,0.0);
+            glVertex3d(0.0, dr, R);
+            glVertex3d(0.0, dr,-R);
+            glVertex3d( R,-dr,0.0);
+            glVertex3d(-R,-dr,0.0);
+            glVertex3d(0.0,-dr, R);
+            glVertex3d(0.0,-dr,-R);
+            /* Z */
+            glVertex3d( R,0.0, dr);
+            glVertex3d(-R,0.0, dr);
+            glVertex3d(0.0, R, dr);
+            glVertex3d(0.0,-R, dr);
+            glVertex3d( R,0.0,-dr);
+            glVertex3d(-R,0.0,-dr);
+            glVertex3d(0.0, R,-dr);
+            glVertex3d(0.0,-R,-dr);
+         }
+      glEnd();
+
+/* .. Draw L axes */
+      AxisLength = 0.4*POV.Height*POV.Range;
+      DrawAxisLabels(GLYPH_L,AxisColor,
+                     0.0,AxisLength,
+                     0.0,AxisLength,
+                     0.0,AxisLength);
+
+
+      glPopMatrix();
+      glColor4fv(Black);
+      glEnable(GL_LIGHTING);
+      glDepthMask(GL_TRUE);
+}
+/**********************************************************************/
 void DrawNearAuxObjects(void)
 {
-      double CNH[3][3],PosN[3];
       double AxisLength,r[3],len[3];
-      long Isc,Ib,i;
+      long Isc,Ib,Ithr,i;
       struct SCType *S;
       struct BodyType *B;
       struct GeomType *G;
@@ -1180,6 +1681,8 @@ void DrawNearAuxObjects(void)
       glTranslated(-POV.PosR[0],-POV.PosR[1],-POV.PosR[2]);
       AxisLength = 0.4*POV.Height*POV.Range;
 
+      if (CamShow[PROX_OPS]) DrawProxOps();
+
 /* .. Draw Formation Origin and Axes */
       if (CamShow[F_AXES]) {
          glPushMatrix();
@@ -1201,7 +1704,7 @@ void DrawNearAuxObjects(void)
             glPushMatrix();
 
             if (S->RefOrb == POV.Host.RefOrb) { /* TODO: Improve this */
-               glTranslated(S->Rrel[0],S->Rrel[1],S->Rrel[2]);
+               glTranslated(S->PosR[0],S->PosR[1],S->PosR[2]);
                if (CamShow[B_AXES]) {
                   for(Ib=0;Ib<S->Nb;Ib++) {
                      B = &S->B[Ib];
@@ -1265,8 +1768,8 @@ void DrawNearAuxObjects(void)
                      if (MAGV(S->FSW.bvb) > 0.0)
                         DrawVector(S->FSW.bvb,"Bfsw","uT",BvbColor,
                            1.15*AxisLength,1.0E6,FALSE);
-                     //DrawVector(S->FSW.Hvb,"H","Nms",HvbColor,AxisLength,
-                     //   1.0,FALSE);
+                     /*DrawVector(S->FSW.Hvb,"H","Nms",HvbColor,AxisLength,
+                        1.0,FALSE);*/
                      glPopMatrix();
                   }
                }
@@ -1275,6 +1778,28 @@ void DrawNearAuxObjects(void)
             glPopMatrix();
          }
       }
+
+/* .. Draw Thruster Plumes */
+      for(Isc=0;Isc<Nsc;Isc++) {
+         S = &SC[Isc];
+         if (S->Exists) {
+            glPushMatrix();
+
+            if (S->RefOrb == POV.Host.RefOrb) { /* TODO: Improve this */
+               glTranslated(S->PosR[0],S->PosR[1],S->PosR[2]);
+               B = &S->B[0];
+               glTranslated(B->pn[0],B->pn[1],B->pn[2]);
+               RotateR2L(B->CN);
+               glTranslated(-B->cm[0],-B->cm[1],-B->cm[2]);
+               for(Ithr=0;Ithr<S->Nthr;Ithr++) {
+                  DrawThrusterPlume(&S->Thr[Ithr]);
+               }
+            }
+
+            glPopMatrix();
+         }
+      }
+
 
 /* .. Translucent FOVs are drawn last to get blending right */
       if (CamShow[CAM_FOV]) {
@@ -1288,9 +1813,9 @@ void DrawNearAuxObjects(void)
                   B = &S->B[F->Body];
                   if (F->NearExists) {
                      glPushMatrix();
-                     glTranslated(S->Rrel[0]+B->pn[0],
-                                  S->Rrel[1]+B->pn[1],
-                                  S->Rrel[2]+B->pn[2]);
+                     glTranslated(S->PosR[0]+B->pn[0],
+                                  S->PosR[1]+B->pn[1],
+                                  S->PosR[2]+B->pn[2]);
                      RotateR2L(B->CN);
                      glTranslated(F->pb[0]-B->cm[0],
                                   F->pb[1]-B->cm[1],
@@ -1321,6 +1846,55 @@ void DrawNearAuxObjects(void)
       if (ShowHUD) DrawCamHUD();
       if (strlen(Banner) > 1) DrawBanner(CamWidth,CamHeight);
       if (ShowWatermark) DrawWatermarks();
+}
+/**********************************************************************/
+void DrawContactSpheres(void)
+{
+      struct SCType *S;
+      struct BodyType *B;
+      struct GeomType *G;
+      struct PolyType *P;
+      long Isc,Ib,Ip;
+      static long First = 1;
+      static GLUquadric *Sphere;
+      GLfloat White[4] = {1.0,1.0,1.0,1.0};
+      GLfloat Black[4] = {0.0,0.0,0.0,1.0};
+
+      if (First) {
+         First = 0;
+         Sphere = gluNewQuadric();
+      }
+
+      glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT,White);
+      glMaterialfv(GL_FRONT_AND_BACK,GL_DIFFUSE,White);
+      glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,White);
+      glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,Black);
+      glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,10.0);
+
+      for(Isc=0;Isc<Nsc;Isc++) {
+         S = &SC[Isc];
+         if (S->RefOrb == POV.Host.RefOrb) {
+            for(Ib=0;Ib<S->Nb;Ib++) {
+               B = &S->B[Ib];
+               G = &Geom[B->GeomTag];
+               glPushMatrix();
+               glMultMatrixf(B->ModelMatrix);
+               for(Ip=0;Ip<G->Npoly;Ip++) {
+                  P = &G->Poly[Ip];
+                  glPushMatrix();
+                  glTranslated(P->Centroid[0],P->Centroid[1],P->Centroid[2]);
+                  glScaled(P->radius,P->radius,P->radius);
+                  gluSphere(Sphere,1.0,8,8);
+                  glPopMatrix();
+               }
+               glPopMatrix();
+            }
+         }
+      }
+
+      glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT,Black);
+      glMaterialfv(GL_FRONT_AND_BACK,GL_DIFFUSE,Black);
+      glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,Black);
 }
 /**********************************************************************/
 void DepthPass(void)
@@ -1357,7 +1931,7 @@ void DepthPass(void)
                BB = &G->BBox;
                for(i=0;i<3;i++) rb[i] = BB->center[i] - B->cm[i];
                MxV(B->CN,rb,rn);
-               for(i=0;i<3;i++) rn[i] += B->pn[i]+ S->Rrel[i];
+               for(i=0;i<3;i++) rn[i] += B->pn[i]+ S->PosR[i];
                MxV(CLN,rn,rl);
                for(i=0;i<3;i++) {
                   r = rl[i] + BB->radius;
@@ -1439,18 +2013,13 @@ void DepthPass(void)
 /**********************************************************************/
 void OpaquePass(void)
 {
-      long Isc,Ib,i;
+      long Isc,Ib;
       struct SCType *S;
       struct BodyType *B;
+      struct RegionType *R;
       struct GeomType *G;
       struct FBOType *SM;
-      struct POVType *P;
-      struct OrbitType *O;
-      struct MinorBodyType *MB;
-      GLfloat MSN[16];
-
-      P = &POV;
-      for(i=0;i<16;i++) MSN[i] = ShadowFromNMatrix[i];
+      long Ir;
 
       SM = &ShadowMap;
 
@@ -1466,18 +2035,18 @@ void OpaquePass(void)
                GL_COMPARE_R_TO_TEXTURE);
       }
 
-      O = &Orb[POV.Host.RefOrb];
-      if (O->CenterType == MINORBODY) {
-         MB = &MinorBody[O->center];
-         G = &Geom[MB->GeomTag];
-         glPushMatrix();
-         glMultMatrixf(MB->ModelMatrix);
-         if (ShadowsEnabled) {
-            MxM4f(ShadowFromNMatrix,MB->ModelMatrix,ShadowMatrix);
-            glUniformMatrix4fv(ShadowMatrixLoc,1,0,ShadowMatrix);
+      for(Ir=0;Ir<Nrgn;Ir++) {
+         R = &Rgn[Ir];
+         if (R->Exists && R->World == POV.Host.World) {
+            glPushMatrix();
+            glMultMatrixf(R->ModelMatrix);
+            if (ShadowsEnabled) {
+               MxM4f(ShadowFromNMatrix,R->ModelMatrix,ShadowMatrix);
+               glUniformMatrix4fv(ShadowMatrixLoc,1,0,ShadowMatrix);
+            }
+            glCallList(Geom[R->GeomTag].OpaqueListTag);
+            glPopMatrix();
          }
-         glCallList(G->OpaqueListTag);
-         glPopMatrix();
       }
 
       for(Isc=0;Isc<Nsc;Isc++) {
@@ -1501,29 +2070,41 @@ void OpaquePass(void)
 /**********************************************************************/
 void SeeThruPass(void)
 {
-      long Isc,Ib;
+      long Isc,Ib,Ir;
       struct SCType *S;
       struct BodyType *B;
       struct GeomType *G;
+      struct RegionType *R;
+      struct FBOType *SM;
 
-#if 0
-      glFrontFace(GL_CW);
-      for(Isc=0;Isc<Nsc;Isc++) {
-         S = &SC[Isc];
-         if (S->RefOrb == POV.Host.RefOrb) { /* TODO: Improve this */
-            for(Ib=0;Ib<Nb;Ib++) {
-               B = &S->B[Ib];
-               G = &Geom[B->GeomTag];
-               glPushMatrix();
-               glMultMatrixf(B->ModelMatrix);
-               glCallList(G->OpaqueListTag);
-               glCallList(G->SeeThruListTag);
-               glPopMatrix();
+      SM = &ShadowMap;
+
+      glUseProgram(BodyShaderProgram);
+      glUniform1i(ShadowsEnabledLoc,ShadowsEnabled);
+      glUniformMatrix3fv(CNELoc,1,0,CNE);
+
+      if (ShadowsEnabled) {
+         glActiveTexture(GL_TEXTURE5);
+         glEnable(GL_TEXTURE_2D);
+         glBindTexture(GL_TEXTURE_2D,SM->TexTag);
+         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_COMPARE_MODE,
+               GL_COMPARE_R_TO_TEXTURE);
+      }
+
+      for(Ir=0;Ir<Nrgn;Ir++) {
+         R = &Rgn[Ir];
+         if (R->Exists && R->World == POV.Host.World) {
+            glPushMatrix();
+            glMultMatrixf(R->ModelMatrix);
+            if (ShadowsEnabled) {
+               MxM4f(ShadowFromNMatrix,R->ModelMatrix,ShadowMatrix);
+               glUniformMatrix4fv(ShadowMatrixLoc,1,0,ShadowMatrix);
             }
+            glCallList(Geom[R->GeomTag].SeeThruListTag);
+            glPopMatrix();
          }
       }
-      glFrontFace(GL_CCW);
-#endif
+
       for(Isc=0;Isc<Nsc;Isc++) {
          S = &SC[Isc];
          if (S->RefOrb == POV.Host.RefOrb) {
@@ -1543,7 +2124,6 @@ void DrawBodies(void)
 {
       double CNH[3][3],PosN[3];
       GLfloat Black[4] = {0.0,0.0,0.0,1.0};
-      long i;
 
 /* .. Light Source */
       /* Sun */
@@ -1582,16 +2162,16 @@ void BufferToScreen()
 /**********************************************************************/
 void FindModelMatrices(void)
 {
-      long Isc,Ib,i;
-      double pbn[3],pcmn[3];
+      long Isc,Ib,i,Ir;
+      double pbn[3],pcmn[3],prn[3];
       struct SCType *S;
       struct BodyType *B;
       struct OrbitType *O;
-      struct MinorBodyType *MB;
+      struct RegionType *R;
 
       for(Isc=0;Isc<Nsc;Isc++) {
          S = &SC[Isc];
-         if (S->RefOrb == POV.Host.RefOrb) { /* TODO: Improve this */
+         if (S->Exists && S->RefOrb == POV.Host.RefOrb) { /* TODO: Improve this */
             for(Ib=0;Ib<S->Nb;Ib++) {
                B = &S->B[Ib];
                if (S->RefPt == REFPT_CM) {
@@ -1600,17 +2180,19 @@ void FindModelMatrices(void)
                else {
                   for(i=0;i<3;i++) pcmn[i] = 0.0;
                }
-               for(i=0;i<3;i++) pbn[i] = S->Rrel[i] + B->pn[i] - pcmn[i];
+               for(i=0;i<3;i++) pbn[i] = S->PosR[i] + B->pn[i] - pcmn[i];
                BuildModelMatrix(B->CN,pbn,B->ModelMatrix);
             }
          }
       }
 
-      O = &Orb[POV.Host.RefOrb];
-      if (O->CenterType == MINORBODY) {
-         MB = &MinorBody[O->center];
-         for(i=0;i<3;i++) pbn[i] = -O->PosN[i];
-         BuildModelMatrix(MB->CWN,pbn,MB->ModelMatrix);
+      for(Ir=0;Ir<Nrgn;Ir++) {
+         R = &Rgn[Ir];
+         if (R->Exists && R->World == POV.Host.World) {
+            O = &Orb[POV.Host.RefOrb];
+            for(i=0;i<3;i++) prn[i] = R->PosN[i]-O->PosN[i];
+            BuildModelMatrix(R->CN,prn,R->ModelMatrix);
+         }
       }
 }
 /**********************************************************************/
@@ -1636,6 +2218,7 @@ void CamRenderExec(void)
          DrawFarScene();
          SetEye(MONOCULAR);
          DrawBodies();
+         /* DrawContactSpheres(); */ /* Diagnostic only */
          DrawNearAuxObjects();
          glutSwapBuffers();
       }
@@ -1769,7 +2352,7 @@ long OccultedByEarth(double pge[3], double pte[3])
 void DrawMap(void)
 {
 
-      double a,Lng,Lat,x,y,sinlat,coslat;
+      double a,Lng,Lat,x,y;
       double p[3],magr,CosEclipse,rad,lngc,latc,axis[3];
       GLfloat Black[4] = {0.0,0.0,0.0,1.0};
       float MinorLatLngColor[4] = {1.0,1.0,1.0,0.2};
@@ -1780,78 +2363,41 @@ void DrawMap(void)
       struct OrbitType *Eph;
       struct SCType *S;
       struct WorldType *W;
-      struct MinorBodyType *MB;
       double dt,rn[3],vn[3],anom,re[3],rmw[3];
       double Zaxis[3] = {0.0,0.0,1.0};
       double CEW[3][3],CEN[3][3],CWH[3][3],svh[3],svw[3];
       float OldLng,OldLat;
-      long i,j,k,Im;
+      long i,k,Im;
       double rmh[3],rmn[3];
-      double CWN[3][3],Wrad,Ww;
 
       glClear(GL_COLOR_BUFFER_BIT);
       glMaterialfv(GL_FRONT,GL_DIFFUSE,Black);
 
       S = &SC[POV.Host.SC];
       if (World[POV.Host.World].Type != SUN) {
-         if (POV.Host.WorldType == WORLD) {
-            W = &World[Orb[S->RefOrb].center];
+         W = &World[Orb[S->RefOrb].World];
 
-            for(i=0;i<3;i++) svh[i] = -W->PosH[i];
-            UNITV(svh);
-            MxM(W->CWN,W->CNH,CWH);
-            MxV(CWH,svh,svw);
-            magr = MAGV(S->PosN);
-            CosEclipse = -sqrt(1.0-(W->rad*W->rad/magr/magr));
-            for(i=0;i<3;i++) {
-               for(j=0;j<3;j++) {
-                  CWN[i][j] = W->CWN[i][j];
-               }
-            }
-            Wrad = W->rad;
-            Ww = W->w;
-         }
-         else {
-            MB = &MinorBody[Orb[S->RefOrb].center];
-
-            for(i=0;i<3;i++) svh[i] = -MB->PosH[i];
-            UNITV(svh);
-            MxM(MB->CWN,MB->CNH,CWH);
-            MxV(CWH,svh,svw);
-            magr = MAGV(S->PosN);
-            CosEclipse = -sqrt(1.0-(MB->rad*MB->rad/magr/magr));
-            for(i=0;i<3;i++) {
-               for(j=0;j<3;j++) {
-                  CWN[i][j] = MB->CWN[i][j];
-               }
-            }
-            Wrad = MB->rad;
-            Ww = MB->w;
-         }
+         for(i=0;i<3;i++) svh[i] = -W->PosH[i];
+         UNITV(svh);
+         MxM(W->CWN,W->CNH,CWH);
+         MxV(CWH,svh,svw);
+         magr = MAGV(S->PosN);
+         CosEclipse = -sqrt(1.0-(W->rad*W->rad/magr/magr));
 
 
 /* .. Map with Day/Night Shading */
-         if (POV.Host.WorldType == WORLD) {
-            if (POV.Host.World == LUNA) {
-               glActiveTexture(GL_TEXTURE0);
-               glBindTexture(GL_TEXTURE_2D, World[LUNA].ColTexTag);
-               glActiveTexture(GL_TEXTURE1);
-               glBindTexture(GL_TEXTURE_2D, World[LUNA].BumpTexTag);
-               glUseProgram(MoonMapShaderProgram);
-               glUniform3f(MoonMapSunVecLoc,svw[0],svw[1],svw[2]);
-               glUniform1f(MoonMapCosEclLoc,CosEclipse);
-            }
-            else {
-               glActiveTexture(GL_TEXTURE0);
-               glBindTexture(GL_TEXTURE_2D, World[POV.Host.World].MapTexTag);
-               glUseProgram(MapShaderProgram);
-               glUniform3f(MapSunVecLoc,svw[0],svw[1],svw[2]);
-               glUniform1f(MapCosEclLoc,CosEclipse);
-            }
+         if (POV.Host.World == LUNA) {
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, World[LUNA].ColTexTag);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, World[LUNA].BumpTexTag);
+            glUseProgram(MoonMapShaderProgram);
+            glUniform3f(MoonMapSunVecLoc,svw[0],svw[1],svw[2]);
+            glUniform1f(MoonMapCosEclLoc,CosEclipse);
          }
          else {
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, MinorBody[POV.Host.World].MapTexTag);
+            glBindTexture(GL_TEXTURE_2D, World[POV.Host.World].MapTexTag);
             glUseProgram(MapShaderProgram);
             glUniform3f(MapSunVecLoc,svw[0],svw[1],svw[2]);
             glUniform1f(MapCosEclLoc,CosEclipse);
@@ -1933,40 +2479,13 @@ void DrawMap(void)
          glDisable(GL_TEXTURE_2D);
 
 /* .. Moon Sprite */
-         if (POV.Host.WorldType == WORLD) {
-            if (W->Nsat > 0) { /* Draw Moon Sprites */
-               glEnable(GL_TEXTURE_2D);
-               glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-               glBindTexture(GL_TEXTURE_2D,MoonSpriteTexTag);
-               for(Im=0;Im<W->Nsat;Im++) {
-                  MxV(W->CWN,World[W->Sat[Im]].eph.PosN,rmw);
-                  UNITV(rmw);
-                  Lng = atan2(rmw[1],rmw[0])*R2D;
-                  Lat = asin(rmw[2])*R2D;
-                  x=4.0;
-                  y=x;
-                  glBegin(GL_QUADS);
-                     glTexCoord2f(0.0,1.0);
-                     glVertex2f(Lng-x,Lat-y);
-                     glTexCoord2f(1.0,1.0);
-                     glVertex2f(Lng+x,Lat-y);
-                     glTexCoord2f(1.0,0.0);
-                     glVertex2f(Lng+x,Lat+y);
-                     glTexCoord2f(0.0,0.0);
-                     glVertex2f(Lng-x,Lat+y);
-                  glEnd();
-               }
-               glDisable(GL_TEXTURE_2D);
-            }
-            else if (W->Type == MOON) { /* Draw Parent Sprite */
-               glEnable(GL_TEXTURE_2D);
-               glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-               glBindTexture(GL_TEXTURE_2D,MoonSpriteTexTag);
-               for(i=0;i<3;i++) rmn[i] = -W->eph.PosN[i];
-               UNITV(rmn);
-               MxV(World[W->Parent].CNH,rmn,rmh);
-               MxV(W->CNH,rmh,rmn);
-               MxV(W->CWN,rmn,rmw);
+         if (W->Nsat > 0) { /* Draw Moon Sprites */
+            glEnable(GL_TEXTURE_2D);
+            glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+            glBindTexture(GL_TEXTURE_2D,MoonSpriteTexTag);
+            for(Im=0;Im<W->Nsat;Im++) {
+               MxV(W->CWN,World[W->Sat[Im]].eph.PosN,rmw);
+               UNITV(rmw);
                Lng = atan2(rmw[1],rmw[0])*R2D;
                Lat = asin(rmw[2])*R2D;
                x=4.0;
@@ -1981,16 +2500,40 @@ void DrawMap(void)
                   glTexCoord2f(0.0,0.0);
                   glVertex2f(Lng-x,Lat+y);
                glEnd();
-               glDisable(GL_TEXTURE_2D);
             }
+            glDisable(GL_TEXTURE_2D);
+         }
+         else if (W->Type == MOON) { /* Draw Parent Sprite */
+            glEnable(GL_TEXTURE_2D);
+            glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+            glBindTexture(GL_TEXTURE_2D,MoonSpriteTexTag);
+            for(i=0;i<3;i++) rmn[i] = -W->eph.PosN[i];
+            UNITV(rmn);
+            MxV(World[W->Parent].CNH,rmn,rmh);
+            MxV(W->CNH,rmh,rmn);
+            MxV(W->CWN,rmn,rmw);
+            Lng = atan2(rmw[1],rmw[0])*R2D;
+            Lat = asin(rmw[2])*R2D;
+            x=4.0;
+            y=x;
+            glBegin(GL_QUADS);
+               glTexCoord2f(0.0,1.0);
+               glVertex2f(Lng-x,Lat-y);
+               glTexCoord2f(1.0,1.0);
+               glVertex2f(Lng+x,Lat-y);
+               glTexCoord2f(1.0,0.0);
+               glVertex2f(Lng+x,Lat+y);
+               glTexCoord2f(0.0,0.0);
+               glVertex2f(Lng-x,Lat+y);
+            glEnd();
+            glDisable(GL_TEXTURE_2D);
          }
 
 /* .. Ground Stations */
          glColor4fv(GroundStationColor);
          glPointSize(5.0);
          for(i=0;i<Ngnd;i++) {
-            if (GroundStation[i].Exists && GroundStation[i].World == POV.Host.World
-               && POV.Host.WorldType == WORLD) {
+            if (GroundStation[i].Exists && GroundStation[i].World == POV.Host.World) {
                glBegin(GL_POINTS);
                   glVertex2f(GroundStation[i].lng,GroundStation[i].lat);
                glEnd();
@@ -2002,7 +2545,7 @@ void DrawMap(void)
          glPointSize(1.0);
 
 /* .. SC Sprite */
-         MxV(CWN,S->PosN,p);
+         MxV(W->CWN,S->PosN,p);
          UNITV(p);
          Lng = atan2(p[1],p[0])*R2D;
          Lat = asin(p[2])*R2D;
@@ -2027,11 +2570,11 @@ void DrawMap(void)
 
 /* .. Horizon Circle */
          glLineWidth(1.5);
-         MxV(CWN,S->PosN,axis);
+         MxV(W->CWN,S->PosN,axis);
          UNITV(axis);
          lngc = atan2(axis[1],axis[0]);
          latc = asin(axis[2]);
-         rad = acos(Wrad/magr);
+         rad = acos(W->rad/magr);
          glColor4fv(GroundStationColor);
          DrawSmallCircle(lngc,latc,rad);
 
@@ -2041,8 +2584,8 @@ void DrawMap(void)
          Eph = &Orb[POV.Host.RefOrb];
          Eph2RV(Eph->mu,Eph->SLR,Eph->ecc,Eph->inc,Eph->RAAN,Eph->ArgP,
             AbsTime-3600.0-Eph->tp,rn,vn,&anom);
-         SimpRot(Zaxis,-3600.0*Ww,CEW);
-         MxM(CEW,CWN,CEN);
+         SimpRot(Zaxis,-3600.0*W->w,CEW);
+         MxM(CEW,W->CWN,CEN);
          MxV(CEN,rn,re);
          magr = MAGV(re);
          OldLng = atan2(re[1],re[0])*R2D;
@@ -2051,8 +2594,8 @@ void DrawMap(void)
             dt = ((double) k)*60.0;
             Eph2RV(Eph->mu,Eph->SLR,Eph->ecc,Eph->inc,Eph->RAAN,Eph->ArgP,
                AbsTime+dt-Eph->tp,rn,vn,&anom);
-            SimpRot(Zaxis,Ww*dt,CEW);
-            MxM(CEW,CWN,CEN);
+            SimpRot(Zaxis,W->w*dt,CEW);
+            MxM(CEW,W->CWN,CEN);
             MxV(CEN,rn,re);
             magr = MAGV(re);
             Lng = atan2(re[1],re[0])*R2D;
@@ -2099,8 +2642,7 @@ void DrawMap(void)
          glDisable(GL_LINE_SMOOTH);
 
 /* .. TDRS in View */
-         if (POV.Host.WorldType == WORLD && POV.Host.World == EARTH
-            && CamShow[TDRS]) DrawTdrsMap();
+         if (POV.Host.World == EARTH && CamShow[TDRS]) DrawTdrsMap();
 
 /* .. Clock shows (possibly offset) time */
          if (MapShow[MAP_CLOCK]) DrawClock();
@@ -2195,9 +2737,8 @@ void DrawOrrery(void)
 {
       struct OrreryPOVType *O;
       double t,dt,t1,t2,r[3],v[3],anom;
-      struct WorldType *W,*W1,*W2,*P,*M;
+      struct WorldType *W,*W1,*W2,*P,*M,*MB;
       struct OrbitType *E;
-      struct MinorBodyType *MB;
       struct LagrangeSystemType *LS;
       struct LagrangePointType *LP;
       double MaxRadFactor,MaxAnom;
@@ -2226,31 +2767,27 @@ void DrawOrrery(void)
 
       glMatrixMode(GL_PROJECTION);
       glLoadIdentity();
-      glOrtho(-O->Radius,O->Radius, -O->Radius*OrreryHeight/OrreryWidth,O->Radius*OrreryHeight/OrreryWidth,
+      glOrtho(-O->Radius,O->Radius,
+              -O->Radius*OrreryHeight/OrreryWidth,
+               O->Radius*OrreryHeight/OrreryWidth,
               -60.0*AU2m,60.0*AU2m);
       glMatrixMode(GL_MODELVIEW);
 
 /* .. Gradient fill background */
-//      glBegin(GL_QUADS);
-//         glVertex2d(-O->Radius,-O->Radius);
-//         glVertex2d( O->Radius,-O->Radius);
-//         glVertex2d( O->Radius, O->Radius);
-//         glVertex2d(-O->Radius, O->Radius);
-//      glEnd();
+/*      glBegin(GL_QUADS);
+**         glVertex2d(-O->Radius,-O->Radius);
+**         glVertex2d( O->Radius,-O->Radius);
+**         glVertex2d( O->Radius, O->Radius);
+**         glVertex2d(-O->Radius, O->Radius);
+**      glEnd();
+*/
 
-      if (O->Type == ORB_CENTRAL) {
+      if (O->Regime == ORB_CENTRAL) {
          RotateL2R(O->CN);
          glTranslated(-O->PosN[0],-O->PosN[1],-O->PosN[2]);
-         if (O->CenterType == WORLD) {
-            W = &World[O->World];
-            RotateL2R(W->CNH);
-            glTranslated(-W->PosH[0],-W->PosH[1],-W->PosH[2]);
-         }
-         else {
-            MB = &MinorBody[O->MinorBody];
-            RotateL2R(MB->CNH);
-            glTranslated(-MB->PosH[0],-MB->PosH[1],-MB->PosH[2]);
-         }
+         W = &World[O->World];
+         RotateL2R(W->CNH);
+         glTranslated(-W->PosH[0],-W->PosH[1],-W->PosH[2]);
       }
       else {
          RotateL2R(O->CN);
@@ -2266,7 +2803,7 @@ void DrawOrrery(void)
 
       glLineWidth(2.0);
 
-/* .. Draw Orbits of Planets, Moons, and Asteroids */
+/* .. Draw Orbits of Planets and Moons */
       for(Ip=MERCURY;Ip<=PLUTO;Ip++) {
          if(World[Ip].Exists) {
             P = &World[Ip];
@@ -2312,8 +2849,8 @@ void DrawOrrery(void)
 
 /* .. Draw Orbits for Asteroids and Comets */
       for(Ib=0;Ib<Nmb;Ib++) {
-         if(MinorBody[Ib].Exists) {
-            MB = &MinorBody[Ib];
+         if(World[55+Ib].Exists) {
+            MB = &World[55+Ib];
             E = &MB->eph;
             if (E->SMA > 0.05*O->Radius) {
                glColor3fv(MinorBodyOrbitColor);
@@ -2463,8 +3000,8 @@ void DrawOrrery(void)
 /* .. Draw Asteroids and Comets */
       glPointSize(6.0);
       for(Ib=0;Ib<Nmb;Ib++) {
-         if(MinorBody[Ib].Exists) {
-            MB = &MinorBody[Ib];
+         if(World[55+Ib].Exists) {
+            MB = &World[55+Ib];
             E = &MB->eph;
             if (E->SMA > 0.05*O->Radius) {
                glColor3fv(WorldColor);
@@ -2496,20 +3033,12 @@ void DrawOrrery(void)
       for(Iorb=0;Iorb<Norb;Iorb++) {
          if(Orb[Iorb].Exists) {
             E = &Orb[Iorb];
-            if (E->Type == ORB_CENTRAL) {
+            if (E->Regime == ORB_CENTRAL) {
                if (E->rmin > 0.05*O->Radius) {
-                  if (E->CenterType == WORLD) {
-                     W = &World[E->center];
-                     glPushMatrix();
-                     glTranslated(W->PosH[0],W->PosH[1],W->PosH[2]);
-                     RotateR2L(W->CNH);
-                  }
-                  else {
-                     MB = &MinorBody[E->center];
-                     glPushMatrix();
-                     glTranslated(MB->PosH[0],MB->PosH[1],MB->PosH[2]);
-                     RotateR2L(MB->CNH);
-                  }
+                  W = &World[E->World];
+                  glPushMatrix();
+                  glTranslated(W->PosH[0],W->PosH[1],W->PosH[2]);
+                  RotateR2L(W->CNH);
                   if (E->ecc < 1.0) {
                      glBegin(GL_LINE_LOOP);
                         t1 = E->tp - 0.5*E->Period;
@@ -2559,8 +3088,8 @@ void DrawOrrery(void)
                if (sqrt(E->Ay*E->Ay+E->By*E->By+E->Az*E->Az) > 0.05*O->Radius) {
                   LP = &LS->LP[O->LP];
                   glBegin(GL_LINE_STRIP);
-                     dt = 0.002*TwoPi/LP->w1;
                      Period = TwoPi/LP->w1;
+                     dt = 0.002*Period;
                      t1 = AbsTime - 0.5*Period;
                      t2 = AbsTime + 0.5*Period;
                      ta = t1+Period/6.0;
@@ -2616,18 +3145,10 @@ void DrawOrrery(void)
       for(Isc=0;Isc<Nsc;Isc++) {
          if(SC[Isc].Exists) {
             E = &Orb[SC[Isc].RefOrb];
-            if (E->CenterType == WORLD) {
-               W = &World[E->center];
-               glPushMatrix();
-               glTranslated(W->PosH[0],W->PosH[1],W->PosH[2]);
-               RotateR2L(W->CNH);
-            }
-            else {
-               MB = &MinorBody[E->center];
-               glPushMatrix();
-               glTranslated(MB->PosH[0],MB->PosH[1],MB->PosH[2]);
-               RotateR2L(MB->CNH);
-            }
+            W = &World[E->World];
+            glPushMatrix();
+            glTranslated(W->PosH[0],W->PosH[1],W->PosH[2]);
+            RotateR2L(W->CNH);
             glRasterPos3dv(SC[Isc].PosN);
             glBitmap(8,8,4.0,4.0,5.0,-13.0,ScGlyph);
             DrawBitmapString(GLUT_BITMAP_8_BY_13,SC[Isc].Label);
@@ -2703,18 +3224,16 @@ void SetupViewVolume(int width, int height)
 void PovTrackHostMode(void)
 {
       double qdot[4],rb[3],rs[3],rf[3],rw[3];
-      long i,j,RefOrb,CenterType,center,PovSC,PovBody;
+      long i,j,RefOrb,center,PovSC,PovBody;
       struct TargetType *Host;
       double rh[3];
 
       Host = &POV.Host;
 
       RefOrb = Host->RefOrb;
-      CenterType = Orb[RefOrb].CenterType;
-      center = Orb[RefOrb].center;
+      center = Orb[RefOrb].World;
       PovSC = Host->SC;
       PovBody = Host->Body;
-      Host->WorldType = CenterType;
 
       if (POV.Frame == FRAME_N) {
          for(i=0;i<3;i++) {
@@ -2728,9 +3247,14 @@ void PovTrackHostMode(void)
          for(i=0;i<3;i++) {
             for(j=0;j<3;j++) POV.CL[i][j] = POV.C[i][j];
          }
-         MxM(POV.CL,SC[PovSC].CLN,POV.CN);
-         MxMT(POV.CN,Frm[RefOrb].CN,POV.CF);
+         if (Host->Type == TARGET_SC) {
+            MxM(POV.CL,SC[PovSC].CLN,POV.CN);
+         }
+         else if(Host->Type == TARGET_REFORB) {
+            MxM(POV.CL,Orb[RefOrb].CLN,POV.CN);
+         }
          MxMT(POV.CN,SC[PovSC].B[0].CN,POV.CB);
+         MxMT(POV.CN,Frm[RefOrb].CN,POV.CF);
       }
       else if(POV.Frame == FRAME_F) {
          for(i=0;i<3;i++) {
@@ -2758,17 +3282,9 @@ void PovTrackHostMode(void)
       }
 
       if (Host->Type == TARGET_WORLD) {
-         if (CenterType == MINORBODY) {
-            for(i=0;i<3;i++) {
-               rw[i] = MinorBody[Host->World].rad*POV.Range*POV.CN[2][i];
-               POV.PosR[i] = rw[i]-Orb[RefOrb].PosN[i];
-            }
-         }
-         else {
-            for(i=0;i<3;i++) {
-               rw[i] = World[Host->World].rad*POV.Range*POV.CN[2][i];
-               POV.PosR[i] = rw[i]-Orb[RefOrb].PosN[i];
-            }
+         for(i=0;i<3;i++) {
+            rw[i] = World[Host->World].rad*POV.Range*POV.CN[2][i];
+            POV.PosR[i] = rw[i]-Orb[RefOrb].PosN[i];
          }
       }
       else if (Host->Type == TARGET_REFORB) {
@@ -2788,7 +3304,7 @@ void PovTrackHostMode(void)
          Host->World = center;
          for(i=0;i<3;i++) {
             rs[i] = POV.Range*POV.CN[2][i];
-            POV.PosR[i] = rs[i] + SC[PovSC].Rrel[i];
+            POV.PosR[i] = rs[i] + SC[PovSC].PosR[i];
          }
       }
       else if (Host->Type == TARGET_BODY) {
@@ -2796,23 +3312,14 @@ void PovTrackHostMode(void)
          for(i=0;i<3;i++) {
             rb[i] = POV.Range*POV.CN[2][i];
             rs[i] = rb[i] + SC[PovSC].B[PovBody].pn[i];
-            POV.PosR[i] = rs[i] + SC[PovSC].Rrel[i];
+            POV.PosR[i] = rs[i] + SC[PovSC].PosR[i];
          }
       }
 
       for(i=0;i<3;i++) POV.PosN[i] = POV.PosR[i] + Orb[RefOrb].PosN[i];
-      if (Orb[RefOrb].CenterType == MINORBODY) {
-         MxM(POV.CN,MinorBody[Host->World].CNH,POV.CH);
-         VxM(POV.PosN,MinorBody[Host->World].CNH,rh);
-         for(i=0;i<3;i++) {
-            POV.PosH[i] = MinorBody[Host->World].PosH[i]+rh[i];
-         }
-      }
-      else {
-         MxM(POV.CN,World[Host->World].CNH,POV.CH);
-         VxM(POV.PosN,World[Host->World].CNH,rh);
-         for(i=0;i<3;i++) POV.PosH[i] = World[Host->World].PosH[i]+rh[i];
-      }
+      MxM(POV.CN,World[Host->World].CNH,POV.CH);
+      VxM(POV.PosN,World[Host->World].CNH,rh);
+      for(i=0;i<3;i++) POV.PosH[i] = World[Host->World].PosH[i]+rh[i];
 
       QW2QDOT(POV.q,POV.w,qdot);
       for(i=0;i<4;i++) POV.q[i] += qdot[i];
@@ -2880,7 +3387,7 @@ void PovTrackTargetMode(void)
       }
       else if (Host->Type == TARGET_SC) {
          for(j=0;j<3;j++) {
-            Host->PosR[j] = SC[Host->SC].Rrel[j];
+            Host->PosR[j] = SC[Host->SC].PosR[j];
             Host->PosN[j] = Host->PosR[j] + Orb[Host->RefOrb].PosN[j];
             for(k=0;k<3;k++)
                Host->CN[j][k] = SC[Host->SC].B[0].CN[j][k];
@@ -2900,7 +3407,7 @@ void PovTrackTargetMode(void)
       else {
          for(j=0;j<3;j++) {
             Host->PosR[j] = SC[Host->SC].B[Host->Body].pn[j]
-               + SC[Host->SC].Rrel[j];
+               + SC[Host->SC].PosR[j];
             Host->PosN[j] = Host->PosR[j] + Orb[Host->RefOrb].PosN[j];
             for(k=0;k<3;k++)
                Host->CN[j][k] = SC[Host->SC].B[Host->Body].CN[j][k];
@@ -2940,7 +3447,7 @@ void PovTrackTargetMode(void)
       }
       else if (Trg->Type == TARGET_SC) {
          for(j=0;j<3;j++) {
-            Trg->PosR[j] = SC[Trg->SC].Rrel[j];
+            Trg->PosR[j] = SC[Trg->SC].PosR[j];
             Trg->PosN[j] = Trg->PosR[j] + Orb[Trg->RefOrb].PosN[j];
          }
          MTxV(World[Trg->World].CNH,Trg->PosN,Trg->PosH);
@@ -2949,7 +3456,7 @@ void PovTrackTargetMode(void)
       else {
          for(j=0;j<3;j++) {
             Trg->PosR[j] = SC[Trg->SC].B[Trg->Body].pn[j]
-               + SC[Trg->SC].Rrel[j];
+               + SC[Trg->SC].PosR[j];
             Trg->PosN[j] = Trg->PosR[j] + Orb[Trg->RefOrb].PosN[j];
          }
          MTxV(World[Trg->World].CNH,Trg->PosN,Trg->PosH);
@@ -3071,7 +3578,7 @@ void PovFixedInHostMode(void)
       }
       else if (Host->Type == TARGET_SC) {
          for(j=0;j<3;j++) {
-            Host->PosR[j] = SC[Host->SC].Rrel[j];
+            Host->PosR[j] = SC[Host->SC].PosR[j];
             Host->PosN[j] = Host->PosR[j] + Orb[Host->RefOrb].PosN[j];
             for(k=0;k<3;k++)
                Host->CN[j][k] = SC[Host->SC].B[0].CN[j][k];
@@ -3091,7 +3598,7 @@ void PovFixedInHostMode(void)
       else {
          for(j=0;j<3;j++) {
             Host->PosR[j] = SC[Host->SC].B[Host->Body].pn[j]
-               + SC[Host->SC].Rrel[j];
+               + SC[Host->SC].PosR[j];
             Host->PosN[j] = Host->PosR[j] + Orb[Host->RefOrb].PosN[j];
             for(k=0;k<3;k++)
                Host->CN[j][k] = SC[Host->SC].B[Host->Body].CN[j][k];
@@ -3161,7 +3668,7 @@ void TimerHandler(int value)
 /*********************************************************************/
 void Idle(void)
 {
-      long MaxCamFrame = 10000;
+      long MaxCamFrame = 20000;
       char CamFileName[40];
       long Done = 0;
 
@@ -3177,12 +3684,6 @@ void Idle(void)
             glutSetWindow(OrreryWindow);
             DrawOrrery();
          }
-         #ifdef _ENABLE_PROXOPS_GUI_
-            if (ProxOpsWindowExists) {
-               glutSetWindow(ProxOpsWindow);
-               DrawProxOps();
-            }
-         #endif
          glutPostRedisplay();
       }
       else {
@@ -3205,16 +3706,10 @@ void Idle(void)
                   glutSetWindow(OrreryWindow);
                   DrawOrrery();
                }
-               #ifdef _ENABLE_PROXOPS_GUI_
-                  if (ProxOpsWindowExists) {
-                     glutSetWindow(ProxOpsWindow);
-                     DrawProxOps();
-                  }
-               #endif
                glutPostRedisplay();
                if (CaptureCam) {
                   CamFrame++;
-                  sprintf(CamFileName,"CamFrame%05li.ppm",CamFrame);
+                  sprintf(CamFileName,"CamFrame%05ld.ppm",CamFrame);
                   glutSetWindow(CamWindow);
                   CaptureScreenToPpm("./Screenshots/",
                      CamFileName,CamHeight,CamWidth);
@@ -3319,15 +3814,6 @@ void SpecialKeyHandler(int key, int x, int y)
                CaptureScreenToPpm("./Screenshots/",
                   "MapSnap.ppm",MapHeight,MapWidth);
             }
-            break;
-         case GLUT_KEY_F3 :
-            #ifdef _ENABLE_PROXOPS_GUI_
-               if (ProxOpsWindowExists) {
-                  glutSetWindow(ProxOpsWindow);
-                  CaptureScreenToPpm("./Screenshots/",
-                     "ProxOpsSnap.ppm",ProxOpsHeight,ProxOpsWidth);
-               }
-            #endif
             break;
       }
 }
@@ -3469,14 +3955,19 @@ void CamMouseButtonHandler(int Button, int State, int x, int y)
                   else if (POV.Host.Type == TARGET_REFORB ||
                            POV.Host.Type == TARGET_FRM) {
                      POV.Host.RefOrb = (POV.Host.RefOrb+Norb-1)%Norb;
-                     POV.Host.World = Orb[POV.Host.RefOrb].center;
+                     POV.Host.World = Orb[POV.Host.RefOrb].World;
+                     while(!(SC[POV.Host.SC].Exists &&
+                             SC[POV.Host.SC].RefOrb ==
+                             POV.Host.RefOrb)) {
+                        POV.Host.SC = (POV.Host.SC+1)%Nsc;
+                     };
                   }
                   else if (POV.Host.Type == TARGET_SC) {
                      do {
                         POV.Host.SC = (POV.Host.SC+Nsc-1)%Nsc;
                      } while(!SC[POV.Host.SC].Exists);
                      POV.Host.RefOrb = SC[POV.Host.SC].RefOrb;
-                     POV.Host.World = Orb[POV.Host.RefOrb].center;
+                     POV.Host.World = Orb[POV.Host.RefOrb].World;
                   }
                   else {
                      POV.Host.Body = (POV.Host.Body+SC[POV.Host.SC].Nb-1)
@@ -3492,14 +3983,19 @@ void CamMouseButtonHandler(int Button, int State, int x, int y)
                   else if (POV.Host.Type == TARGET_REFORB ||
                            POV.Host.Type == TARGET_FRM) {
                      POV.Host.RefOrb = (POV.Host.RefOrb+1)%Norb;
-                     POV.Host.World = Orb[POV.Host.RefOrb].center;
+                     POV.Host.World = Orb[POV.Host.RefOrb].World;
+                     while(!(SC[POV.Host.SC].Exists &&
+                             SC[POV.Host.SC].RefOrb ==
+                             POV.Host.RefOrb)) {
+                        POV.Host.SC = (POV.Host.SC+1)%Nsc;
+                     };
                   }
                   else if (POV.Host.Type == TARGET_SC) {
                      do {
                         POV.Host.SC = (POV.Host.SC+1)%Nsc;
                      } while(!SC[POV.Host.SC].Exists);
                      POV.Host.RefOrb = SC[POV.Host.SC].RefOrb;
-                     POV.Host.World = Orb[POV.Host.RefOrb].center;
+                     POV.Host.World = Orb[POV.Host.RefOrb].World;
                   }
                   else {
                      POV.Host.Body = (POV.Host.Body+1)%SC[POV.Host.SC].Nb;
@@ -3507,7 +4003,7 @@ void CamMouseButtonHandler(int Button, int State, int x, int y)
                }
                else if (Pick == 7) {
                   POV.Range *= 1.6;
-                  if (POV.Range > 500.0) POV.Range = 500.0;
+                  if (POV.Range > 10000.0) POV.Range = 10000.0;
                }
                else if (Pick == 8) {
                   POV.Range *= 0.625;
@@ -3540,14 +4036,14 @@ void CamMouseButtonHandler(int Button, int State, int x, int y)
                   else if (POV.Target.Type == TARGET_REFORB ||
                            POV.Target.Type == TARGET_FRM) {
                      POV.Target.RefOrb = (POV.Target.RefOrb+Norb-1)%Norb;
-                     POV.Target.World = Orb[POV.Target.RefOrb].center;
+                     POV.Target.World = Orb[POV.Target.RefOrb].World;
                   }
                   else if (POV.Target.Type == TARGET_SC) {
                      do {
                         POV.Target.SC = (POV.Target.SC+Nsc-1)%Nsc;
                      } while(!SC[POV.Target.SC].Exists);
                      POV.Target.RefOrb = SC[POV.Target.SC].RefOrb;
-                     POV.Target.World = Orb[POV.Target.RefOrb].center;
+                     POV.Target.World = Orb[POV.Target.RefOrb].World;
                   }
                   else {
                      POV.Target.Body = (POV.Target.Body+SC[POV.Target.SC].Nb-1)
@@ -3563,14 +4059,14 @@ void CamMouseButtonHandler(int Button, int State, int x, int y)
                   else if (POV.Target.Type == TARGET_REFORB ||
                            POV.Target.Type == TARGET_FRM) {
                      POV.Target.RefOrb = (POV.Target.RefOrb+1)%Norb;
-                     POV.Target.World = Orb[POV.Target.RefOrb].center;
+                     POV.Target.World = Orb[POV.Target.RefOrb].World;
                   }
                   else if (POV.Target.Type == TARGET_SC) {
                      do {
                         POV.Target.SC = (POV.Target.SC+1)%Nsc;
                      } while(!SC[POV.Target.SC].Exists);
                      POV.Target.RefOrb = SC[POV.Target.SC].RefOrb;
-                     POV.Target.World = Orb[POV.Target.RefOrb].center;
+                     POV.Target.World = Orb[POV.Target.RefOrb].World;
                   }
                   else {
                      POV.Target.Body = (POV.Target.Body+1)%SC[POV.Target.SC].Nb;
@@ -3578,11 +4074,11 @@ void CamMouseButtonHandler(int Button, int State, int x, int y)
                }
                else if (Pick == 7) {
                   POV.Range *= 1.6;
-                  if (POV.Range > 500.0) POV.Range = 500.0;
+                  if (POV.Range > 10000.0) POV.Range = 10000.0;
                }
                else if (Pick == 8) {
                   POV.Range *= 0.625;
-                  if (POV.Range < 5.0) POV.Range = 5.0;
+                  if (POV.Range < 1.0) POV.Range = 1.0;
                }
             }
             else if (x >= CamShowWidget.xmin && x <= CamShowWidget.xmax &&
@@ -3683,7 +4179,7 @@ void OrreryMouseButtonHandler(int Button, int State, int x, int y)
                                        O->Scale[O->Zoom];
                      break;
                   case 2:  /* Pan Up */
-                     if (O->Type == ORB_CENTRAL) {
+                     if (O->Regime == ORB_CENTRAL) {
                         O->PosN[1] += 0.5*O->Radius;
                      }
                      else {
@@ -3692,21 +4188,21 @@ void OrreryMouseButtonHandler(int Button, int State, int x, int y)
                      }
                      break;
                   case 3:  /* Pan Down */
-                     if (O->Type == ORB_CENTRAL) O->PosN[1] -= 0.5*O->Radius;
+                     if (O->Regime == ORB_CENTRAL) O->PosN[1] -= 0.5*O->Radius;
                      else {
                         for(i=0;i<3;i++) O->PosN[i] -=
                            0.5*O->Radius*LagSys[O->LagSys].CLN[1][i];
                      }
                      break;
                   case 4:  /* Pan Left */
-                     if (O->Type == ORB_CENTRAL) O->PosN[0] -= 0.5*O->Radius;
+                     if (O->Regime == ORB_CENTRAL) O->PosN[0] -= 0.5*O->Radius;
                      else {
                         for(i=0;i<3;i++) O->PosN[i] -=
                            0.5*O->Radius*LagSys[O->LagSys].CLN[0][i];
                      }
                      break;
                   case 5:  /* Pan Right */
-                     if (O->Type == ORB_CENTRAL) O->PosN[0] += 0.5*O->Radius;
+                     if (O->Regime == ORB_CENTRAL) O->PosN[0] += 0.5*O->Radius;
                      else {
                         for(i=0;i<3;i++) O->PosN[i] +=
                            0.5*O->Radius*LagSys[O->LagSys].CLN[0][i];
@@ -3732,7 +4228,7 @@ void OrreryMouseButtonHandler(int Button, int State, int x, int y)
                /* Check Worlds */
                for(Iw=0;Iw<NWORLD && !Done;Iw++) {
                   if (World[Iw].Exists) {
-                     if (O->Type == ORB_CENTRAL) {
+                     if (O->Regime == ORB_CENTRAL) {
                         for(i=0;i<3;i++) rwh[i] =
                            World[Iw].PosH[i] - World[O->World].PosH[i];
                         MxV(O->CNH,rwh,rwn);
@@ -3754,7 +4250,7 @@ void OrreryMouseButtonHandler(int Button, int State, int x, int y)
                      d = sqrt(dx*dx+dy*dy);
                      if (d < 20.0) { /* If within 20 pixels */
                         Done = 1;
-                        O->Type = ORB_CENTRAL;
+                        O->Regime = ORB_CENTRAL;
                         O->World = Iw;
                         for(i=0;i<3;i++) {
                            for(j=0;j<3;j++) {
@@ -3782,7 +4278,7 @@ void OrreryMouseButtonHandler(int Button, int State, int x, int y)
                         for(i=0;i<3;i++) rwh[i] =
                            LPrh[i] - World[O->World].PosH[i];
                         MxV(O->CNH,rwh,rwn);
-                        if (O->Type == ORB_CENTRAL) {
+                        if (O->Regime == ORB_CENTRAL) {
                            for(i=0;i<3;i++) rw[i] = rwn[i] - O->PosN[i];
                         }
                         else {
@@ -3796,7 +4292,7 @@ void OrreryMouseButtonHandler(int Button, int State, int x, int y)
                         dy = ((double) y)-yw;
                         d = sqrt(dx*dx+dy*dy);
                         if (d < 20.0) {
-                           O->Type = ORB_THREE_BODY;
+                           O->Regime = ORB_THREE_BODY;
                            O->World = Iw;
                            O->LagSys = Is;
                            O->LP = Ip;
@@ -4164,7 +4660,7 @@ void Load3DNoise(void)
 /*********************************************************************/
 void LoadCamLists(void)
 {
-      long Isc,Ib;
+      long Isc,Ib,Iw,Ir;
       double MwAlphaMask[4] = {0.0,0.5,0.5,0.0};
 
 /* .. Load SC Geom Display Lists */
@@ -4173,9 +4669,14 @@ void LoadCamLists(void)
             GeomToDisplayLists(&Geom[SC[Isc].B[Ib].GeomTag]);
          }
       }
-/* .. Load Asteroid Geom Display Lists */
-      for(Ib=0;Ib<Nmb;Ib++) {
-         GeomToDisplayLists(&Geom[MinorBody[Ib].GeomTag]);
+/* .. Load World Geom Display Lists */
+      for(Iw=0;Iw<NWORLD;Iw++) {
+         if (World[Iw].GeomTag != 0)
+            GeomToDisplayLists(&Geom[World[Iw].GeomTag]);
+      }
+/* .. Load Region Geom Display Lists */
+      for(Ir=0;Ir<Nrgn;Ir++) {
+         GeomToDisplayLists(&Geom[Rgn[Ir].GeomTag]);
       }
 
 /* .. Load Stars and Worlds */
@@ -4269,7 +4770,7 @@ GLuint LoadSpectrum(const char *SpectrumName)
 void LoadCamTextures(void)
 {
       struct MatlType *M;
-      struct MinorBodyType *MB;
+      struct WorldType *MB;
       long Im,Iw,Ip,Ib;
       char s[80];
       GLfloat SunlightColor[3] = {1.0,1.0,1.0};
@@ -4290,7 +4791,7 @@ void LoadCamTextures(void)
          }
       }
 
-      SkyCube = PpmToCubeTag("./World/","EarthCol",3);
+      SkyCube = PpmToCubeTag("./World/","StarryEnvMap",3);
 
       World[SOL].Color[0] = 1.0;
       World[SOL].Color[1] = 1.0;
@@ -4360,8 +4861,8 @@ void LoadCamTextures(void)
          }
       }
       for(Ib=0;Ib<Nmb;Ib++) {
-         if (MinorBody[Ib].Exists) {
-            MB = &MinorBody[Ib];
+         if (World[55+Ib].Exists) {
+            MB = &World[55+Ib];
             if (!strcmp(MB->MapFileName,"NONE")) { /* strcmp returns 0 if match */
                MB->TexTag = NullTexTag;
                MB->ColCubeTag = NullColCubeTag;
@@ -4416,8 +4917,11 @@ void LoadCamTextures(void)
       /*
       World[EARTH].ColCubeTag = PpmToCubeTag("./World/","MoonlikeCol",3);
       World[EARTH].BumpCubeTag = PpmToCubeTag("./World/","MoonlikeBump",3);
-      World[EARTH].CloudGlossCubeTag = PpmToCubeTag("./World/","EarthlikeCloudGloss",3);
       */
+      World[EARTH].BumpCubeTag = PpmToCubeTag("./World/","EarthBump",3);
+      World[MARS].BumpCubeTag = PpmToCubeTag("./World/","MarsBump",3);
+      World[EARTH].CloudGlossCubeTag = PpmToCubeTag("./World/","EarthCloudGloss",3);
+
       World[LUNA].ColCubeTag = PpmToCubeTag("./World/","LunaCol",3);
       World[LUNA].BumpCubeTag = PpmToCubeTag("./World/","LunaBump",3);
 
@@ -4473,38 +4977,174 @@ void LoadShadowMapFBO(void)
       glBindFramebuffer(GL_FRAMEBUFFER,0);
 }
 /**********************************************************************/
-#if _USE_SHADERS_
+void CreateStarrySkyEnvMap(void)
+{
+      char face[6][20] = {"PX.ppm","PY.ppm","PZ.ppm",
+                          "MX.ppm","MY.ppm","MZ.ppm"};
+      char filename[40];
+      GLuint FboTag,TexTag;
+      GLuint Height,Width;
+      GLenum Status;
+      float *Tex;
+      long If,i;
+      double CPH[6][3][3] = {
+         {{ 0.0, 1.0, 0.0},
+          { 0.0, 0.0, 1.0},
+          { 1.0, 0.0, 0.0}}, /* PX */
+
+         {{-1.0, 0.0, 0.0},
+          { 0.0, 0.0, 1.0},
+          { 0.0, 1.0, 0.0}}, /* PY */
+
+         {{ 1.0, 0.0, 0.0},
+          { 0.0, 1.0, 0.0},
+          { 0.0, 0.0, 1.0}}, /* PZ */
+
+         {{ 0.0,-1.0, 0.0},
+          { 0.0, 0.0, 1.0},
+          {-1.0, 0.0, 0.0}}, /* MX */
+
+         {{ 1.0, 0.0, 0.0},
+          { 0.0, 0.0, 1.0},
+          { 0.0,-1.0, 0.0}}, /* MY */
+
+         {{-1.0, 0.0, 0.0},
+          { 0.0, 1.0, 0.0},
+          { 0.0, 0.0,-1.0}}  /* MZ */
+      };
+      double LoS[3];
+
+      Height = 1024;
+      Width = 1024;
+
+      Tex = (float *) calloc(Height*Width*3,sizeof(float));
+
+      glGenFramebuffers(1,(GLuint *) &FboTag);
+      glBindFramebuffer(GL_FRAMEBUFFER,FboTag);
+
+      /* Create Texture */
+      glActiveTexture(GL_TEXTURE0);
+      glGenTextures(1,(GLuint *) &TexTag);
+      glBindTexture(GL_TEXTURE_2D,TexTag);
+      glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,Width,Height,0,
+         GL_RGB,GL_UNSIGNED_BYTE,NULL);
+      glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
+      glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
+      glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+
+      glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,TexTag,0);
+
+      Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+      if (Status != GL_FRAMEBUFFER_COMPLETE) {
+         printf("Error initializing StarrySkyEnvMap\n");
+      }
+
+      /* Draw each face into framebuffer, save to file */
+      glMatrixMode(GL_PROJECTION);
+      glPushMatrix();
+      glMatrixMode(GL_MODELVIEW);
+      glClearColor(0.0,0.0,0.0,1.0);
+      for(If=0;If<6;If++) {
+         glClear(GL_COLOR_BUFFER_BIT);
+
+         /* Set camera orientation */
+         glMatrixMode(GL_PROJECTION);
+         glLoadIdentity();
+         gluPerspective(90.0,1.0,0.1,10.0);
+         glMatrixMode(GL_MODELVIEW);
+
+         /* Transform from View frame to H frame */
+         glLoadIdentity();
+         RotateL2R(CPH[If]);
+
+         /* Line of Sight, from POV toward back of view frustum */
+         for(i=0;i<3;i++) LoS[i] = -CPH[If][2][i];
+
+         /* Draw Milky Way, stars */
+         if (0) glCallList(FermiSkyList);
+         else if (0) glCallList(MilkyWayList);
+         DrawStars(LoS,BuckyPf,StarList);
+
+         /* Save to PPM */
+         sprintf(filename,"StarryEnvMap");
+         strcat(filename,face[If]);
+         glReadPixels(0,0,Width,Height,GL_RGB,GL_FLOAT,Tex);
+         TexToPpm("./World/",filename,Height,Width,3,Tex);
+      }
+
+      glMatrixMode(GL_PROJECTION);
+      glPopMatrix();
+      glMatrixMode(GL_MODELVIEW);
+
+      glBindTexture(GL_TEXTURE_2D,0);
+
+      /* Redirect rendering to on-screen framebuffer */
+      glBindFramebuffer(GL_FRAMEBUFFER,0);
+
+      glDeleteFramebuffers(1,&FboTag);
+      glDeleteTextures(1,&TexTag);
+      free(Tex);
+}
+/**********************************************************************/
+#ifdef _USE_SHADERS_
 void LoadCamShaders(void)
 {
-      #include "../Kit/Source/CamShaders.glsl"
       GLint UniLoc;
       GLfloat Eye3x3[9] = {1.0,0.0,0.0, 0.0,1.0,0.0, 0.0,0.0,1.0};
       GLfloat Eye4x4[16] = {1.0,0.0,0.0,0.0, 0.0,1.0,0.0,0.0,
                             0.0,0.0,1.0,0.0, 0.0,0.0,0.0,1.0};
+      size_t StrLen;
+      char *ShaderText;
 
+      FileToString("./Kit/Shaders/WorldVtx.glsl",&ShaderText,&StrLen);
       WorldVtxShader =
-         TextToShader(WorldVtxText,GL_VERTEX_SHADER,"WorldVtx");
+         TextToShader(ShaderText,GL_VERTEX_SHADER,"WorldVtx");
+      free(ShaderText);
 
+      FileToString("./Kit/Shaders/WorldFrag.glsl",&ShaderText,&StrLen);
       WorldFragShader =
-         TextToShader(WorldFragText,GL_FRAGMENT_SHADER,"WorldFrag");
+         TextToShader(ShaderText,GL_FRAGMENT_SHADER,"WorldFrag");
+      free(ShaderText);
 
       WorldShaderProgram = BuildShaderProgram(
          WorldVtxShader,WorldFragShader,"World");
 
+      FileToString("./Kit/Shaders/RingVtx.glsl",&ShaderText,&StrLen);
       RingVtxShader =
-         TextToShader(RingVtxText,GL_VERTEX_SHADER,"RingVtx");
+         TextToShader(ShaderText,GL_VERTEX_SHADER,"RingVtx");
+      free(ShaderText);
 
+      FileToString("./Kit/Shaders/RingFrag.glsl",&ShaderText,&StrLen);
       RingFragShader =
-         TextToShader(RingFragText,GL_FRAGMENT_SHADER,"RingFrag");
+         TextToShader(ShaderText,GL_FRAGMENT_SHADER,"RingFrag");
+      free(ShaderText);
 
       RingShaderProgram =
          BuildShaderProgram(RingVtxShader,RingFragShader,"Ring");
 
-      BodyVtxShader =
-         TextToShader(BodyVtxText,GL_VERTEX_SHADER,"BodyVtx");
+      FileToString("./Kit/Shaders/AtmoVtx.glsl",&ShaderText,&StrLen);
+      AtmoVtxShader =
+         TextToShader(ShaderText,GL_VERTEX_SHADER,"AtmoVtx");
+      free(ShaderText);
 
+      FileToString("./Kit/Shaders/AtmoFrag.glsl",&ShaderText,&StrLen);
+      AtmoFragShader =
+         TextToShader(ShaderText,GL_FRAGMENT_SHADER,"AtmoFrag");
+      free(ShaderText);
+
+      AtmoShaderProgram =
+         BuildShaderProgram(AtmoVtxShader,AtmoFragShader,"Atmo");
+
+      FileToString("./Kit/Shaders/BodyVtx.glsl",&ShaderText,&StrLen);
+      BodyVtxShader =
+         TextToShader(ShaderText,GL_VERTEX_SHADER,"BodyVtx");
+      free(ShaderText);
+
+      FileToString("./Kit/Shaders/BodyFrag.glsl",&ShaderText,&StrLen);
       BodyFragShader =
-         TextToShader(BodyFragText,GL_FRAGMENT_SHADER,"BodyFrag");
+         TextToShader(ShaderText,GL_FRAGMENT_SHADER,"BodyFrag");
+      free(ShaderText);
 
       BodyShaderProgram =
          BuildShaderProgram(BodyVtxShader,BodyFragShader,"Body");
@@ -4520,14 +5160,31 @@ void LoadCamShaders(void)
       glUniform1i(UniLoc,3);
       UniLoc = glGetUniformLocation(WorldShaderProgram,"PovPosW");
       glUniform3f(UniLoc,0.0,0.0,1.0);
-      UniLoc = glGetUniformLocation(WorldShaderProgram,"HazeEnabled");
+      UniLoc = glGetUniformLocation(WorldShaderProgram,"HasAtmo");
       glUniform1i(UniLoc,0);
+      UniLoc = glGetUniformLocation(WorldShaderProgram,"AtmoColor");
+      glUniform3f(UniLoc,0.0,0.0,0.0);
+      UniLoc = glGetUniformLocation(WorldShaderProgram,"MaxHt");
+      glUniform1f(UniLoc,0.0);
       ValidateShaderProgram(WorldShaderProgram,"World");
 
       glUseProgram(RingShaderProgram);
       UniLoc = glGetUniformLocation(RingShaderProgram,"RingTexture");
       glUniform1i(UniLoc,0);
       ValidateShaderProgram(RingShaderProgram,"Ring");
+
+      glUseProgram(AtmoShaderProgram);
+      UniLoc = glGetUniformLocation(AtmoShaderProgram,"Alt");
+      glUniform1f(UniLoc,0.0);
+      UniLoc = glGetUniformLocation(AtmoShaderProgram,"MaxHt");
+      glUniform1f(UniLoc,40.0E3);
+      UniLoc = glGetUniformLocation(AtmoShaderProgram,"GasColor");
+      glUniform3f(UniLoc,1.0,0.0,1.0);
+      UniLoc = glGetUniformLocation(AtmoShaderProgram,"DustColor");
+      glUniform3f(UniLoc,1.0,1.0,1.0);
+      UniLoc = glGetUniformLocation(AtmoShaderProgram,"WorldRadius");
+      glUniform1f(UniLoc,6378.145E3);
+      ValidateShaderProgram(AtmoShaderProgram,"Atmo");
 
       glUseProgram(BodyShaderProgram);
       UniLoc = glGetUniformLocation(BodyShaderProgram,"CNE");
@@ -4574,17 +5231,22 @@ void LoadCamShaders(void)
 }
 #endif
 /**********************************************************************/
-#if _USE_SHADERS_
+#ifdef _USE_SHADERS_
 void LoadMapShaders(void)
 {
-      #include "../Kit/Source/MapShaders.glsl"
       GLint TexLoc;
+      char *ShaderText;
+      size_t StrLen;
 
+      FileToString("./Kit/Shaders/MapVtx.glsl",&ShaderText,&StrLen);
       MapVtxShader =
-         TextToShader(MapVtxText,GL_VERTEX_SHADER,"MapVtx");
+         TextToShader(ShaderText,GL_VERTEX_SHADER,"MapVtx");
+      free(ShaderText);
 
+      FileToString("./Kit/Shaders/MapFrag.glsl",&ShaderText,&StrLen);
       MapFragShader =
-         TextToShader(MapFragText,GL_FRAGMENT_SHADER,"MapFrag");
+         TextToShader(ShaderText,GL_FRAGMENT_SHADER,"MapFrag");
+      free(ShaderText);
 
       MapShaderProgram =
          BuildShaderProgram(MapVtxShader,MapFragShader,"Map");
@@ -4600,8 +5262,10 @@ void LoadMapShaders(void)
 
       glUseProgram(0);
 
+      FileToString("./Kit/Shaders/MoonMapFrag.glsl",&ShaderText,&StrLen);
       MoonMapFragShader =
-         TextToShader(MoonMapFragText,GL_FRAGMENT_SHADER,"MoonMapFrag");
+         TextToShader(ShaderText,GL_FRAGMENT_SHADER,"MoonMapFrag");
+      free(ShaderText);
 
       MoonMapShaderProgram =
          BuildShaderProgram(MapVtxShader,MoonMapFragShader,"MoonMap");
@@ -4626,6 +5290,13 @@ void InitCamWindow(void)
       glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
       glutInitWindowSize(CamWidth,CamHeight);
       CamWindow = glutCreateWindow(CamTitle);
+	   #if (defined(GLEW_BUILD) || defined(GLEW_STATIC))
+	   if (GLEW_OK != glewInit()) {
+		   printf("glew failed to initialize in InitCamWindow\n");
+		   exit(1);
+	   }
+	   #endif
+
       glutSetWindow(CamWindow);
       glutPositionWindow(0,30);
 
@@ -4639,7 +5310,7 @@ void InitCamWindow(void)
       glEnable(GL_POINT_SMOOTH);
       glShadeModel(GL_SMOOTH);
       glPolygonMode(GL_FRONT, GL_FILL);
-      //glPolygonMode(GL_FRONT, GL_LINE);
+      /*glPolygonMode(GL_FRONT, GL_LINE);*/
       glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 /* .. Create light */
@@ -4658,13 +5329,13 @@ void InitCamWindow(void)
       glutPassiveMotionFunc(CamMousePassiveMotionHandler);
       glutKeyboardFunc(AsciiKeyHandler);
       glutSpecialFunc(SpecialKeyHandler);
-      //glutJoystickFunc(JoystickHandler,100);
+      /*glutJoystickFunc(JoystickHandler,100);*/
       glutReshapeFunc(CamReshapeHandler);
-      //glutSetCursor(GLUT_CURSOR_INHERIT);
+      /*glutSetCursor(GLUT_CURSOR_INHERIT);*/
 
 /* .. Set up view volume */
       POV.Near = 1.0;
-      POV.Far = 150.0E3;  /* m */
+      POV.Far = 50.0E3;  /* m */
       SkyDistance = 0.5*POV.Far;
 
       Font8x11Offset = LoadFont8x11();
@@ -4683,6 +5354,8 @@ void InitCamWindow(void)
       SeeThruPassNeeded = FALSE;
       printf("Loading Cam Lists\n");
       LoadCamLists();
+
+      /*CreateStarrySkyEnvMap();*/
 
       ShowWatermark = 0;
 
@@ -4792,7 +5465,7 @@ void InitOrreryWindow(void)
       OrreryWidth = 512;
       OrreryHeight = 512;
       O->Zoom = 26;
-      O->Type = ORB_CENTRAL;
+      O->Regime = ORB_CENTRAL;
       O->World = SOL;
       O->LagSys = SUNEARTH;
       O->LP = LAGPT_L1;
@@ -4874,9 +5547,6 @@ void ReadGraphicsInpFile(void)
       long i;
       char Frame;
       long Host,Target;
-      #ifdef _ENABLE_PROXOPS_GUI_
-         long ProxOpsScaleMSD, ProxOpsScalePoT;
-      #endif
 
 /* .. Initialize POV */
       infile = FileOpen(InOutPath,"Inp_Graphics.txt","r");
@@ -4889,12 +5559,6 @@ void ReadGraphicsInpFile(void)
       MapWindowExists = DecodeString(response);
       fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
       OrreryWindowExists = DecodeString(response);
-      fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
-      ProxOpsWindowExists = DecodeString(response);
-      #ifndef _ENABLE_PROXOPS_GUI_
-         printf("ProxOps Window is not Enabled in this distribution.  Sorry for the inconvenience.\n");
-         ProxOpsWindowExists = FALSE;
-      #endif
 /* .. POV */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
@@ -4911,7 +5575,7 @@ void ReadGraphicsInpFile(void)
       }
       POV.Host.SC = Host;
       POV.Host.RefOrb = SC[Host].RefOrb;
-      POV.Host.World = Orb[POV.Host.RefOrb].center;
+      POV.Host.World = Orb[POV.Host.RefOrb].World;
       POV.Frame = DecodeString(response);
       if (Frame == 'N') POV.Frame = FRAME_N;
       else if (Frame == 'L') POV.Frame = FRAME_L;
@@ -4932,7 +5596,7 @@ void ReadGraphicsInpFile(void)
       }
       POV.Target.SC = Target;
       POV.Target.RefOrb = SC[Target].RefOrb;
-      POV.Target.World = Orb[POV.Target.RefOrb].center;
+      POV.Target.World = Orb[POV.Target.RefOrb].World;
       POV.Frame = DecodeString(response);
       if (Frame == 'N') POV.Frame = FRAME_N;
       else if (Frame == 'L') POV.Frame = FRAME_L;
@@ -4983,24 +5647,6 @@ void ReadGraphicsInpFile(void)
             MapShowLabel[i],junk,&newline);
          MapShow[i] = DecodeString(response);
       }
-
-/* .. ProxOps Parameters */
-      fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-      #ifdef _ENABLE_PROXOPS_GUI_
-         fscanf(infile,"\"%[^\"]\" %[^\n] %[\n]",ProxOpsTitle,junk,&newline);
-         fscanf(infile,"%ld %ld %[^\n] %[\n]",
-            &ProxOpsWidth,&ProxOpsHeight,junk,&newline);
-
-         fscanf(infile,"%ld %[^\n] %[\n]",&ProxOpsScaleMSD,junk,&newline);
-
-         ProxOpsScaleMSD=(ProxOpsScaleMSD == 5 ? 3 : ProxOpsScaleMSD);
-         fscanf(infile,"%ld %[^\n] %[\n]",&ProxOpsScalePoT,junk,&newline);
-         ProxOpsZoom = (ProxOpsScalePoT+1)*3+ProxOpsScaleMSD-1;
-         fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
-         ProxOpsView = DecodeString(response);
-      #else
-         for(i=0;i<5;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-      #endif
 
       fclose(infile);
 
@@ -5158,12 +5804,20 @@ long GuiCmdInterpreter(char CmdLine[512], double *CmdTime)
       char response[120];
       char FrameChar;
       double Ang1,Ang2,Ang3;
+      double Val1,Val2,Val3,Val4;
       long NewCmdProcessed = FALSE;
+      long Ifov;
 
       if (sscanf(CmdLine,"%lf POV.Host.SC %ld",CmdTime,&POV.Host.SC) == 2) {
          NewCmdProcessed = TRUE;
          POV.Host.RefOrb = SC[POV.Host.SC].RefOrb;
-         POV.Host.World = Orb[POV.Host.RefOrb].center;
+         POV.Host.World = Orb[POV.Host.RefOrb].World;
+      }
+
+      if (sscanf(CmdLine,"%lf POV.Host.RefOrb %ld",CmdTime,&POV.Host.RefOrb) == 2) {
+         NewCmdProcessed = TRUE;
+         POV.Host.Type = TARGET_REFORB;
+         POV.Host.World = Orb[POV.Host.RefOrb].World;
       }
 
       if (sscanf(CmdLine,"%lf CaptureCam %s",CmdTime,response) == 2) {
@@ -5189,25 +5843,54 @@ long GuiCmdInterpreter(char CmdLine[512], double *CmdTime)
          }
       }
 
-      #ifdef _ENABLE_PROXOPS_GUI_
-         if (sscanf(CmdLine,"%lf ProxOpsSnap %s",CmdTime,response) == 2) {
-            NewCmdProcessed = TRUE;
-            if (DecodeString(response) == TRUE && ProxOpsWindowExists) {
-               glutSetWindow(ProxOpsWindow);
-               CaptureScreenToPpm("./Screenshots/",
-                  "ProxOpsSnap.ppm",ProxOpsHeight,ProxOpsWidth);
-            }
-         }
-      #endif
-
       if (sscanf(CmdLine,"%lf ShowHUD %s",CmdTime,response) == 2) {
          NewCmdProcessed = TRUE;
          ShowHUD = DecodeString(response);
       }
 
+      if (sscanf(CmdLine,"%lf ShowWatermark %s",CmdTime,response) == 2) {
+         NewCmdProcessed = TRUE;
+         ShowWatermark = DecodeString(response);
+      }
+
+      if (sscanf(CmdLine,"%lf ShowShadows %s",CmdTime,response) == 2) {
+         NewCmdProcessed = TRUE;
+         CamShow[CAM_SHADOWS] = DecodeString(response);
+         ShadowsEnabled = CamShow[CAM_SHADOWS];
+      }
+
+      if (sscanf(CmdLine,"%lf ShowProxOps %s",CmdTime,response) == 2) {
+         NewCmdProcessed = TRUE;
+         CamShow[PROX_OPS] = DecodeString(response);
+      }
+
+      if (sscanf(CmdLine,"%lf ShowFOV %s",CmdTime,response) == 2) {
+         NewCmdProcessed = TRUE;
+         CamShow[CAM_FOV] = DecodeString(response);
+      }
+
+      if (sscanf(CmdLine,"%lf FOV[%ld].NearExists =  %s",CmdTime,&Ifov,response) == 3) {
+         NewCmdProcessed = TRUE;
+         FOV[Ifov].NearExists = DecodeString(response);
+      }
+
+      if (sscanf(CmdLine,"%lf FOV[%ld].FarExists =  %s",CmdTime,&Ifov,response) == 3) {
+         NewCmdProcessed = TRUE;
+         FOV[Ifov].FarExists = DecodeString(response);
+      }
+
       if (sscanf(CmdLine,"%lf Banner = \"%[^\"]\"",CmdTime,response) == 2) {
          NewCmdProcessed = TRUE;
          strcpy(Banner,response);
+      }
+
+      if (sscanf(CmdLine,"%lf BannerColor = [%lf %lf %lf %lf]",
+         CmdTime,&Val1,&Val2,&Val3,&Val4) == 5) {
+         NewCmdProcessed = TRUE;
+         BannerColor[0] = Val1;
+         BannerColor[1] = Val2;
+         BannerColor[2] = Val3;
+         BannerColor[3] = Val4;
       }
 
       if (sscanf(CmdLine,"%lf GL Output Step = %lf",CmdTime,&DTOUTGL) == 2) {
@@ -5268,14 +5951,9 @@ int HandoffToGui(int argc, char **argv)
       if (OrreryWindowExists) {
          InitOrreryWindow();
       }
-      #ifdef _ENABLE_PROXOPS_GUI_
-         if (ProxOpsWindowExists) {
-            InitProxOpsWindow();
-         }
-      #endif
 
       /* Comment out when OpenGL installation is stable */
-      //CheckOpenGLProperties();
+      /*CheckOpenGLProperties();*/
 
 /* .. Dive into Event Loop */
       if (TimeMode == FAST_TIME)
@@ -5287,6 +5965,7 @@ int HandoffToGui(int argc, char **argv)
 
       return(0);
 }
-//#ifdef __cplusplus
-//}
-//#endif
+/* #ifdef __cplusplus
+** }
+** #endif
+*/

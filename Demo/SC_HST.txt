@@ -31,6 +31,7 @@ FALSE                         ! Include 2nd Order Flex Terms
 88400.0  93200.0   38200.0    ! Moments of Inertia (kg-m^2)
 0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
 0.0  0.0  6.0                 ! Location of mass center, m
+0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
 HST.obj                       ! Geometry Input File Name
 NONE                          ! Flex File Name
 ************************************************************************

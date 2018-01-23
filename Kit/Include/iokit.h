@@ -15,34 +15,47 @@
 #ifndef __IOKIT_H__
 #define __IOKIT_H__
 
-//#ifdef __cplusplus
-//namespace Kit {
-//#endif
+/*
+** #ifdef __cplusplus
+** namespace Kit {
+** #endif
+*/
 
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #ifdef _ENABLE_SOCKETS_
-   #include <sys/socket.h>
-   //#include <sys/un.h>
-   #include <netinet/in.h>
-   #include <netdb.h>
+   #ifdef _WIN32
+      #include <winsock2.h>
+   #else
+      #include <sys/socket.h>
+      #include <netinet/in.h>
+      #include <netdb.h>
+      /* Finesse winsock SOCKET datatype */
+      #define SOCKET int
+   #endif
+   /* #include <sys/un.h> */
    #include <fcntl.h>
 #endif
 
 FILE *FileOpen(const char *Path, const char *File, const char *CtrlCode);
 void ByteSwapDouble(double *A);
+int FileToString(const char *file_name, char **result_string,
+                 size_t *string_len);
 
 #ifdef _ENABLE_SOCKETS_
-int InitSocketServer(int Port);
-int InitSocketClient(const char *hostname, int Port);
+SOCKET InitSocketServer(int Port, int AllowBlocking);
+SOCKET InitSocketClient(const char *hostname, int Port, int AllowBlocking);
 #endif
 
-//#ifdef __cplusplus
-//}
-//#endif
+/*
+** #ifdef __cplusplus
+** }
+** #endif
+*/
 
 #endif /* __IOKIT_H__ */

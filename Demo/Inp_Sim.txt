@@ -6,24 +6,28 @@ FAST                            !  Time Mode (FAST, REAL, or EXTERNAL)
 TRUE                            !  Graphics Front End?
 Inp_Cmd.txt                     !  Command Script File Name
 **************************  Reference Orbits  **************************
-5                               !  Number of Reference Orbits
+6                               !  Number of Reference Orbits
 TRUE   Orb_EOS.txt              !  Input file name for Orb 0
 TRUE   Orb_ISS.txt              !  Input file name for Orb 1
 TRUE   Orb_67P.txt              !  Input file name for Orb 2
 TRUE   Orb_Saturn.txt           !  Input file name for Orb 3
 TRUE   Orb_Jupiter.txt          !  Input file name for Orb 4
+TRUE   Orb_Cube.txt             !  Input file name for Orb 5
 *****************************  Spacecraft  *****************************
-7                               !  Number of Spacecraft
+10                              !  Number of Spacecraft
 TRUE  0 SC_Aura.txt             !  Existence, RefOrb, Input file for SC 0
 TRUE  1 SC_ISS.txt              !  Existence, RefOrb, Input file for SC 1
 TRUE  1 SC_Shuttle.txt          !  Existence, RefOrb, Input file for SC 2
 TRUE  2 SC_IonCruiser.txt       !  Existence, RefOrb, Input file for SC 3
 TRUE  3 SC_Voyager.txt          !  Existence, RefOrb, Input file for SC 4
 TRUE  4 SC_Moai.txt             !  Existence, RefOrb, Input file for SC 5
-TRUE  4 SC_BBM.txt              !  Existence, RefOrb, Input file for SC 7
+TRUE  4 SC_BBM.txt              !  Existence, RefOrb, Input file for SC 6
+TRUE  5 SC_Cubesat1U.txt           !  Existence, RefOrb, Input file for SC 7
+TRUE  5 SC_Cubesat3U.txt           !  Existence, RefOrb, Input file for SC 8
+TRUE  5 SC_Cubesat6U.txt           !  Existence, RefOrb, Input file for SC 9
 ***************************** Environment  *****************************
-01 23 2015                      !  Date (Month, Day, Year)
-19 48 00.00                     !  Greenwich Mean Time (Hr,Min,Sec)
+09 29 2016                      !  Date (Month, Day, Year)
+10 16 00.00                     !  Greenwich Mean Time (Hr,Min,Sec)
 0.0                             !  Time Offset (sec)
 USER_DEFINED                    !  Model Date Interpolation for Solar Flux and AP values?(TWOSIGMA_KP, NOMINAL or USER_DEFINED)
 230.0                           !  If USER_DEFINED, enter desired F10.7 value
@@ -33,13 +37,15 @@ IGRF                            !  Magfield (NONE,DIPOLE,IGRF)
 2   0                           !  Earth Gravity Model N and M (<=18)
 2   0                           !  Mars Gravity Model N and M (<=18)
 2   0                           !  Luna Gravity Model N and M (<=18)
-FALSE                           !  Aerodynamic Forces & Torques
+FALSE   FALSE                   !  Aerodynamic Forces & Torques (Shadows)
 FALSE                           !  Gravity Gradient Torques
-FALSE                           !  Solar Pressure Forces & Torques
+FALSE   FALSE                   !  Solar Pressure Forces & Torques (Shadows)
 FALSE                           !  Gravity Perturbation Forces
 FALSE                           !  Passive Joint Torques
 FALSE                           !  Thruster Plume Forces & Torques
 FALSE                           !  RWA Imbalance Forces and Torques
+FALSE                           !  Contact Forces and Torques
+FALSE                           !  CFD Slosh Forces and Torques
 FALSE                           !  Output Environmental Torques to Files
 ********************* Celestial Bodies of Interest *********************
 TRUE                            !  Mercury
@@ -53,7 +59,7 @@ TRUE                            !  Neptune and its moons
 TRUE                            !  Pluto and its moons
 TRUE                            !  Asteroids and Comets
 ***************** Lagrange Point Systems of Interest ******************
-FALSE                           !  Earth-Moon
+TRUE                            !  Earth-Moon
 TRUE                            !  Sun-Earth
 FALSE                           !  Sun-Jupiter
 ************************* Ground Stations ***************************

@@ -22,9 +22,26 @@
 #include "iokit.h"
 #include "mathkit.h"
 
-//#ifdef __cplusplus
-//namespace Kit {
-//#endif
+/*
+** #ifdef __cplusplus
+** namespace Kit {
+** #endif
+*/
+
+struct SilEdgeType {
+   long Body;
+   long Iv1,Iv2;
+   double PosV1B[3];
+   double PosV2B[3];
+   double PosV1N[3];
+   double PosV2N[3];
+};
+
+struct SilVtxType {
+   long Body;
+   double PosB[3];
+   double PosN[3];
+};
 
 struct PolyType {
    long Nv;
@@ -40,13 +57,16 @@ struct PolyType {
    double Norm[3];
    double Uhat[3],Vhat[3]; /* In-plane basis vectors */
    double Centroid[3];
+   double radius; /* of bounding sphere centered on Centroid */
+   double UnshadedArea; /* Variable, accounting for shadowing */
+   double UnshadedCtr[3]; /* Variable, accounting for shadowing */
 };
 
 struct EdgeType {
-   long Vtx1;
-   long Vtx2;
-   long Poly1;
-   long Poly2;
+   long Vtx1; /* Tail */
+   long Vtx2; /* Head */
+   long Poly1; /* Left */
+   long Poly2; /* Right */
    double Length;
 };
 
@@ -160,8 +180,10 @@ struct GeomType *LoadWingsObjFile(const char ModelPath[80], const char ObjFilena
 void WriteGeomToObjFile(struct MatlType *Matl,struct GeomType *Geom,const char Path[80],
    const char FileName[40]);
 
-//#ifdef __cplusplus
-//}
-//#endif
+/*
+** #ifdef __cplusplus
+** }
+** #endif
+*/
 
 #endif /* __GEOMKIT_H__ */

@@ -14,9 +14,10 @@
 
 #include "geomkit.h"
 
-//#ifdef __cplusplus
-//namespace Kit {
-//#endif
+/* #ifdef __cplusplus
+** namespace Kit {
+** #endif
+*/
 
 /**********************************************************************/
 struct MatlType *AddMtlLib(const char *PathName, const char *MtlLibName,
@@ -208,6 +209,10 @@ void SurfaceForceProps(struct GeomType *G)
             printf("NaN Centroid in SurfaceForceProps\n");
             exit(1);
          }
+         P->UnshadedArea = P->Area;
+         P->UnshadedCtr[0] = P->Centroid[0];
+         P->UnshadedCtr[1] = P->Centroid[1];
+         P->UnshadedCtr[2] = P->Centroid[2];
 
          DestroyMatrix(uv,P->Nv+1);
       }
@@ -481,7 +486,7 @@ void SplitKDNode(struct KDNodeType *KD,struct GeomType *G)
       long AnyVtxBelowMedian;
       long AnyVtxAboveMedian;
 
-      //printf("KD Node Depth = %ld\n",KD->Depth);
+      /* printf("KD Node Depth = %ld\n",KD->Depth); */
 
       /* Create child nodes */
       Axis = (KD->Axis+1)%3;
@@ -543,7 +548,7 @@ void SplitKDNode(struct KDNodeType *KD,struct GeomType *G)
          LC->IsLeaf = 1;
       }
       else if (LC->Depth > 20) {
-         //printf("Depth exceeds 20.  Npoly = %ld\n",LC->Npoly);
+         /*printf("Depth exceeds 20.  Npoly = %ld\n",LC->Npoly);*/
          LC->IsLeaf = 1;
       }
       else SplitKDNode(LC,G);
@@ -552,7 +557,7 @@ void SplitKDNode(struct KDNodeType *KD,struct GeomType *G)
          HC->IsLeaf = 1;
       }
       else if (HC->Depth > 20) {
-         //printf("Depth exceeds 20.  Npoly = %ld\n",HC->Npoly);
+         /*printf("Depth exceeds 20.  Npoly = %ld\n",HC->Npoly);*/
          HC->IsLeaf = 1;
       }
       else SplitKDNode(HC,G);
@@ -826,7 +831,7 @@ struct GeomType *LoadWingsObjFile(const char ModelPath[80],const char ObjFilenam
       FILE *TmpFile;
       char *txtptr;
       double V[3];
-      double r[3];
+      double r[3],magr;
       long V1,V2;
       long Ng,Ig,Iv,Im;
       long I,It,In,i,j,MatlIdx;
@@ -1086,6 +1091,11 @@ struct GeomType *LoadWingsObjFile(const char ModelPath[80],const char ObjFilenam
             if (G->V[i][j] > G->BBox.max[j]) G->BBox.max[j] = G->V[i][j];
          }
       }
+      /* Expand BBox slightly to make sure all Vtx's are inside it */
+      for(j=0;j<3;j++) {
+         G->BBox.max[j] += 0.01;
+         G->BBox.min[j] -= 0.01;
+      }
       for(j=0;j<3;j++) {
          G->BBox.center[j] = 0.5*(G->BBox.min[j]+G->BBox.max[j]);
       }
@@ -1142,6 +1152,7 @@ struct GeomType *LoadWingsObjFile(const char ModelPath[80],const char ObjFilenam
                   G->Edge[G->Nedge-1].Vtx1 = V1;
                   G->Edge[G->Nedge-1].Vtx2 = V2;
                   G->Edge[G->Nedge-1].Poly1 = Ip;
+                  G->Edge[G->Nedge-1].Poly2 = -1;
                   for(i=0;i<3;i++) V[i] = G->V[V1][i] - G->V[V2][i];
                   G->Edge[G->Nedge-1].Length = MAGV(V);
                   P->E[Iv] = G->Nedge-1;
@@ -1152,6 +1163,18 @@ struct GeomType *LoadWingsObjFile(const char ModelPath[80],const char ObjFilenam
 
       /* Find Normals, Areas, Centroids for use in surface force models */
       SurfaceForceProps(G);
+
+      /* Find radius of bounding sphere for each poly */
+      for(Ipoly=0;Ipoly<G->Npoly;Ipoly++) {
+         P = &G->Poly[Ipoly];
+         P->radius = 0.0;
+         for(Iv=0;Iv<P->Nv;Iv++) {
+            Ivtx = P->V[Iv];
+            for(i=0;i<3;i++) r[i] = G->V[Ivtx][i] - P->Centroid[i];
+            magr = MAGV(r);
+            if (magr > P->radius) P->radius = magr;
+         }
+      }
 
       *Ngeom = Ng;
       *GeomTag = Ng-1;
@@ -1266,6 +1289,7 @@ void WriteGeomToObjFile(struct MatlType *Matl,struct GeomType *Geom,const char P
 
 }
 
-//#ifdef __cplusplus
-//}
-//#endif
+/* #ifdef __cplusplus
+** }
+** #endif
+*/

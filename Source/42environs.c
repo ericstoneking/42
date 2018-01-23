@@ -17,10 +17,11 @@
 #include <mathkit.h>
 #include <timekit.h>
 
-//#ifdef __cplusplus
-//namespace _42 {
-//using namespace Kit;
-//#endif
+/* #ifdef __cplusplus
+** namespace _42 {
+** using namespace Kit;
+** #endif
+*/
 
 /**********************************************************************/
 /*  Nominal Schatten Model Solar Flux KP and AP data   */
@@ -266,20 +267,33 @@ void TwoSigmaAtmoParam(void)
 }
 
 /**********************************************************************/
-      void Environment(struct SCType *S)
+void Environment(struct SCType *S)
 {
-      long Center;
+      struct OrbitType *O;
       struct WorldType *P;
+      double Alt;
+      double PosW[3];
+      int NumEnergies = 5;
+      float ElectronEnergy[5] = {0.15,0.5,1.0,3.0,4.0}; /* MeV */
+      float ProtonEnergy[5] = {4.0,10.0,20.0,30.0,50.0}; /* MeV */
+      static double **Flux;
+      double MagLat;
+      static long First = 1;
+      
+      if (First) {
+         First = 0;
+         Flux = CreateMatrix(4,NumEnergies);
+      }
 
-      Center = Orb[S->RefOrb].center;
-      P = &World[Center];
+      O = &Orb[S->RefOrb];
+      P = &World[O->World];
 
-      /* .. Magnetic Field */
+/* .. Magnetic Field */
       if (MagModel.Type == DIPOLE) {
          DipoleMagField(P->DipoleMoment,P->DipoleAxis,
          P->DipoleOffset,S->PosN,P->PriMerAng,S->bvn);
       }
-      else if (MagModel.Type == IGRF && Center == EARTH) {
+      else if (MagModel.Type == IGRF && O->World == EARTH) {
          IGRFMagField(ModelPath,MagModel.N,MagModel.M,S->PosN,
          P->PriMerAng,S->bvn);
       }
@@ -291,6 +305,7 @@ void TwoSigmaAtmoParam(void)
 
       MxV(S->B[0].CN,S->bvn,S->bvb);
 
+/* .. Atmospheric Density */
       /* .. Use of NOAA and Schatten files for Solar Flux and AP values */
       if (UseFileForInterpolation == TWOSIGMA_KP){
          TwoSigmaAtmoParam();
@@ -301,22 +316,36 @@ void TwoSigmaAtmoParam(void)
          NominalAtmoParam();
       printf("AP 2Sigma value is %lf \n", GeomagIndex);
       printf("Flux 2Sigma value is %lf \n", Flux10p7);
-    }
+      }
       /* .. Atmospheric Density */
-      if (Orb[S->RefOrb].center == EARTH) {
-         //S->AtmoDensity = MSIS86(Year,doy,Hour,Minute,Second,
-         //S->PosN,P->PriMerAng,Flux10p7,GeomagIndex);
-         S->AtmoDensity = JacchiaRoberts(S->PosN,S->svn,Flux10p7,GeomagIndex);
+      if (O->World == EARTH) {
+         MxV(World[EARTH].CWN,S->PosN,PosW);
+         Alt = MAGV(PosW)-World[EARTH].rad;
+         if (Alt < 1000.0E3) { /* What is max alt of MSISE00 validity? */
+            S->AtmoDensity = NRLMSISE00(Year,doy,Hour,Minute,Second,PosW,
+                                        Flux10p7,GeomagIndex);
+         }
+         else S->AtmoDensity = 0.0;
       }
 
-      else if (Orb[S->RefOrb].center == MARS) {
+      else if (O->World == MARS) {
          S->AtmoDensity = MarsAtmosphereModel(S->PosN);
       }
 
       else S->AtmoDensity = 0.0;
+      
+/* .. Radiation Belt Electron and Proton Fluxes, particles/cm^2/sec */
+      if (O->World == EARTH) {
+         MxV(World[EARTH].CWN,S->PosN,PosW);
+         UNITV(PosW);
+         MagLat = asin(VoV(PosW,World[EARTH].DipoleAxis));
+         RadBelt(MAGV(S->PosN)/1000.0,fabs(MagLat)*R2D,NumEnergies,
+            ElectronEnergy,ProtonEnergy,Flux);
+      }
 
 }
 
-//#ifdef __cplusplus
-//}
-//#endif
+/* #ifdef __cplusplus
+** }
+** #endif
+*/

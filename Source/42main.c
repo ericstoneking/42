@@ -28,9 +28,11 @@
 /* This "main" serves as the entry point for the stand-alone          */
 /* application.  It calls 42's top-level executive function, "exec".  */
 
-//#ifdef __cplusplus
-//namespace _42 {
-//#endif
+/*
+** #ifdef __cplusplus
+** namespace _42 {
+** #endif
+*/
 
 int exec(int argc,char **argv);
 
@@ -39,7 +41,9 @@ int main(int argc,char **argv)
  	   return(exec(argc,argv));
 }
 
-//#ifdef __cplusplus
-//}
-//#endif
+/*
+** #ifdef __cplusplus
+** }
+** #endif
+*/
 

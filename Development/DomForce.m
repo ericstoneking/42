@@ -14,6 +14,7 @@ for i=1:N,
     x=(i-N/2)*5.0/N;
     if mod(i,50) == 0,
        i
+       fflush(stdout)
     end
     for j=1:N,
         y=(j-N/2)*5.0/N;

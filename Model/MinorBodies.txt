@@ -3,12 +3,13 @@
 *****************************  Minor Body  *********************************
 TRUE                               ! Exists
 "Bennu"                            ! Name
+ASTEROID                           ! ASTEROID or COMET
 Rockball                           ! Map File Name
 RQ36Crust05.obj                    ! Geometry Object File Name
 RQ36Color.ppm                      ! Color Texture File Name
 RQ36Bump.ppm                       ! Bump Texture File Name
 5.2                                ! mu, m^2/sec^3
-250.0                              ! Radius, m
+246.0                              ! Radius, m
 4.0613E-4                          ! Rotation rate, rad/sec
 86.6388 -65.1086                   ! RA, Dec of pole, deg
 1.685E11                           ! SMA, m
@@ -21,6 +22,7 @@ RQ36Bump.ppm                       ! Bump Texture File Name
 *****************************  Minor Body  *********************************
 TRUE                               ! Exists
 "Eros"                             ! Name   
+ASTEROID                           ! ASTEROID or COMET
 Rockball                           ! Map File Name
 ErosCrust03.obj                    ! Geometry Object File Name   
 ErosColor.ppm                      ! Color Texture File Name  
@@ -39,12 +41,13 @@ ErosBump.ppm                       ! Bump Texture File Name
 *****************************  Minor Body  *********************************
 TRUE                               ! Exists
 "67P/C-G"                          ! Name 
+COMET                              ! ASTEROID or COMET
 Rockball                           ! Map File Name
-67P-CG.obj                         ! Geometry Object File Name 
+67P.obj                         ! Geometry Object File Name 
 NONE                               ! Color Texture File Name
 NONE                               ! Bump Texture File Name
 667.0                              ! mu, m^2/sec^3
-2.0E3                              ! Radius, m
+2.64E3                             ! Radius, m
 1.4075E-4                          ! Rotation rate, rad/sec
 69.0  64.0                         ! RA, Dec of pole, deg
 518.06E9                           ! SMA, m
@@ -57,6 +60,7 @@ NONE                               ! Bump Texture File Name
 *****************************  Minor Body  *********************************
 FALSE                              ! Exists
 "Itokawa"                          ! Name 
+ASTEROID                           ! ASTEROID or COMET
 Rockball                           ! Map File Name
 ItokawaCrust03.obj                 ! Geometry Object File Name 
 ItokawaColor.ppm                   ! Color Texture File Name
@@ -75,6 +79,7 @@ ItokawaBump.ppm                    ! Bump Texture File Name
 *****************************  Minor Body  *********************************
 FALSE                              ! Exists
 "Wirtanen"                         ! Name
+COMET                              ! ASTEROID or COMET
 Rockball                           ! Map File Name
 Wirtanen.obj                       ! Geometry Object File Name 
 WirtanenColor.ppm                  ! Color Texture File Name 
@@ -93,6 +98,7 @@ WirtanenBump.ppm                   ! Bump Texture File Name
 *****************************  Minor Body  *********************************
 FALSE                              ! Exists
 "Haidea"                           ! Name
+ASTEROID                           ! ASTEROID or COMET
 Rockball                           ! Map File Name
 GenericAsteroid.obj                ! Geometry Object File Name 
 HaideaColor.ppm                    ! Color Texture File Name
@@ -111,6 +117,7 @@ HaideaBump.ppm                     ! Bump Texture File Name
 *****************************  Minor Body  *********************************
 FALSE                              ! Exists
 "Lacadiera"                        ! Name
+ASTEROID                           ! ASTEROID or COMET
 Rockball                           ! Map File Name
 Lacadiera.obj                      ! Geometry Object File Name 
 LacadieraColor.ppm                 ! Color Texture File Name
@@ -129,6 +136,7 @@ LacadieraBump.ppm                  ! Bump Texture File Name
 *****************************  Minor Body  *********************************
 FALSE                              ! Exists
 "Hedwig"                           ! Name 
+ASTEROID                           ! ASTEROID or COMET
 Rockball                           ! Map File Name
 GenericAsteroid.obj                ! Geometry Object File Name 
 HedwigColor.ppm                    ! Color Texture File Name

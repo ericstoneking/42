@@ -1,22 +1,28 @@
 <<<<<<<<<<<<<<<<<  42: Orbit Description File   >>>>>>>>>>>>>>>>>
 Low Earth Orbit               !  Description
-CENTRAL WORLD                 !  Orbit Type (CENTRAL, THREE_BODY), Center Type (WORLD, MINORBODY)
+CENTRAL                       !  Orbit Type (ZERO, FLIGHT, CENTRAL, THREE_BODY)
+::::::::::::::  Use these lines if ZERO           :::::::::::::::::
+MINORBODY_2                   !  World
+::::::::::::::  Use these lines if FLIGHT   :::::::::::::::::
+0                             !  Region Number
 ::::::::::::::  Use these lines if Body-Centered Orbit  :::::::::::::::::
 EARTH                         !  Orbit Center
-KEP                           !  Use Keplerian elements (KEP) or (RV)
+KEP                           !  Use Keplerian elements (KEP) or (RV) or FILE
 PA                            !  Use Peri/Apoapsis (PA) or min alt/ecc (AE)
-400.0   400.0                 !  Periapsis & Apoapsis Altitude, km
+100.0   400.0                 !  Periapsis & Apoapsis Altitude, km
 200.0  2.0                    !  Min Altitude (km), Eccentricity
-30.0                          !  Inclination (deg)
+98.1                          !  Inclination (deg)
 0.0                           !  Right Ascension of Ascending Node (deg)
 0.0                           !  Argument of Periapsis (deg)
-0.0                           !  True Anomaly (deg)
+30.0                         !  True Anomaly (deg)
 0.0  0.0  0.0                 !  RV Initial Position (km)
 0.0  0.0  0.0                 !  RV Initial Velocity (km/sec)
+TRV  "ORB_ID"                 !  TLE or TRV format, Label to find in file
+"TRV.txt"                     !  File name, label
 :::::::::::::  Use these lines if Three-Body Orbit  ::::::::::::::::
 SUNEARTH                      !  Lagrange system
 LAGDOF_MODES                  !  Propagate using LAGDOF_MODES or LAGDOF_COWELL
-MODES                         !  Initialize with MODES or XYZ
+MODES                         !  Initialize with MODES or XYZ or FILE
 L2                            !  Libration point (L1, L2, L3, L4, L5)
 800000.0                      !  XY Semi-major axis, km
 45.0                          !  Initial XY Phase, deg
@@ -28,6 +34,8 @@ CW                            !  Sense (CW, CCW), viewed from +Z (L4, L5 only)
 60.0                          !  Initial Z Phase, deg
 1.05  0.5  0.0                !  Initial X, Y, Z (Non-dimensional)
 0.0   0.0  0.0                !  Initial Xdot, Ydot, Zdot (Non-dimensional)
+TRV  "ORB_ID"                 !  TLE or TRV format, Label to find in file
+"TRV.txt"                     !  File name, label
 ******************* Formation Frame Parameters ************************
 L                             !  Formation Frame Fixed in [NL]
 0.0  0.0  0.0  123            !  Euler Angles (deg) and Sequence

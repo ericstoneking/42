@@ -14,9 +14,10 @@
 
 #include "envkit.h"
 
-//#ifdef __cplusplus
-//namespace Kit {
-//#endif
+/* #ifdef __cplusplus
+** namespace Kit {
+** #endif
+*/
 
 #define D2R 1.74532925199E-2
 #define PI 3.14159265358979323846
@@ -307,10 +308,10 @@ void IGRFMagField(const char *ModelPath, long N, long M, double pbn[3],double Pr
 
       MTxV(CEN,BVE,MagVecN);
 
-      //printf("r,phi,theta: %lf %lf %lf\n",r,phi,theta);
-      //printf("Br,Bth,Bph: %lf %lf %lf\n",Br,Bth,Bph);
-      //printf("BVE: %lf %lf %lf\n\n",BVE[0],BVE[1],BVE[2]);
-
+      /*printf("r,phi,theta: %lf %lf %lf\n",r,phi,theta);
+      **printf("Br,Bth,Bph: %lf %lf %lf\n",Br,Bth,Bph);
+      **printf("BVE: %lf %lf %lf\n\n",BVE[0],BVE[1],BVE[2]);
+      */
 }
 /**********************************************************************/
 /*  Computes planetary dipole magnetic field vector at S/C position.  */
@@ -890,6 +891,7 @@ void ECEFToWGS84(double p[3], double *glat, double *glong, double *alt)
       *glong = atan2(p[1],p[0]);
 }
 
-//#ifdef __cplusplus
-//}
-//#endif
+/* #ifdef __cplusplus
+** }
+** #endif
+*/

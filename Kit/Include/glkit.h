@@ -25,17 +25,20 @@
    #include <GL/glut.h>
    #include <GL/glu.h>
 #elif defined __MINGW32__
-   #include "GLee.h"
+   #define GLEW_BUILD
+   #include "glew.h"
    #define GL_GLEXT_PROTOTYPES
    #include <glut.h>
    #include <GL/glu.h>
 #elif defined _WIN32
-   #include "GLee.h"
+   #define GLEW_BUILD
+   #include "glew.h"
    #define GL_GLEXT_PROTOTYPES
    #include <glut.h>
    #include <GL/glu.h>
 #elif defined _WIN64
-   #include "GLee.h"
+   #define GLEW_BUILD
+   #include "glew.h"
    #define GL_GLEXT_PROTOTYPES
    #include <glut.h>
    #include <GL/glu.h>
@@ -43,7 +46,7 @@
    #include <OpenGL/gl.h>
    #include <OpenGL/glu.h>
    #include <GLUT/glut.h>
-   //#include <CGDirectDisplay.h> /* For CGDisplayHideCursor */
+   /* #include <CGDirectDisplay.h> */ /* For CGDisplayHideCursor */
 #else
    #error "Yo!  I don't know where to look for glut.h!"
 #endif
@@ -53,9 +56,11 @@
 #include "iokit.h"
 #include "sigkit.h"
 
-//#ifdef __cplusplus
-//namespace Kit {
-//#endif
+/*
+** #ifdef __cplusplus
+** namespace Kit {
+** #endif
+*/
 
 #define FRONT 1
 #define BACK 0
@@ -94,6 +99,7 @@ EXTERN struct PentType Pent[12];
 EXTERN double CosVis[4], SinVis[4];
 EXTERN GLuint WorldVtxShader,WorldFragShader,WorldShaderProgram;
 EXTERN GLuint RingVtxShader,RingFragShader,RingShaderProgram;
+EXTERN GLuint AtmoVtxShader,AtmoFragShader,AtmoShaderProgram;
 EXTERN GLuint MapVtxShader,MapFragShader,MapShaderProgram;
 EXTERN GLuint BodyVtxShader,BodyFragShader,BodyShaderProgram;
 EXTERN GLuint MoonMapFragShader,MoonMapShaderProgram;
@@ -126,6 +132,8 @@ void CaptureScreenToPpm(const char path[40], const char filename[40],
 void TexToPpm(const char path[40], const char filename[40],
               long Nh, long Nw, long Nb, float *Data);
 GLuint PpmToTexTag(const char path[40], const char filename[40],int BytesPerPixel,
+                   GLuint wrap);
+GLuint Ppm1DToTexTag(const char path[40], const char filename[40],int BytesPerPixel,
                    GLuint wrap);
 GLuint PpmToCubeTag(const char path[40], const char file[40], int BytesPerPixel);
 GLuint PpmToRingTexTag(const char path[80], const char filename[80]);
@@ -202,9 +210,11 @@ GLuint BuildShaderProgram(GLuint VtxShader, GLuint FragShader, const char *Name)
 void ValidateShaderProgram(GLuint ShaderProgram, const char *Name);
 #endif
 
-//#ifdef __cplusplus
-//}
-//#endif
+/*
+** #ifdef __cplusplus
+** }
+** #endif
+*/
 
 #endif /* __GLKIT_H__ */
 
