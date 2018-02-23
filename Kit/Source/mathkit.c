@@ -1490,24 +1490,19 @@ long ProjectPointOntoTriangle(double A[3], double B[3], double C[3],
       double DirVec[3], double Pt[3], double ProjPt[3], double Bary[4])
 {
       double Den,NumA,NumB,NumC,NumD;
-      double A1B2mA2B1,A0B2mA2B0,A0B1mA1B0;
-      double C1D2mC2D1,C0D2mC2D0,C0D1mC1D0;
+      double AxB[3],CxD[3],PxB[3],AxP[3],CxP[3],PxD[3];
       double M[4][3],Mplus[3][4];
       long InPoly,i;
 
-      A1B2mA2B1 = A[1]*B[2]-A[2]*B[1];
-      A0B2mA2B0 = A[0]*B[2]-A[2]*B[0];
-      A0B1mA1B0 = A[0]*B[1]-A[1]*B[0];
-      C1D2mC2D1 = C[1]*DirVec[2]-C[2]*DirVec[1];
-      C0D2mC2D0 = C[0]*DirVec[2]-C[2]*DirVec[0];
-      C0D1mC1D0 = C[0]*DirVec[1]-C[1]*DirVec[0];
+      VxV(A,B,AxB);
+      VxV(C,DirVec,CxD);
 
-      Den =  (A[0]-B[0])*C1D2mC2D1
-            -(A[1]-B[1])*C0D2mC2D0
-            +(A[2]-B[2])*C0D1mC1D0
-            -DirVec[0]*A1B2mA2B1
-            +DirVec[1]*A0B2mA2B0
-            -DirVec[2]*A0B1mA1B0;
+      Den =  (A[0]-B[0])*CxD[0]
+            +(A[1]-B[1])*CxD[1]
+            +(A[2]-B[2])*CxD[2]
+            -DirVec[0]*AxB[0]
+            -DirVec[1]*AxB[1]
+            -DirVec[2]*AxB[2];
 
       if (fabs(Den) < 1.0E-12) {
          /* If DirVec is in plane of ABC, then problem reduces to... */
@@ -1524,34 +1519,38 @@ long ProjectPointOntoTriangle(double A[3], double B[3], double C[3],
          Bary[3] = 0.0;
       }
       else {
+         VxV(Pt,B,PxB);
+         VxV(A,Pt,AxP);
+         VxV(C,Pt,CxP);
+         VxV(Pt,DirVec,PxD);
+      
+         NumA =  (Pt[0]-B[0])*CxD[0]
+                +(Pt[1]-B[1])*CxD[1]
+                +(Pt[2]-B[2])*CxD[2]
+                -DirVec[0]*PxB[0]
+                -DirVec[1]*PxB[1]
+                -DirVec[2]*PxB[2];
 
-         NumA =  (Pt[0]-B[0])*C1D2mC2D1
-                -(Pt[1]-B[1])*C0D2mC2D0
-                +(Pt[2]-B[2])*C0D1mC1D0
-                -DirVec[0]*(Pt[1]*B[2]-Pt[2]*B[1])
-                +DirVec[1]*(Pt[0]*B[2]-Pt[2]*B[0])
-                -DirVec[2]*(Pt[0]*B[1]-Pt[1]*B[0]);
+         NumB =  (A[0]-Pt[0])*CxD[0]
+                +(A[1]-Pt[1])*CxD[1]
+                +(A[2]-Pt[2])*CxD[2]
+                -DirVec[0]*AxP[0]
+                -DirVec[1]*AxP[1]
+                -DirVec[2]*AxP[2];
 
-         NumB =  (A[0]-Pt[0])*C1D2mC2D1
-                -(A[1]-Pt[1])*C0D2mC2D0
-                +(A[2]-Pt[2])*C0D1mC1D0
-                -DirVec[0]*(A[1]*Pt[2]-A[2]*Pt[1])
-                +DirVec[1]*(A[0]*Pt[2]-A[2]*Pt[0])
-                -DirVec[2]*(A[0]*Pt[1]-A[1]*Pt[0]);
+         NumC =  (A[0]-B[0])*PxD[0]
+                +(A[1]-B[1])*PxD[1]
+                +(A[2]-B[2])*PxD[2]
+                -DirVec[0]*AxB[0]
+                -DirVec[1]*AxB[1]
+                -DirVec[2]*AxB[2];
 
-         NumC =  (A[0]-B[0])*(Pt[1]*DirVec[2]-Pt[2]*DirVec[1])
-                -(A[1]-B[1])*(Pt[0]*DirVec[2]-Pt[2]*DirVec[0])
-                +(A[2]-B[2])*(Pt[0]*DirVec[1]-Pt[1]*DirVec[0])
-                -DirVec[0]*A1B2mA2B1
-                +DirVec[1]*A0B2mA2B0
-                -DirVec[2]*A0B1mA1B0;
-
-         NumD =  (A[0]-B[0])*(C[1]*Pt[2]-C[2]*Pt[1])
-                -(A[1]-B[1])*(C[0]*Pt[2]-C[2]*Pt[0])
-                +(A[2]-B[2])*(C[0]*Pt[1]-C[1]*Pt[0])
-                +(C[0]-Pt[0])*A1B2mA2B1
-                -(C[1]-Pt[1])*A0B2mA2B0
-                +(C[2]-Pt[2])*A0B1mA1B0;
+         NumD =  (A[0]-B[0])*CxP[0]
+                +(A[1]-B[1])*CxP[1]
+                +(A[2]-B[2])*CxP[2]
+                -(Pt[0]-C[0])*AxB[0]
+                -(Pt[1]-C[1])*AxB[1]
+                -(Pt[2]-C[2])*AxB[2];
 
          Bary[0] = NumA/Den;
          Bary[1] = NumB/Den;

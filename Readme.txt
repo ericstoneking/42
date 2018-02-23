@@ -1,6 +1,11 @@
 Welcome to 42, the mostly harmless spacecraft simulation tool.
 
-See the overview, "42 Overview.pdf", in the Docs folder.  "Nomenclature.pdf", "POV Menu.pdf", and "Key Bindings.txt" are also recommended.
+See the overview, "42 Overview.pdf", in the Docs folder. Also recommended:
+Nomenclature.pdf
+POV Menu.pdf
+Key Bindings.txt
+FSW Models.pdf
+Flight Regimes.pdf
 
 If you're installing on Windows, see the file "Install-msys.txt" in the Docs folder.
 
@@ -10,6 +15,3 @@ The default folder for inputs and outputs is "InOut".  Look there for sample inp
 
 The input/output folder may be changed for a sim run by running 42 with an argument.  For example, enter this at the command prompt:
 42 Demo
-
-The VisCProj and XcodeProj folders are provided as starting points.  I haven't kept them up to date as 42 has evolved.  The Makefile is current.
-

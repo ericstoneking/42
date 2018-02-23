@@ -1,6 +1,6 @@
 <<<<<<<<<<<<<<<<<<<<<<  Minor Body Inputs for 42  >>>>>>>>>>>>>>>>>>>>>>>>>>
 8                                  ! Number of Minor Bodies in this File
-*****************************  Minor Body  *********************************
+*****************************  Minor Body 0 *********************************
 TRUE                               ! Exists
 "Bennu"                            ! Name
 ASTEROID                           ! ASTEROID or COMET
@@ -19,7 +19,7 @@ RQ36Bump.ppm                       ! Bump Texture File Name
 1.1847                             ! Arg of Periapsis, rad
 2010  10  14  0                    ! Epoch Year, Month, Day, Hour
 0.9382                             ! True Anomaly at Epoch, rad
-*****************************  Minor Body  *********************************
+*****************************  Minor Body 1 *********************************
 TRUE                               ! Exists
 "Eros"                             ! Name   
 ASTEROID                           ! ASTEROID or COMET
@@ -38,12 +38,12 @@ ErosBump.ppm                       ! Bump Texture File Name
 2.4236                             ! Arg of Periapsis, rad
 2010  10  14  0                    ! Epoch Year, Month, Day, Hour
 2.1829                             ! True Anomaly at Epoch, rad
-*****************************  Minor Body  *********************************
+*****************************  Minor Body 2 *********************************
 TRUE                               ! Exists
 "67P/C-G"                          ! Name 
 COMET                              ! ASTEROID or COMET
 Rockball                           ! Map File Name
-67P.obj                         ! Geometry Object File Name 
+67P-CG.obj                         ! Geometry Object File Name 
 NONE                               ! Color Texture File Name
 NONE                               ! Bump Texture File Name
 667.0                              ! mu, m^2/sec^3
@@ -57,7 +57,7 @@ NONE                               ! Bump Texture File Name
 0.22305                            ! Arg of Periapsis, rad
 2014  8  10  00                    ! Epoch Year, Month, Day, Hour
 5.3007                             ! True Anomaly at Epoch, rad (Value is Mean Anom.  Fix!)
-*****************************  Minor Body  *********************************
+*****************************  Minor Body 3 *********************************
 FALSE                              ! Exists
 "Itokawa"                          ! Name 
 ASTEROID                           ! ASTEROID or COMET
@@ -76,7 +76,7 @@ ItokawaBump.ppm                    ! Bump Texture File Name
 3.9873                             ! Arg of Periapsis, rad
 2010  10  14  0                    ! Epoch Year, Month, Day, Hour
 1.8336                             ! True Anomaly at Epoch, rad
-*****************************  Minor Body  *********************************
+*****************************  Minor Body 4 *********************************
 FALSE                              ! Exists
 "Wirtanen"                         ! Name
 COMET                              ! ASTEROID or COMET
@@ -95,7 +95,7 @@ WirtanenBump.ppm                   ! Bump Texture File Name
 -0.069813                          ! Arg of Periapsis, rad
 2002  8  26  18                    ! Epoch Year, Month, Day, Hour
 0.0                                ! True Anomaly at Epoch, rad
-*****************************  Minor Body  *********************************
+*****************************  Minor Body 5 *********************************
 FALSE                              ! Exists
 "Haidea"                           ! Name
 ASTEROID                           ! ASTEROID or COMET
@@ -114,7 +114,7 @@ HaideaBump.ppm                     ! Bump Texture File Name
 1.6023                             ! Arg of Periapsis, rad
 2013  4  18  0                     ! Epoch Year, Month, Day, Hour
 1.3089                             ! True Anomaly at Epoch, rad
-*****************************  Minor Body  *********************************
+*****************************  Minor Body 6 *********************************
 FALSE                              ! Exists
 "Lacadiera"                        ! Name
 ASTEROID                           ! ASTEROID or COMET
@@ -133,7 +133,7 @@ LacadieraBump.ppm                  ! Bump Texture File Name
 0.54502                            ! Arg of Periapsis, rad
 2013  7 16  4                      ! Epoch Year, Month, Day, Hour
 0.0                                ! True Anomaly at Epoch, rad
-*****************************  Minor Body  *********************************
+*****************************  Minor Body 7 *********************************
 FALSE                              ! Exists
 "Hedwig"                           ! Name 
 ASTEROID                           ! ASTEROID or COMET

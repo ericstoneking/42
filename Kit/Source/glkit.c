@@ -510,8 +510,8 @@ void DrawNearFOV(long Nv,double Width,double Height,double Length,
       r[3] = 1.0/Length;
 
       jmax = (long) (Nv/4)+1;
-      a = Width/(2.0*cos(0.5*daz));
-      b = Height/(2.0*sin((((double) jmax)-0.5)*daz));
+      a = tan(Width/2.0)/cos(0.5*daz);
+      b = tan(Height/2.0)/sin((((double) jmax)-0.5)*daz);
 
       if (Type == 0) { /* FOV_WIREFRAME */
          glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
@@ -601,8 +601,8 @@ void DrawFarFOV(long Nv,double Width,double Height,long Type, GLfloat Color[4],
       r[3] = 1.0/SkyDistance;
 
       jmax = (long) (Nv/4)+1;
-      a = Width/(2.0*cos(0.5*daz));
-      b = Height/(2.0*sin((((double) jmax)-0.5)*daz));
+      a = tan(Width/2.0)/cos(0.5*daz);
+      b = tan(Height/2.0)/sin((((double) jmax)-0.5)*daz);
 
       if (Type == 0 || Type == 1) { /* FOV_WIREFRAME or FOV_SOLID */
          glLineWidth(2.0);

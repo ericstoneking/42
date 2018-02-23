@@ -15,13 +15,13 @@ TRUE   Orb_Jupiter.txt          !  Input file name for Orb 4
 TRUE   Orb_Cube.txt             !  Input file name for Orb 5
 *****************************  Spacecraft  *****************************
 10                              !  Number of Spacecraft
-TRUE  0 SC_Aura.txt             !  Existence, RefOrb, Input file for SC 0
-TRUE  1 SC_ISS.txt              !  Existence, RefOrb, Input file for SC 1
-TRUE  1 SC_Shuttle.txt          !  Existence, RefOrb, Input file for SC 2
-TRUE  2 SC_IonCruiser.txt       !  Existence, RefOrb, Input file for SC 3
-TRUE  3 SC_Voyager.txt          !  Existence, RefOrb, Input file for SC 4
-TRUE  4 SC_Moai.txt             !  Existence, RefOrb, Input file for SC 5
-TRUE  4 SC_BBM.txt              !  Existence, RefOrb, Input file for SC 6
+TRUE  3 SC_Voyager.txt          !  Existence, RefOrb, Input file for SC 0
+TRUE  4 SC_BBM.txt              !  Existence, RefOrb, Input file for SC 0
+TRUE  4 SC_Moai.txt             !  Existence, RefOrb, Input file for SC 2
+TRUE  0 SC_Aura.txt             !  Existence, RefOrb, Input file for SC 3
+TRUE  1 SC_ISS.txt              !  Existence, RefOrb, Input file for SC 4
+TRUE  1 SC_Shuttle.txt          !  Existence, RefOrb, Input file for SC 5
+TRUE  2 SC_IonCruiser.txt       !  Existence, RefOrb, Input file for SC 6
 TRUE  5 SC_Cubesat1U.txt           !  Existence, RefOrb, Input file for SC 7
 TRUE  5 SC_Cubesat3U.txt           !  Existence, RefOrb, Input file for SC 8
 TRUE  5 SC_Cubesat6U.txt           !  Existence, RefOrb, Input file for SC 9

@@ -890,7 +890,162 @@ void ECEFToWGS84(double p[3], double *glat, double *glong, double *alt)
       *glat = atan((p[2]+ep2*Z0)/r);
       *glong = atan2(p[1],p[0]);
 }
-
+/**********************************************************************/
+/* Ref Werner and Scheeres, "Exterior Gravitation of a Polyhedron ..." */
+/* Returns 1 if PosN is outside polyhedron, 0 if inside */
+long PolyhedronGravAcc(struct GeomType *G, double Density, 
+   double PosN[3], double CWN[3][3], double GravAccN[3])
+{
+      struct EdgeType *E;
+      struct PolyType *P;
+      double *V1,*V2,*V3;
+      double PosW[3],GravAccW[3];
+      double re1[3],re2[3],rf1[3],rf2[3],rf3[3],r1,r2,r3,r2xr3[3];
+      double Num,Den,Er[3],Fr[3],Le,wf,SumWf,Gsig;
+      long PosIsOutside;
+      long Ie,Ip,i,j;
+      
+      for(i=0;i<3;i++) {
+         GravAccW[i] = 0.0;
+      }
+      SumWf = 0.0;
+      
+      MxV(CWN,PosN,PosW);
+      
+      for(Ie=0;Ie<G->Nedge;Ie++) {
+         E = &G->Edge[Ie];
+         V1 = G->V[E->Vtx1];
+         V2 = G->V[E->Vtx2];
+         for(i=0;i<3;i++) {
+            re1[i] = V1[i] - PosW[i];
+            re2[i] = V2[i] - PosW[i];
+         }
+         r1 = MAGV(re1);
+         r2 = MAGV(re2);
+         Le = log((r1+r2+E->Length)/(r1+r2-E->Length));
+         MxV(E->Dyad,re1,Er);
+         for(i=0;i<3;i++) {
+            GravAccW[i] -= Er[i]*Le;
+         }
+      }
+      
+      for(Ip=0;Ip<G->Npoly;Ip++) {
+         P = &G->Poly[Ip];
+         V1 = G->V[P->V[0]];
+         V2 = G->V[P->V[1]];
+         V3 = G->V[P->V[2]];
+         for(i=0;i<3;i++) {
+            rf1[i] = V1[i] - PosW[i];
+            rf2[i] = V2[i] - PosW[i];
+            rf3[i] = V3[i] - PosW[i];
+         }
+         r1 = MAGV(rf1);
+         r2 = MAGV(rf2);
+         r3 = MAGV(rf3);
+         VxV(rf2,rf3,r2xr3);
+         Num = VoV(rf1,r2xr3);
+         Den = r1*r2*r3 + r1*VoV(rf2,rf3) + r2*VoV(rf3,rf1) + r3*VoV(rf1,rf2);
+         wf = 2.0*atan2(Num,Den);
+         MxV(P->Dyad,rf1,Fr);
+         for(i=0;i<3;i++) {
+            GravAccW[i] += Fr[i]*wf;
+         }
+         SumWf += wf;
+      }
+      
+      Gsig = 6.67408E-11*Density;
+      for(i=0;i<3;i++) {
+         GravAccW[i] *= Gsig;
+      }
+      
+      MTxV(CWN,GravAccW,GravAccN);
+      
+      /* SumWf should be zero if Pos Is Outside, or -4*pi if Pos is Inside */
+      PosIsOutside = (SumWf > -6.28 ? 1 : 0);
+      
+      return(PosIsOutside);
+}
+/**********************************************************************/
+/* Ref Werner and Scheeres, "Exterior Gravitation of a Polyhedron ..." */
+/* Returns 1 if PosN is outside polyhedron, 0 if inside */
+long PolyhedronGravGrad(struct GeomType *G, double Density, double PosN[3],
+   double CWN[3][3], double GravGradN[3][3])
+{
+      struct EdgeType *E;
+      struct PolyType *P;
+      double *V1,*V2,*V3;
+      double PosW[3],GravGradW[3][3],GC[3][3];
+      double re1[3],re2[3],rf1[3],rf2[3],rf3[3],r1,r2,r3,r2xr3[3];
+      double Num,Den,Er[3],Fr[3],Le,wf,SumWf,Gsig;
+      long PosIsOutside;
+      long Ie,Ip,i,j;
+      
+      for(i=0;i<3;i++) {
+         for(j=0;j<3;j++) GravGradW[i][j] = 0.0;
+      }
+      SumWf = 0.0;
+      
+      MxV(CWN,PosN,PosW);
+      
+      for(Ie=0;Ie<G->Nedge;Ie++) {
+         E = &G->Edge[Ie];
+         V1 = G->V[E->Vtx1];
+         V2 = G->V[E->Vtx2];
+         for(i=0;i<3;i++) {
+            re1[i] = V1[i] - PosW[i];
+            re2[i] = V2[i] - PosW[i];
+         }
+         r1 = MAGV(re1);
+         r2 = MAGV(re2);
+         Le = log((r1+r2+E->Length)/(r1+r2-E->Length));
+         for(i=0;i<3;i++) {
+            for(j=0;j<3;j++) GravGradW[i][j] += E->Dyad[i][j]*Le;
+         }
+      }
+      
+      for(Ip=0;Ip<G->Npoly;Ip++) {
+         P = &G->Poly[Ip];
+         V1 = G->V[P->V[0]];
+         V2 = G->V[P->V[1]];
+         V3 = G->V[P->V[2]];
+         for(i=0;i<3;i++) {
+            rf1[i] = V1[i] - PosW[i];
+            rf2[i] = V2[i] - PosW[i];
+            rf3[i] = V3[i] - PosW[i];
+         }
+         r1 = MAGV(rf1);
+         r2 = MAGV(rf2);
+         r3 = MAGV(rf3);
+         VxV(rf2,rf3,r2xr3);
+         Num = VoV(rf1,r2xr3);
+         Den = r1*r2*r3 + r1*VoV(rf2,rf3) + r2*VoV(rf3,rf1) + r3*VoV(rf1,rf2);
+         wf = 2.0*atan2(Num,Den);
+         for(i=0;i<3;i++) {
+            for(j=0;j<3;j++) GravGradW[i][j] -= P->Dyad[i][j]*wf;
+         }
+         SumWf += wf;
+      }
+      
+      Gsig = 6.67408E-11*Density;
+      for(i=0;i<3;i++) {
+         for(j=0;j<3;j++) GravGradW[i][j] *= Gsig;
+      }
+      
+      MxM(GravGradW,CWN,GC);
+      MTxM(CWN,GC,GravGradN);
+      
+      /* SumWf should be zero if Pos Is Outside, or -4*pi if Pos is Inside */
+      PosIsOutside = (SumWf > -6.28 ? 1 : 0);
+      
+      return(PosIsOutside);
+}
+/**********************************************************************/
+void GravGradTimesInertia(double g[3][3], double I[3][3], double GGxI[3])
+{
+      GGxI[0] = (I[2][2]-I[1][1])*g[1][2] + (g[1][1]-g[2][2])*I[1][2] + I[0][2]*g[1][0] - I[0][1]*g[2][0];
+      GGxI[1] = (I[0][0]-I[2][2])*g[2][0] + (g[2][2]-g[0][0])*I[2][0] + I[0][1]*g[1][2] - I[1][2]*g[0][1];
+      GGxI[2] = (I[1][1]-I[0][0])*g[0][1] + (g[0][0]-g[1][1])*I[0][1] + I[1][2]*g[0][2] - I[0][2]*g[1][2];
+}
 /* #ifdef __cplusplus
 ** }
 ** #endif

@@ -3,8 +3,10 @@ Low Earth Orbit               !  Description
 CENTRAL                       !  Orbit Type (ZERO, FLIGHT, CENTRAL, THREE_BODY)
 ::::::::::::::  Use these lines if ZERO           :::::::::::::::::
 MINORBODY_2                   !  World
+FALSE                         ! Use Polyhedron Gravity
 ::::::::::::::  Use these lines if FLIGHT         :::::::::::::::::
 0                             !  Region Number
+FALSE                         ! Use Polyhedron Gravity
 ::::::::::::::  Use these lines if CENTRAL        :::::::::::::::::
 EARTH                         !  Orbit Center
 KEP                           !  Use Keplerian elements (KEP) or (RV) or FILE
@@ -12,9 +14,9 @@ PA                            !  Use Peri/Apoapsis (PA) or min alt/ecc (AE)
 400.0      400.0              !  Periapsis & Apoapsis Altitude, km
 200.0  2.0                    !  Min Altitude (km), Eccentricity
 23.44                         !  Inclination (deg)
-180.0                           !  Right Ascension of Ascending Node (deg)
+180.0                         !  Right Ascension of Ascending Node (deg)
 0.0                           !  Argument of Periapsis (deg)
-90.0                           !  True Anomaly (deg)
+90.0                          !  True Anomaly (deg)
 0.0  0.0  0.0                 !  RV Initial Position (km)
 0.0  0.0  0.0                 !  RV Initial Velocity (km/sec)
 TRV  "ORB_ID"                 !  TLE or TRV format, Label to find in file

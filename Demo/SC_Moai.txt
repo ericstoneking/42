@@ -6,8 +6,8 @@ PASSIVE_FSW                   !  Flight Software Identifier
 ************************* Orbit Parameters ****************************
 ENCKE                         !  Orbit Prop FIXED, EULER_HILL, or ENCKE
 CM                            !  Pos of CM or ORIGIN, wrt F
-20.0  0.0  0.0                !  Pos wrt Formation (m), expressed in F
-0.0   0.0 -0.005               !  Vel wrt Formation (m/s), expressed in F
+10.0  0.0  -10.0              !  Pos wrt Formation (m), expressed in F
+-0.005    0.0  -0.0025        !  Vel wrt Formation (m/s), expressed in F
 *************************** Initial Attitude ***************************
 LAL                           ! Ang Vel wrt [NL], Att [QA] wrt [NLF]
 0.5    0.0    -0.15             ! Ang Vel (deg/sec)

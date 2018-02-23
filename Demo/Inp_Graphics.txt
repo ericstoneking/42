@@ -7,9 +7,9 @@ TRUE                               !  Orrery Window Exists
 FALSE                              !  Pause at Startup
 TRACK_HOST                         !  POV Mode (TRACK_HOST, TRACK_TARGET, FIXED_IN_HOST)
 SC                                 !  Host Type (WORLD, REFORB, FRM, SC, BODY)
-4  0  L                            !  Initial Host SC, Body, POV Frame
+0  0  L                            !  Initial Host SC, Body, POV Frame
 SC                                 !  Target Type (WORLD, REFORB, FRM, SC, BODY)
-4  0  L                            !  Initial Target SC, Body, POV Frame
+0  0  L                            !  Initial Target SC, Body, POV Frame
 POS_Z                              !  Boresight Axis
 NEG_Y                              !  Up Axis
 40.0                               !  Initial POV Range from Target [m]

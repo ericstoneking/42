@@ -21,6 +21,7 @@
 #include "mathkit.h"
 #include "dcmkit.h"
 #include "iokit.h"
+#include "geomkit.h"
 
 /*
 ** #ifdef __cplusplus
@@ -50,6 +51,11 @@ void HiFiEarthPrecNute(double JD,double C_TEME_TETE[3][3],
                                  double C_TETE_J2000[3][3]);
 void WGS84ToECEF(double glat, double glong, double alt, double p[3]);
 void ECEFToWGS84(double p[3], double *glat, double *glong, double *alt);
+long PolyhedronGravAcc(struct GeomType *G, double Density, double PosN[3],
+   double CWN[3][3], double GravAccN[3]);
+long PolyhedronGravGrad(struct GeomType *G, double Density, double PosN[3],
+   double CWN[3][3], double GravGradN[3][3]);
+void GravGradTimesInertia(double g[3][3], double I[3][3], double GGxI[3]);
 
 /*
 ** #ifdef __cplusplus

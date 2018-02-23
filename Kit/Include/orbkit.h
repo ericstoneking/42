@@ -60,6 +60,7 @@ struct OrbitType {
    long  Exists;
    double Epoch;  /* Sec since J2000 epoch at which orbit elements are referenced */
    long  Regime;  /* ZERO, FLIGHT, CENTRAL (Two-body) or THREE_BODY */
+   long  PolyhedronGravityEnabled;
    long  World;
    long Region;
    /* For Three-Body Orbit Description */

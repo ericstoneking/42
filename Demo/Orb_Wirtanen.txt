@@ -3,8 +3,10 @@ Sortie Insertion Orbit        !  Description
 CENTRAL                       !  Orbit Type (ZERO, FLIGHT, CENTRAL, THREE_BODY)
 ::::::::::::::  Use these lines if ZERO           :::::::::::::::::
 MINORBODY_2                   !  World
+FALSE                         ! Use Polyhedron Gravity
 ::::::::::::::  Use these lines if FLIGHT   :::::::::::::::::
 0                             !  Region Number
+FALSE                         ! Use Polyhedron Gravity
 ::::::::::::::  Use these lines if Body-Centered Orbit  :::::::::::::::::
 MINORBODY_3                      !  Orbit Center
 KEP                           !  Use Keplerian elements (KEP) or (RV) or FILE

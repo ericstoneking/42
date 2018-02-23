@@ -218,6 +218,67 @@ void SurfaceForceProps(struct GeomType *G)
       }
 }
 /*********************************************************************/
+/* Ref Werner and Scheeres, "Exterior Gravitation of a Polyhedron ..." */
+void EdgeAndPolyDyads(struct GeomType *G)
+{
+      struct EdgeType *E;
+      struct PolyType *P1,*P2,*P;
+      double *V1,*V2;
+      double Axis[3],N1[3],N2[3];
+      long Ie,Ip,i,j;
+
+      for(Ie=0;Ie<G->Nedge;Ie++) {
+         E = &G->Edge[Ie];
+         if (E->Poly2 >= 0) {
+            P1 = &G->Poly[E->Poly1];
+            P2 = &G->Poly[E->Poly2];
+            V1 = G->V[E->Vtx1];
+            V2 = G->V[E->Vtx2];
+            for(i=0;i<3;i++) Axis[i] = V2[i]-V1[i];
+            UNITV(Axis);
+            /* Unit vectors in plane, pointing outward */
+            VxV(Axis,P1->Norm,N1);
+            VxV(P2->Norm,Axis,N2);
+            UNITV(N1);
+            UNITV(N2);
+            for(i=0;i<3;i++) {
+               for(j=0;j<3;j++) {
+                  E->Dyad[i][j] = P1->Norm[i]*N1[j] + P2->Norm[i]*N2[j];
+               }
+            }
+         }
+      }
+      
+      for(Ip=0;Ip<G->Npoly;Ip++) {
+         P = &G->Poly[Ip];
+         for(i=0;i<3;i++) {
+            for(j=0;j<3;j++) {
+               P->Dyad[i][j] = P->Norm[i]*P->Norm[j];
+            }
+         }
+      }
+}
+/*********************************************************************/
+double PolyhedronVolume(struct GeomType *G)
+{
+      double Vol;
+      struct PolyType *P;
+      double *V1,*V2,*V3;
+      double V2xV3[3];
+      long Ip;
+      
+      Vol = 0.0;
+      for(Ip=0;Ip<G->Npoly;Ip++) {
+         P = &G->Poly[Ip];
+         V1 = G->V[P->V[0]];
+         V2 = G->V[P->V[1]];
+         V3 = G->V[P->V[2]];
+         VxV(V2,V3,V2xV3);
+         Vol += VoV(V1,V2xV3)/6.0;
+      }
+      return(Vol);
+}
+/*********************************************************************/
 long PolyIsDegenerate(struct PolyType *P, double **V)
 {
 #define EPS (1.0E-6)
@@ -1163,6 +1224,9 @@ struct GeomType *LoadWingsObjFile(const char ModelPath[80],const char ObjFilenam
 
       /* Find Normals, Areas, Centroids for use in surface force models */
       SurfaceForceProps(G);
+      
+      /* For polyhedron gravity */
+      if (EdgesEnabled) EdgeAndPolyDyads(G);
 
       /* Find radius of bounding sphere for each poly */
       for(Ipoly=0;Ipoly<G->Npoly;Ipoly++) {

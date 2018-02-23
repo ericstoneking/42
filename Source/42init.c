@@ -475,12 +475,14 @@ void InitOrbit(struct OrbitType *O)
             O->CLN[j][j] = 1.0;
             O->wln[j] = 0.0;
          }
+         fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+         O->PolyhedronGravityEnabled = DecodeString(response);
          /* Skip FLIGHT, CENTRAL, THREE_BODY sections */
-         for(j=0;j<33;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(j=0;j<34;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
       else if (O->Regime == ORB_FLIGHT) {
          /* Skip ZERO section */
-         for(j=0;j<2;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(j=0;j<3;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
          fscanf(infile,"%[^\n] %[\n]",junk,&newline);
          fscanf(infile,"%ld %[^\n] %[\n]",&Ir,junk,&newline);
          if (!Rgn[Ir].Exists) {
@@ -499,13 +501,15 @@ void InitOrbit(struct OrbitType *O)
             O->wln[1] = 0.0;
             O->wln[2] = World[O->World].w;
          }
+         fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+         O->PolyhedronGravityEnabled = DecodeString(response);
 
          /* Skip CENTRAL and THREE_BODY sections */
          for(j=0;j<31;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
       else if (O->Regime == ORB_CENTRAL) {
          /* Skip ZERO and FLIGHT sections */
-         for(j=0;j<4;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(j=0;j<6;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
 
          fscanf(infile,"%[^\n] %[\n]",junk,&newline);
          fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
@@ -638,7 +642,7 @@ void InitOrbit(struct OrbitType *O)
       }
       else if (O->Regime == ORB_THREE_BODY) {
          /* Skip ZERO, FLIGHT, and CENTRAL sections */
-         for(j=0;j<18;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(j=0;j<20;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
 
          fscanf(infile,"%[^\n] %[\n]",junk,&newline);
          fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
@@ -2964,7 +2968,8 @@ void LoadMinorBodies(void)
          while ((E->tp-AbsTime0) >  E->Period) E->tp -= E->Period;
 
          Geom = LoadWingsObjFile(ModelPath,W->GeomFileName,
-            &Matl,&Nmatl,Geom,&Ngeom,&W->GeomTag,FALSE);
+            &Matl,&Nmatl,Geom,&Ngeom,&W->GeomTag,TRUE);
+         W->Density = W->mu/(6.67408E-11*PolyhedronVolume(&Geom[W->GeomTag]));
 
          W->Parent = SOL;
          W->Nsat = 0;

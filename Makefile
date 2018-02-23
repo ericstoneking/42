@@ -50,7 +50,7 @@ SRC = $(PROJDIR)Source/
 KITINC = $(KITDIR)Include/
 KITSRC = $(KITDIR)Source/
 INOUT = $(PROJDIR)InOut/
-PRIVSRC = $(PROJDIR)/Private/Source/
+GSFCSRC = $(PROJDIR)/GSFC/Source/
 
 #EMBEDDED = -D EMBEDDED_MATLAB
 EMBEDDED = 
@@ -289,12 +289,12 @@ $(OBJ)DetectorFSW.o	: $(MATLABSRC)DetectorFSW.c
 $(OBJ)OpticsFSW.o	: $(MATLABSRC)OpticsFSW.c
 	$(CC) $(CFLAGS) -c $(MATLABSRC)OpticsFSW.c -o $(OBJ)OpticsFSW.o
 
-$(OBJ)42CfdSlosh.o      : $(PRIVSRC)42CfdSlosh.c $(INC)42.h   
-	$(CC) $(CFLAGS) -c $(PRIVSRC)42CfdSlosh.c -o $(OBJ)42CfdSlosh.o  
+$(OBJ)42CfdSlosh.o      : $(GSFCSRC)42CfdSlosh.c $(INC)42.h   
+	$(CC) $(CFLAGS) -c $(GSFCSRC)42CfdSlosh.c -o $(OBJ)42CfdSlosh.o  
 
 
-$(OBJ)42fftb.o      : $(PRIVSRC)42fftb.c $(INC)42.h   
-	$(CC) $(CFLAGS) -c $(PRIVSRC)42fftb.c -o $(OBJ)42fftb.o  
+$(OBJ)42fftb.o      : $(GSFCSRC)42fftb.c $(INC)42.h   
+	$(CC) $(CFLAGS) -c $(GSFCSRC)42fftb.c -o $(OBJ)42fftb.o  
 
 ########################  Miscellaneous Rules  ############################
 clean :

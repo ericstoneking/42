@@ -8,7 +8,7 @@
 0.0 1.0 0.0 0.5                    !  Color RGB+Alpha
 SOLID                              !  WIREFRAME, SOLID, or VECTOR 
 TRUE  TRUE                         !  Draw Near Field, Draw Far Field
-0  0                               !  SC, Body 
+3  0                               !  SC, Body 
 0.0  0.0  1.0                      !  Position in Body [m]
 0.0  0.0  0.0  321                 !  Euler Angles [deg], Sequence
 --------------------------------------------------------------------
@@ -18,7 +18,7 @@ TRUE  TRUE                         !  Draw Near Field, Draw Far Field
 1.0 1.0 0.0 0.5                    !  Color RGB+Alpha
 WIREFRAME                          !  WIREFRAME, SOLID, or VECTOR 
 TRUE  TRUE                         !  Draw Near Field, Draw Far Field
-0  0                               !  SC, Body 
+3  0                               !  SC, Body 
 1.0  0.0  0.0                      !  Position in Body [m]
 90.0  0.0  0.0  213                !  Euler Angles [deg], Sequence
 --------------------------------------------------------------------
@@ -28,6 +28,6 @@ TRUE  TRUE                         !  Draw Near Field, Draw Far Field
 0.0 1.0 1.0 0.5                    !  Color RGB+Alpha
 VECTOR                             !  WIREFRAME, SOLID, or VECTOR 
 TRUE  TRUE                         !  Draw Near Field, Draw Far Field
-0  0                               !  SC, Body 
+3  0                               !  SC, Body 
 -1.0  0.0  0.0                      !  Position in Body [m]
 -45.0  0.0  0.0  213                 !  Euler Angles [deg], Sequence

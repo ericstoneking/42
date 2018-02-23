@@ -3064,6 +3064,65 @@ void CowellRK4(struct SCType *S)
       }
 }
 /**********************************************************************/
+void PolyhedronCowellEOM(double u[6], double udot[6],
+   double mass, double GravAcc[3], double Frc[3])
+{
+      udot[0] = u[3];
+      udot[1] = u[4];
+      udot[2] = u[5];
+      udot[3] = GravAcc[0]+Frc[0]/mass;
+      udot[4] = GravAcc[1]+Frc[1]/mass;
+      udot[5] = GravAcc[2]+Frc[2]/mass;
+}
+/**********************************************************************/
+/* Integration of orbital equations of motion using Cowell's method   */
+/* by 4th order Runge-Kutta                                           */
+void PolyhedronCowellRK4(struct SCType *S)
+{
+      double u[6],uu[6],m1[6],m2[6],m3[6],m4[6];
+		long j;
+      struct OrbitType *O;
+      struct WorldType *W;
+      struct GeomType *G;
+      double GravAccN[3];
+
+      O = &Orb[S->RefOrb];
+      W = &World[O->World];
+      G = &Geom[W->GeomTag];
+
+      u[0] = S->PosN[0];
+      u[1] = S->PosN[1];
+      u[2] = S->PosN[2];
+      u[3] = S->VelN[0];
+      u[4] = S->VelN[1];
+      u[5] = S->VelN[2];
+
+/* .. 4th Order Runga-Kutta Integration */
+      PolyhedronGravAcc(G,W->Density,u,W->CWN,GravAccN);
+      PolyhedronCowellEOM( u, m1, S->mass, GravAccN, S->Frc);
+      for(j=0;j<6;j++) uu[j] = u[j] + 0.5*DTSIM*m1[j];
+      
+      PolyhedronGravAcc(G,W->Density,uu,W->CWN,GravAccN);
+      PolyhedronCowellEOM(uu, m2, S->mass, GravAccN, S->Frc);
+      for(j=0;j<6;j++) uu[j] = u[j] + 0.5*DTSIM*m2[j];
+    
+      PolyhedronGravAcc(G,W->Density,uu,W->CWN,GravAccN);
+      PolyhedronCowellEOM(uu, m3, S->mass, GravAccN, S->Frc);
+      for(j=0;j<6;j++) uu[j] = u[j] + DTSIM*m3[j];
+      
+      PolyhedronGravAcc(G,W->Density,uu,W->CWN,GravAccN);
+      PolyhedronCowellEOM(uu, m4, S->mass, GravAccN, S->Frc);
+      for(j=0;j<6;j++) u[j]+=DTSIM/6.0*(m1[j]+2.0*(m2[j]+m3[j])+m4[j]);
+
+      S->PosN[0] = u[0];
+      S->PosN[1] = u[1];
+      S->PosN[2] = u[2];
+      S->VelN[0] = u[3];
+      S->VelN[1] = u[4];
+      S->VelN[2] = u[5];
+
+}
+/**********************************************************************/
 /*  Orbit dynamics using Encke's method                               */
 /*  Perturbation from Three-Body trajectory                           */
 /*  See Battin, p. 449                                                */
@@ -3339,10 +3398,11 @@ void Dynamics(struct SCType *S)
 
       switch(O->Regime) {
          case ORB_ZERO :
-            CowellRK4(S);
-            break;
          case ORB_FLIGHT :
-            CowellRK4(S);
+            if (O->PolyhedronGravityEnabled) {
+               PolyhedronCowellRK4(S);
+            }
+            else CowellRK4(S);
             break;
          case ORB_CENTRAL :
             switch(S->OrbDOF) {

@@ -1208,6 +1208,7 @@ void DrawFarScene(void)
       double svh[3],PosH[3],PosN[3],svn[3];
       double VisCoef,PixRad,r[3],magr;
       double NearExtent,FarExtent;
+      double PosR[3];
       long WorldDepthFlag[NWORLD][4],Idepth;
       long DepthIsNotEmpty[4] = {0,0,0,0};
       GLfloat Black[4] = {0.0,0.0,0.0,1.0};
@@ -1477,7 +1478,8 @@ void DrawFarScene(void)
       glDisable(GL_LIGHTING);
       for(Isc=0;Isc<Nsc;Isc++) {
          S = &SC[Isc];
-         if (S->RefOrb != POV.Host.RefOrb) {
+         //if (S->RefOrb != POV.Host.RefOrb) {
+         if (!ScIsVisible(POV.Host.RefOrb,Isc,PosR)) {
             glColor4fv(ScColor);
             for(i=0;i<3;i++) PosH[i] = S->PosH[i] - POV.PosH[i];
             MxV(World[POV.Host.World].CNH,PosH,PosN);
@@ -1660,6 +1662,7 @@ void DrawNearAuxObjects(void)
       float SvbColor[4] = {1.0,1.0,0.0,1.0};
       float BvbColor[4] = {1.0,0.0,0.5,1.0};
       float HvbColor[4] = {0.5,0.5,1.0,1.0};
+      double PosR[3];
 
 /* .. Draw near-field Auxiliary Objects */
       glMatrixMode(GL_PROJECTION);
@@ -1703,8 +1706,9 @@ void DrawNearAuxObjects(void)
          if (S->Exists) {
             glPushMatrix();
 
-            if (S->RefOrb == POV.Host.RefOrb) { /* TODO: Improve this */
-               glTranslated(S->PosR[0],S->PosR[1],S->PosR[2]);
+//            if (S->RefOrb == POV.Host.RefOrb) { /* TODO: Improve this */
+            if (ScIsVisible(POV.Host.RefOrb,Isc,PosR) ) {
+               glTranslated(PosR[0],PosR[1],PosR[2]);
                if (CamShow[B_AXES]) {
                   for(Ib=0;Ib<S->Nb;Ib++) {
                      B = &S->B[Ib];
@@ -1785,8 +1789,10 @@ void DrawNearAuxObjects(void)
          if (S->Exists) {
             glPushMatrix();
 
-            if (S->RefOrb == POV.Host.RefOrb) { /* TODO: Improve this */
-               glTranslated(S->PosR[0],S->PosR[1],S->PosR[2]);
+//            if (S->RefOrb == POV.Host.RefOrb) { /* TODO: Improve this */
+//               glTranslated(S->PosR[0],S->PosR[1],S->PosR[2]);
+            if (ScIsVisible(POV.Host.RefOrb,Isc,PosR)) {
+               glTranslated(PosR[0],PosR[1],PosR[2]);
                B = &S->B[0];
                glTranslated(B->pn[0],B->pn[1],B->pn[2]);
                RotateR2L(B->CN);
@@ -1910,6 +1916,7 @@ void DepthPass(void)
       struct GeomType *G;
       struct BoundingBoxType *BB, LB;
       long Isc,Ib,i;
+      double PosR[3];
 
       SM = &ShadowMap;
 
@@ -1924,7 +1931,8 @@ void DepthPass(void)
       PerpBasis(CLN[2],CLN[0],CLN[1]);
       for(Isc=0;Isc<Nsc;Isc++) {
          S = &SC[Isc];
-         if (S->RefOrb == POV.Host.RefOrb) { /* TODO:  Improve this */
+         //if (S->RefOrb == POV.Host.RefOrb) { /* TODO:  Improve this */
+         if (ScIsVisible(POV.Host.RefOrb,Isc,PosR) ) {
             for(Ib=0;Ib<S->Nb;Ib++) {
                B = &S->B[Ib];
                G = &Geom[B->GeomTag];
@@ -1983,7 +1991,8 @@ void DepthPass(void)
             glLoadIdentity();
             for(Isc=0;Isc<Nsc;Isc++) {
                S = &SC[Isc];
-               if (S->RefOrb == POV.Host.RefOrb) { /* TODO: Improve this */
+//               if (S->RefOrb == POV.Host.RefOrb) { /* TODO: Improve this */
+               if (ScIsVisible(POV.Host.RefOrb,Isc,PosR) ) {
                   for(Ib=0;Ib<S->Nb;Ib++) {
                      B = &S->B[Ib];
                      G = &Geom[B->GeomTag];
@@ -2020,6 +2029,7 @@ void OpaquePass(void)
       struct GeomType *G;
       struct FBOType *SM;
       long Ir;
+      double PosR[3];
 
       SM = &ShadowMap;
 
@@ -2051,7 +2061,8 @@ void OpaquePass(void)
 
       for(Isc=0;Isc<Nsc;Isc++) {
          S = &SC[Isc];
-         if (S->RefOrb == POV.Host.RefOrb) { /* TODO: Improve this */
+         //if (S->RefOrb == POV.Host.RefOrb) { /* TODO: Improve this */
+         if (ScIsVisible(POV.Host.RefOrb,Isc,PosR)) {
             for(Ib=0;Ib<S->Nb;Ib++) {
                B = &S->B[Ib];
                G = &Geom[B->GeomTag];
@@ -2076,6 +2087,7 @@ void SeeThruPass(void)
       struct GeomType *G;
       struct RegionType *R;
       struct FBOType *SM;
+      double PosR[3];
 
       SM = &ShadowMap;
 
@@ -2107,7 +2119,8 @@ void SeeThruPass(void)
 
       for(Isc=0;Isc<Nsc;Isc++) {
          S = &SC[Isc];
-         if (S->RefOrb == POV.Host.RefOrb) {
+         //if (S->RefOrb == POV.Host.RefOrb) {
+         if (ScIsVisible(POV.Host.RefOrb,Isc,PosR)) {
             for(Ib=0;Ib<S->Nb;Ib++) {
                B = &S->B[Ib];
                G = &Geom[B->GeomTag];
@@ -2168,10 +2181,12 @@ void FindModelMatrices(void)
       struct BodyType *B;
       struct OrbitType *O;
       struct RegionType *R;
+      double PosR[3];
 
       for(Isc=0;Isc<Nsc;Isc++) {
          S = &SC[Isc];
-         if (S->Exists && S->RefOrb == POV.Host.RefOrb) { /* TODO: Improve this */
+         //if (S->Exists && S->RefOrb == POV.Host.RefOrb) { /* TODO: Improve this */
+         if (ScIsVisible(POV.Host.RefOrb,Isc,PosR)) {
             for(Ib=0;Ib<S->Nb;Ib++) {
                B = &S->B[Ib];
                if (S->RefPt == REFPT_CM) {
@@ -5674,6 +5689,14 @@ void LoadFOVs(void)
             &FOV[i].Nv,&FOV[i].Length,junk,&newline);
          fscanf(infile,"%lf %lf %[^\n] %[\n]",
             &FOV[i].Width,&FOV[i].Height,junk,&newline);
+         if (FOV[i].Width >= 180.0) {
+            printf("FOV[%ld] Width >= 180 deg.  This is not allowed.  Bailing out.\n",i);
+            exit(1);
+         }
+         if (FOV[i].Height >= 180.0) {
+            printf("FOV[%ld] Width >= 180 deg.  This is not allowed.  Bailing out.\n",i);
+            exit(1);
+         }
          FOV[i].Width *= D2R;
          FOV[i].Height *= D2R;
          fscanf(infile,"%f %f %f %f %[^\n] %[\n]",

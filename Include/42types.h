@@ -460,6 +460,7 @@ struct WorldType {
    double DipoleAxis[3]; /* Magnetic Field Dipole Axis */
    double DipoleOffset[3]; /* Dipole Offset, m */
    double RingInner, RingOuter;
+   double Density; /* For minor bodies, polyhedron gravity */
 
    /* Ephemeris */
    struct OrbitType eph; /* Ephemeris Parameters */
