@@ -12,14 +12,64 @@
 /*    All Other Rights Reserved.                                      */
 
 
+#include <math.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include "mathkit.h"
+#include "dcmkit.h"
+
 #ifndef __FSWKIT_H__
 #define __FSWKIT_H__
+
 
 /*
 ** #ifdef __cplusplus
 ** namespace Kit {
 ** #endif
 */
+
+struct KFMeasType {
+   long Ny; /* 1, 2, or 3 */
+
+   double *y;   /* Ny by 1 */
+   double **Rv; /* Ny by Ny */
+   double **H;  /* Ny by Nx */
+   double **L;  /* Nx by Ny */
+   
+   /* Workspace variables */
+   double **HP; /* Ny by Nx */
+   double *Hx; /* Ny by 1 */
+   double **HPHtRv; /* Ny by Ny */
+   double **HPHtRvInv; /* Ny by Ny */
+};
+
+struct KalmanFilterType {
+   long Nx;
+   long Nu;
+   long Nw;
+   long Nm;
+
+   double *x; /* Nx by 1 */
+   double *u; /* Nu by 1 */
+   double **Phi; /* Nx by Nx */
+   double **Gam; /* Nx by Nu */
+   double **Gamw; /* Nx by Nw */
+
+   double **P; /* Covariance after measurement (P is for Plus), Nx by Nx */
+   double **M; /* Covariance before measurement (M is for Minus), Nx by Nx */
+
+   double **Rw; /* Nw by Nw */
+   
+   /* Measurement structures, Nm by 1 */
+   struct KFMeasType *Meas;
+
+   /* Workspace variables */
+   double *PhiX; /* Nx by 1 */
+   double *GamU; /* Nx by 1 */
+   double **PhiP; /* Nx by Nx */
+   double **GRwGt; /* Gamw*Rw*GamwT, Nx by Nx */
+};
+
 
 void FindPDGains(double I, double w, double z, double *Kr, double *Kp);
 double Limit(double x,double min, double max);
@@ -58,10 +108,11 @@ void UDMeasUpdate(double *x, double **U, double y, double *H,
    double Rv, long Ns);
 void UDTimeUpdate(double *x, double **U, double **phi, double **gam,
    double *y, double *Rw,long Ns, long Nw);
-void KFMeasUpdate(double *x, double **P, double y, double *a,
-   double Rv, long Ns);
-void KFTimeUpdate(double *x, double **P, double **phi, double **gam,
-   double *u, double **Rw, long Ns, long Nw);
+void AllocKalmanFilterMeasurement(struct KFMeasType *M,long Nx, long Ny);
+struct KalmanFilterType *CreateKalmanFilter(long Nx, long Nu, long Nw, long Nm);
+void PopulateKalmanFilterWorkspace(struct KalmanFilterType *KF);
+void KalmanFilterMeasUpdate(struct KalmanFilterType *KF, struct KFMeasType *M);
+void KalmanFilterTimeUpdate(struct KalmanFilterType *KF);
 double CMGLaw4x1DOF(double Tcmd[3], double Axis[4][3], double Gim[4][3],
    double h[4], double AngRateCmd[4]);
 

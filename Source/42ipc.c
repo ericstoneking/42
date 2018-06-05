@@ -91,8 +91,8 @@ void WriteStatesToFile(void)
             for(Ig=0;Ig<S->Ng;Ig++) {
                G = &S->G[Ig];
                sprintf(line,"%s  %ld %le %le %le %le %le %le\n",
-                  Mnemonic[MNEM_JOINT],Ig,G->ang[0],G->ang[1],G->ang[2],
-                  G->d[0],G->d[1],G->d[2]);
+                  Mnemonic[MNEM_JOINT],Ig,G->Ang[0],G->Ang[1],G->Ang[2],
+                  G->Pos[0],G->Pos[1],G->Pos[2]);
                fprintf(statefile,"%s",line);
                if (EchoEnabled) printf("%s",line);
             }
@@ -172,19 +172,19 @@ void ReadStatesFromFile(void)
                S->RequestStateRefresh = 1;
             }
             if (!strcmp(MnemString,Mnemonic[MNEM_SVB])) {
-               S->FSW.svb[0] = DblVal1;
-               S->FSW.svb[1] = DblVal2;
-               S->FSW.svb[2] = DblVal3;
+               S->AC.svb[0] = DblVal1;
+               S->AC.svb[1] = DblVal2;
+               S->AC.svb[2] = DblVal3;
             }
             if (!strcmp(MnemString,Mnemonic[MNEM_BVB])) {
-               S->FSW.bvb[0] = DblVal1;
-               S->FSW.bvb[1] = DblVal2;
-               S->FSW.bvb[2] = DblVal3;
+               S->AC.bvb[0] = DblVal1;
+               S->AC.bvb[1] = DblVal2;
+               S->AC.bvb[2] = DblVal3;
             }
             if (!strcmp(MnemString,Mnemonic[MNEM_HVB])) {
-               S->FSW.Hvb[0] = DblVal1;
-               S->FSW.Hvb[1] = DblVal2;
-               S->FSW.Hvb[2] = DblVal3;
+               S->AC.Hvb[0] = DblVal1;
+               S->AC.Hvb[1] = DblVal2;
+               S->AC.Hvb[2] = DblVal3;
             }
          }
          if (sscanf(line,"%s %lf %lf %lf %lf",MnemString,
@@ -202,12 +202,12 @@ void ReadStatesFromFile(void)
             &DblVal4,&DblVal5,&DblVal6) == 8) {
             if (!strcmp(MnemString,Mnemonic[MNEM_JOINT])) {
                G = &S->G[IntVal1];
-               G->ang[0] = DblVal1;
-               G->ang[1] = DblVal2;
-               G->ang[2] = DblVal3;
-               G->d[0] = DblVal4;
-               G->d[1] = DblVal5;
-               G->d[2] = DblVal6;
+               G->Ang[0] = DblVal1;
+               G->Ang[1] = DblVal2;
+               G->Ang[2] = DblVal3;
+               G->Pos[0] = DblVal4;
+               G->Pos[1] = DblVal5;
+               G->Pos[2] = DblVal6;
                S->RequestStateRefresh = 1;
             }
          }
@@ -335,19 +335,19 @@ void ReadStatesFromSocket(void)
                S->RequestStateRefresh = 1;
             }
             if (!strcmp(MnemString,Mnemonic[MNEM_SVB])) {
-               S->FSW.svb[0] = DblVal1;
-               S->FSW.svb[1] = DblVal2;
-               S->FSW.svb[2] = DblVal3;
+               S->AC.svb[0] = DblVal1;
+               S->AC.svb[1] = DblVal2;
+               S->AC.svb[2] = DblVal3;
             }
             if (!strcmp(MnemString,Mnemonic[MNEM_BVB])) {
-               S->FSW.bvb[0] = DblVal1;
-               S->FSW.bvb[1] = DblVal2;
-               S->FSW.bvb[2] = DblVal3;
+               S->AC.bvb[0] = DblVal1;
+               S->AC.bvb[1] = DblVal2;
+               S->AC.bvb[2] = DblVal3;
             }
             if (!strcmp(MnemString,Mnemonic[MNEM_HVB])) {
-               S->FSW.Hvb[0] = DblVal1;
-               S->FSW.Hvb[1] = DblVal2;
-               S->FSW.Hvb[2] = DblVal3;
+               S->AC.Hvb[0] = DblVal1;
+               S->AC.Hvb[1] = DblVal2;
+               S->AC.Hvb[2] = DblVal3;
             }
          }
          if (sscanf(line,"%s %lf %lf %lf %lf",MnemString,
@@ -365,12 +365,12 @@ void ReadStatesFromSocket(void)
             &DblVal4,&DblVal5,&DblVal6) == 8) {
             if (!strcmp(MnemString,Mnemonic[MNEM_JOINT])) {
                G = &S->G[IntVal1];
-               G->ang[0] = DblVal1;
-               G->ang[1] = DblVal2;
-               G->ang[2] = DblVal3;
-               G->d[0] = DblVal4;
-               G->d[1] = DblVal5;
-               G->d[2] = DblVal6;
+               G->Ang[0] = DblVal1;
+               G->Ang[1] = DblVal2;
+               G->Ang[2] = DblVal3;
+               G->Pos[0] = DblVal4;
+               G->Pos[1] = DblVal5;
+               G->Pos[2] = DblVal6;
                S->RequestStateRefresh = 1;
             }
          }
@@ -487,8 +487,8 @@ void WriteStatesToSocket(void)
          for(Ig=0;Ig<S->Ng;Ig++) {
             G = &S->G[Ig];
             sprintf(line,"%s  %ld %le %le %le %le %le %le\n",
-               Mnemonic[MNEM_JOINT],Ig,G->ang[0],G->ang[1],G->ang[2],
-               G->d[0],G->d[1],G->d[2]);
+               Mnemonic[MNEM_JOINT],Ig,G->Ang[0],G->Ang[1],G->Ang[2],
+               G->Pos[0],G->Pos[1],G->Pos[2]);
             Success = send(TxSocket,line,strlen(line),0);
             if (EchoEnabled) printf("%s",line);
          }

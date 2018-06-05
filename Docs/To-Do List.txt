@@ -29,4 +29,8 @@ Migrate ST and CSS windows from SatCam to 42.
 
 Finish implementing commands in Prototype.rtf
 
+Atmospheric Scattering
 
+SPH Slosh?
+
+Parallelize shadow volumes for aero/SRP?  Implement in shader?

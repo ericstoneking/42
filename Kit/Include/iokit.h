@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <fcntl.h>
 #ifdef _ENABLE_SOCKETS_
    #ifdef _WIN32
       #include <winsock2.h>
@@ -39,7 +40,6 @@
       #define SOCKET int
    #endif
    /* #include <sys/un.h> */
-   #include <fcntl.h>
 #endif
 
 FILE *FileOpen(const char *Path, const char *File, const char *CtrlCode);

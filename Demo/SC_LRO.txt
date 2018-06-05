@@ -267,4 +267,129 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.12                          ! Rotor Inertia, kg-m^2
 75.0                          ! Momentum, Nms
 1.0  0.0  0.0                 ! Max Gimbal Angle Rates, deg/sec
+******************************* Gyro ************************************
+3                                ! Number of Gyro Axes
+============================== Axis 0 ===================================
+0.1                           ! Sample Time,sec
+1.0  0.0  0.0                 ! Axis expressed in Body Frame
+1000.0                        ! Max Rate, deg/sec
+100.0                         ! Scale Factor Error, ppm
+1.0                           ! Quantization, arcsec 
+0.07                          ! Angle Random Walk (deg/rt-hr)
+0.1  1.0                      ! Bias Stability (deg/hr) over timespan (hr)
+0.1                           ! Angle Noise, arcsec RMS
+0.1                           ! Initial Bias (deg/hr)
+0                             ! Flex Node Index
+============================== Axis 1 ===================================
+0.1                           ! Sample Time,sec
+0.0  1.0  0.0                 ! Axis expressed in Body Frame
+1000.0                        ! Max Rate, deg/sec
+100.0                         ! Scale Factor Error, ppm
+1.0                           ! Quantization, arcsec 
+0.07                          ! Angle Random Walk (deg/rt-hr)
+0.1  1.0                      ! Bias Stability (deg/hr) over timespan (hr)
+0.1                           ! Angle Noise, arcsec RMS
+0.1                           ! Initial Bias (deg/hr)
+0                             ! Flex Node Index
+============================== Axis 2 ===================================
+0.1                           ! Sample Time,sec
+0.0  0.0  1.0                 ! Axis expressed in Body Frame
+1000.0                        ! Max Rate, deg/sec
+100.0                         ! Scale Factor Error, ppm
+1.0                           ! Quantization, arcsec 
+0.07                          ! Angle Random Walk (deg/rt-hr)
+0.1  1.0                      ! Bias Stability (deg/hr) over timespan (hr)
+0.1                           ! Angle Noise, arcsec RMS
+0.1                           ! Initial Bias (deg/hr)
+0                             ! Flex Node Index
+*************************** Magnetometer ********************************
+3                             ! Number of Magnetometer Axes
+============================== Axis 0 ===================================
+0.1                           ! Sample Time,sec
+1.0  0.0  0.0                 ! Axis expressed in Body Frame
+60.0E-6                       ! Saturation, Tesla
+0.0                           ! Scale Factor Error, ppm
+1.0E-6                        ! Quantization, Tesla 
+1.0E-6                        ! Noise, Tesla RMS
+0                             ! Flex Node Index
+============================== Axis 1 ===================================
+0.1                           ! Sample Time,sec
+0.0  1.0  0.0                 ! Axis expressed in Body Frame
+60.0E-6                       ! Saturation, Tesla
+0.0                           ! Scale Factor Error, ppm
+1.0E-6                        ! Quantization, Tesla 
+1.0E-6                        ! Noise, Tesla RMS
+0                             ! Flex Node Index
+============================== Axis 2 ===================================
+0.1                           ! Sample Time,sec
+0.0  0.0  1.0                 ! Axis expressed in Body Frame
+60.0E-6                       ! Saturation, Tesla
+0.0                           ! Scale Factor Error, ppm
+1.0E-6                        ! Quantization, Tesla 
+1.0E-6                        ! Noise, Tesla RMS
+0                             ! Flex Node Index
+*********************** Coarse Sun Sensor *******************************
+4                             ! Number of Coarse Sun Sensors
+============================== CSS 0 ====================================
+0.1                           ! Sample Time,sec
+1.0  1.0  1.0                 ! Axis expressed in Body Frame
+90.0                          ! Half-cone Angle, deg
+1.0                           ! Scale Factor
+0.001                         ! Quantization
+============================== CSS 1 ====================================
+0.1                           ! Sample Time,sec
+1.0 -1.0  1.0                 ! Axis expressed in Body Frame
+90.0                          ! Half-cone Angle, deg
+1.0                           ! Scale Factor
+0.001                         ! Quantization
+============================== CSS 2 ====================================
+0.1                           ! Sample Time,sec
+1.0 -1.0 -1.0                 ! Axis expressed in Body Frame
+90.0                          ! Half-cone Angle, deg
+1.0                           ! Scale Factor
+0.001                         ! Quantization
+============================== CSS 3 ====================================
+0.1                           ! Sample Time,sec
+1.0  1.0 -1.0                 ! Axis expressed in Body Frame
+90.0                          ! Half-cone Angle, deg
+1.0                           ! Scale Factor
+0.001                         ! Quantization
+************************** Star Tracker *********************************
+2                             ! Number of Star Trackers
+=============================== ST 0 ====================================
+0.25                          ! Sample Time,sec
+30.0  20.0  10.0  213         ! Mounting Angles (deg), Seq in Body
+8.0   8.0                     ! X, Y FOV Size, deg
+30.0  10.0  10.0              ! Sun, Earth, Moon Exclusion Angles, deg
+2.0  2.0  20.0                ! Noise Equivalent Angle, arcsec RMS
+0                             ! Flex Node Index
+=============================== ST 1 ====================================
+0.25                          ! Sample Time,sec
+-30.0  -20.0  -10.0  213      ! Mounting Angles (deg), Seq in Body
+8.0   8.0                     ! X, Y FOV Size, deg
+30.0  10.0  10.0              ! Sun, Earth, Moon Exclusion Angles, deg
+2.0  2.0  20.0                ! Noise Equivalent Angle, arcsec RMS
+0                             ! Flex Node Index
+****************************** GPS **************************************
+************************* Fine Sun Sensor *******************************
+1                             ! Number of Fine Sun Sensors
+=============================== FSS 0 ===================================
+0.2                           ! Sample Time,sec
+30.0  20.0  10.0  213         ! Mounting Angles (deg), Seq in Body
+32.0   32.0                   ! X, Y FOV Size, deg
+0.1                           ! Noise Equivalent Angle, deg RMS
+0.5                           ! Quantization, deg
+*************************** Accelerometer *******************************
+1                             ! Number of Accel Axes
+============================== Axis 0 ===================================
+0.1                           ! Sample Time,sec
+0.5  1.0  1.5                 ! Position in B[0] (m)
+1.0  0.0  0.0                 ! Axis expressed in Body Frame
+0.0                           ! Scale Factor Error
+0.05                          ! Quantization, m/s^2
+0.0                           ! Random Walk (units?)
+0.0                           ! Bias Stability (m/s^2/hr?)
+0.0                           ! DV Noise, m/s
+0.5                           ! Initial Bias (m/s^2)
+0                             ! Flex Node Index
 

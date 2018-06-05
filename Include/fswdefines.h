@@ -28,11 +28,5 @@
    #define D2R 1.74532925199433E-2
 #endif
 
-#define BDOT 0
-#define RATEDAMP 1
-#define SPIN 2
-#define MOMBIAS 3
-#define LVLH 4
-#define INERTPOINT 5
 
 

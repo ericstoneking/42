@@ -39,8 +39,10 @@ struct CmdVecType {
 struct CmdType {
    long Parm;
    long Frame;
-   double Rate[3];
+   double AngRate[3];
    double Ang[3];
+   double PosRate[3];
+   double Pos[3];
    long RotSeq;
    double qrl[4];
    double qrn[4];
@@ -53,7 +55,10 @@ struct CmdType {
    struct CmdVecType SecVec;
 };
 
-struct FswGimType {
+struct AcBodyType {
+};
+
+struct AcJointType {
    long IsUnderActiveControl;
    long IsSpherical;
    long RotDOF;
@@ -62,110 +67,239 @@ struct FswGimType {
    double CBoGo[3][3];
    double COI[3][3];
    long RotSeq;
-   double Rate[3];
+   long TrnSeq;
    double Ang[3];
-   double RateGain[3];
+   double AngRate[3];
+   double Pos[3];
+   double PosRate[3];
    double AngGain[3];
-   double MaxRate[3];
+   double AngRateGain[3];
+   double PosGain[3];
+   double PosRateGain[3];
+   double MaxAngRate[3];
+   double MaxPosRate[3];
    double MaxTrq[3];
+   double MaxFrc[3];
+   struct CmdType Cmd;
 };
 
-struct FSWType {
-   long Init;
-   long Tlm;
+struct AcAccelType {
+   double PosB[3];
+   double Axis[3];
+   double Acc;
+};
 
+struct AcGyroType {
+   double Axis[3];
+   double Rate;
+};
+
+struct AcMagnetometerType {
+   double Axis[3];
+   double Field;
+};
+
+struct AcCssType {
+   double Axis[3];
+   double Scale;
+   long Valid;
+   double Illum;
+};
+
+struct AcStarTrackerType {
+   double qb[4];
+   double CB[3][3];
+   long Valid;
+   double qn[4];
+   double qbn[4];
+};
+
+struct AcFssType {
+   double qb[4];
+   double CB[3][3];
+   long Valid;
+   double SunAng[2];
+   double SunVecS[3];
+   double SunVecB[3];
+};
+
+struct AcEarthSensorType {
+   long Valid;
+   double Roll;
+   double Pitch;
+};
+
+struct AcGpsType {
+   long Valid;
+   long Rollover;
+   long Week;
+   double Sec;
+   double PosN[3];
+   double VelN[3];
+   double PosW[3];
+   double VelW[3];
+   double Lng,Lat,Alt;
+};
+
+struct AcWhlType {
+   double Axis[3];
+   double DistVec[3];
+   double J;
+   double Tmax;
+   double Hmax;
+   double w;
+   double H;
+   double Tcmd;
+};
+
+struct AcMtbType {
+   double Axis[3];
+   double DistVec[3];
+   double Mmax;
+   double Mcmd;
+};
+
+struct AcThrType {
+   double PosB[3];
+   double Axis[3];
+   double Fmax;
+   double Fcmd;
+   double PulseWidthCmd;
+};
+
+struct AcCmgType {
+};
+
+struct AcPrototypeCtrlType {
+   long Init;
+   double wc;
+   double amax;
+   double vmax;
+   double Kprec;
+   double Knute;
+   double Tcmd[3];
+   double qbr[4];
+   double therr[3];
+   double werr[3];
+};
+
+struct AcAdHocCtrlType {
+   long Init;
+   double Kr[3],Kp[3];
+   double therr[3],werr[3];
+   double Tcmd[3];
+};
+
+struct AcSpinnerCtrlType {
+   long Init;
+   double Ispin,Itrans; 
+   double SpinRate;
+   double Knute;
+   double Kprec;
+
+   double Bold1,Bold2;
+   double xold,yold;
+   double rvn[3],rvb[3];
+   double Tcmd[3];
+   double Mcmd[3];
+};
+
+struct AcMomBiasCtrlType {
+   long Init;
+};
+
+struct AcThreeAxisCtrlType {
+   long Init;
+   double Kr[3];
+   double Kp[3];
+   double Kunl;
+   
+   double Tcmd[3];
+   double Hwcmd[3];
+};
+
+struct AcIssCtrlType {
+   long Init;
+   double Kr[3];
+   double Kp[3];
+   double Tmax;
+   double therr[3];
+   double werr[3];
+};
+
+struct AcCmgCtrlType {
+   long Init;
+};
+
+
+struct AcsType {
+   long Nb;
+   long Ng;
+   long Nwhl;
+   long Nmtb;
+   long Nthr;
+   long Ncmg;
+   long Nacc;
+   long Ngyro;
+   long Nmag;
+   long Ncss;
+   long Nst;
+   long Nfss;
+   
+   /* Dynamics */
+   struct AcBodyType *B;
+   struct AcJointType *G;
+   
+   /* Sensors */
+   struct AcAccelType *Accel;
+   struct AcGyroType *Gyro;
+   struct AcMagnetometerType *MAG;
+   struct AcCssType *CSS;
+   struct AcStarTrackerType *ST;
+   struct AcFssType *FSS;
+   struct AcGpsType *GPS;
+   struct AcEarthSensorType ES;
+   
+   /* Actuators */
+   struct AcWhlType *Whl;
+   struct AcMtbType *MTB;
+   struct AcThrType *Thr;
+   struct AcCmgType *CMG;
+   
+   /* Control Modes */
+   struct AcPrototypeCtrlType PrototypeCtrl;
+   struct AcAdHocCtrlType AdHocCtrl;
+   struct AcSpinnerCtrlType SpinnerCtrl;
+   struct AcMomBiasCtrlType MomBiasCtrl;
+   struct AcThreeAxisCtrlType ThreeAxisCtrl;
+   struct AcIssCtrlType IssCtrl;
+   struct AcCmgCtrlType CmgCtrl;
+   
+   /* Common Parameters */
+   double DT;
+   double mass;
+   double MOI[3][3];
+   
+   /* Common Variables */
+   long Init;
    long Mode;
    long ReqMode;
-   double DT;
-
-   /* Cmd Variables */
    struct CmdType Cmd;
-
-   /* Sensor Inputs */
-   long SunValid;
-   double svb[3];
-   long MagValid;
-   double bvb[3];
-   double qbn[4];
+   
    double wbn[3];
-   long EarthValid;
-   double ESroll, ESpitch;
-   long EphValid;
-   double PosN[3],VelN[3];
-   double svn[3],bvn[3];
-
-   /* Gimbals */
-   long Ngim;
-   struct FswGimType *Gim;
-   struct CmdType *GimCmd;
-
-   /* Wheels */
-   long Nwhl;
-   double *Hw;
-   double *Hwcmd;
-   double **Awhl;  /* 3 x Nwhl */
-   double **AwhlPlus; /* Nwhl x 3 */
-   double *Twhlcmd;
-
-   /* MTBs */
-   long Nmtb;
-   double **Amtb;  /* 3 x Nmtb */
-   double **AmtbPlus;  /* Nmtb x 3 */
-   double *Mmtbcmd;
-   double *Mmtbmax;
-
-   /* Thrusters */
-   long Nthr;
-   double **Athr; /* 3 x Nthr, or 6 x Nthr */
-   double **AthrPlus; /* Nthr x 3  or Nthr x 6 */
-   double *Thrcmd;
-
-   /* Ideal Actuators */
-   double IdealFrc[3];
-   double IdealTrq[3];
-
-   /* Formation Control */
-   double CSF[3][3];
-   double PosF[3];  /* Expressed in F */
-   double VelF[3];  /* Expressed in F */
-   double CSFcmd[3][3];
-   double PosFcmd[3];
-
-   /* Control Parameters */
-   double MOI[3];
-   double mass;
-   double wc[3],zc[3];
-   double Kr[3],Kp[3],Ki[3];
-   double wct,zct;
-   double Krt,Kpt,Kit;
-   double thsat, psat; /* Error Saturation Limits */
-   double Kunl;
-   double Kprec,Knute;
-   double MaxSlewRate;
-   double wrn[3];
-   double rvn[3];
-
-   /* Limits */
-   double Tmax;
-   double Fmax;
-   double wmax[3];
-
-   /* For RampCoastGlide */
-   double RcgWC;
-   double RcgAmax;
-   double RcgVmax;
-
-   /* Intermediate Variables */
-   double CRN[3][3],CBR[3][3],CBN[3][3];
-   double qbr[4];
-   double therr[3],werr[3],ierr[3];
-   double pbr[3],vbr[3];
-   double poserr[3],velerr[3];
-   double Tcmd[3];
-   double rvb[3];
+   double qbn[4];
+   double CBN[3][3];
    double Hvb[3];
-
-   double Bold1,Bold2,xold,yold;
+   double svn[3],svb[3];
+   double bvn[3],bvb[3];
+   double PosN[3];
+   double VelN[3];
+   long SunValid;
+   long MagValid;
+   long EphValid;
+   
+   double IdealTrq[3];
+   double IdealFrc[3];
 };
 
 /*

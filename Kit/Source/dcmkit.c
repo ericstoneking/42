@@ -531,6 +531,116 @@ void PARAXIS(double IB[3][3], double CBA[3][3], double m, double pba[3],
       }
 
 }
+/******************************************************************************/
+void PrincipalMOI(double Ib[3][3], double Ip[3], double CPB[3][3])
+{
+      double Tol = 1.0E-12;
+      long MaxK = 100;
+      double I[3][3];
+      double C[3][3] = {{1.0,0.0,0.0},{0.0,1.0,0.0},{0.0,0.0,1.0}};
+      double CI[3][3],CICT[3][3],CCPB[3][3];
+      double MaxOffDiag,th,MaxEl,Swap;
+      long i,j,k;
+      long id,jd;
+      long Jmax;
+      long Done;
+
+      for(i=0;i<3;i++) {
+         for(j=0;j<3;j++) {
+            I[i][j] = Ib[i][j];
+            CPB[i][j] = 0.0;
+         }
+         CPB[i][i] = 1.0;
+      }
+      k = 1;
+      Done = 0;
+
+      while(!Done) {
+         MaxOffDiag = fabs(I[0][1]);
+         id = 0;
+         jd = 1;
+         if (fabs(I[0][2]) > MaxOffDiag) {
+            MaxOffDiag = fabs(I[0][2]);
+            id = 0;
+            jd = 2;
+         }
+         if (fabs(I[1][2]) > MaxOffDiag) {
+            MaxOffDiag = fabs(I[1][2]);
+            id = 1;
+            jd = 2;
+         }
+      
+         if (I[id][id] == I[jd][jd]) {
+            th = 0.78540; /* pi/4 */
+         }
+         else {
+            th = 0.5*atan2(2.0*I[id][jd],I[id][id]-I[jd][jd]);
+         }
+      
+         for(i=0;i<3;i++) {
+            for(j=0;j<3;j++) {
+               C[i][j] = 0.0;
+            }
+            C[i][i] = 1.0;
+         }
+         C[id][id] =  cos(th);
+         C[jd][jd] =  cos(th);
+         C[id][jd] =  sin(th);
+         C[jd][id] = -sin(th);
+      
+         MxM(C,I,CI);
+         MxMT(CI,C,CICT);
+         MxM(C,CPB,CCPB);
+         for(i=0;i<3;i++) {
+            for(j=0;j<3;j++) {
+               I[i][j] = CICT[i][j];
+               CPB[i][j] = CCPB[i][j];
+            }
+         }
+      
+         k++;
+         if (MaxOffDiag < Tol || k > MaxK) Done = 1;
+      }
+      
+      for(i=0;i<3;i++) Ip[i] = I[i][i];
+      
+      /* Flip Signs to make max elements in each row positive */
+      for(i=0;i<3;i++) {
+         MaxEl = fabs(CPB[i][0]);
+         Jmax = 0;
+         if (fabs(CPB[i][1]) > MaxEl) {
+            MaxEl = fabs(CPB[i][1]);
+            Jmax = 1;
+         }
+         if (fabs(CPB[i][2]) > MaxEl) {
+            MaxEl = fabs(CPB[i][2]);
+            Jmax = 2;
+         }
+         if (CPB[i][Jmax] < 0.0) {
+            for(j=0;j<3;j++) CPB[i][j] *= -1.0;
+         }
+      }
+      /* Permute rows to make CPB as diagonal as possible */
+      Done = 0;
+      while(!Done) {
+         Done = 1;
+         for(i=0;i<3;i++) {
+            for(j=0;j<3;j++) {
+               if (fabs(CPB[j][i]) > fabs(CPB[i][i])) {
+                  Done = 0;
+                  for(k=0;k<3;k++) {
+                     Swap = CPB[j][k];
+                     CPB[j][k] = CPB[i][k];
+                     CPB[i][k] = Swap;
+                  }
+                  Swap = Ip[j];
+                  Ip[j] = Ip[i];
+                  Ip[i] = Swap;
+               }
+            }
+         }
+      }
+}
 /**********************************************************************/
 /*  Given quaternion measurements, find body rates.  Ref Kane, 1.13   */
 void Q2W(double q[4], double qdot[4], double w[3])

@@ -1,0 +1,13 @@
+Path: .
+Working Copy Root Path: /Users/estoneki/Desktop/42
+URL: https://mesa-svn.ndc.nasa.gov/42
+Relative URL: ^/
+Repository Root: https://mesa-svn.ndc.nasa.gov/42
+Repository UUID: ad5bd6d9-799f-e640-a0ec-14e48dfc8bbe
+Revision: 991
+Node Kind: directory
+Schedule: normal
+Last Changed Author: estoneki
+Last Changed Rev: 991
+Last Changed Date: 2018-02-06 12:49:50 -0500 (Tue, 06 Feb 2018)
+

@@ -304,7 +304,7 @@ int exec(int argc,char **argv)
       for (Isc=0;Isc<Nsc;Isc++) {
          if (SC[Isc].Exists) {
             InitSpacecraft(&SC[Isc]);
-            InitFSW(&SC[Isc]);
+            InitAC(&SC[Isc]);
          }
       }
       CmdInterpreter();

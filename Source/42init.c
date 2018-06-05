@@ -135,13 +135,10 @@ long DecodeString(char *s)
       else if (!strcmp(s,"PASSIVE_FSW")) return PASSIVE_FSW;
       else if (!strcmp(s,"PROTOTYPE_FSW")) return PROTOTYPE_FSW;
       else if (!strcmp(s,"AD_HOC_FSW")) return AD_HOC_FSW;
-      else if (!strcmp(s,"MANUAL_CONTROL_FSW")) return MANUAL_CONTROL_FSW;
       else if (!strcmp(s,"SPINNER_FSW")) return SPINNER_FSW;
       else if (!strcmp(s,"MOMBIAS_FSW")) return MOMBIAS_FSW;
       else if (!strcmp(s,"THREE_AXIS_FSW")) return THREE_AXIS_FSW;
-      else if (!strcmp(s,"IONCRUISER_FSW")) return IONCRUISER_FSW;
       else if (!strcmp(s,"ISS_FSW")) return ISS_FSW;
-      else if (!strcmp(s,"ARC_CHASER_FSW")) return ARC_CHASER_FSW;
       else if (!strcmp(s,"CMG_FSW")) return CMG_FSW;
 
       else if (!strcmp(s,"PHOBOS")) return PHOBOS;
@@ -319,9 +316,9 @@ void EchoDyn(struct SCType *S)
          fprintf(outfile,"Rotu0: %ld   Rotx0: %ld\n",G->Rotu0,G->Rotx0);
          fprintf(outfile,"Trnu0: %ld   Trnx0: %ld\n",G->Trnu0,G->Trnx0);
          fprintf(outfile,"ang:  %lf %lf %lf\n",
-            G->ang[0],G->ang[1],G->ang[2]);
+            G->Ang[0],G->Ang[1],G->Ang[2]);
          fprintf(outfile,"rate:  %lf %lf %lf\n",
-            G->rate[0],G->rate[1],G->rate[2]);
+            G->AngRate[0],G->AngRate[1],G->AngRate[2]);
          fprintf(outfile,"COI:\n");
          fprintf(outfile,"%lf %lf %lf\n",
             G->COI[0][0],G->COI[0][1],G->COI[0][2]);
@@ -1435,7 +1432,7 @@ void InitSpacecraft(struct SCType *S)
       char junk[120],newline,response[120];
       char response1[120],response2[120],response3[120];
       double CBL[3][3],CBF[3][3];
-      long i,j,k,Ib,Ig,Iw,Im,It,Bi,Bo,Icmg;
+      long i,j,k,Ib,Ig,Iw,Im,It,Bi,Bo,Ic;
       char RateFrame,AttFrame,AttParm;
       double wlnb[3];
       double wbn[3],CBN[3][3],qbn[4];
@@ -1444,6 +1441,7 @@ void InitSpacecraft(struct SCType *S)
       double psn[3],vsn[3],psl[3],vsl[3],pfl[3],pcmn[3],pcml[3];
       double PosVec[3],VelVec[3],wxr[3],wxrn[3],wxrl[3];
       double rh[3],vh[3];
+      double BiasTime;
       long Seq;
       long i1,i2,i3;
       long UseCM;
@@ -1453,6 +1451,9 @@ void InitSpacecraft(struct SCType *S)
       struct FormationType *Fr;
       struct DynType *D;
       struct CMGType *C;
+      struct GyroType *Gyro;
+      struct MagnetometerType *MAG;
+      struct CssType *CSS;
       long OldNgeom;
 
       infile=FileOpen(InOutPath,S->FileName,"r");
@@ -1660,18 +1661,18 @@ void InitSpacecraft(struct SCType *S)
 
             /* Load in initial angles and angular rates */
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
-                   &G->ang[0],&G->ang[1],&G->ang[2],junk,&newline);
+                   &G->Ang[0],&G->Ang[1],&G->Ang[2],junk,&newline);
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
-                   &G->rate[0],&G->rate[1],&G->rate[2],junk,&newline);
+                   &G->AngRate[0],&G->AngRate[1],&G->AngRate[2],junk,&newline);
             for(k=0;k<3;k++) {
-               G->ang[k] *= D2R;
-               G->rate[k] *= D2R;
+               G->Ang[k] *= D2R;
+               G->AngRate[k] *= D2R;
             }
             /* Load in initial displacements and rates */
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
-                  &G->d[0],&G->d[1],&G->d[2],junk,&newline);
+                  &G->Pos[0],&G->Pos[1],&G->Pos[2],junk,&newline);
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
-                  &G->s[0],&G->s[1],&G->s[2],junk,&newline);
+                  &G->PosRate[0],&G->PosRate[1],&G->PosRate[2],junk,&newline);
 
             fscanf(infile,"%lf %lf %lf %ld %[^\n] %[\n]",
                    &Ang1,&Ang2,&Ang3,&Seq,junk,&newline);
@@ -1770,7 +1771,7 @@ void InitSpacecraft(struct SCType *S)
 /* .. Thruster parameters */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nthr,junk,&newline);
-      S->Thr = (struct ThrusterType *) calloc(S->Nthr,sizeof(struct ThrusterType));
+      S->Thr = (struct ThrType *) calloc(S->Nthr,sizeof(struct ThrType));
       if (S->Nthr == 0) {
          for(i=0;i<4;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
@@ -1785,9 +1786,9 @@ void InitSpacecraft(struct SCType *S)
                    &S->Thr[It].A[2],junk,&newline);
             UNITV(S->Thr[It].A);
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
-                   &S->Thr[It].r[0],
-                   &S->Thr[It].r[1],
-                   &S->Thr[It].r[2],junk,&newline);
+                   &S->Thr[It].PosB[0],
+                   &S->Thr[It].PosB[1],
+                   &S->Thr[It].PosB[2],junk,&newline);
          }
       }
 
@@ -1799,8 +1800,8 @@ void InitSpacecraft(struct SCType *S)
          for(i=0;i<8;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
       else {
-         for(Icmg=0;Icmg<S->Ncmg;Icmg++) {
-            C = &S->CMG[Icmg];
+         for(Ic=0;Ic<S->Ncmg;Ic++) {
+            C = &S->CMG[Ic];
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
             fscanf(infile,"%ld %[^\n] %[\n]",&C->DOF,junk,&newline);
             fscanf(infile,"%lf %lf %lf %ld %[^\n] %[\n]",
@@ -1814,7 +1815,8 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%lf %lf %lf %ld %[^\n] %[\n]",
                    &Ang1,&Ang2,&Ang3,&Seq,junk,&newline);
             A2C(Seq,Ang1*D2R,Ang2*D2R,Ang3*D2R,C->CGB);
-            fscanf(infile,"%lf %[^\n] %[\n]",&C->J,junk,&newline);
+            fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
+               &C->I[0],&C->I[1],&C->I[2],junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&C->H,junk,&newline);
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
                    &C->MaxAngRate[0],&C->MaxAngRate[1],&C->MaxAngRate[2],
@@ -1822,9 +1824,114 @@ void InitSpacecraft(struct SCType *S)
             for(k=0;k<3;k++) {
                C->MaxAngRate[k] *= D2R;
             }
-            FindCmgAxisAndTrq(C);
+            FindCmgTrq(C,S->B[0].wn);
          }
       }
+
+/* .. Gyro Parameters */
+      fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      fscanf(infile,"%ld %[^\n] %[\n]",&S->Ngyro,junk,&newline);
+      S->Gyro = (struct GyroType *) calloc(S->Ngyro,sizeof(struct GyroType));
+      if (S->Ngyro == 0) {
+         for(i=0;i<11;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      }
+      else {
+         for(Ig=0;Ig<S->Ngyro;Ig++) {
+            Gyro = &S->Gyro[Ig];
+            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+            fscanf(infile,"%lf %[^\n] %[\n]",&Gyro->SampleTime,junk,&newline);
+            Gyro->MaxCounter = (long) (Gyro->SampleTime/DTSIM+0.5);
+            if (Gyro->MaxCounter < 1) {
+               Gyro->MaxCounter = 1;
+               Gyro->SampleTime = DTSIM;
+               printf("Info:  Gyro[%ld].SampleTime was smaller than DTSIM.  It has been adjusted to be DTSIM.\n",Ig);
+            }
+            Gyro->SampleCounter = Gyro->MaxCounter;
+            fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
+               &Gyro->Axis[0],&Gyro->Axis[1],&Gyro->Axis[2],junk,&newline);
+            UNITV(Gyro->Axis);
+            fscanf(infile,"%lf %[^\n] %[\n]",&Gyro->MaxRate,junk,&newline);
+            Gyro->MaxRate *= D2R;
+            fscanf(infile,"%lf %[^\n] %[\n]",&Gyro->Scale,junk,&newline);
+            Gyro->Scale = 1.0+1.0E-6*Gyro->Scale;
+            fscanf(infile,"%lf %[^\n] %[\n]",&Gyro->Quant,junk,&newline);
+            Gyro->Quant *= D2R/3600.0;
+            fscanf(infile,"%lf %[^\n] %[\n]",&Gyro->SigV,junk,&newline);
+            Gyro->SigV *= D2R/60.0; /* from deg/rt-hr to rad/rt-sec */
+            fscanf(infile,"%lf %lf %[^\n] %[\n]",&Gyro->SigU,&BiasTime,junk,&newline);
+            Gyro->SigU *= D2R/3600.0/sqrt(BiasTime*3600.0);
+            fscanf(infile,"%lf %[^\n] %[\n]",&Gyro->SigE,junk,&newline);
+            Gyro->SigE *= D2R/3600.0;
+            fscanf(infile,"%lf %[^\n] %[\n]",&Gyro->Bias,junk,&newline);
+            Gyro->Bias *= D2R/3600.0;
+            fscanf(infile,"%ld %[^\n] %[\n]",&Gyro->FlexNode,junk,&newline);
+            
+            Gyro->BiasStabCoef = Gyro->SigU*sqrt(Gyro->SampleTime);
+            Gyro->ARWCoef = sqrt(Gyro->SigV*Gyro->SigV/Gyro->SampleTime 
+                               + Gyro->SigU*Gyro->SigU*Gyro->SampleTime/12.0);
+            Gyro->AngNoiseCoef = Gyro->SigE/sqrt(Gyro->SampleTime);
+            Gyro->CorrCoef = 1.0-Gyro->SampleTime/(BiasTime*3600.0);
+            Gyro->Angle = 0.0;
+         }
+      }
+      
+/* .. Magnetometer Parameters */
+      fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      fscanf(infile,"%ld %[^\n] %[\n]",&S->Nmag,junk,&newline);
+      S->MAG = (struct MagnetometerType *) calloc(S->Nmag,sizeof(struct MagnetometerType));
+      if (S->Nmag == 0) {
+         for(i=0;i<8;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      }
+      else {
+         for(Im=0;Im<S->Nmag;Im++) {
+            MAG = &S->MAG[Im];
+            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+            fscanf(infile,"%lf %[^\n] %[\n]",&MAG->SampleTime,junk,&newline);
+            MAG->MaxCounter = (long) (MAG->SampleTime/DTSIM+0.5);
+            if (MAG->MaxCounter < 1) {
+               MAG->MaxCounter = 1;
+               MAG->SampleTime = DTSIM;
+               printf("Info:  MAG[%ld].SampleTime was smaller than DTSIM.  It has been adjusted to be DTSIM.\n",Im);
+            }
+            MAG->SampleCounter = MAG->MaxCounter;
+            fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
+               &MAG->Axis[0],&MAG->Axis[1],&MAG->Axis[2],junk,&newline);
+            UNITV(MAG->Axis);
+            fscanf(infile,"%lf %[^\n] %[\n]",&MAG->Saturation,junk,&newline);
+            fscanf(infile,"%lf %[^\n] %[\n]",&MAG->Scale,junk,&newline);
+            MAG->Scale = 1.0+1.0E-6*MAG->Scale;
+            fscanf(infile,"%lf %[^\n] %[\n]",&MAG->Quant,junk,&newline);
+            fscanf(infile,"%lf %[^\n] %[\n]",&MAG->Noise,junk,&newline);
+            fscanf(infile,"%ld %[^\n] %[\n]",&MAG->FlexNode,junk,&newline);
+         }
+      }
+      
+/* .. Coarse Sun Sensors */
+      fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      fscanf(infile,"%ld %[^\n] %[\n]",&S->Ncss,junk,&newline);
+      S->CSS = (struct CssType *) calloc(S->Ncss,sizeof(struct CssType));
+      if (S->Ncss == 0) {
+         for(i=0;i<6;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      }
+      else {
+         for(Ic=0;Ic<S->Ncss;Ic++) {
+            CSS = &S->CSS[Ic];
+            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+            fscanf(infile,"%lf %[^\n] %[\n]",&CSS->SampleTime,junk,&newline);
+            fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
+               &CSS->Axis[0],&CSS->Axis[1],&CSS->Axis[2],junk,&newline);
+            UNITV(CSS->Axis);
+            fscanf(infile,"%lf %[^\n] %[\n]",&CSS->FovAng,junk,&newline);
+            CSS->FovAng *= D2R;
+            fscanf(infile,"%lf %[^\n] %[\n]",&CSS->Scale,junk,&newline);
+            fscanf(infile,"%lf %[^\n] %[\n]",&CSS->Quant,junk,&newline);
+         }
+      }
+
+/* .. Star Trackers */
+/* .. GPS Sensors */
+/* .. Fine Sun Sensors */
+/* .. Accelerometers */
 
 /* .. Initialize some Orbit and Formation variables */
       O = &Orb[S->RefOrb];
@@ -3401,6 +3508,8 @@ void InitSim(int argc, char **argv)
       }
 
       LoadTdrs();
+      
+      RNG = CreateRandomProcess(1);
 }
 
 /* #ifdef __cplusplus

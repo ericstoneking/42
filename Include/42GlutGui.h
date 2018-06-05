@@ -196,7 +196,7 @@ EXTERN GLuint SkyCube;
 EXTERN GLuint NoiseTex;
 
 EXTERN long ShadowsEnabled;
-EXTERN long RiftEnabled;
+EXTERN long VREnabled;
 EXTERN long SeeThruPassNeeded;
 EXTERN GLfloat ShadowMatrix[16];
 

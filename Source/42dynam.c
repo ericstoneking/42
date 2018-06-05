@@ -21,25 +21,34 @@
 */
 
 /**********************************************************************/
-void FindCmgAxisAndTrq(struct CMGType *C)
+void FindCmgTrq(struct CMGType *C, double wb0n[3])
 {
-      double wg[3],wb[3],wxA[3];
-      long i;
-
-/* .. Axis */
-      A2C(C->Seq,C->ang[0],C->ang[1],C->ang[2],C->CG);
-      MxM(C->CG,C->CGB,C->CB);
-      for(i=0;i<3;i++) {
-         C->A[i] = C->CB[2][i];
+#if 0
+      double Ang[3],AngRate[3];
+      double Gs[3],Gds[3],wxGs[3],Ga[3];
+      double ZeroVec[3] = {0.0,0.0,0.0};
+      double ZeroMatrix[3][3] = {{0.0,0.0,0.0},{0.0,0.0,0.0},{0.0,0.0,0.0}};
+      double JunkVec1[3],JunkVec2[3];
+      long i,j;
+      
+      for(i=0;i<C->DOF;i++) {
+         Ang[i] = C->ang[i];
+         AngRate[i] = C->angrate[i];
       }
-
-/* .. Torque */
-      ADOT2W(FALSE,C->Seq,C->ang,C->angrate,wg);
-      MTxV(C->CGB,wg,wb);
-      VxV(wb,C->A,wxA);
+      Ang[C->DOF] = 0.0;
+      AngRate[C->DOF] = C->SpinRate;
+      JointPartials(C->Init,FALSE,C->Seq,123,Ang,AngRate,C->Gamma,Gs,
+         Gds,ZeroVec,ZeroMatrix,JunkVec1,JunkVec2);
+      C->Init = FALSE;
+         
+      VxV(wb0n,Gs,wxGs);
       for(i=0;i<3;i++) {
-         C->Trq[i] = -C->H*wxA[i];
+         Ga[i] = 0.0;
+         for(j=0;j<C->DOF;j++) Ga[i] += C->Gamma[i][j]*C->angacc[j];
       }
+      for(i=0;i<3;i++) Trq[i] = -C->I[i]*(Ga[i] + Gds[i] + wxGs[i]);
+      MTxV(C->CB,Trq,C->Trq);
+#endif      
 }
 /**********************************************************************/
 void PassiveJointFrcTrq(double *u, double *x, struct SCType *S)
@@ -173,25 +182,25 @@ void MapJointStatesToStateVector(struct SCType *S)
       for(Ig=0;Ig<S->Ng;Ig++) {
          G = &S->G[Ig];
          if (G->IsSpherical) {
-            A2C(G->RotSeq,G->ang[0],G->ang[1],G->ang[2],CGoGi);
+            A2C(G->RotSeq,G->Ang[0],G->Ang[1],G->Ang[2],CGoGi);
             C2Q(CGoGi,qgogi);
-            for(i=0;i<3;i++) D->u[G->Rotu0+i] = G->rate[i];
+            for(i=0;i<3;i++) D->u[G->Rotu0+i] = G->AngRate[i];
             for(i=0;i<4;i++) D->x[G->Rotx0+i] = qgogi[i];
          }
          else {
             for(i=0;i<G->RotDOF;i++) {
-               D->u[G->Rotu0+i] = G->rate[i];
-               D->x[G->Rotx0+i] = G->ang[i];
+               D->u[G->Rotu0+i] = G->AngRate[i];
+               D->x[G->Rotx0+i] = G->Ang[i];
             }
          }
          for (i=0; i<G->TrnDOF;i++) {
-            D->u[G->Trnu0+i] = G->s[i];
-            D->x[G->Trnx0+i] = G->d[i];
+            D->u[G->Trnu0+i] = G->PosRate[i];
+            D->x[G->Trnx0+i] = G->Pos[i];
          }
-         A2C(G->RotSeq,G->ang[0],G->ang[1],G->ang[2],G->CGoGi);
+         A2C(G->RotSeq,G->Ang[0],G->Ang[1],G->Ang[2],G->CGoGi);
          JointPartials(TRUE,G->IsSpherical,G->RotSeq,G->TrnSeq,
-            G->ang,G->rate,G->Gamma,G->Gs,G->Gds,
-            G->s,G->Delta,G->Ds,G->Dds);
+            G->Ang,G->AngRate,G->Gamma,G->Gs,G->Gds,
+            G->PosRate,G->Delta,G->Ds,G->Dds);
          for(i=0;i<3;i++) {
             G->PassiveTrq[i] = 0.0;
             G->PassiveFrc[i] = 0.0;
@@ -270,28 +279,28 @@ void MapStateVectorToBodyStates(double *u, double *x, double *uf,
          if (G->IsSpherical) {
             UNITQ(&x[G->Rotx0]);
             for(i=0;i<3;i++) {
-               G->rate[i] = u[G->Rotu0+i];
+               G->AngRate[i] = u[G->Rotu0+i];
             }
             Q2C(&x[G->Rotx0],G->CGoGi);
-            C2A(G->RotSeq,G->CGoGi,&G->ang[0],&G->ang[1],&G->ang[2]);
+            C2A(G->RotSeq,G->CGoGi,&G->Ang[0],&G->Ang[1],&G->Ang[2]);
          }
          else {
             for(i=0;i<G->RotDOF;i++) {
-               G->rate[i] = u[G->Rotu0+i];
+               G->AngRate[i] = u[G->Rotu0+i];
                while (x[G->Rotx0+i] >  Pi) x[G->Rotx0+i] -= TwoPi;
                while (x[G->Rotx0+i] < -Pi) x[G->Rotx0+i] += TwoPi;
-               G->ang[i] = x[G->Rotx0+i];
+               G->Ang[i] = x[G->Rotx0+i];
             }
             if (G->RotDOF == 3) {
-               if (fabs(G->ang[1]) > 1.5533) {
+               if (fabs(G->Ang[1]) > 1.5533) {
                   printf("Warning:  Joint %ld is near gimbal lock.\n",Ig);
                }
             }
-            A2C(G->RotSeq,G->ang[0],G->ang[1],G->ang[2],G->CGoGi);
+            A2C(G->RotSeq,G->Ang[0],G->Ang[1],G->Ang[2],G->CGoGi);
          }
          for(i=0;i<G->TrnDOF;i++) {
-            G->s[i] = u[G->Trnu0+i];
-            G->d[i] = x[G->Trnx0+i];
+            G->PosRate[i] = u[G->Trnu0+i];
+            G->Pos[i] = x[G->Trnx0+i];
          }
          if (S->FlexActive) {
             /* Flex */
@@ -342,7 +351,7 @@ void MapStateVectorToBodyStates(double *u, double *x, double *uf,
          C2Q(Bo->CN,Bo->qn);
 
          /* wn */
-         ADOT2W(G->IsSpherical,G->RotSeq,G->ang,G->rate,wgon);
+         ADOT2W(G->IsSpherical,G->RotSeq,G->Ang,G->AngRate,wgon);
          MxV(G->CBoGo,wgon,Bo->wn);
          if (S->FlexActive) {
             for(i=0;i<3;i++) {
@@ -361,8 +370,8 @@ void MapStateVectorToBodyStates(double *u, double *x, double *uf,
             xg[i] = 0.0;
             vg[i] = 0.0;
             for (j=0;j<G->TrnDOF;j++) {
-               xg[i] += G->Delta[i][j]*G->d[j];
-               vg[i] += G->Delta[i][j]*G->s[j];
+               xg[i] += G->Delta[i][j]*G->Pos[j];
+               vg[i] += G->Delta[i][j]*G->PosRate[j];
             }
          }
          MTxV(G->CGiBi,xg,G->xb);
@@ -432,6 +441,7 @@ void FindTotalAngMom(struct SCType *S) {
       for(i=0;i<3;i++) S->Hvn[i] += Hwn[i];
 
       /* CMGs */
+#if 0
       for(Icmg=0;Icmg<S->Ncmg;Icmg++) {
          C = &S->CMG[Icmg];
          for(i=0;i<3;i++) {
@@ -440,6 +450,7 @@ void FindTotalAngMom(struct SCType *S) {
       }
       MTxV(S->B[0].CN,Hcb,Hcn);
       for(i=0;i<3;i++) S->Hvn[i] += Hcn[i];
+#endif
 
       /* Express in B[0] frame */
       MxV(S->B[0].CN,S->Hvn,S->Hvb);
@@ -466,10 +477,12 @@ double FindTotalKineticEnergy(struct SCType *S)
          KE += 0.5*W->w*W->J*W->w;
       }
 
+#if 0
       for(Icmg=0;Icmg<S->Ncmg;Icmg++) {
          C = &S->CMG[Icmg];
          KE += 0.5*C->H*C->H/C->J;
       }
+#endif
 
       if (Orb[S->RefOrb].Regime == ORB_ZERO) {
           KE += 0.5*S->mass*VoV(S->VelN,S->VelN);
@@ -1325,7 +1338,7 @@ void FindAccR(struct SCType *S)
       }
 }
 /**********************************************************************/
-/*  Find Peta, cplusPeta, Hxi, HplusQeta, CnbP for each body          */
+/*  Find Peta, cplusPeta, HplusQeta, CnbP for each body          */
 void FindFlexTerms(struct SCType *S)
 {
       struct BodyType *B;
@@ -1379,7 +1392,7 @@ void FindInertiaTrq(struct SCType *S)
       struct BodyType *B;
       struct CMGType *C;
       double H[3],wxH[3],Ia[3];
-      double cPexa[3],Hxi[3],wxHxi[3];
+      double cPexa[3];
       double CAccR[3];
       long Ib,i,j,Nf,Icmg;
 
@@ -1393,12 +1406,15 @@ void FindInertiaTrq(struct SCType *S)
             H[i] += S->Whl[j].H*S->Whl[j].A[i];
          }
       }
+#if 0
       for(Icmg=0;Icmg<S->Ncmg;Icmg++) {
          C = &S->CMG[Icmg];
          for(i=0;i<3;i++) {
             H[i] += C->A[i]*C->H;
          }
       }
+#endif
+
       VxV(B->wn,H,wxH);
       for(i=0;i<3;i++) B->InertiaTrq[i] =  -wxH[i];
 
@@ -1413,19 +1429,13 @@ void FindInertiaTrq(struct SCType *S)
       }
 
       if (S->FlexActive && S->RefPt == REFPT_JOINT) {
-         /* -(c + Pf*eta) x AccR - 2 wxHf*xi */
+         /* -(c + Pf*eta) x AccR */
          for(Ib=0;Ib<S->Nb;Ib++) {
             B = &S->B[Ib];
             Nf = B->Nf;
             MxV(B->CN,B->AccR,CAccR);
             MxV(B->cplusPeta,CAccR,cPexa);
-            for(i=0;i<3;i++) {
-               Hxi[i] = 0.0;
-               for(j=0;j<Nf;j++) Hxi[i] += B->Hf[i][j]*B->xi[j];
-            }
-            VxV(B->wn,Hxi,wxHxi);
-            for(i=0;i<3;i++)
-               B->InertiaTrq[i] += -cPexa[i] - 2.0*wxHxi[i];
+            for(i=0;i<3;i++) B->InertiaTrq[i] += -cPexa[i];
          }
       }
 
@@ -1778,13 +1788,15 @@ void KaneNBodyEOM(double *u, double *x, double *h,
       }
 
       /* Apply CMG torque to B[0] */
+      #if 0
       for(Icmg=0;Icmg<S->Ncmg;Icmg++) {
          C = &S->CMG[Icmg];
-         FindCmgAxisAndTrq(C);
+         FindCmgTrq(C,u[0]);
          for(i=0;i<3;i++) {
             WhlTrq[i] += C->Trq[i];
          }
       }
+      #endif
 
       MapStateVectorToBodyStates(u,x,uf,xf,S);
 
@@ -1792,8 +1804,8 @@ void KaneNBodyEOM(double *u, double *x, double *h,
       for(Ig=0;Ig<S->Ng;Ig++) {
          G = &S->G[Ig];
          JointPartials(FALSE,G->IsSpherical,G->RotSeq,G->TrnSeq,
-            G->ang,G->rate,G->Gamma,G->Gs,G->Gds,
-            G->s,G->Delta,G->Ds,G->Dds);
+            G->Ang,G->AngRate,G->Gamma,G->Gs,G->Gds,
+            G->PosRate,G->Delta,G->Ds,G->Dds);
       }
 
       FindBodyPathDCMs(S);
@@ -1801,7 +1813,7 @@ void KaneNBodyEOM(double *u, double *x, double *h,
       /* Path vectors, beta and rho */
       FindPathVectors(S);
 
-      /* Find Peta, cplusPeta, Hxi, HplusQeta, CnbP for each body */
+      /* Find Peta, cplusPeta, HplusQeta, CnbP for each body */
       FindFlexTerms(S);
 
       /* Partial Angular Velocity Matrix (PAngVel) and I*PAngVel */
@@ -2131,7 +2143,7 @@ void KaneNBodyConstraints(struct SCType *S)
             WhlTrq[i] -= S->Whl[j].Trq*S->Whl[j].A[i];
          }
       }
-
+#if 0
       /* Apply CMG torque to B[0] */
       for(Icmg=0;Icmg<S->Ncmg;Icmg++) {
          C = &S->CMG[Icmg];
@@ -2140,14 +2152,15 @@ void KaneNBodyConstraints(struct SCType *S)
             WhlTrq[i] += C->Trq[i];
          }
       }
+#endif
 
       MapStateVectorToBodyStates(D->u,D->x,D->uf,D->xf,S);
 
       for(Ig=0;Ig<S->Ng;Ig++) {
          G = &S->G[Ig];
          JointPartials(FALSE,G->IsSpherical,G->RotSeq,G->TrnSeq,
-            G->ang,G->rate,G->Gamma,G->Gs,G->Gds,
-            G->s,G->Delta,G->Ds,G->Dds);
+            G->Ang,G->AngRate,G->Gamma,G->Gs,G->Gds,
+            G->PosRate,G->Delta,G->Ds,G->Dds);
       }
       FindBodyPathDCMs(S);
       FindPathVectors(S);
@@ -2551,13 +2564,15 @@ void OneBodyEOM(double *u, double *x, double *h,
             Hb[i]+= h[j]*S->Whl[j].A[i];
          }
       }
+#if 0
       for(Icmg=0;Icmg<S->Ncmg;Icmg++) {
          C = &S->CMG[Icmg];
-         FindCmgAxisAndTrq(C);
+         FindCmgTrq(C,B->wn);
          for(i=0;i<3;i++) {
             Hb[i] += C->A[i]*C->H;
          }
       }
+#endif
 
 /* .. Build wheel torque in B0 frame */
       for (i=0;i<3;i++) {

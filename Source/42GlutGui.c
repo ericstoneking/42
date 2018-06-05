@@ -729,7 +729,7 @@ void DrawPlanetLabels(GLfloat length)
       glEnable(GL_LIGHTING);
 }
 /*********************************************************************/
-void DrawThrusterPlume(struct ThrusterType *Thr)
+void DrawThrusterPlume(struct ThrType *Thr)
 {
       GLfloat TipColor[4] = {0.918,0.67,0.25,0.3};
       GLfloat CoreColor[4] = {1.0,0.937,0.259,1.0};
@@ -751,12 +751,12 @@ void DrawThrusterPlume(struct ThrusterType *Thr)
          glColor4fv(CoreColor);
          glBegin(GL_TRIANGLE_FAN);
             glNormal3d(-Thr->A[0],-Thr->A[1],-Thr->A[2]);
-            for(j=0;j<3;j++) p[j] = Thr->r[j]-0.5*scl*f*Thr->A[j];
+            for(j=0;j<3;j++) p[j] = Thr->PosB[j]-0.5*scl*f*Thr->A[j];
             glVertex3dv(p);
             for(ang=0.0;ang<=360.0;ang+=30.0) {
                s=-sin(ang*D2R);
                c=cos(ang*D2R);
-               for(j=0;j<3;j++) p[j] = Thr->r[j] + Rad*(c*X[j]+s*Y[j]);
+               for(j=0;j<3;j++) p[j] = Thr->PosB[j] + Rad*(c*X[j]+s*Y[j]);
                glVertex3dv(p);
             }
          glEnd();
@@ -764,12 +764,12 @@ void DrawThrusterPlume(struct ThrusterType *Thr)
          glColor4fv(TipColor);
          glBegin(GL_TRIANGLE_FAN);
             glNormal3d(-Thr->A[0],-Thr->A[1],-Thr->A[2]);
-            for(j=0;j<3;j++) p[j] = Thr->r[j]-scl*f*Thr->A[j];
+            for(j=0;j<3;j++) p[j] = Thr->PosB[j]-scl*f*Thr->A[j];
             glVertex3dv(p);
             for(ang=0.0;ang<=360.0;ang+=30.0) {
                s=-sin(ang*D2R);
                c=cos(ang*D2R);
-               for(j=0;j<3;j++) p[j] = Thr->r[j] + Rad*(c*X[j]+s*Y[j]);
+               for(j=0;j<3;j++) p[j] = Thr->PosB[j] + Rad*(c*X[j]+s*Y[j]);
                glVertex3dv(p);
             }
          glEnd();
@@ -1766,13 +1766,13 @@ void DrawNearAuxObjects(void)
                      glPushMatrix();
                      glTranslated(B->pn[0],B->pn[1],B->pn[2]);
                      RotateR2L(B->CN);
-                     if (MAGV(S->FSW.svb) > 0.0)
-                        DrawVector(S->FSW.svb,"Sfsw"," ",SvbColor,
+                     if (MAGV(S->AC.svb) > 0.0)
+                        DrawVector(S->AC.svb,"Sfsw"," ",SvbColor,
                            1.15*AxisLength,1.0,TRUE);
-                     if (MAGV(S->FSW.bvb) > 0.0)
-                        DrawVector(S->FSW.bvb,"Bfsw","uT",BvbColor,
+                     if (MAGV(S->AC.bvb) > 0.0)
+                        DrawVector(S->AC.bvb,"Bfsw","uT",BvbColor,
                            1.15*AxisLength,1.0E6,FALSE);
-                     /*DrawVector(S->FSW.Hvb,"H","Nms",HvbColor,AxisLength,
+                     /*DrawVector(S->AC.Hvb,"H","Nms",HvbColor,AxisLength,
                         1.0,FALSE);*/
                      glPopMatrix();
                   }
@@ -2215,7 +2215,7 @@ void CamRenderExec(void)
 {
       FindModelMatrices();
 
-      if (RiftEnabled) {
+      if (VREnabled) {
          SetDestination(OFFSCREEN);
          SetEye(LEFTEYE);
          DrawFarScene();
@@ -4334,47 +4334,8 @@ void OrreryMouseActiveMotionHandler(int x, int y)
 /**********************************************************************/
 void OrreryMousePassiveMotionHandler(int x, int y){}
 /**********************************************************************/
-/* My Logitech joystick has input ranges:                             */
-/*       X: [-1000:1000]                                              */
-/*       Y: [0:1023]                                                  */
-/*       Z: [-1000:1000]                                              */
 void JoystickHandler(unsigned int ButtonMask, int x, int y, int z)
 {
-      int Xdm = -50;
-      int Xdp =  50;
-      int Ydm = 486;  /* 511-25 */
-      int Ydp = 536;  /* 511+25 */
-      int Zdm = -50;
-      int Zdp =  50;
-      double SFx = 1.0/950.0;
-      double SFy = 1.0/486.0;
-      double SFz = 1.0/950.0;
-
-      struct FSWType *FSW;
-
-      if (POV.Mode == FIXED_IN_HOST) {
-         FSW = &SC[POV.Host.SC].FSW;
-         if (x < Xdm)
-            FSW->wrn[0] = SFx*(((float) x) - Xdm) * FSW->wmax[0];
-         else if (x > Xdp)
-            FSW->wrn[0] = SFx*(((float) x) - Xdp) * FSW->wmax[0];
-         else
-            FSW->wrn[0] = 0.0;
-
-         if (y < Ydm)
-            FSW->wrn[1] = SFy*(((float) y) - Ydm) * FSW->wmax[1];
-         else if (y > Ydp)
-            FSW->wrn[1] = SFy*(((float) y) - Ydp) * FSW->wmax[1];
-         else
-            FSW->wrn[1] = 0.0;
-
-         if (z < Zdm)
-            FSW->wrn[2] = SFz*(((float) z) - Zdm) * FSW->wmax[2];
-         else if (z > Zdp)
-            FSW->wrn[2] = SFz*(((float) z) - Zdp) * FSW->wmax[2];
-         else
-            FSW->wrn[2] = 0.0;
-      }
 }
 /**********************************************************************/
 void InitCamWidgets(void)
@@ -5365,7 +5326,7 @@ void InitCamWindow(void)
       LoadCamTextures();
       printf("Loading 3D Noise\n");
       Load3DNoise();
-      RiftEnabled = FALSE;
+      VREnabled = FALSE;
       SeeThruPassNeeded = FALSE;
       printf("Loading Cam Lists\n");
       LoadCamLists();

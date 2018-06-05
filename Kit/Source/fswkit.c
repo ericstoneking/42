@@ -12,11 +12,7 @@
 /*    All Other Rights Reserved.                                      */
 
 
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include "mathkit.h"
-#include "dcmkit.h"
+#include "fswkit.h"
 
 /* #ifdef __cplusplus
 ** namespace Kit {
@@ -1131,129 +1127,272 @@ void UDTimeUpdate(double *x, double **U, double **phi, double **gam,
       free(a);
       free(Gy);
 }
-/**********************************************************************/
-/*  Kalman Filter Measurement Update                                  */
-/*                                                                    */
-/*  x  = State                                                        */
-/*  P  = Covariance Matrix                                            */
-/*  y  = Scalar Measurement                                           */
-/*  a  = Observation Vector (y=a*x)                                   */
-/*  Rv = Measurement Noise Covariance                                 */
-void KFMeasUpdate(double *x, double **P, double y, double *a,
-   double Rv, long Ns)
+/******************************************************************************/
+/*  The following functions implement a "sequential" Kalman Filter, with      */
+/*  measurement updates having 1, 2, or 3 dimensions.                         */
+/*  These functions use a KalmanFilterType struct to hold parameters and      */
+/*  internal states.                                                          */ 
+
+/******************************************************************************/
+void AllocKalmanFilterMeasurement(struct KFMeasType *M,long Nx, long Ny)
 {
-      double z,*Pa,aPa,*L;
-      long i,j;
-
-      Pa = (double *) calloc(Ns,sizeof(double));
-      L = (double *) calloc(Ns,sizeof(double));
-
-/* .. Form residual */
-      z=y;
-      for(i=0;i<Ns;i++) {
-         z -= a[i]*x[i];
+      long i;
+      
+      if (Ny < 1 || Ny > 3) {
+         printf("Hmm.  This Kalman Filter implementation assumes measurements are of \n");
+         printf("dimension 1, 2, or 3.  Bailing out.\n");
+         exit(1);
       }
-
-/* .. Some preliminary matrix multiplies */
-      for(i=0;i<Ns;i++) {
-         for(j=0;j<Ns;j++) {
-            Pa[i] += P[i][j]*a[j];
-         }
+      M->Ny = Ny;
+      M->y = calloc(Ny,sizeof(double));
+      M->Rv = calloc(Ny,sizeof(double *));
+      for(i=0;i<Ny;i++) {
+         M->Rv[i] = calloc(Ny,sizeof(double));
       }
-      aPa=0.0;
-      for(i=0;i<Ns;i++) {
-         aPa += a[i]*Pa[i];
+      M->H = calloc(Ny,sizeof(double *));
+      for(i=0;i<Ny;i++) {
+         M->H[i] = calloc(Nx,sizeof(double));
       }
+      M->L = calloc(Nx,sizeof(double *));
+      for(i=0;i<Nx;i++) M->L[i] = calloc(Ny,sizeof(double));
+      
+      M->HP = calloc(Ny,sizeof(double *));
+      for(i=0;i<Ny;i++) M->HP[i] = calloc(Nx,sizeof(double));
+      
+      M->Hx = calloc(Ny,sizeof(double));
+      
+      M->HPHtRv = calloc(Ny,sizeof(double *));
+      for(i=0;i<Ny;i++) M->HPHtRv[i] = calloc(Ny,sizeof(double));
 
-/* .. L = Kalman Gain vector */
-      for(i=0;i<Ns;i++) {
-         L[i] = Pa[i]/(aPa+Rv);
-      }
-
-/* .. Update State Estimate */
-      for(i=0;i<Ns;i++) {
-         x[i] +=  L[i]*z;
-      }
-
-/* .. Update Covariance Matrix */
-      for(i=0;i<Ns;i++) {
-         for(j=0;j<Ns;j++) {
-            P[i][j] -= L[i]*Pa[j];
-         }
-      }
-
-      free(Pa);
-      free(L);
+      M->HPHtRvInv = calloc(Ny,sizeof(double *));
+      for(i=0;i<Ny;i++) M->HPHtRvInv[i] = calloc(Ny,sizeof(double));
 }
-/**********************************************************************/
-/*  Kalman Filter Time Update (Propagation)                           */
-/*                                                                    */
-/*  x(k+1)=phi*x(k)+gam*u(k)                                          */
-/*  P(k+1)=phi*P(k)*phi'+gam*Rw*gam'                                  */
-/*                                                                    */
-void KFTimeUpdate(double *x, double **P, double **phi, double **gam,
-   double *u, double **Rw, long Ns, long Nw)
+/******************************************************************************/
+struct KalmanFilterType *CreateKalmanFilter(long Nx, long Nu, long Nw, long Nm)
 {
-      double *Fx,*Gu,**FP,**GR,**FPF,**GRG;
+      long i;
+
+      struct KalmanFilterType *KF;
+      
+      KF = calloc(1,sizeof(struct KalmanFilterType));
+      
+      KF->Nx = Nx;
+      KF->Nu = Nu;
+      KF->Nw = Nw;
+      KF->Nm = Nm;
+      
+      KF->x = calloc(Nx,sizeof(double));
+      KF->u = calloc(Nu,sizeof(double));
+
+      KF->Phi = calloc(Nx,sizeof(double *));
+      for(i=0;i<Nx;i++) {
+         KF->Phi[i] = calloc(Nx,sizeof(double *));
+      }
+
+      KF->Gam = calloc(Nx,sizeof(double *));
+      for(i=0;i<Nx;i++) {
+         KF->Gam[i] = calloc(Nu,sizeof(double *));
+      }
+
+      KF->Gamw = calloc(Nx,sizeof(double *));
+      for(i=0;i<Nx;i++) {
+         KF->Gamw[i] = calloc(Nw,sizeof(double *));
+      }
+      
+      KF->P = calloc(Nx,sizeof(double *));
+      for(i=0;i<Nx;i++) KF->P[i] = calloc(Nx,sizeof(double));
+      
+      KF->Rw = calloc(Nw,sizeof(double *));
+      for(i=0;i<Nw;i++) {
+         KF->Rw[i] = calloc(Nw,sizeof(double *));
+      }
+      
+      KF->Meas = calloc(Nm,sizeof(struct KFMeasType));
+      
+      KF->PhiX = calloc(Nx,sizeof(double));
+      KF->GamU = calloc(Nx,sizeof(double));
+      
+      KF->PhiP = calloc(Nx,sizeof(double *));
+      for(i=0;i<Nx;i++) KF->PhiP[i] = calloc(Nx,sizeof(double));
+      
+      KF->GRwGt = calloc(Nx,sizeof(double *));
+      for(i=0;i<Nx;i++) KF->GRwGt[i] = calloc(Nx,sizeof(double));
+      
+      return(KF);
+}
+/******************************************************************************/
+void PopulateKalmanFilterWorkspace(struct KalmanFilterType *KF)
+{
+      double **GRw;
       long i,j,k;
 
-      Fx = (double *) calloc(Ns,sizeof(double));
-      Gu = (double *) calloc(Ns,sizeof(double));
-      FP = CreateMatrix(Ns,Ns);
-      GR = CreateMatrix(Ns,Nw);
-      FPF = CreateMatrix(Ns,Ns);
-      GRG = CreateMatrix(Ns,Ns);
-
-/* .. Propagate State */
-      for(i=0;i<Ns;i++) {
-         for(j=0;j<Ns;j++) {
-            Fx[i] += phi[i][j]*x[j];
-         }
-         for(j=0;j<Nw;j++) {
-            Gu[i] += gam[i][j]*u[j];
-         }
-         x[i] = Fx[i]+Gu[i];
-      }
-
-/* .. Propagate Covariance */
-      for(i=0;i<Ns;i++) {
-         for(j=0;j<Ns;j++) {
-            for(k=0;k<Ns;k++) {
-               FP[i][j] += phi[i][k]*P[k][j];
-            }
-         }
-         for(j=0;j<Nw;j++) {
-            for(k=0;k<Nw;k++) {
-               GR[i][j] += gam[i][k]*Rw[k][j];
+      GRw = calloc(KF->Nx,sizeof(double *));
+      for(i=0;i<KF->Nx;i++) GRw[i] = calloc(KF->Nw,sizeof(double));
+      for(i=0;i<KF->Nx;i++) {
+         for(j=0;j<KF->Nw;j++) {
+            for(k=0;k<KF->Nw;k++) {
+               GRw[i][j] += KF->Gamw[i][k]*KF->Rw[k][j];
             }
          }
       }
-
-      for(i=0;i<Ns;i++) {
-         for(j=0;j<Ns;j++) {
-            for(k=0;k<Ns;k++) {
-               FPF[i][j] += FP[i][k]*phi[j][k];
-            }
-         }
-         for(j=0;j<Ns;j++) {
-            for(k=0;k<Nw;k++) {
-               GRG[i][j] += GR[i][k]*gam[j][k];
+      KF->GRwGt = calloc(KF->Nx,sizeof(double *));
+      for(i=0;i<KF->Nx;i++) KF->GRwGt[i] = calloc(KF->Nx,sizeof(double));
+      for(i=0;i<KF->Nx;i++) {
+         for(j=0;j<KF->Nx;j++) {
+            for(k=0;k<KF->Nw;k++) {
+               KF->GRwGt[i][j] += GRw[i][k]*KF->Gamw[j][k];
             }
          }
       }
-
-      for(i=0;i<Ns;i++) {
-         for(j=0;j<Ns;j++) {
-            P[i][j] = FPF[i][j] + GRG[i][j];
+      for(i=0;i<KF->Nx;i++) free(GRw[i]);
+      free(GRw);
+}
+/******************************************************************************/
+void KalmanFilterMeasUpdate(struct KalmanFilterType *KF, struct KFMeasType *M)
+{
+      long i,j,k;
+      double Det;
+      
+      /* H*P*HT + Rv */
+      for(i=0;i<M->Ny;i++) {
+         for(j=0;j<KF->Nx;j++) {
+            M->HP[i][j] = 0.0;
+            for(k=0;k<KF->Nx;k++) {
+               M->HP[i][j] += M->H[i][k]*KF->P[k][j];
+            }
          }
       }
+      for(i=0;i<M->Ny;i++) {
+         for(j=i;j<M->Ny;j++) {
+            M->HPHtRv[i][j] = M->Rv[i][j];
+            for(k=0;k<KF->Nx;k++) {
+               M->HPHtRv[i][j] += M->HP[i][k]*M->H[j][k];
+            }
+            M->HPHtRv[j][i] = M->HPHtRv[i][j];
+         }
+      }
+      
+      /* Invert (HPHt+Rv) */
+      if (M->Ny == 1) {
+         if (M->HPHtRv[0][0] == 0.0) {
+            printf("Attempted divide by zero in KalmanFilterMeasUpdate.\n");
+            exit(1);
+         }
+         M->HPHtRvInv[0][0] = 1.0/M->HPHtRv[0][0];
+      }
+      else if (M->Ny == 2) {
+         Det = M->HPHtRv[0][0]*M->HPHtRv[1][1]
+             - M->HPHtRv[1][0]*M->HPHtRv[0][1];
+         if (Det == 0.0) {
+            printf("Singular matrix HPHtRv in KalmanFilterMeasUpdate.\n");
+            exit(1);
+         }
+         M->HPHtRvInv[0][0] =  M->HPHtRv[1][1]/Det; 
+         M->HPHtRvInv[0][1] = -M->HPHtRv[0][1]/Det; 
+         M->HPHtRvInv[1][1] =  M->HPHtRv[0][0]/Det; 
 
-      DestroyMatrix(FP,Ns);
-      DestroyMatrix(GR,Ns);
-      DestroyMatrix(FPF,Ns);
-      DestroyMatrix(GRG,Ns);
-      free(Fx);
-      free(Gu);
+         M->HPHtRvInv[1][0] =  M->HPHtRvInv[0][1]; 
+      }
+      else if (M->Ny == 3) {
+         Det=M->HPHtRv[0][0]*(M->HPHtRv[1][1]*M->HPHtRv[2][2]-M->HPHtRv[2][1]*M->HPHtRv[1][2])
+            +M->HPHtRv[0][1]*(M->HPHtRv[1][2]*M->HPHtRv[2][0]-M->HPHtRv[2][2]*M->HPHtRv[1][0])
+            +M->HPHtRv[0][2]*(M->HPHtRv[1][0]*M->HPHtRv[2][1]-M->HPHtRv[2][0]*M->HPHtRv[1][1]);
+
+         if (Det == 0.0) {
+            printf("Singular matrix HPHtRv in KalmanFilterMeasUpdate.\n");
+            exit(1);
+         }
+
+         M->HPHtRvInv[0][0]=(M->HPHtRv[1][1]*M->HPHtRv[2][2]
+                            -M->HPHtRv[2][1]*M->HPHtRv[1][2])/Det;
+         M->HPHtRvInv[0][1]=(M->HPHtRv[2][1]*M->HPHtRv[0][2]
+                            -M->HPHtRv[0][1]*M->HPHtRv[2][2])/Det;
+         M->HPHtRvInv[0][2]=(M->HPHtRv[0][1]*M->HPHtRv[1][2]
+                            -M->HPHtRv[1][1]*M->HPHtRv[0][2])/Det;
+         M->HPHtRvInv[1][1]=(M->HPHtRv[0][0]*M->HPHtRv[2][2]
+                            -M->HPHtRv[2][0]*M->HPHtRv[0][2])/Det;
+         M->HPHtRvInv[1][2]=(M->HPHtRv[1][0]*M->HPHtRv[0][2]
+                            -M->HPHtRv[0][0]*M->HPHtRv[1][2])/Det;
+         M->HPHtRvInv[2][2]=(M->HPHtRv[0][0]*M->HPHtRv[1][1]
+                            -M->HPHtRv[1][0]*M->HPHtRv[0][1])/Det;         
+
+         M->HPHtRvInv[1][0]=M->HPHtRvInv[0][1];
+         M->HPHtRvInv[2][0]=M->HPHtRvInv[0][2];
+         M->HPHtRvInv[2][1]=M->HPHtRvInv[1][2];
+      }
+      else {
+         printf("Oops.  This Kalman Filter implementation assumes that \n");
+         printf("measurements are of dimension 1, 2, or 3.  Bailing out.\n");
+         exit(1);
+      }
+      
+      /* L = (HP)^T*inv(HPHt+Rv) */
+      for(i=0;i<KF->Nx;i++) {
+         for(j=0;j<M->Ny;j++) {
+            M->L[i][j] = 0.0;
+            for(k=0;k<M->Ny;k++) {
+               M->L[i][j] += M->HP[k][i]*M->HPHtRvInv[k][j];
+            }
+         }
+      }
+            
+      /* Update x */
+      for(i=0;i<M->Ny;i++) {
+         M->Hx[i] = 0.0;
+         for(j=0;j<KF->Nx;j++) M->Hx[i] += M->H[i][j]*KF->x[j];
+      }
+      for(i=0;i<KF->Nx;i++) {
+         for(j=0;j<M->Ny;j++) {
+            KF->x[i] += M->L[i][j]*(M->y[j] - M->Hx[j]);
+         } 
+      }
+      
+      /* Update P */
+      for(i=0;i<KF->Nx;i++) {
+         for(j=i;j<KF->Nx;j++) {
+            for(k=0;k<M->Ny;k++) {
+               KF->P[i][j] -= M->L[i][k]*M->HP[k][j];
+            }
+            KF->P[j][i] = KF->P[i][j];
+         }
+      }
+}
+/******************************************************************************/
+void KalmanFilterTimeUpdate(struct KalmanFilterType *KF)
+{
+      long i,j,k;
+      
+      /* x(k+1) = Phi*x(k) + Gam*u(k) */
+      for(i=0;i<KF->Nx;i++) {
+         KF->PhiX[i] = 0.0;
+         KF->GamU[i] = 0.0;
+         for(j=0;j<KF->Nx;j++) {
+            KF->PhiX[i] += KF->Phi[i][j]*KF->x[j];
+         }
+         for(j=0;j<KF->Nu;j++) {
+            KF->GamU[i] += KF->Gam[i][j]*KF->u[j];
+         }
+      }
+      for(i=0;i<KF->Nx;i++) KF->x[i] = KF->PhiX[i]+KF->GamU[i];
+
+      /* P = Phi*P*PhiT + Gamw*Rw*GamwT */
+      for(i=0;i<KF->Nx;i++) {
+         for(j=0;j<KF->Nx;j++) {
+            KF->PhiP[i][j] = 0.0;
+            for(k=0;k<KF->Nx;k++) {
+               KF->PhiP[i][j] += KF->Phi[i][k]*KF->P[k][j];
+            }
+         }
+      }
+      for(i=0;i<KF->Nx;i++) {
+         for(j=i;j<KF->Nx;j++) {
+            KF->P[i][j] = KF->GRwGt[i][j];
+            for(k=0;k<KF->Nx;k++) {
+               KF->P[i][j] += KF->PhiP[i][k]*KF->Phi[j][k];
+            }
+            KF->P[j][i] = KF->P[i][j];
+         }
+      }
 }
 /**********************************************************************/
 /*  Ref Wie, "Singularity Escape/Avoidance Steering Logic for         */

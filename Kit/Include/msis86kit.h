@@ -166,14 +166,17 @@ typedef struct Namelist Namelist;
 
 #define f2c_abs(x) ((x) >= 0 ? (x) : -(x))
 #define dabs(x) (doublereal) f2c_abs(x)
+/* These defines might trip up a Raspberry Pi, and are only used once.  
+   Inlining.  See msis86kit.c:570
 #ifndef min
 #define min(a,b) ((a) <= (b) ? (a) : (b))
 #endif
 #ifndef max
 #define max(a,b) ((a) >= (b) ? (a) : (b))
 #endif
-#define dmin(a,b) (doublereal)min(a,b)
-#define dmax(a,b) (doublereal)max(a,b)
+#define dmin(a,b) (doublereal) min(a,b)
+#define dmax(a,b) (doublereal) max(a,b)
+*/
 
 /* procedure parameter types for -A and -C++ */
 

@@ -1,0 +1,1 @@
+This file exists solely so that git copies the Object directory into its repo (it appears to skip over empty directories).  If you're reading this, this file has already served its purpose.  Leave it alone or delete it, as you like.

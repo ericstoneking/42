@@ -19,7 +19,6 @@
 ** using namespace Kit;
 ** #endif
 */
-
 /**********************************************************************/
 /*  Acceleration of a point A fixed in SC[Isc].B[0], expressed in     */
 /*  B[0].  Due to 42's accounting of forces (esp. gravity), the       */
@@ -39,7 +38,7 @@ void Accelerometer(struct SCType *S,struct AccelType *A)
       B = &S->B[0];
 
 /* .. Vector from cm of B0 to A */
-      for(j=0;j<3;j++) p[j] = A->pb[j] - B->cm[j];
+      for(j=0;j<3;j++) p[j] = A->PosB[j] - B->cm[j];
 
 /* .. abn and alfbn are byproducts of NbodyAttitudeRK4 */
       VxV(B->wn,p,wxp);
@@ -66,11 +65,100 @@ void Accelerometer(struct SCType *S,struct AccelType *A)
       MxV(B->CN,S->asn,asnb);
       for(j=0;j<3;j++) accb[j] += asnb[j];
 
-/* .. Express in Accel frame */
-      MxV(A->CB,accb,A->acc);
+/* .. Find component along Accel axis */
+      A->acc = VoV(accb,A->Axis);
 
 /* .. Add noise, etc. */
 
+}
+/**********************************************************************/
+void GenericGyroModel(struct SCType *S)
+{
+      struct GyroType *G;
+      long Ig;
+      double PrevBias,RateError,PrevAngle;
+      long Counts,PrevCounts;
+      
+      for(Ig=0;Ig<S->Ngyro;Ig++) {
+         G = &S->Gyro[Ig];
+         
+         G->SampleCounter++;
+         if (G->SampleCounter >= G->MaxCounter) {
+            G->SampleCounter = 0;
+         
+            G->TrueRate = VoV(S->B[0].wn,G->Axis);
+         
+            PrevBias = G->CorrCoef*G->Bias;
+            G->Bias = PrevBias + G->BiasStabCoef*GaussianRandom(RNG);
+            RateError = 0.5*(G->Bias+PrevBias) + G->ARWCoef*GaussianRandom(RNG);
+         
+            G->MeasRate = Limit(G->Scale*G->TrueRate + RateError,
+               -G->MaxRate,G->MaxRate);
+         
+            PrevAngle = G->Angle;
+            G->Angle = PrevAngle + G->MeasRate*G->SampleTime 
+               + G->AngNoiseCoef*GaussianRandom(RNG);
+         
+            PrevCounts = (long) (PrevAngle/G->Quant+0.5);
+            Counts = (long) (G->Angle/G->Quant+0.5);
+
+            G->MeasRate = ((double) (Counts - PrevCounts))*G->Quant/G->SampleTime;
+         }
+      }
+}
+/**********************************************************************/
+void GenericMagnetometerModel(struct SCType *S)
+{
+      struct MagnetometerType *MAG;
+      long Counts,Imag;
+      double Signal;
+      
+      for(Imag=0;Imag<S->Nmag;Imag++) {
+         MAG = &S->MAG[Imag];
+         
+         MAG->SampleCounter++;
+         if (MAG->SampleCounter >= MAG->MaxCounter) {
+            MAG->SampleCounter = 0;
+            
+            Signal = MAG->Scale*VoV(S->bvb,MAG->Axis) 
+               + MAG->Noise*GaussianRandom(RNG);
+            Signal = Limit(Signal,-MAG->Saturation,MAG->Saturation); 
+            Counts = (long) (Signal/MAG->Quant+0.5);
+            MAG->Field = ((double) Counts)*MAG->Quant;
+         }
+      }
+}
+/**********************************************************************/
+void GenericCssModel(struct SCType *S)
+{
+}
+/**********************************************************************/
+void GenericStarTrackerModel(struct SCType *S)
+{
+}
+/**********************************************************************/
+void GenericGpsModel(struct SCType *S)
+{
+}
+/**********************************************************************/
+void GenericFssModel(struct SCType *S)
+{
+}
+/**********************************************************************/
+void GenericAccelModel(struct SCType *S)
+{
+}
+/**********************************************************************/
+void GenericGimbalPotModel(struct SCType *S)
+{
+}
+/**********************************************************************/
+void GenericEarthSensorModel(struct SCType *S)
+{
+}
+/**********************************************************************/
+void GenericWheelTachModel(struct SCType *S)
+{
 }
 /**********************************************************************/
 /*  This function is called at the simulation rate.  Sub-sampling of  */
@@ -81,85 +169,121 @@ void Sensors(struct SCType *S)
 
       double evn[3],evb[3];
       long i,j,k,DOF;
-      struct FSWType *FSW;
+      struct AcsType *AC;
       struct JointType *G;
 
-      FSW = &S->FSW;
-
-      /* Enable telemetry on OutFlag */
-      if (OutFlag) FSW->Tlm = TRUE;
-      else FSW->Tlm = FALSE;
+      AC = &S->AC;
 
       /* Sun Sensor */
       if (S->Eclipse){
-         FSW->SunValid = FALSE;
+         AC->SunValid = FALSE;
       }
       else {
-         FSW->SunValid = TRUE;
-         MxV(S->B[0].CN,S->svn,FSW->svb);
+         AC->SunValid = TRUE;
+         MxV(S->B[0].CN,S->svn,AC->svb);
       }
-      /* TAM */
+      
+      /* Magnetometer */
       if (Orb[S->RefOrb].World == EARTH) {
-         FSW->MagValid = TRUE;
-         for(i=0;i<3;i++) FSW->bvb[i] = S->bvb[i];
+         AC->MagValid = TRUE;
+         if (S->Nmag == 0) {
+            for(i=0;i<3;i++) AC->bvb[i] = S->bvb[i];
+         }
+         else {
+            GenericMagnetometerModel(S);
+            for(i=0;i<3;i++) {
+               AC->bvb[i] = 0.0;
+            }
+            for(i=0;i<S->Nmag;i++) {
+               AC->MAG[i].Field = S->MAG[i].Field;
+               for(j=0;j<3;j++) { 
+                  AC->bvb[j] += S->MAG[i].Field*S->MAG[i].Axis[j];
+               }
+            }
+         }
       }
       else {
-         FSW->MagValid = FALSE;
+         AC->MagValid = FALSE;
       }
+      
       /* Star Tracker */
-      for (i=0;i<4;i++) FSW->qbn[i] = S->B[0].qn[i];
+      for (i=0;i<4;i++) {
+         AC->qbn[i] = S->B[0].qn[i];
+      }
 
       /* IMU */
-      for (i=0;i<3;i++) FSW->wbn[i] = S->B[0].wn[i];
+      if (S->Ngyro == 0) {
+         for (i=0;i<3;i++) AC->wbn[i] = S->B[0].wn[i];
+      }
+      else {
+         GenericGyroModel(S);
+         for(i=0;i<3;i++) {
+            AC->wbn[i] = 0.0;
+         }
+         for(i=0;i<S->Ngyro;i++) {
+            AC->Gyro[i].Rate = S->Gyro[i].MeasRate;
+            for(j=0;j<3;j++) {
+               AC->wbn[j] += S->Gyro[i].MeasRate*S->Gyro[i].Axis[j];
+            }
+         }
+      }
 
       /* Earth Sensor */
       for (i=0;i<3;i++) evn[i] = -S->PosN[i];
       UNITV(evn);
       MxV(S->B[0].CN,evn,evb);
       if (evb[2] > 0.866) {
-         FSW->EarthValid = TRUE;
-         FSW->ESroll = evb[1];
-         FSW->ESpitch = -evb[0];
+         AC->ES.Valid = TRUE;
+         AC->ES.Roll = evb[1];
+         AC->ES.Pitch = -evb[0];
       }
       else {
-         FSW->EarthValid = FALSE;
-         FSW->ESroll = 0.0;
-         FSW->ESpitch = 0.0;
+         AC->ES.Valid = FALSE;
+         AC->ES.Roll = 0.0;
+         AC->ES.Pitch = 0.0;
       }
 
       /* Ephemeris */
-      FSW->EphValid = TRUE;
+      AC->EphValid = TRUE;
       for (i=0;i<3;i++) {
-         FSW->PosN[i] = S->PosN[i];
-         FSW->VelN[i] = S->VelN[i];
-         FSW->svn[i] = S->svn[i];
-         FSW->bvn[i] = S->bvn[i];
+         AC->PosN[i] = S->PosN[i];
+         AC->VelN[i] = S->VelN[i];
+         AC->svn[i] = S->svn[i];
+         AC->bvn[i] = S->bvn[i];
       }
 
       /* Gimbal Angles */
-      for (i=0;i<FSW->Ngim;i++) {
+      for (i=0;i<AC->Ng;i++) {
          G = &S->G[i];
-         DOF = FSW->Gim[i].RotDOF;
+         DOF = AC->G[i].RotDOF;
          for (j=0;j<DOF;j++) {
-            FSW->Gim[i].Ang[j] = G->ang[j];
-            FSW->Gim[i].Rate[j] = G->rate[j];
+            AC->G[i].Ang[j] = G->Ang[j];
+            AC->G[i].AngRate[j] = G->AngRate[j];
          }
          for(j=0;j<3;j++) {
             for(k=0;k<3;k++) {
-               FSW->Gim[i].COI[j][k] = G->COI[j][k];
+               AC->G[i].COI[j][k] = G->COI[j][k];
             }
+         }
+         DOF = AC->G[i].TrnDOF;
+         for (j=0;j<DOF;j++) {
+            AC->G[i].Pos[j] = G->Pos[j];
+            AC->G[i].PosRate[j] = G->PosRate[j];
          }
       }
 
       /* Wheel Tachs */
-      for (i=0;i<S->Nw;i++) FSW->Hw[i] = S->Whl[i].H;
-
-      /* Formation Sensors */
-      for (i=0;i<3;i++) {
-         for (j=0;j<3;j++) FSW->CSF[i][j] = S->CF[i][j];
-         FSW->PosF[i] = S->PosF[i];
-         FSW->VelF[i] = S->VelF[i];
+      for (i=0;i<S->Nw;i++) {
+         AC->Whl[i].H = S->Whl[i].H;
+         AC->Whl[i].w = S->Whl[i].w;
       }
+
+//      /* Formation Sensors */
+//      for (i=0;i<3;i++) {
+//         for (j=0;j<3;j++) FSW->CSF[i][j] = S->CF[i][j];
+//         FSW->PosF[i] = S->PosF[i];
+//         FSW->VelF[i] = S->VelF[i];
+//      }
 
 }
 

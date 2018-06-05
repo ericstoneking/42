@@ -3,23 +3,27 @@
 # Let's try to auto-detect what platform we're on.  
 # If this fails, set 42PLATFORM manually in the else block.
 AUTOPLATFORM = Failed
-ifeq ($(PLATFORM),apple)
-   AUTOPLATFORM = Succeeded
-   42PLATFORM = __APPLE__
+ifeq ($(OS),Windows_NT)
+   ifeq ($(MSYSTEM),MINGW32)
+      AUTOPLATFORM = Succeeded
+      42PLATFORM = __MSYS__
 endif
-ifeq ($(PLATFORM),linux)
-   AUTOPLATFORM = Succeeded
-   42PLATFORM = __linux__
-endif
-ifeq ($(MSYSTEM),MINGW32)
-   AUTOPLATFORM = Succeeded
-   42PLATFORM = __MSYS__
+else
+   UNAME_S := $(shell uname -s)
+   ifeq ($(UNAME_S),Linux)
+      AUTOPLATFORM = Succeeded
+      42PLATFORM = __linux__
+   endif
+   ifeq ($(UNAME_S),Darwin)
+      AUTOPLATFORM = Succeeded
+      42PLATFORM = __APPLE__
+   endif
 endif
 ifeq ($(AUTOPLATFORM),Failed)
    # Autodetect failed.  Set platform manually.
-   42PLATFORM = __APPLE__
+   #42PLATFORM = __APPLE__
    #42PLATFORM = __linux__
-   #42PLATFORM = __MSYS__
+   42PLATFORM = __MSYS__
 endif
 
 GUIFLAG = -D _USE_GUI_

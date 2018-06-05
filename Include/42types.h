@@ -116,12 +116,12 @@ struct JointType {
    long RotLocked[3];     /* Set TRUE if individual DOF is to be locked in place */
    long TrnSeq;           /* Translational joint sequence */
    long TrnLocked[3];
-   double d[3];           /* translational kinematic state variables */
-   double s[3];           /* translational dynamic state variables */
+   double Pos[3];           /* translational kinematic state variables */
+   double PosRate[3];           /* translational dynamic state variables */
    double xb[3];          /* translational displacement in the Bi frame */
    double xn[3];          /* translational displacement in the N frame */
-   double ang[3];         /* Joint Euler angles */
-   double rate[3];        /* Euler angle rates about gim axes */
+   double Ang[3];         /* Joint Euler angles */
+   double AngRate[3];        /* Euler angle rates about gim axes */
    double AngCmd[3];      /* Euler angle commands, for kinematic joints */
    double RateCmd[3];     /* Euler angle rate commands, for kinematic joints */
    double RotSpringCoef[3];  /* For passive joint torques */
@@ -190,39 +190,149 @@ struct MTBType {
    long FlexNode;
 };
 
-struct ThrusterType {
+struct ThrType {
    double Fmax;
    double F;
    double A[3]; /* Axis vector wrt Body 0 */
-   double r[3]; /* Position vector in Body 0 */
+   double PosB[3]; /* Position vector in Body 0 */
    double Frc[3]; /* Force exerted */
    double Trq[3]; /* Torque exerted */
    long FlexNode;
 };
 
 struct CMGType {
-   /* CMG Rotor Axis (A) is the Z axis of the frame defined by gimbal rotations */
-   long DOF;     /* 1, 2, or 3 */
-   long Seq; /* Euler Sequence */
-   double CG[3][3]; /* Dynamic orientation */
-   double CGB[3][3]; /* Static Mounting DCM */
-   double CB[3][3]; /* Total orientation */
-   double ang[3]; /* Typically only 1 or 2 used */
-   double angrate[3]; /* Typically only 1 or 2 used */
-   double MaxAngRate[3];
-   double MaxAng[3];
-   double J; /* Rotor MOI, kg-m^2 */
+   long Init;
+   long DOF;     /* 1 or 2 */
+   long Seq; /* Euler Sequence (13x, 23x, 123 or 213) */
+   double Gamma[3][3]; /* Joint Partials */
+   double CG[3][3]; /* Dynamic orientation  (like CBoGo) */
+   double CGB[3][3]; /* Static Mounting DCM (like CGiBi) */
+   double CB[3][3]; /* Total orientation (like CBoBi) */
+   double ang[2]; /*  rad */
+   double angrate[2]; /* rad/sec */
+   double angacc[2];
+   double MaxAngRate[2];
+   double MaxAng[2];
+   double MaxAcc[2];
+   double I[3]; /* Inertias, kg-m^2 (I[2] is rotor inertia) */
    double H; /* Momentum, constant, Nms */
-   double A[3]; /* Axis, expressed in B[0] */
+   double SpinRate; /* rad/sec */
    double Trq[3]; /* Exerted on B[0], expressed in B[0] */
    long FlexNode;
 };
 
 struct AccelType {
-   double pb[3];  /* Position in B[0] */
-   double CB[3][3]; /* Mounting matrix */
-   double acc[3];  /* Measured acceleration, expressed in A */
+   double PosB[3];  /* Position in B[0] */
+   double Axis[3]; /* Mounting matrix */
+   double acc;  /* Measured acceleration, expressed in A */
    long FlexNode;
+};
+
+struct GyroType {
+   /* Parameters */
+   double SampleTime;
+   long MaxCounter;
+   double Axis[3];
+   double MaxRate;
+   double Scale;
+   double Quant;
+   double SigV; /* ARW, rad/rt-sec */
+   double SigU; /* Bias Stability, rad/sec^1.5 */
+   double SigE; /* Angle Readout Noise, rad */
+   long FlexNode;
+   
+   double BiasStabCoef;
+   double ARWCoef;
+   double AngNoiseCoef;
+   double CorrCoef; /* Correlation Coef, exp(-SampleTime/BiasTime) */
+
+   /* Variables */
+   long SampleCounter;
+   double TrueRate; /* rad/sec */
+   double Bias; /* rad/sec */
+   double Angle; /* rad */
+   double MeasRate; /* rad/sec */
+};
+
+struct MagnetometerType {
+   /* Parameters */
+   double SampleTime;
+   long MaxCounter;
+   double Axis[3];
+   double Saturation;
+   double Scale;
+   double Quant;
+   double Noise;
+   long FlexNode;
+
+   /* Variables */
+   long SampleCounter;
+   double Field; /* Magfield Component, Tesla */
+};
+
+struct CssType {
+   /* Parameters */
+   double SampleTime;
+   double Axis[3];
+   double FovAng;
+   double Scale;
+   double Quant;
+
+   /* Variables */
+   long Valid;
+   double Illum; /* Units defined by scale */
+};
+
+struct StarTrackerType {
+   /* Parameters */
+   double SampleTime;
+   double qb[4];
+   double CB[3][3];
+   double FovAng[2];
+   double SunExclAng;
+   double EarthExclAng;
+   double MoonExclAng;
+   double NEA[3];
+   long FlexNode;
+
+   /* Variables */
+   long Valid;
+   double qn[4];
+   double qbn[4];
+};
+
+struct FssType {
+   /* Parameters */
+   double SampleTime;
+   double qb[4];
+   double CB[3][3];
+   double FovAng[2];
+   double Noise;
+   double Quant;
+
+   /* Variables */
+   long Valid;
+   double SunAng[2];
+   double SunVecS[3];
+   double SunVecB[3];
+};
+
+struct GpsType {
+   /* Parameters */
+   double SampleTime;
+   double PosNoise;
+   double VelNoise;
+   
+   /* Variables */
+   long Valid;
+   long Rollover;
+   long Week;
+   double Sec;
+   double PosN[3];
+   double VelN[3];
+   double PosW[3];
+   double VelW[3];
+   double Lng,Lat,Alt;
 };
 
 struct JointPathTableType { /* tells if joint is in path of body*/
@@ -293,20 +403,39 @@ struct SCType {
    long OrbDOF;  /* FIXED, EULER_HILL, ENCKE, COWELL */
    long RefOrb;
    long FswTag;  /* Tag for FSW function */
+
    long Nb;   /* Number of bodies */
    long Ng;   /* Number of joints, = Nb-1 */
-   long Nw;   /* Number of wheels */
-   long Nmtb; /* Number of MTB's  [0 - 4] */
-   long Nthr; /* Number of thrusters [0 - 12] */
-   long Ncmg; /* Number of Control Moment Gyros [0 - 4] */
-   long Nacc; /* Number of accelerometers [0 - 4] */
+   
+   struct AcsType AC;
+   
    struct BodyType *B;
    struct JointType *G;
+   
+   long Nw;   /* Number of wheels */
+   long Nmtb; /* Number of MTB's */
+   long Nthr; /* Number of thrusters */
+   long Ncmg; /* Number of Control Moment Gyros */
+   
    struct WhlType *Whl;
    struct MTBType *MTB;
-   struct ThrusterType *Thr;
+   struct ThrType *Thr;
    struct CMGType *CMG;
-   struct AccelType Accel[4];
+   
+   long Nacc; /* Number of accelerometer axes */
+   long Ngyro; /* Number of Gyro axes */
+   long Nmag; /* Number of magnetometer axes */
+   long Ncss; /* Number of coarse sun sensors */
+   long Nst; /* Number of star trackers */
+   long Nfss; /* Number of Fine Sun Sensors */
+   
+   struct AccelType *Accel;
+   struct GyroType *Gyro;
+   struct MagnetometerType *MAG;
+   struct CssType *CSS;
+   struct StarTrackerType *ST;
+   struct FssType *FSS;
+   
    double mass;
    double cm[3]; /* wrt B0 origin, expressed in B0 frame */
    double I[3][3]; /* Inertia matrix, wrt SC.cm, expressed in B0 frame */
@@ -357,8 +486,6 @@ struct SCType {
    struct DynType Dyn;
    /* Workspace for Actuator Sizing */
    struct EnvTrqType EnvTrq;
-   /* Should FSW be part of SC, or its own structure? */
-   struct FSWType FSW;
    /* Bounding Box used for shadowmap */
    struct BoundingBoxType BBox;
    /* See ReadStatesFromSocket */

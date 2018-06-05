@@ -15,3 +15,9 @@ The default folder for inputs and outputs is "InOut".  Look there for sample inp
 
 The input/output folder may be changed for a sim run by running 42 with an argument.  For example, enter this at the command prompt:
 42 Demo
+
+
+Common Problems:
+1)  42 expects the input files to be plain vanilla text files.  If your text editor adds formatting, makes straight quotes into smart quotes, etc, 42 may get confused.  The most common symptom is generating the "Bogus input in DecodeString" error.
+2)  Also text-related, 42 is very simple-minded about reading the input files.  Adding extra lines, or accidentally deleting a line, or swapping lines, will throw things out of synch.  Again, the most common symptom is the "Bogus input in DecodeString" error.  Use your debugger to trace back where the error was generating.  (The actual mistake may be at that line, or may be somewhere upstream.)
+

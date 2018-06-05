@@ -152,6 +152,43 @@ void PotatoReport(void)
       }
 }
 /*********************************************************************/
+void MagReport(void)
+{
+      static FILE *magfile;
+      static long First = 1;
+      
+      if (First) {
+         First = 0;
+         magfile = FileOpen(InOutPath,"MagBVB.42","wt");
+      }
+      
+      fprintf(magfile,"%le %le %le %le %le %le %le %le %le \n",
+         SC[0].bvb[0],SC[0].bvb[1],SC[0].bvb[2],
+         SC[0].MAG[0].Field,SC[0].MAG[1].Field,SC[0].MAG[2].Field,
+         SC[0].AC.bvb[0],SC[0].AC.bvb[1],SC[0].AC.bvb[2]);
+      
+}
+/*********************************************************************/
+void GyroReport(void)
+{
+      static FILE *gyrofile;
+      static long First = 1;
+      
+      if (First) {
+         First = 0;
+         gyrofile = FileOpen(InOutPath,"Gyro.42","wt");
+      }
+      
+      fprintf(gyrofile,"%le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le \n",
+         SC[0].B[0].wn[0],SC[0].B[0].wn[1],SC[0].B[0].wn[2],
+         SC[0].Gyro[0].TrueRate,SC[0].Gyro[1].TrueRate,SC[0].Gyro[2].TrueRate,
+         SC[0].Gyro[0].Bias,SC[0].Gyro[1].Bias,SC[0].Gyro[2].Bias,
+         SC[0].Gyro[0].Angle,SC[0].Gyro[1].Angle,SC[0].Gyro[2].Angle,
+         SC[0].Gyro[0].MeasRate,SC[0].Gyro[1].MeasRate,SC[0].Gyro[2].MeasRate,
+         SC[0].AC.wbn[0],SC[0].AC.wbn[1],SC[0].AC.wbn[2]);
+      
+}
+/*********************************************************************/
 void Report(void)
 {
       static FILE *timefile,*AbsTimeFile;
@@ -267,12 +304,17 @@ void Report(void)
             MxMT(SC[0].B[0].CN,SC[0].CLN,CBL);
             C2A(123,CBL,&Roll,&Pitch,&Yaw);
             fprintf(RPYfile,"%lf %lf %lf\n",Roll*R2D,Pitch*R2D,Yaw*R2D);
+
+            //MagReport();
+            //GyroReport();
+
          }
 
       }
 
       if (!strcmp(InOutPath,"./Potato/")) PotatoReport();
       if (!strcmp(InOutPath,"./CMG/")) CmgReport();
+      
 
       if (CleanUpFlag) {
          fclose(timefile);

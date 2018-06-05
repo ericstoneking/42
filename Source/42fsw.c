@@ -29,7 +29,6 @@ long FswCmdInterpreter(char CmdLine[512],double *CmdTime)
       char response[80];
       char FrameChar;
       long Frame;
-      struct FSWType *Fsw;
       struct CmdType *Cmd;
       struct CmdVecType *CV;
       double q[4],Ang[3],C[3][3],VecR[3],Vec[3],VecH[3];
@@ -42,8 +41,7 @@ long FswCmdInterpreter(char CmdLine[512],double *CmdTime)
       if (sscanf(CmdLine,"%lf SC[%ld] qrn = [%lf %lf %lf %lf]",
          CmdTime,&Isc,&q[0],&q[1],&q[2],&q[3]) == 6) {
          NewCmdProcessed = TRUE;
-         Fsw = &SC[Isc].FSW;
-         Cmd = &Fsw->Cmd;
+         Cmd = &SC[Isc].AC.Cmd;
          Cmd->Parm = PARM_QUATERNION;
          Cmd->Frame = FRAME_N;
          for(i=0;i<4;i++) Cmd->qrn[i] = q[i];
@@ -52,8 +50,7 @@ long FswCmdInterpreter(char CmdLine[512],double *CmdTime)
       else if (sscanf(CmdLine,"%lf SC[%ld] qrl = [%lf %lf %lf %lf]",
          CmdTime,&Isc,&q[0],&q[1],&q[2],&q[3]) == 6) {
          NewCmdProcessed = TRUE;
-         Fsw = &SC[Isc].FSW;
-         Cmd = &Fsw->Cmd;
+         Cmd = &SC[Isc].AC.Cmd;
          Cmd->Parm = PARM_QUATERNION;
          Cmd->Frame = FRAME_L;
          for(i=0;i<4;i++) Cmd->qrl[i] = q[i];
@@ -68,8 +65,7 @@ long FswCmdInterpreter(char CmdLine[512],double *CmdTime)
       else if (sscanf(CmdLine,"%lf SC[%ld] Cmd Angles = [%lf %lf %lf] deg, Seq = %ld wrt %c Frame",
          CmdTime,&Isc,&Ang[0],&Ang[1],&Ang[2],&RotSeq,&FrameChar) == 7) {
          NewCmdProcessed = TRUE;
-         Fsw = &SC[Isc].FSW;
-         Cmd = &Fsw->Cmd;
+         Cmd = &SC[Isc].AC.Cmd;
          Cmd->Parm = PARM_EULER_ANGLES;
          if (FrameChar == 'L') Cmd->Frame = FRAME_L;
          else Cmd->Frame = FRAME_N;
@@ -83,8 +79,7 @@ long FswCmdInterpreter(char CmdLine[512],double *CmdTime)
       else if (sscanf(CmdLine,"%lf SC[%ld].G[%ld] Cmd Angles = [%lf %lf %lf] deg",
          CmdTime,&Isc,&Ig,&Ang[0],&Ang[1],&Ang[2]) == 6) {
          NewCmdProcessed = TRUE;
-         Fsw = &SC[Isc].FSW;
-         Cmd = &Fsw->GimCmd[Ig];
+         Cmd = &SC[Isc].AC.G[Ig].Cmd;
          Cmd->Parm = PARM_EULER_ANGLES;
          for(i=0;i<3;i++) Cmd->Ang[i] = Ang[i]*D2R;
       }
@@ -92,13 +87,12 @@ long FswCmdInterpreter(char CmdLine[512],double *CmdTime)
       else if (sscanf(CmdLine,"%lf Point SC[%ld].B[%ld] %s Vector [%lf %lf %lf] at RA = %lf deg, Dec = %lf deg",
          CmdTime,&Isc,&Ib,VecString,&VecR[0],&VecR[1],&VecR[2],&RA,&Dec) == 9) {
          NewCmdProcessed = TRUE;
-         Fsw = &SC[Isc].FSW;
          if (Ib == 0) {
-            Cmd = &Fsw->Cmd;
+            Cmd = &SC[Isc].AC.Cmd;
          }
          else {
             Ig = SC[Isc].B[Ib].Gin;
-            Cmd = &Fsw->GimCmd[Ig];
+            Cmd = &SC[Isc].AC.G[Ig].Cmd;
          }
          Cmd->Parm = PARM_VECTORS;
          if (!strcmp(VecString,"Primary")) CV = &Cmd->PriVec;
@@ -116,13 +110,12 @@ long FswCmdInterpreter(char CmdLine[512],double *CmdTime)
          "%lf Point SC[%ld].B[%ld] %s Vector [%lf %lf %lf] at World[%ld] Lng = %lf deg, Lat = %lf deg, Alt = %lf km",
          CmdTime,&Isc,&Ib,VecString,&VecR[0],&VecR[1],&VecR[2],&Iw,&Lng,&Lat,&Alt) == 11) {
          NewCmdProcessed = TRUE;
-         Fsw = &SC[Isc].FSW;
          if (Ib == 0) {
-            Cmd = &Fsw->Cmd;
+            Cmd = &SC[Isc].AC.Cmd;
          }
          else {
             Ig = SC[Isc].B[Ib].Gin;
-            Cmd = &Fsw->GimCmd[Ig];
+            Cmd = &SC[Isc].AC.G[Ig].Cmd;
          }
          Cmd->Parm = PARM_VECTORS;
          Cmd->Frame = FRAME_N;
@@ -142,13 +135,12 @@ long FswCmdInterpreter(char CmdLine[512],double *CmdTime)
       else if (sscanf(CmdLine,"%lf Point SC[%ld].B[%ld] %s Vector [%lf %lf %lf] at World[%ld]",
          CmdTime,&Isc,&Ib,VecString,&VecR[0],&VecR[1],&VecR[2],&Iw) == 8) {
          NewCmdProcessed = TRUE;
-         Fsw = &SC[Isc].FSW;
          if (Ib == 0) {
-            Cmd = &Fsw->Cmd;
+            Cmd = &SC[Isc].AC.Cmd;
          }
          else {
             Ig = SC[Isc].B[Ib].Gin;
-            Cmd = &Fsw->GimCmd[Ig];
+            Cmd = &SC[Isc].AC.G[Ig].Cmd;
          }
          Cmd->Parm = PARM_VECTORS;
          Cmd->Frame = FRAME_N;
@@ -166,13 +158,12 @@ long FswCmdInterpreter(char CmdLine[512],double *CmdTime)
       else if (sscanf(CmdLine,"%lf Point SC[%ld].B[%ld] %s Vector [%lf %lf %lf] at GroundStation[%ld]",
          CmdTime,&Isc,&Ib,VecString,&VecR[0],&VecR[1],&VecR[2],&It) == 8) {
          NewCmdProcessed = TRUE;
-         Fsw = &SC[Isc].FSW;
          if (Ib == 0) {
-            Cmd = &Fsw->Cmd;
+            Cmd = &SC[Isc].AC.Cmd;
          }
          else {
             Ig = SC[Isc].B[Ib].Gin;
-            Cmd = &Fsw->GimCmd[Ig];
+            Cmd = &SC[Isc].AC.G[Ig].Cmd;
          }
          Cmd->Parm = PARM_VECTORS;
          Cmd->Frame = FRAME_N;
@@ -190,13 +181,12 @@ long FswCmdInterpreter(char CmdLine[512],double *CmdTime)
       else if (sscanf(CmdLine,"%lf Point SC[%ld].B[%ld] %s Vector [%lf %lf %lf] at SC[%ld].B[%ld] point [%lf %lf %lf]",
          CmdTime,&Isc,&Ib,VecString,&VecR[0],&VecR[1],&VecR[2],&Isct,&Ibt,&Vec[0],&Vec[1],&Vec[2]) == 12) {
          NewCmdProcessed = TRUE;
-         Fsw = &SC[Isc].FSW;
          if (Ib == 0) {
-            Cmd = &Fsw->Cmd;
+            Cmd = &SC[Isc].AC.Cmd;
          }
          else {
             Ig = SC[Isc].B[Ib].Gin;
-            Cmd = &Fsw->GimCmd[Ig];
+            Cmd = &SC[Isc].AC.G[Ig].Cmd;
          }
          Cmd->Parm = PARM_VECTORS;
          Cmd->Frame = FRAME_N;
@@ -214,13 +204,12 @@ long FswCmdInterpreter(char CmdLine[512],double *CmdTime)
       else if (sscanf(CmdLine,"%lf Point SC[%ld].B[%ld] %s Vector [%lf %lf %lf] at SC[%ld]",
          CmdTime,&Isc,&Ib,VecString,&VecR[0],&VecR[1],&VecR[2],&Isct) == 8) {
          NewCmdProcessed = TRUE;
-         Fsw = &SC[Isc].FSW;
          if (Ib == 0) {
-            Cmd = &Fsw->Cmd;
+            Cmd = &SC[Isc].AC.Cmd;
          }
          else {
             Ig = SC[Isc].B[Ib].Gin;
-            Cmd = &Fsw->GimCmd[Ig];
+            Cmd = &SC[Isc].AC.G[Ig].Cmd;
          }
          Cmd->Parm = PARM_VECTORS;
          Cmd->Frame = FRAME_N;
@@ -236,13 +225,12 @@ long FswCmdInterpreter(char CmdLine[512],double *CmdTime)
       else if (sscanf(CmdLine,"%lf Point SC[%ld].B[%ld] %s Vector [%lf %lf %lf] at %s",
          CmdTime,&Isc,&Ib,VecString,&VecR[0],&VecR[1],&VecR[2],TargetString) == 8) {
          NewCmdProcessed = TRUE;
-         Fsw = &SC[Isc].FSW;
          if (Ib == 0) {
-            Cmd = &Fsw->Cmd;
+            Cmd = &SC[Isc].AC.Cmd;
          }
          else {
             Ig = SC[Isc].B[Ib].Gin;
-            Cmd = &Fsw->GimCmd[Ig];
+            Cmd = &SC[Isc].AC.G[Ig].Cmd;
          }
          Cmd->Parm = PARM_VECTORS;
          Cmd->Frame = FRAME_N;
@@ -314,13 +302,12 @@ long FswCmdInterpreter(char CmdLine[512],double *CmdTime)
       else if (sscanf(CmdLine,"%lf Align SC[%ld].B[%ld] %s Vector [%lf %lf %lf] with SC[%ld].B[%ld] vector [%lf %lf %lf]",
          CmdTime,&Isc,&Ib,VecString,&VecR[0],&VecR[1],&VecR[2],&Isct,&Ibt,&Vec[0],&Vec[1],&Vec[2]) == 12) {
          NewCmdProcessed = TRUE;
-         Fsw = &SC[Isc].FSW;
          if (Ib == 0) {
-            Cmd = &Fsw->Cmd;
+            Cmd = &SC[Isc].AC.Cmd;
          }
          else {
             Ig = SC[Isc].B[Ib].Gin;
-            Cmd = &Fsw->GimCmd[Ig];
+            Cmd = &SC[Isc].AC.G[Ig].Cmd;
          }
          Cmd->Parm = PARM_VECTORS;
          Cmd->Frame = FRAME_N;
@@ -338,7 +325,6 @@ long FswCmdInterpreter(char CmdLine[512],double *CmdTime)
       else if (sscanf(CmdLine,"%lf Align SC[%ld].B[%ld] %s Vector [%lf %lf %lf] with %c-frame Vector [%lf %lf %lf]",
          CmdTime,&Isc,&Ib,VecString,&VecR[0],&VecR[1],&VecR[2],&FrameChar,&Vec[0],&Vec[1],&Vec[2]) == 11) {
          NewCmdProcessed = TRUE;
-         Fsw = &SC[Isc].FSW;
          if (FrameChar == 'L') Frame = FRAME_L;
          else if (FrameChar == 'H') {
             Frame = FRAME_N;
@@ -347,11 +333,11 @@ long FswCmdInterpreter(char CmdLine[512],double *CmdTime)
          }
          else Frame = FRAME_N;
          if (Ib == 0) {
-            Cmd = &Fsw->Cmd;
+            Cmd = &SC[Isc].AC.Cmd;
          }
          else {
             Ig = SC[Isc].B[Ib].Gin;
-            Cmd = &Fsw->GimCmd[Ig];
+            Cmd = &SC[Isc].AC.G[Ig].Cmd;
          }
          Cmd->Parm = PARM_VECTORS;
          if (!strcmp(VecString,"Primary")) CV = &Cmd->PriVec;
@@ -373,9 +359,9 @@ long FswCmdInterpreter(char CmdLine[512],double *CmdTime)
          CmdTime,&Isc,&Ithr,response) == 4) {
          NewCmdProcessed = TRUE;
          if (DecodeString(response))
-            SC[Isc].FSW.Thrcmd[Ithr] = SC[Isc].Thr[Ithr].Fmax*DTSIM;
+            SC[Isc].AC.Thr[Ithr].PulseWidthCmd = SC[Isc].AC.DT;
          else
-            SC[Isc].FSW.Thrcmd[Ithr] = 0.0;
+            SC[Isc].AC.Thr[Ithr].PulseWidthCmd = 0.0;
       }
 
       else if (sscanf(CmdLine,"Event Eclipse Entry SC[%ld] qrl = [%lf %lf %lf %lf]",
@@ -383,8 +369,7 @@ long FswCmdInterpreter(char CmdLine[512],double *CmdTime)
          *CmdTime = SimTime+DTSIM; /* Allows exiting while loop in CmdInterpreter */
          if (SC[Isc].Eclipse) { /* Will pend on this command until this condition is true */
             NewCmdProcessed = TRUE;
-            Fsw = &SC[Isc].FSW;
-            Cmd = &Fsw->Cmd;
+            Cmd = &SC[Isc].AC.Cmd;
             Cmd->Parm = PARM_QUATERNION;
             Cmd->Frame = FRAME_L;
             for(i=0;i<4;i++) Cmd->qrl[i] = q[i];
@@ -395,8 +380,7 @@ long FswCmdInterpreter(char CmdLine[512],double *CmdTime)
          *CmdTime = SimTime+DTSIM; /* Allows exiting while loop in CmdInterpreter */
          if (!SC[Isc].Eclipse) { /* Will pend on this command until this condition is true */
             NewCmdProcessed = TRUE;
-            Fsw = &SC[Isc].FSW;
-            Cmd = &Fsw->Cmd;
+            Cmd = &SC[Isc].AC.Cmd;
             Cmd->Parm = PARM_QUATERNION;
             Cmd->Frame = FRAME_L;
             for(i=0;i<4;i++) Cmd->qrl[i] = q[i];
@@ -409,8 +393,7 @@ long FswCmdInterpreter(char CmdLine[512],double *CmdTime)
          *CmdTime = SimTime+DTSIM; /* Allows exiting while loop in CmdInterpreter */
          if (SC[Isc].Eclipse) { /* Will pend on this command until this condition is true */
             NewCmdProcessed = TRUE;
-            Fsw = &SC[Isc].FSW;
-            Cmd = &Fsw->Cmd;
+            Cmd = &SC[Isc].AC.Cmd;
             Cmd->Parm = PARM_EULER_ANGLES;
             if (FrameChar == 'L') Cmd->Frame = FRAME_L;
             else Cmd->Frame = FRAME_N;
@@ -428,8 +411,7 @@ long FswCmdInterpreter(char CmdLine[512],double *CmdTime)
          *CmdTime = SimTime+DTSIM; /* Allows exiting while loop in CmdInterpreter */
          if (!SC[Isc].Eclipse) { /* Will pend on this command until this condition is true */
             NewCmdProcessed = TRUE;
-            Fsw = &SC[Isc].FSW;
-            Cmd = &Fsw->Cmd;
+            Cmd = &SC[Isc].AC.Cmd;
             Cmd->Parm = PARM_EULER_ANGLES;
             if (FrameChar == 'L') Cmd->Frame = FRAME_L;
             else Cmd->Frame = FRAME_N;
@@ -444,19 +426,18 @@ long FswCmdInterpreter(char CmdLine[512],double *CmdTime)
       else if (sscanf(CmdLine,"%lf Set SC[%ld] RampCoastGlide wc = %lf Hz, amax = %lf, vmax = %lf",
          CmdTime,&Isc,&wc,&amax,&vmax) == 5) {
          NewCmdProcessed = TRUE;
-         Fsw = &SC[Isc].FSW;
-         Fsw->RcgWC = wc*TwoPi;
-         Fsw->RcgAmax = amax;
-         Fsw->RcgVmax = vmax;
+         SC[Isc].AC.PrototypeCtrl.wc = wc*TwoPi;
+         SC[Isc].AC.PrototypeCtrl.amax = amax;
+         SC[Isc].AC.PrototypeCtrl.vmax = vmax;
       }
 
       else if (sscanf(CmdLine,"%lf Spin SC[%ld] about Primary Vector at %lf deg/sec",
          CmdTime,&Isc,&wc) == 3) {
          NewCmdProcessed = TRUE;
-         Fsw = &SC[Isc].FSW;
+         Cmd = &SC[Isc].AC.Cmd;
          
-         Fsw->Cmd.Parm = PARM_AXIS_SPIN;
-         Fsw->Cmd.SpinRate = wc*D2R;
+         Cmd->Parm = PARM_AXIS_SPIN;
+         Cmd->SpinRate = wc*D2R;
       }
 
       return(NewCmdProcessed);
@@ -618,7 +599,6 @@ void ThreeAxisAttitudeCommand(struct SCType *S)
 {
       struct JointType *G;
       struct BodyType *B;
-      struct FSWType *Fsw;
       struct CmdType *Cmd;
       struct CmdVecType *PV, *SV;
       double CRN[3][3],C[3][3],qln[4],Cdot[3][3];
@@ -626,9 +606,8 @@ void ThreeAxisAttitudeCommand(struct SCType *S)
       double PriVecGo[3],SecVecGo[3],CGoGi[3][3];
       long Ig,Bi,i,j;
 
-      Fsw = &S->FSW;
 
-      Cmd = &Fsw->Cmd;
+      Cmd = &S->AC.Cmd;
       PV = &Cmd->PriVec;
       SV = &Cmd->SecVec;
 
@@ -680,7 +659,7 @@ void ThreeAxisAttitudeCommand(struct SCType *S)
             C2Q(CRN,Cmd->qrn);
             for(i=0;i<3;i++) {
                for(j=0;j<3;j++) {
-                  Cdot[i][j] = (CRN[i][j]-Cmd->OldCRN[i][j])/Fsw->DT;
+                  Cdot[i][j] = (CRN[i][j]-Cmd->OldCRN[i][j])/S->AC.DT;
                }
             }
             CDOT2W(CRN,Cdot,Cmd->wrn);
@@ -698,7 +677,7 @@ void ThreeAxisAttitudeCommand(struct SCType *S)
          G = &S->G[Ig];
          Bi = G->Bin;
          B = &S->B[Bi];
-         Cmd = &Fsw->GimCmd[Ig];
+         Cmd = &S->AC.G[Ig].Cmd;
          PV = &Cmd->PriVec;
          SV = &Cmd->SecVec;
 
@@ -731,14 +710,12 @@ void ThreeAxisAttitudeCommand(struct SCType *S)
 /**********************************************************************/
 void SpinnerCommand(struct SCType *S)
 {
-      struct FSWType *Fsw;
       struct CmdType *Cmd;
       struct CmdVecType *PV;
       double MagH;
       long i;
       
-      Fsw = &S->FSW;
-      Cmd = &Fsw->Cmd;
+      Cmd = &S->AC.Cmd;
       PV = &Cmd->PriVec;
       
       if (PV->Frame != FRAME_N) {
@@ -759,91 +736,163 @@ void SpinnerCommand(struct SCType *S)
 }
 /**********************************************************************/
 /* This function copies needed parameters from the SC structure to    */
-/* the FSW structure.                                                 */
-void InitFSW(struct SCType *S)
+/* the AC structure.                                                 */
+void InitAC(struct SCType *S)
 {
       long Ig,i,j;
-      struct FSWType *FSW;
+      struct AcsType *AC;
+      double **A,**Aplus;
 
-      FSW = &S->FSW;
+      AC = &S->AC;
 
-      FSW->Init = 1;
+      AC->Init = 1;
 
+      /* Joints */
+      AC->Ng = S->Ng;
       if (S->Ng > 0) {
-         FSW->Ngim = S->Ng;
-         FSW->Gim = (struct FswGimType *) calloc(S->Ng,sizeof(struct FswGimType));
-         FSW->GimCmd = (struct CmdType *) calloc(S->Ng,sizeof(struct CmdType));
-         for(Ig=0;Ig<FSW->Ngim;Ig++) {
-            FSW->Gim[Ig].IsSpherical = S->G[Ig].IsSpherical;
-            FSW->Gim[Ig].RotDOF = S->G[Ig].RotDOF;
-            FSW->Gim[Ig].TrnDOF = S->G[Ig].TrnDOF;
-            FSW->Gim[Ig].IsUnderActiveControl = TRUE;
-            FSW->Gim[Ig].RotSeq = S->G[Ig].RotSeq;
-            FSW->GimCmd[Ig].RotSeq = S->G[Ig].RotSeq;
+         AC->G = (struct AcJointType *) calloc(S->Ng,sizeof(struct AcJointType));
+         for(Ig=0;Ig<AC->Ng;Ig++) {
+            AC->G[Ig].IsUnderActiveControl = TRUE;
+            AC->G[Ig].IsSpherical = S->G[Ig].IsSpherical;
+            AC->G[Ig].RotDOF = S->G[Ig].RotDOF;
+            AC->G[Ig].TrnDOF = S->G[Ig].TrnDOF;
             for(i=0;i<3;i++) {
                for(j=0;j<3;j++) {
-                  FSW->Gim[Ig].CGiBi[i][j] = S->G[Ig].CGiBi[i][j];
-                  FSW->Gim[Ig].CBoGo[i][j] = S->G[Ig].CBoGo[i][j];
+                  AC->G[Ig].CGiBi[i][j] = S->G[Ig].CGiBi[i][j];
+                  AC->G[Ig].CBoGo[i][j] = S->G[Ig].CBoGo[i][j];
+               }
+            }
+            AC->G[Ig].RotSeq = S->G[Ig].RotSeq;
+            AC->G[Ig].TrnSeq = S->G[Ig].TrnSeq;
+         }
+      }
+      
+      /* Accelerometer Axes */
+
+      /* Gyro Axes */
+      AC->Ngyro = S->Ngyro;
+      if (S->Ngyro > 0) {
+         AC->Gyro = (struct AcGyroType *) calloc(S->Ngyro,sizeof(struct AcGyroType));
+         for(i=0;i<S->Ngyro;i++) {
+            for(j=0;j<3;j++) {
+               AC->Gyro[i].Axis[j] = S->Gyro[i].Axis[j];
+            }
+         }
+      }
+
+      /* Magnetometer Axes */
+      AC->Nmag = S->Nmag;
+      if (S->Nmag > 0) {
+         AC->MAG = (struct AcMagnetometerType *) calloc(S->Nmag,sizeof(struct AcMagnetometerType));
+         for(i=0;i<S->Nmag;i++) {
+            for(j=0;j<3;j++) {
+               AC->MAG[i].Axis[j] = S->MAG[i].Axis[j];
+            }
+         }
+      }
+
+      /* Coarse Sun Sensors */
+      /* Star Trackers */
+      /* Fine Sun Sensors */
+      /* GPS */
+      
+      /* Wheels */
+      AC->Nwhl = S->Nw;
+      if (S->Nw > 0) {
+         AC->Whl = (struct AcWhlType *) calloc(AC->Nwhl,sizeof(struct AcWhlType));
+         A = CreateMatrix(3,AC->Nwhl);
+         Aplus = CreateMatrix(AC->Nwhl,3);
+         for (i=0;i<S->Nw;i++) {
+            for (j=0;j<3;j++) {
+               AC->Whl[i].Axis[j] = S->Whl[i].A[j];
+               A[j][i] = S->Whl[i].A[j];
+            }
+         }
+         if (S->Nw == 1) {
+            for(i=0;i<3;i++) AC->Whl[0].DistVec[i] = AC->Whl[0].Axis[i]; 
+         }
+         else if (S->Nw >= 2) {
+            PINVG(A,Aplus,3,S->Nw);
+            for(i=0;i<AC->Nwhl;i++) {
+               for(j=0;j<3;j++) {
+                  AC->Whl[i].DistVec[j] = Aplus[i][j];
                }
             }
          }
-      }
-
-      if (S->Nw > 0) {
-         FSW->Nwhl = S->Nw;
-         FSW->Hw = (double *) calloc(FSW->Nwhl,sizeof(double));
-         FSW->Hwcmd = (double *) calloc(FSW->Nwhl,sizeof(double));
-         FSW->Awhl = CreateMatrix(3,FSW->Nwhl);
-         FSW->AwhlPlus = CreateMatrix(FSW->Nwhl,3);
-         FSW->Twhlcmd = (double *) calloc(FSW->Nwhl,sizeof(double));
-         for (i=0;i<S->Nw;i++) {
-            for (j=0;j<3;j++) {
-               FSW->Awhl[j][i] = S->Whl[i].A[j];
-            }
+         DestroyMatrix(A,3);
+         DestroyMatrix(Aplus,AC->Nwhl);
+         for(i=0;i<S->Nw;i++) {
+            AC->Whl[i].J = S->Whl[i].J;
+            AC->Whl[i].Tmax = S->Whl[i].Tmax;
+            AC->Whl[i].Hmax = S->Whl[i].Hmax;
          }
-         if (S->Nw >= 3) PINVG(FSW->Awhl,FSW->AwhlPlus,3,FSW->Nwhl);
       }
 
+      /* Magnetic Torquer Bars */
+      AC->Nmtb = S->Nmtb;
       if (S->Nmtb > 0) {
-         FSW->Nmtb = S->Nmtb;
-         FSW->Amtb = CreateMatrix(3,FSW->Nmtb);
-         FSW->AmtbPlus = CreateMatrix(FSW->Nmtb,3);
-         FSW->Mmtbcmd = (double *) calloc(FSW->Nmtb,sizeof(double));
-         FSW->Mmtbmax = (double *) calloc(FSW->Nmtb,sizeof(double));
+         AC->MTB = (struct AcMtbType *) calloc(AC->Nmtb,sizeof(struct AcMtbType));
+         A = CreateMatrix(3,AC->Nmtb);
+         Aplus = CreateMatrix(AC->Nmtb,3);
          for (i=0;i<S->Nmtb;i++) {
             for (j=0;j<3;j++) {
-               FSW->Amtb[j][i] = S->MTB[i].A[j];
+               AC->MTB[i].Axis[j] = S->MTB[i].A[j];
+               A[j][i] = S->MTB[i].A[j];
             }
-            FSW->Mmtbmax[i] = S->MTB[i].Mmax;
          }
-         PINVG(FSW->Amtb,FSW->AmtbPlus,3,FSW->Nmtb);
+         if (S->Nmtb == 1) {
+            for(i=0;i<3;i++) AC->MTB[0].DistVec[i] = AC->MTB[0].Axis[i]; 
+         }
+         else if (S->Nmtb >= 2) {
+            PINVG(A,Aplus,3,S->Nmtb);
+            for(i=0;i<AC->Nmtb;i++) {
+               for(j=0;j<3;j++) {
+                  AC->MTB[i].DistVec[j] = Aplus[i][j];
+               }
+            }
+         }
+         DestroyMatrix(A,3);
+         DestroyMatrix(Aplus,AC->Nmtb);
+         for(i=0;i<S->Nmtb;i++) {
+            AC->MTB[i].Mmax = S->MTB[i].Mmax;
+         }
       }
 
+      /* Thrusters */
+      AC->Nthr = S->Nthr;
       if (S->Nthr > 0) {
-         FSW->Nthr = S->Nthr;
-         FSW->Athr = CreateMatrix(3,FSW->Nthr);
-         FSW->AthrPlus = CreateMatrix(FSW->Nthr,3);
-         FSW->Thrcmd = (double *) calloc(FSW->Nthr,sizeof(double));
-         /* for(i=0;i<S->Nthr;i++) {
-         **    for(j=0;j<3;j++) {
-         **       FSW->Athr[j][i] = S->Thr[i].A[j];
-         **    }
-         ** }
-         ** PINVG(FSW->Athr,FSW->AthrPlus,3,FSW->Nthr);
-         */
+         AC->Thr = (struct AcThrType *) calloc(AC->Nthr,sizeof(struct AcThrType));
+         for(i=0;i<S->Nthr;i++) {
+            AC->Thr[i].Fmax = S->Thr[i].Fmax;
+            for(j=0;j<3;j++) {
+               AC->Thr[i].Axis[j] = S->Thr[i].A[j];
+               AC->Thr[i].PosB[j] = S->Thr[i].PosB[j];
+            }
+         }
       }
+      
+      /* Control Moment Gyros */
 
-      /* Crude MOI estimate */
+      AC->DT = DTSIM;
+      AC->mass = S->mass;
       for (i=0;i<3;i++) {
-            FSW->MOI[i] = S->I[i][i];
+         for(j=0;j<3;j++) {
+            AC->MOI[i][j] = S->I[i][j];
+         }
       }
-      FSW->mass = S->mass;
-
-      /* For RampCoastGlide.  See Inp_Cmd.txt for easy modification. */
-      FSW->RcgWC = 0.05*TwoPi;
-      FSW->RcgAmax = 0.01;
-      FSW->RcgVmax = 0.5*D2R;
-
+      
+      /* Controllers */
+      AC->PrototypeCtrl.Init = 1;
+      AC->AdHocCtrl.Init = 1;
+      AC->SpinnerCtrl.Init = 1;
+      AC->MomBiasCtrl.Init = 1;
+      AC->ThreeAxisCtrl.Init = 1;
+      AC->IssCtrl.Init = 1;
+      AC->CmgCtrl.Init = 1;
+      
+      AC->PrototypeCtrl.wc = 0.05*TwoPi;
+      AC->PrototypeCtrl.amax = 0.01;
+      AC->PrototypeCtrl.vmax = 0.5*D2R;
 }
 /**********************************************************************/
 /* The effective inertia for a gimbal is assumed to be the moment of  */
@@ -892,59 +941,59 @@ void FindAppendageInertia(long Ig, struct SCType *S,double Iapp[3])
             for(k=0;k<3;k++) Iapp[k] += IBoG[k][k];
          }
       }
-
 }
 /**********************************************************************/
 /*  This simple control law is suitable for rapid prototyping.        */
 void PrototypeFSW(struct SCType *S)
 {
-      struct FSWType *FSW;
+      struct AcsType *AC;
+      struct AcPrototypeCtrlType *C;
       struct BodyType *B;
       struct CmdType *Cmd;
       double alpha[3],Iapp[3];
       double Hvnb[3],Herr[3],werr[3];
+      double qbr[4];
       long Ig,i,j;
 
-      FSW = &S->FSW;
+      AC = &S->AC;
+      C = &AC->PrototypeCtrl;
+      Cmd = &AC->Cmd;
       
-      if (FSW->Cmd.Parm == PARM_AXIS_SPIN) {
-         if (FSW->Init) {
-            FSW->Init = 0;
-            FSW->DT = DTSIM;
-            FSW->Kprec = 3.0E-2;
-            FSW->Knute = 1.0;
+      if (Cmd->Parm == PARM_AXIS_SPIN) {
+         if (C->Init) {
+            C->Init = 0;
+            C->Kprec = 3.0E-2;
+            C->Knute = 1.0;
          }
          
          SpinnerCommand(S);
          
          B = &S->B[0];
-         Cmd = &FSW->Cmd;
          
          MxV(B->CN,Cmd->Hvn,Hvnb);
          
          for(i=0;i<3;i++) {
             Herr[i] = S->Hvb[i] - Hvnb[i];
-            werr[i] = FSW->wbn[i] - Cmd->wrn[i];
-            FSW->Tcmd[i] = -FSW->Knute*werr[i];
+            werr[i] = AC->wbn[i] - Cmd->wrn[i];
+            C->Tcmd[i] = -C->Knute*werr[i];
             if (MAGV(Herr) < 0.5*MAGV(Cmd->Hvn)) {
-               FSW->Tcmd[i] -= FSW->Kprec*Herr[i];
+               C->Tcmd[i] -= C->Kprec*Herr[i];
             }
-            FSW->IdealTrq[i] = Limit(FSW->Tcmd[i],-0.1,0.1); 
+            AC->IdealTrq[i] = Limit(C->Tcmd[i],-0.1,0.1); 
          }
          
       }
       else {
-         if (FSW->Init) {
-            FSW->Init = 0;
-            FSW->DT = DTSIM;
-            for(Ig=0;Ig<FSW->Ngim;Ig++) {
+         if (C->Init) {
+            C->Init = 0;
+            for(Ig=0;Ig<AC->Ng;Ig++) {
                FindAppendageInertia(Ig,S,Iapp);
                for(j=0;j<3;j++) {
                   FindPDGains(Iapp[j],0.05,1.0,
-                     &FSW->Gim[Ig].RateGain[j],
-                     &FSW->Gim[Ig].AngGain[j]);
-                  FSW->Gim[Ig].MaxRate[j] = 0.5*D2R;
-                  FSW->Gim[Ig].MaxTrq[j] = 0.1;
+                     &AC->G[Ig].AngRateGain[j],
+                     &AC->G[Ig].AngGain[j]);
+                  AC->G[Ig].MaxAngRate[j] = 0.5*D2R;
+                  AC->G[Ig].MaxTrq[j] = 0.1;
                }
             }
          }
@@ -953,14 +1002,14 @@ void PrototypeFSW(struct SCType *S)
          ThreeAxisAttitudeCommand(S);
 
          /* Form attitude error signals */
-         QxQT(FSW->qbn,FSW->Cmd.qrn,FSW->qbr);
-         Q2AngleVec(FSW->qbr,FSW->therr);
-         for(i=0;i<3;i++) FSW->werr[i] = FSW->wbn[i] - FSW->Cmd.wrn[i];
+         QxQT(AC->qbn,Cmd->qrn,qbr);
+         Q2AngleVec(qbr,C->therr);
+         for(i=0;i<3;i++) C->werr[i] = AC->wbn[i] - Cmd->wrn[i];
 
          /* Closed-loop attitude control */
-         VectorRampCoastGlide(FSW->therr,FSW->werr,
-            FSW->RcgWC,FSW->RcgAmax,FSW->RcgVmax,alpha);
-         for(i=0;i<3;i++) FSW->IdealTrq[i] = FSW->MOI[i]*alpha[i];
+         VectorRampCoastGlide(C->therr,C->werr,
+            C->wc,C->amax,C->vmax,alpha);
+         for(i=0;i<3;i++) AC->IdealTrq[i] = AC->MOI[i][i]*alpha[i];
       }
 
 }
@@ -974,88 +1023,92 @@ void SpinnerFSW(struct SCType *S)
       double y=0.0;
       double w1,w2,w3;
       double CyclicTorque,OrbPeriod,MaxPtgErr;
-      static double I3,It;
-      long i;
-      struct FSWType *FSW;
+      long i,Imtb;
+      struct AcsType *AC;
+      struct AcSpinnerCtrlType *C;
+      struct AcMtbType *M;
 
-      FSW = &S->FSW;
+      AC = &S->AC;
+      C = &AC->SpinnerCtrl;
 
-      if (FSW->Init) {
-         FSW->Init = 0;
-         FSW->DT = 0.1;
-         FSW->Bold1 = 0.0;
-         FSW->Bold2 = 0.0;
-         FSW->xold = 0.0;
-         FSW->yold = 0.0;
+      if (AC->Init) {
+         AC->Init = 0;
+         AC->DT = 0.1;
+         C->Bold1 = 0.0;
+         C->Bold2 = 0.0;
+         C->xold = 0.0;
+         C->yold = 0.0;
 
          CyclicTorque = 3.0E-4;
          MaxPtgErr = 1.0*D2R;
          OrbPeriod = TwoPi/sqrt(Orb[S->RefOrb].mu/(pow(Orb[S->RefOrb].SMA,3)));
-         FindSpinnerGains(FSW->MOI[2],sqrt(FSW->MOI[0]*FSW->MOI[1]),
+         FindSpinnerGains(AC->MOI[2][2],sqrt(AC->MOI[0][0]*AC->MOI[1][1]),
                           CyclicTorque,OrbPeriod,MaxPtgErr,
-                          &FSW->wrn[2],&FSW->Knute,&FSW->Kprec);
+                          &C->SpinRate,&C->Knute,&C->Kprec);
 
-         I3 = FSW->MOI[2];
-         It = sqrt(FSW->MOI[0]*FSW->MOI[1]);
+         C->Ispin = AC->MOI[2][2];
+         C->Itrans = sqrt(AC->MOI[0][0]*AC->MOI[1][1]);
       }
 
-
       /* Sun-TAM Attitude Determination */
-      if (FSW->SunValid) {
-         TRIAD(FSW->svn,FSW->bvn,FSW->svb,FSW->bvb,FSW->CBN);
-         for(i=0;i<3;i++) FSW->rvn[i] = FSW->svn[i];
-         MxV(FSW->CBN,FSW->rvn,FSW->rvb);
-         x = FSW->rvb[0];
-         y = FSW->rvb[1];
+      if (AC->SunValid) {
+         TRIAD(AC->svn,AC->bvn,AC->svb,AC->bvb,AC->CBN);
+         for(i=0;i<3;i++) C->rvn[i] = AC->svn[i];
+         MxV(AC->CBN,C->rvn,C->rvb);
+         x = C->rvb[0];
+         y = C->rvb[1];
       }
 
       /* Spin rate control */
-      B1=FSW->bvb[0];
-      B2=FSW->bvb[1];
+      B1=AC->bvb[0];
+      B2=AC->bvb[1];
       magb=sqrt(B1*B1+B2*B2);
       B1 /= magb;
       B2 /= magb;
-      w3=(B1*FSW->Bold2-B2*FSW->Bold1)/FSW->DT-FSW->wrn[2];
-/*      w3 = FSW->wbn[2]-FSW->wrn[2]; */
-      FSW->Bold1=B1;
-      FSW->Bold2=B2;
-      FSW->Tcmd[2] = -FSW->Kprec*w3;
+      w3=(B1*C->Bold2-B2*C->Bold1)/AC->DT - C->SpinRate;
+/*      w3 = AC->wbn[2] - C->SpinRate; */
+      C->Bold1=B1;
+      C->Bold2=B2;
+      C->Tcmd[2] = -C->Kprec*w3;
 
       /* Precession/nutation control */
-      if (FSW->SunValid && fabs(w3) < 0.5*FSW->wrn[2]){
-/*         w1 = FSW->wbn[0]; */
-/*         w2 = FSW->wbn[1]; */
-         w1= (y-FSW->yold)/FSW->DT + FSW->wrn[2]*x;
-         w2=-(x-FSW->xold)/FSW->DT + FSW->wrn[2]*y;
-         FSW->Tcmd[0] = -FSW->Knute*w1-FSW->Kprec*(It*w1-I3*FSW->wrn[2]*x);
-         FSW->Tcmd[1] = -FSW->Knute*w2-FSW->Kprec*(It*w2-I3*FSW->wrn[2]*y);
-         FSW->xold = x;
-         FSW->yold = y;
+      if (AC->SunValid && fabs(w3) < 0.5*C->SpinRate){
+/*         w1 = AC->wbn[0]; */
+/*         w2 = AC->wbn[1]; */
+         w1= (y-C->yold)/AC->DT + C->SpinRate*x;
+         w2=-(x-C->xold)/AC->DT + C->SpinRate*y;
+         C->Tcmd[0] = -C->Knute*w1-C->Kprec*(C->Itrans*w1-C->Ispin*C->SpinRate*x);
+         C->Tcmd[1] = -C->Knute*w2-C->Kprec*(C->Itrans*w2-C->Ispin*C->SpinRate*y);
+         C->xold = x;
+         C->yold = y;
       }
       else {
-         FSW->Tcmd[0] = 0.0;
-         FSW->Tcmd[1] = 0.0;
+         C->Tcmd[0] = 0.0;
+         C->Tcmd[1] = 0.0;
       }
 
-      VxV(FSW->bvb,FSW->Tcmd,FSW->Mmtbcmd);
-      magb2 = VoV(FSW->bvb,FSW->bvb);
-      for (i=0;i<3;i++) {
-         FSW->Mmtbcmd[i] /= magb2;
-         FSW->Mmtbcmd[i] = Limit(FSW->Mmtbcmd[i],
-                                    -FSW->Mmtbmax[i],
-                                     FSW->Mmtbmax[i]);
-/*         FSW->IdealFrc[i] = 0.0; */
-/*         FSW->IdealTrq[i] = FSW->Tcmd[i]; */
+      VxV(AC->bvb,C->Tcmd,C->Mcmd);
+      magb2 = VoV(AC->bvb,AC->bvb);
+      for (i=0;i<3;i++) C->Mcmd[i] /= magb2;
+      
+      for(Imtb=0;Imtb<AC->Nmtb;Imtb++) {
+         M = &AC->MTB[Imtb];
+         M->Mcmd = VoV(M->DistVec,C->Mcmd);
+         M->Mcmd = Limit(M->Mcmd,-M->Mmax,M->Mmax);
       }
+/*      for(i=0;i<3;i++) { */
+/*         AC->IdealFrc[i] = 0.0; */
+/*         AC->IdealTrq[i] = M->Tcmd[i]; */
+/*      } */
 
 }
 /**********************************************************************/
-/* SC_EOS is a two-body momentum-biased Earth pointer                 */
+/* Notional two-body momentum-biased Earth pointer                    */
 void MomBiasFSW(struct SCType *S)
 {
 
       double PitchRateError,PitchTcmd;
-      double Tcmd[3],magb2;
+      double Tcmd[3],magb2,Mcmd[3];
       double Bdot[3];
       static double bvbold[3];
       double PitchRateCmd = -0.001059;
@@ -1068,67 +1121,64 @@ void MomBiasFSW(struct SCType *S)
       double Hwcmd = -50.0;
       double Zvec[3] = {0.0,0.0,1.0};
       long i;
-      struct FSWType *FSW;
+      struct AcsType *AC;
+      struct AcMomBiasCtrlType *C;
 
-      FSW = &S->FSW;
-
-      if (FSW->Init) {
-         FSW->Init = 0;
-         FSW->DT = 0.1;
-
-         FSW->Gim[0].IsSpherical = FALSE;
-         FSW->Gim[0].RotDOF = 1;
-         FSW->Gim[0].RotSeq = 231;
+      AC = &S->AC;
+      C = &AC->MomBiasCtrl;
+      
+      if (C->Init) {
+         C->Init = 0;
       }
 
-      if (!FSW->EarthValid) {  /* Bdot Acquisition */
+      if (!AC->ES.Valid) {  /* Bdot Acquisition */
 
-         FSW->Twhlcmd[0] = -Kry*(FSW->Hw[0]-Hwcmd);
+         AC->Whl[0].Tcmd = -Kry*(AC->Whl[0].H-Hwcmd);
          for(i=0;i<3;i++) {
-            Bdot[i] = (FSW->bvb[i]-bvbold[i])/FSW->DT;
-            bvbold[i] = FSW->bvb[i];
-            FSW->Mmtbcmd[i] = -Kbdot*Bdot[i];
+            Bdot[i] = (AC->bvb[i]-bvbold[i])/AC->DT;
+            bvbold[i] = AC->bvb[i];
+            AC->MTB[i].Mcmd = -Kbdot*Bdot[i];
 
-            FSW->GimCmd[0].Ang[i] = 0.0;
-            FSW->GimCmd[0].Rate[i] = 0.0;
-
+            AC->G[0].Cmd.Ang[i] = 0.0;
+            AC->G[0].Cmd.AngRate[i] = 0.0;
          }
 
       }
       else { /* Nadir Point */
 
          /* Pitch Loop */
-         PitchRateError = FSW->wbn[1]-PitchRateCmd;
-         PitchTcmd = -Kry*PitchRateError-Kpy*FSW->ESpitch;
-         FSW->Twhlcmd[0] = -PitchTcmd-Kunl*(FSW->Hw[0]-Hwcmd);
+         PitchRateError = AC->wbn[1]-PitchRateCmd;
+         PitchTcmd = -Kry*PitchRateError-Kpy*AC->ES.Pitch;
+         AC->Whl[0].Tcmd = -PitchTcmd-Kunl*(AC->Whl[0].H-Hwcmd);
 
          /* Roll-Yaw Loop */
-         Tcmd[0] = -Krx*FSW->wbn[0]-Kpx*FSW->ESroll;
+         Tcmd[0] = -Krx*AC->wbn[0]-Kpx*AC->ES.Roll;
          Tcmd[2] = -0.5*Tcmd[0];
 
          /* Wheel Unload */
-         Tcmd[1] = -Kunl*(FSW->Hw[0]-Hwcmd);
+         Tcmd[1] = -Kunl*(AC->Whl[0].H-Hwcmd);
 
          /* M = BxT/B^2 */
-         VxV(FSW->bvb,Tcmd,FSW->Mmtbcmd);
-         magb2 = VoV(FSW->bvb,FSW->bvb);
-         FSW->Mmtbcmd[0] /= magb2;
-         FSW->Mmtbcmd[1] /= magb2;
-         FSW->Mmtbcmd[2] /= magb2;
+         VxV(AC->bvb,Tcmd,Mcmd);
+         magb2 = VoV(AC->bvb,AC->bvb);
+         Mcmd[0] /= magb2;
+         Mcmd[1] /= magb2;
+         Mcmd[2] /= magb2;
+         for(i=0;i<3;i++) AC->MTB[i].Mcmd = Mcmd[i];
 
-         /* Gimbal */
-         FSW->GimCmd[0].Rate[0] = -PitchRateCmd;
-         if (FSW->SunValid) {
-            PointGimbalToTarget(FSW->Gim[0].RotSeq, FSW->Gim[0].CGiBi,
-               FSW->Gim[0].CBoGo, FSW->svb, Zvec, FSW->GimCmd[0].Ang);
+         /* Solar Array Gimbal */
+         AC->G[0].Cmd.AngRate[0] = -PitchRateCmd;
+         if (AC->SunValid) {
+            PointGimbalToTarget(AC->G[0].RotSeq, AC->G[0].CGiBi,
+               AC->G[0].CBoGo, AC->svb, Zvec, AC->G[0].Cmd.Ang);
          }
          else {
-            FSW->GimCmd[0].Ang[0] += PitchRateCmd*FSW->DT;
+            AC->G[0].Cmd.Ang[0] += PitchRateCmd*AC->DT;
          }
-         if (FSW->Gim[0].Ang[0] - FSW->GimCmd[0].Ang[0] > Pi)
-            FSW->GimCmd[0].Ang[0] += TwoPi;
-         if (FSW->Gim[0].Ang[0] - FSW->GimCmd[0].Ang[0] < -Pi)
-            FSW->GimCmd[0].Ang[0] -= TwoPi;
+         if (AC->G[0].Ang[0] - AC->G[0].Cmd.Ang[0] > Pi)
+            AC->G[0].Cmd.Ang[0] += TwoPi;
+         if (AC->G[0].Ang[0] - AC->G[0].Cmd.Ang[0] < -Pi)
+            AC->G[0].Cmd.Ang[0] -= TwoPi;
       }
 }
 /**********************************************************************/
@@ -1139,555 +1189,146 @@ void ThreeAxisFSW(struct SCType *S)
       double qrn[4],qbr[4],svr[3];
       double Herr[3],HxB[3];
       double Zvec[3] = {0.0,0.0,1.0};
-      long i,j,Bout;
-      struct FSWType *FSW;
+      long i,j;
+      struct AcsType *AC;
+      struct AcThreeAxisCtrlType *C;
+      
+      AC = &S->AC;
+      C = &AC->ThreeAxisCtrl;
 
-      FSW = &S->FSW;
-
-      if (FSW->Init) {
-         FSW->Init = 0;
-         FSW->DT = 0.1;
-         FSW->Gim[0].IsSpherical = FALSE;
-         FSW->Gim[0].RotDOF = 1;
-         FSW->Gim[0].RotSeq = 231;
+      if (C->Init) {
+         C->Init = 0;
 			for(j=0;j<3;j++) {
-				FSW->GimCmd[0].Rate[j] = 0.0;
-				FSW->GimCmd[0].Ang[j] = 0.0;
-				FSW->Gim[0].MaxRate[j] = 0.2*D2R;
-				FSW->Gim[0].MaxTrq[j] = 100.0;
+				AC->G[0].Cmd.AngRate[j] = 0.0;
+				AC->G[0].Cmd.Ang[j] = 0.0;
+				AC->G[0].MaxAngRate[j] = 0.2*D2R;
+				AC->G[0].MaxTrq[j] = 100.0;
 				FindPDGains(S->B[1].I[1][1],0.02*TwoPi,1.0,
-					&FSW->Gim[0].RateGain[j],&FSW->Gim[0].AngGain[j]);
+					&AC->G[0].AngRateGain[j],&AC->G[0].AngGain[j]);
 			}
 
          for(i=0;i<3;i++) {
-            FSW->wc[i] = 0.1;
-            FSW->zc[i] = 0.7;
-            FindPDGains(FSW->MOI[i],FSW->wc[i],FSW->zc[i],
-                        &FSW->Kr[i],&FSW->Kp[i]);
+            FindPDGains(AC->MOI[i][i],0.1,0.7,
+                        &C->Kr[i],&C->Kp[i]);
+            C->Hwcmd[i] = 0.0;
          }
-         FSW->Kunl = 1.0E6;
+         C->Kunl = 1.0E6;
       }
 
       /* Find Attitude Command */
-      FindCLN(FSW->PosN,FSW->VelN,CRN,wln);
+      FindCLN(AC->PosN,AC->VelN,CRN,wln);
       C2Q(CRN,qrn);
-      MxV(CRN,FSW->svn,svr);
+      MxV(CRN,AC->svn,svr);
 
       /* Form Error Signals */
-      QxQT(FSW->qbn,qrn,qbr);
+      QxQT(AC->qbn,qrn,qbr);
       RECTIFYQ(qbr);
 
       /* PD Control */
       for(i=0;i<3;i++) {
-         FSW->Tcmd[i] = -FSW->Kr[i]*FSW->wbn[i]-FSW->Kp[i]*(2.0*qbr[i]);
-         FSW->Twhlcmd[i] = -FSW->Tcmd[i];
+         C->Tcmd[i] = -C->Kr[i]*AC->wbn[i]-C->Kp[i]*(2.0*qbr[i]);
+         AC->Whl[i].Tcmd = -C->Tcmd[i];
       }
 
       /* Momentum Management */
       for(i=0;i<3;i++) {
-         Herr[i]=FSW->Hw[i]-FSW->Hwcmd[i];
+         Herr[i] = AC->Whl[i].H - C->Hwcmd[i];
       }
-      VxV(Herr,FSW->bvb,HxB);
-      for(i=0;i<3;i++) FSW->Mmtbcmd[i] = FSW->Kunl*HxB[i];
+      VxV(Herr,AC->bvb,HxB);
+      for(i=0;i<3;i++) AC->MTB[i].Mcmd = C->Kunl*HxB[i];
 
-      /* Gimbals */
-      FSW->GimCmd[0].Rate[0] = wln[1];
-      if (FSW->SunValid) {
-         PointGimbalToTarget(FSW->Gim[0].RotSeq, FSW->Gim[0].CGiBi,
-               FSW->Gim[0].CBoGo, FSW->svb, Zvec,FSW->GimCmd[0].Ang);
-      }
-      else {
-         FSW->GimCmd[0].Ang[0] += wln[1]*FSW->DT;
-      }
-		if (FSW->Gim[0].Ang[0] - FSW->GimCmd[0].Ang[0] > Pi)
-			FSW->GimCmd[0].Ang[0] += TwoPi;
-		if (FSW->Gim[0].Ang[0] - FSW->GimCmd[0].Ang[0] < -Pi)
-			FSW->GimCmd[0].Ang[0] -= TwoPi;
-}
-/**********************************************************************/
-void Thr3DOFFSW(struct SCType *S)
-{
-
-      double MOI[3] = {100.0,200.0,300.0};
-      static double Kr[3],Kp[3];
-      double CLN[3][3],qrn[4],qbr[4];
-      double Fcmd[3]={0.0,0.0,0.0};
-      double Tcmd[3],Thrcmd[12];
-      double Aplus[12][6] = {{-0.25, 0.0 , 0.0 , 0.0  ,-0.125, 0.125},
-                             { 0.0 ,-0.25, 0.0 , 0.125, 0.0  ,-0.125},
-                             { 0.0 , 0.0 ,-0.25,-0.125, 0.125, 0.0  },
-                             { 0.25, 0.0 , 0.0 , 0.0  , 0.125, 0.125},
-                             { 0.0 , 0.25, 0.0 ,-0.125, 0.0  ,-0.125},
-                             { 0.0 , 0.0 ,-0.25, 0.125,-0.125, 0.0  },
-                             {-0.25, 0.0 , 0.0 , 0.0  , 0.125,-0.125},
-                             { 0.0 , 0.25, 0.0 , 0.125, 0.0  , 0.125},
-                             { 0.0 , 0.0 , 0.25,-0.125,-0.125, 0.0  },
-                             { 0.25, 0.0 , 0.0 , 0.0  ,-0.125,-0.125},
-                             { 0.0 ,-0.25, 0.0 ,-0.125, 0.0  , 0.125},
-                             { 0.0 , 0.0 , 0.25, 0.125, 0.125, 0.0  }};
-      double Null[12][3] = {{1.0,0.0,0.0},{0.0,1.0,0.0},{0.0,0.0,1.0},
-                            {1.0,0.0,0.0},{0.0,1.0,0.0},{0.0,0.0,1.0},
-                            {1.0,0.0,0.0},{0.0,1.0,0.0},{0.0,0.0,1.0},
-                            {1.0,0.0,0.0},{0.0,1.0,0.0},{0.0,0.0,1.0}};
-      double M, k[3],wln[3];
-      long i,j;
-      static long First = 1;
-      struct FSWType *FSW;
-
-      FSW = &S->FSW;
-
-      if (First) {
-         First = 0;
-         for (i=0;i<3;i++) FindPDGains(MOI[i],0.05,1.0,&Kr[i],&Kp[i]);
-      }
-
-      /* Align to LVLH */
-      FindCLN(FSW->PosN,FSW->VelN,CLN,wln);
-      C2Q(CLN,qrn);
-      QxQT(FSW->qbn,qrn,qbr);
-      RECTIFYQ(qbr);
-      for(i=0;i<3;i++) {
-         Tcmd[i] = -Kr[i]*FSW->wbn[i]-Kp[i]*(2.0*qbr[i]);
-         Tcmd[i] = Limit(Tcmd[i],-0.1,0.1);
-      }
-
-      /* Thruster Selection Logic */
-      for(i=0;i<12;i++) {
-         Thrcmd[i] = 0.0;
-         for(j=0;j<3;j++) {
-            Thrcmd[i] += Aplus[i][j]*Fcmd[j]+Aplus[i][j+3]*Tcmd[j];
-         }
-      }
-      for(i=0;i<3;i++) {
-         M=Thrcmd[i];
-         k[i] = 0.0;
-         if (M > Thrcmd[3+i]) M = Thrcmd[3+i];
-         if (M > Thrcmd[6+i]) M = Thrcmd[6+i];
-         if (M > Thrcmd[9+i]) M = Thrcmd[9+i];
-         if (M < 0) k[i] = -M;
-      }
-      for(i=0;i<12;i++) {
-         for(j=0;j<3;j++) Thrcmd[i] += Null[i][j]*k[j];
-         if (Thrcmd[i] > 1.0) Thrcmd[i] = 1.0;
-         if (Thrcmd[i] < 0.0) Thrcmd[i] = 0.0;
-         FSW->Thrcmd[i] = Thrcmd[i];
-      }
-
-}
-/**********************************************************************/
-void Thr6DOFFSW(struct SCType *S)
-{
-
-      double Aplus[12][6] = {{-0.25, 0.0 , 0.0 , 0.0  ,-0.125, 0.125},
-                             { 0.0 ,-0.25, 0.0 , 0.125, 0.0  ,-0.125},
-                             { 0.0 , 0.0 ,-0.25,-0.125, 0.125, 0.0  },
-                             { 0.25, 0.0 , 0.0 , 0.0  , 0.125, 0.125},
-                             { 0.0 , 0.25, 0.0 ,-0.125, 0.0  ,-0.125},
-                             { 0.0 , 0.0 ,-0.25, 0.125,-0.125, 0.0  },
-                             {-0.25, 0.0 , 0.0 , 0.0  , 0.125,-0.125},
-                             { 0.0 , 0.25, 0.0 , 0.125, 0.0  , 0.125},
-                             { 0.0 , 0.0 , 0.25,-0.125,-0.125, 0.0  },
-                             { 0.25, 0.0 , 0.0 , 0.0  ,-0.125,-0.125},
-                             { 0.0 ,-0.25, 0.0 ,-0.125, 0.0  , 0.125},
-                             { 0.0 , 0.0 , 0.25, 0.125, 0.125, 0.0  }};
-      double Null[12][3] = {{1.0,0.0,0.0},{0.0,1.0,0.0},{0.0,0.0,1.0},
-                            {1.0,0.0,0.0},{0.0,1.0,0.0},{0.0,0.0,1.0},
-                            {1.0,0.0,0.0},{0.0,1.0,0.0},{0.0,0.0,1.0},
-                            {1.0,0.0,0.0},{0.0,1.0,0.0},{0.0,0.0,1.0}};
-      double M, k[3];
-      long i,j;
-      double Cerr[3][3],therr[3],Tcmd[3];
-      double perr[3],F[3],Fcmd[3];
-      double Thrcmd[12];
-      struct FSWType *FSW;
-
-      FSW = &S->FSW;
-
-      if (FSW->Init) {
-         FSW->Init = 0;
-
-         for(i=0;i<3;i++) {
-            FSW->wc[i] = 0.1;
-            FSW->zc[i] = 1.0;
-         }
-         FSW->wct = 0.005;
-         FSW->zct = 1.0;
-         FSW->thsat = 0.1;
-         FSW->psat = 5.0;
-         if (S->Tag == 3) {
-            A2C(123,90.0*D2R,0.0*D2R,0.0*D2R,FSW->CSFcmd);
-            FSW->PosFcmd[0] = 0.0;
-            FSW->PosFcmd[1] = 0.0;
-            FSW->PosFcmd[2] = 0.0;
-         }
-         else {
-            A2C(213,-90.0*D2R,0.0*D2R,0.0*D2R,FSW->CSFcmd);
-            FSW->PosFcmd[0] = 50.0;
-            FSW->PosFcmd[1] = 0.0;
-            FSW->PosFcmd[2] = 0.0;
-         }
-         FSW->Tmax = 0.1;
-         FSW->Fmax = 1.0;
-
-         for (i=0;i<3;i++) FindPDGains(FSW->MOI[i],
-             FSW->wc[i],FSW->zc[i],
-            &FSW->Kr[i],&FSW->Kp[i]);
-         FindPDGains(FSW->mass,FSW->wct,FSW->zct,
-                     &FSW->Krt,&FSW->Kpt);
-      }
-
-/* .. Attitude Loop */
-
-      MxMT(FSW->CSF,FSW->CSFcmd,Cerr);
-      therr[0] = Cerr[1][2];
-      therr[1] = Cerr[2][0];
-      therr[2] = Cerr[0][1];
-      for(i=0;i<3;i++) {
-         therr[i] = Limit(therr[i],-FSW->thsat,FSW->thsat);
-         Tcmd[i] = -FSW->Kr[i]*FSW->wbn[i]
-                   -FSW->Kp[i]*therr[i];
-         Tcmd[i] = Limit(Tcmd[i],-FSW->Tmax,FSW->Tmax);
-      }
-
-
-/* .. Translation Loop */
-
-      for(i=0;i<3;i++) {
-         perr[i] = FSW->PosF[i] - FSW->PosFcmd[i];
-         perr[i] = Limit(perr[i],-FSW->psat,FSW->psat);
-         /* F[i] = -FSW->Krt*FSW->vsf[i]
-         **        -FSW->Kpt*perr[i]; */
-         F[i] = 0.0;
-      }
-      MxV(FSW->CSF,F,Fcmd);
-      for(i=0;i<3;i++)
-         Fcmd[i] = Limit(Fcmd[i],-FSW->Fmax,FSW->Fmax);
-
-
-/* .. Thruster Selection Logic */
-      for(i=0;i<12;i++) {
-         Thrcmd[i] = 0.0;
-         for(j=0;j<3;j++) {
-            Thrcmd[i] += Aplus[i][j]*Fcmd[j]+Aplus[i][j+3]*Tcmd[j];
-         }
-      }
-      for(i=0;i<3;i++) {
-         M=Thrcmd[i];
-         k[i] = 0.0;
-         if (M > Thrcmd[3+i]) M = Thrcmd[3+i];
-         if (M > Thrcmd[6+i]) M = Thrcmd[6+i];
-         if (M > Thrcmd[9+i]) M = Thrcmd[9+i];
-         if (M < 0.0) k[i] = -M;
-      }
-      for(i=0;i<12;i++) {
-         for(j=0;j<3;j++) Thrcmd[i] += Null[i][j]*k[j];
-         if (Thrcmd[i] > 1.0) Thrcmd[i] = 1.0;
-         if (Thrcmd[i] < 0.0) Thrcmd[i] = 0.0;
-         FSW->Thrcmd[i] = Thrcmd[i];
-      }
-
-}
-/**********************************************************************/
-void MmsFSW(struct SCType *S)
-{
-      struct FSWType *FSW;
-
-      FSW = &S->FSW;
-
-      if (FSW->Init) {
-         FSW->Init = 0;
-         FSW->DT = 0.1;
-         FSW->Ngim = 0;
-      }
-}
-/**********************************************************************/
-void SolarSailFSW(struct SCType *S)
-{
-      static FILE *FswFile;
-      double acmdn[3],acmd[3];
-      double Zvec[3] = {0.0,0.0,1.0};
-      double NegZvec[3] = {0.0,0.0,-1.0};
-      double Xvec[3] = {1.0,0.0,0.0};
-      double CRN[3][3],CBR[3][3],qbr[4],qrn[4];
-      double CmdTrq[3];
-      long i,j;
-      struct JointType *G;
-      struct FSWType *FSW;
-
-      FSW = &S->FSW;
-
-      if (FSW->Init) {
-         FSW->Init = 0;
-         FSW->Ngim = S->Ng;
-         for(i=0;i<FSW->Ngim;i++) {
-            FSW->Gim[i].IsSpherical = FALSE;
-            FSW->Gim[i].RotDOF = 1;
-            FSW->Gim[i].RotSeq = 123;
-            for(j=0;j<3;j++) {
-               FSW->GimCmd[i].Rate[j] = 0.0;
-               FSW->Gim[i].MaxRate[j] = 1.0*D2R;
-            }
-         }
-         for(i=0;i<8;i++) {
-            for(j=0;j<3;j++) {
-               FindPDGains(53.5,0.05,2.0,
-                  &FSW->Gim[i].RateGain[j],&FSW->Gim[i].AngGain[j]);
-               FSW->Gim[i].MaxTrq[j] = 1.0;
-            }
-         }
-         FswFile = FileOpen(InOutPath,"Fsw.42","w");
-      }
-
-/* .. Attitude control torque */
-      TRIAD(S->svn,Zvec,NegZvec,Xvec,CRN);
-      C2Q(CRN,qrn);
-      MxMT(S->B[0].CN,CRN,CBR);
-      C2Q(CBR,qbr);
-      RECTIFYQ(qbr);
-      for(i=0;i<3;i++) {
-         CmdTrq[i] = Limit(-10.0*S->B[0].wn[i]-0.2*2.0*qbr[i],-1.0,1.0);
-         FSW->Twhlcmd[i] = -CmdTrq[i];
-      }
-
-/* .. Desired thrust direction */
-      /* For escape, thrust parallel to velocity */
-      CopyUnitV(S->VelN,acmdn);
-      MxV(S->B[0].CN,acmdn,acmd);
-
-      if (VoV(FSW->svb,acmd) > 0.0) { /* Going upwind */
-         /* Feather panels parallel to Sun */
-         for(i=0;i<8;i++) {
-            if (FSW->Gim[i].Ang[0] > 0.0)
-               FSW->GimCmd[i].Ang[0] = 90.0*D2R;
-            else
-               FSW->GimCmd[i].Ang[0] = -90.0*D2R;
-         }
+      /* Solar Array Gimbal */
+      AC->G[0].Cmd.AngRate[0] = wln[1];
+      if (AC->SunValid) {
+         PointGimbalToTarget(AC->G[0].RotSeq, AC->G[0].CGiBi,
+               AC->G[0].CBoGo, AC->svb, Zvec,AC->G[0].Cmd.Ang);
       }
       else {
-         /* Put panels to acmd */
-         for(i=0;i<8;i++) {
-            G = &S->G[i];
-            PointGimbalToTarget(G->RotSeq,G->CGiBi,G->CBoGo,acmd,Zvec,FSW->GimCmd[i].Ang);
-            /* FSW->GimAngCmd[i][0] = 0.0*D2R; */
-         }
+         AC->G[0].Cmd.Ang[0] += wln[1]*AC->DT;
       }
-
-      if (OutFlag) {
-         fprintf(FswFile,"%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf\n",
-            qrn[0],qrn[1],qrn[2],qrn[3],qbr[0],qbr[1],qbr[2],qbr[3],
-            CmdTrq[0],CmdTrq[1],CmdTrq[2]);
-      }
-}
-/**********************************************************************/
-void EarthToMoonFSW(struct SCType *S)
-{
-      double Zvec[3] = {0.0,0.0,1.0};
-      double Yvec[3] = {0.0,1.0,0.0};
-      double CRN[3][3],CBR[3][3],qbr[4];
-      long i;
-      struct FSWType *FSW;
-
-      double amax = 1.0;
-      double mu,rc[3],vc[3],magrc,rchat[3],hc[3],hchat[3],thchat[3],n;
-      double rhat[3],thhat[3],hhat[3];
-      double CLN[3][3],x[3],v[3],magr;
-      double h[3],ucmd,wcmd,vcirc;
-      double PosR[3],VelR[3];
-      double a[3];
-      double Kv,Kr,Kvy,Krc,Kvc;
-      double xmax,zmax;
-      double u,w;
-      double axcc,azcc;
-
-      static FILE *Afile;
-
-      FSW = &S->FSW;
-
-      if (FSW->Init) {
-         FSW->Init = 0;
-         Afile = FileOpen(InOutPath,"Acc.42","w");
-      }
-
-/* .. Rendezvous with Luna */
-      if (Orb[S->RefOrb].World == EARTH) {
-         zmax = 500.0E6;
-         xmax = 500.0E6;
-         mu = World[EARTH].mu;
-         for(i=0;i<3;i++) {
-            rc[i] = World[LUNA].eph.PosN[i];
-            vc[i] = World[LUNA].eph.VelN[i];
-         }
-      }
-      else {
-         zmax =   50.0E3;
-         xmax = 100.0E3;
-         mu = Orb[1].mu;
-         for(i=0;i<3;i++) {
-            rc[i] = Orb[1].PosN[i];
-            vc[i] = Orb[1].VelN[i];
-         }
-      }
-      for(i=0;i<3;i++) {
-         PosR[i] = S->PosN[i]-rc[i];
-         VelR[i] = S->VelN[i]-vc[i];
-      }
-      magrc = CopyUnitV(rc,rchat);
-      VxV(rc,vc,hc);
-      CopyUnitV(hc,hchat);
-      VxV(hchat,rchat,thchat);
-      n = sqrt(mu/magrc/magrc/magrc);
-      for(i=0;i<3;i++) {
-         CLN[0][i] = thchat[i];
-         CLN[1][i] = -hchat[i];
-         CLN[2][i] = -rchat[i];
-      }
-      FindPDGains(1.0,5.0*n,1.0,&Kv,&Kr);
-      FindPDGains(1.0,5.0*n,0.5,&Kvc,&Krc);
-      Kvy = 5.0*(2.0*n);
-
-      /* SC state */
-      magr = CopyUnitV(S->PosN,rhat);
-      MAGV(S->VelN);
-      VxV(S->PosN,S->VelN,h);
-      CopyUnitV(h,hhat);
-      VxV(hhat,rhat,thhat);
-
-      vcirc = sqrt(mu/magr);
-      RelRV2EHRV(magrc,n,CLN,PosR,VelR,x,v);
-
-      u = VoV(S->VelN,thhat);
-      w = -VoV(S->VelN,rhat);
-
-/* .. Cancel out natural (nonlinear) coupling, then add in as desired */
-      axcc = 2.0*(n+v[0]/magrc)*v[2];
-      azcc = magr*(n+v[0]/magrc)*(n+v[0]/magrc) - mu/(magr*magr);
-      if (magr < 0.2*magrc) {
-         ucmd = 0.2*magrc/magr*vcirc;
-         if (u < 0.5*vcirc) wcmd = 0.0;
-         else wcmd = -2.0*vcirc;
-         a[0] = -Kv*(u-ucmd);
-         a[2] = -Kv*(w-wcmd);
-      }
-      else if (magr > 1.2*magrc) {
-         ucmd = vcirc;
-         if (u < 0.5*ucmd) wcmd = 0.0;
-         else wcmd = vcirc*Limit(magr/magrc-1.0,0.0,3.0);
-         a[0] = -Kv*(u-ucmd);
-         a[2] = -Kv*(w-wcmd);
-      }
-      else {
-         x[0] = Limit(x[0],-xmax,xmax);
-         x[2] = Limit(x[2],-zmax,zmax);
-         if (u < 0.5*vcirc) {
-            a[0] = -Kv*(u-0.5*vcirc);
-            a[2] = -Kv*v[2];
-         }
-         else {
-            a[0] =  -Kv*v[0] + Kvc*v[2] -  Kr*x[0] + Krc*x[2] + axcc;
-            a[2] = -Kvc*v[0] -  Kv*v[2] - Krc*x[0] -  Kr*x[2] + azcc;
-         }
-      }
-      a[1] = (fabs(VoV(hchat,rhat)) < 0.1*fabs(VoV(hchat,thhat)) ? -Kvy*v[1] : 0.0);
-
-      for(i=0;i<3;i++) {
-         a[i] = Limit(a[i],-amax,amax);
-      }
-      MTxV(S->CLN,a,FSW->IdealFrc);
-      for(i=0;i<3;i++) FSW->IdealFrc[i] *= S->mass;
-
-/* .. Attitude Control */
-      TRIAD(S->CLN[0],S->CLN[1],Zvec,Yvec,CRN);
-      MxMT(S->B[0].CN,CRN,CBR);
-      C2Q(CBR,qbr);
-      RECTIFYQ(qbr);
-      for(i=0;i<3;i++)
-         FSW->IdealTrq[i] = FSW->MOI[i]*RampCoastGlide(2.0*qbr[i],S->B[0].wn[i],0.05*TwoPi,1.0E-2,1.0*D2R);
-
-      if (OutFlag) {
-         fprintf(Afile,"%lf %lf %lf  %lf %lf %lf  %lf %lf %lf  %lf %lf\n",
-            x[0],x[1],x[2],
-            v[0],v[1],v[2],
-            a[0],a[1],a[2],
-            axcc,azcc);
-      }
-
+      if (AC->G[0].Ang[0] - AC->G[0].Cmd.Ang[0] > Pi)
+         AC->G[0].Cmd.Ang[0] += TwoPi;
+      if (AC->G[0].Ang[0] - AC->G[0].Cmd.Ang[0] < -Pi)
+         AC->G[0].Cmd.Ang[0] -= TwoPi;
 }
 /**********************************************************************/
 void IssFSW(struct SCType *S)
 {
       long Ig,i,j;
-      struct FSWType *FSW;
+      struct AcsType *AC;
+      struct AcIssCtrlType *C;
       double Identity[3][3] = {{1.0,0.0,0.0},{0.0,1.0,0.0},{0.0,0.0,1.0}};
       double Zvec[3] = {0.0,0.0,1.0};
       double GimCmd[3];
       double svb[3];
       double Iapp[3];
       double r[3],rb[3],tvb[3],MinRoZ,RoZ;
-      double CRL[3][3],CBL[3][3];
+      double CRL[3][3],CBL[3][3],CBR[3][3];
 
-      FSW = &S->FSW;
+      AC = &S->AC;
+      C = &AC->IssCtrl;
 
-      if (FSW->Init) {
-         FSW->Init = 0;
-         for(Ig=0;Ig<FSW->Ngim;Ig++) {
+      if (C->Init) {
+         C->Init = 0;
+         for(Ig=0;Ig<AC->Ng;Ig++) {
             for(j=0;j<3;j++) {
-               FSW->GimCmd[Ig].Rate[j] = 0.0;
-               FSW->GimCmd[Ig].Ang[j] = 0.0;
-               FSW->Gim[Ig].MaxRate[j] = 0.5*D2R;
+               AC->G[Ig].Cmd.AngRate[j] = 0.0;
+               AC->G[Ig].Cmd.Ang[j] = 0.0;
+               AC->G[Ig].MaxAngRate[j] = 0.5*D2R;
             }
             FindAppendageInertia(Ig,S,Iapp);
-            for(j=0;j<FSW->Gim[Ig].RotDOF;j++) {
+            for(j=0;j<AC->G[Ig].RotDOF;j++) {
                FindPDGains(Iapp[j],0.02*TwoPi,1.0,
-                  &FSW->Gim[Ig].RateGain[j],
-                  &FSW->Gim[Ig].AngGain[j]);
-               FSW->Gim[Ig].MaxTrq[j] = 0.1*FSW->Gim[Ig].AngGain[j];
+                  &AC->G[Ig].AngRateGain[j],
+                  &AC->G[Ig].AngGain[j]);
+               AC->G[Ig].MaxTrq[j] = 0.1*AC->G[Ig].AngGain[j];
             }
          }
          for(i=0;i<3;i++)
             FindPDGains(S->I[i][i],0.02*TwoPi,0.7,
-               &FSW->Kr[i],&FSW->Kp[i]);
-         FSW->Tmax = 0.1*MAX(FSW->Kp[0],MAX(FSW->Kp[1],FSW->Kp[2]));
+               &C->Kr[i],&C->Kp[i]);
+         C->Tmax = 0.1*MAX(C->Kp[0],MAX(C->Kp[1],C->Kp[2]));
       }
 
 /* .. Hold LVLH */
       A2C(213,0.0*D2R,0.0,0.0,CRL);
       MxMT(S->B[0].CN,S->CLN,CBL);
-      MxMT(CBL,CRL,FSW->CBR);
+      MxMT(CBL,CRL,CBR);
       /* XVV */
-      C2A(321,FSW->CBR,&FSW->therr[2],&FSW->therr[1],&FSW->therr[0]);
+      C2A(321,CBR,&C->therr[2],&C->therr[1],&C->therr[0]);
       for(i=0;i<3;i++) {
-         FSW->werr[i] = FSW->wbn[i] - S->wln[i];
-         FSW->IdealTrq[i] = -FSW->Kp[i]*FSW->therr[i]
-                            -FSW->Kr[i]*FSW->werr[i];
+         C->werr[i] = AC->wbn[i] - S->wln[i];
+         AC->IdealTrq[i] = -C->Kp[i]*C->therr[i]
+                            -C->Kr[i]*C->werr[i];
        }
 
 /* .. Point Main Solar Arrays */
-      MxV(S->B[0].CN,FSW->svn,svb);
+      MxV(S->B[0].CN,AC->svn,svb);
       PointGimbalToTarget(21,Identity,Identity,svb,Zvec,GimCmd);
       GimCmd[0] += 5.0*D2R; /* Avoid lighting artifacts from on-edge polys */
-      FSW->GimCmd[0].Ang[0] = GimCmd[0];
-      FSW->GimCmd[1].Ang[0] = -GimCmd[0];
-      FSW->GimCmd[0].Rate[0] = -S->wln[1];
-      FSW->GimCmd[1].Rate[0] = S->wln[1];
+      AC->G[0].Cmd.Ang[0] = GimCmd[0];
+      AC->G[1].Cmd.Ang[0] = -GimCmd[0];
+      AC->G[0].Cmd.AngRate[0] = -S->wln[1];
+      AC->G[1].Cmd.AngRate[0] = S->wln[1];
 
-      FSW->GimCmd[2].Ang[0] = -GimCmd[1];
-      FSW->GimCmd[3].Ang[0] =  GimCmd[1];
-      FSW->GimCmd[4].Ang[0] = -GimCmd[1];
-      FSW->GimCmd[5].Ang[0] =  GimCmd[1];
+      AC->G[2].Cmd.Ang[0] = -GimCmd[1];
+      AC->G[3].Cmd.Ang[0] =  GimCmd[1];
+      AC->G[4].Cmd.Ang[0] = -GimCmd[1];
+      AC->G[5].Cmd.Ang[0] =  GimCmd[1];
 
-      FSW->GimCmd[6].Ang[0] =  GimCmd[1];
-      FSW->GimCmd[7].Ang[0] = -GimCmd[1];
-      FSW->GimCmd[8].Ang[0] =  GimCmd[1];
-      FSW->GimCmd[9].Ang[0] = -GimCmd[1];
+      AC->G[6].Cmd.Ang[0] =  GimCmd[1];
+      AC->G[7].Cmd.Ang[0] = -GimCmd[1];
+      AC->G[8].Cmd.Ang[0] =  GimCmd[1];
+      AC->G[9].Cmd.Ang[0] = -GimCmd[1];
 
 /* .. Point SM Solar Array */
-      FSW->GimCmd[12].Ang[0] = GimCmd[0];
-      FSW->GimCmd[13].Ang[0] = -GimCmd[0];
+      AC->G[12].Cmd.Ang[0] = GimCmd[0];
+      AC->G[13].Cmd.Ang[0] = -GimCmd[0];
 
 /* .. Point Radiators */
       PointGimbalToTarget(1,Identity,Identity,svb,Zvec,GimCmd);
-      FSW->GimCmd[10].Ang[0] =  GimCmd[0] + 90.0*D2R;
-      FSW->GimCmd[11].Ang[0] =  GimCmd[0] + 90.0*D2R;
+      AC->G[10].Cmd.Ang[0] =  GimCmd[0] + 90.0*D2R;
+      AC->G[11].Cmd.Ang[0] =  GimCmd[0] + 90.0*D2R;
 
 /* .. Point HGA */
       /* Select TDRS nearest Zenith */
@@ -1706,260 +1347,14 @@ void IssFSW(struct SCType *S)
       }
       PointGimbalToTarget(21,S->G[14].CGiBi,Identity,tvb,Zvec,GimCmd);
 
-      FSW->GimCmd[14].Ang[0] = Limit(GimCmd[0],-120.0*D2R,120.0*D2R);
-      FSW->GimCmd[14].Ang[1] = Limit(GimCmd[1],-65.0*D2R,65.0*D2R);
-
-}
-/**********************************************************************/
-void ManualControlFSW(struct SCType *S)
-{
-      struct FSWType *FSW;
-      long i;
-
-      FSW = &S->FSW;
-
-      if (FSW->Init) {
-         FSW->Init = 0;
-         for(i=0;i<3;i++) {
-            FSW->wmax[i] = 0.3;
-         }
-      }
-
-      for(i=0;i<3;i++) {
-         FSW->IdealTrq[i] =
-            RateControl(FSW->wbn[i]-FSW->wrn[i],0.1,1.0*TwoPi)*FSW->MOI[i];
-      }
-}
-/**********************************************************************/
-/* Put Chaser on Safety Ellipse                                       */
-/* Align with LVLH                                                    */
-/* Point Solar Arrays at Sun                                          */
-/* Hold Arm in Neutral Position                                       */
-void ArcEllipseMode(struct SCType *S)
-{
-      struct FSWType *FSW;
-      double CBR[3][3],qbr[4];
-      double Zvec[3] = {0.0,0.0,1.0};
-      static double OldZ;
-      long i;
-
-      FSW = &S->FSW;
-
-      /* Translation Control */
-      /* Attitude Control */
-      MxMT(S->B[0].CN,S->CLN,CBR);
-      C2Q(CBR,qbr);
-      RECTIFYQ(qbr);
-      for(i=0;i<3;i++) {
-         FSW->IdealTrq[i] = FSW->MOI[i]*
-            RampCoastGlide(2.0*qbr[i],S->B[0].wn[i],0.05*TwoPi,1.0E-2,1.0*D2R);
-      }
-      /* Solar Arrays */
-      for(i=0;i<2;i++) {
-         PointGimbalToTarget(FSW->Gim[i].RotSeq, FSW->Gim[i].CGiBi,
-            FSW->Gim[i].CBoGo, S->svb, Zvec,
-            FSW->GimCmd[i].Ang);
-      }
-      /* Arm */
-      FSW->GimCmd[2].Ang[1] = -30.0*D2R;
-      FSW->GimCmd[3].Ang[0] = 60.0*D2R;
-      FSW->GimCmd[4].Ang[0] = -30.0*D2R;
-
-      if (S->PosEH[2] > 0.0 && OldZ < 0.0) {
-         FSW->Mode = 2;  /* Approach */
-         printf("Mode Transition to Approach\n");
-      }
-      OldZ = S->PosEH[2];
-}
-/**********************************************************************/
-void ArcAcqAxis(struct SCType *S)
-{
-}
-/**********************************************************************/
-void ArcApproach(struct SCType *S)
-{
-      struct FSWType *FSW;
-      struct OrbitType *O;
-      double CBR[3][3],qbr[4];
-      double Zvec[3] = {0.0,0.0,1.0};
-      double ucmd;
-      double Feh[3];
-      double n,n2;
-      long i;
-
-      FSW = &S->FSW;
-      O = &Orb[S->RefOrb];
-
-      n = O->MeanMotion;
-      n2 = n*n;
-
-      if (S->PosEH[0] > -10.0) {
-         ucmd = 0.01;
-      }
-      else {
-         ucmd = 0.05;
-      }
-
-      /* Translation Control */
-      /* Feedforward cancellation of EH coupling */
-      Feh[0] = FSW->mass*(-2.0*n*S->VelEH[2]);
-      Feh[1] = FSW->mass*(n2*S->PosEH[1]);
-      Feh[2] = FSW->mass*(2.0*n*S->VelEH[0] - 3.0*n2*S->PosEH[2]);
-
-      /* Add Closed-loop Control */
-
-      Feh[0] += FSW->mass*
-         RateControl(S->VelEH[0]-ucmd,1.0E-2,0.05*TwoPi);
-      Feh[1] += FSW->mass*
-         RampCoastGlide(S->PosEH[1],S->VelEH[1],0.05*TwoPi,1.0E-2,1.0);
-      Feh[2] += FSW->mass*
-         RampCoastGlide(S->PosEH[2],S->VelEH[2],0.05*TwoPi,1.0E-2,1.0);
-      MTxV(S->CLN,Feh,FSW->IdealFrc);
-      /* Attitude Control */
-      MxMT(S->B[0].CN,S->CLN,CBR);
-      C2Q(CBR,qbr);
-      RECTIFYQ(qbr);
-      for(i=0;i<3;i++) {
-         FSW->IdealTrq[i] = FSW->MOI[i]*
-            RampCoastGlide(2.0*qbr[i],S->B[0].wn[i],0.05*TwoPi,1.0E-2,1.0*D2R);
-      }
-      /* Solar Arrays */
-      for(i=0;i<2;i++) {
-         PointGimbalToTarget(FSW->Gim[i].RotSeq, FSW->Gim[i].CGiBi,
-            FSW->Gim[i].CBoGo, S->svb, Zvec,
-            FSW->GimCmd[i].Ang);
-      }
-      /* Arm */
-      FSW->GimCmd[2].Ang[1] = -30.0*D2R;
-      FSW->GimCmd[3].Ang[0] = 60.0*D2R;
-      FSW->GimCmd[4].Ang[0] = -30.0*D2R;
-
-      /* Mode Transition */
-      if (S->PosEH[0] > -5.5) {
-         FSW->Mode = 3;  /* Capture */
-         printf("Mode Transition to Capture\n");
-      }
-}
-/**********************************************************************/
-void ArcCapture(struct SCType *S)
-{
-      struct FSWType *FSW;
-      struct OrbitType *O;
-      double CBR[3][3],qbr[4];
-      double PosCmd[3] = {-5.0,0.0,0.0};
-      double Feh[3];
-      double n,n2;
-      long i;
-
-      FSW = &S->FSW;
-      O = &Orb[S->RefOrb];
-
-      n = O->MeanMotion;
-      n2 = n*n;
-
-      /* Translation Control */
-      Feh[0] = FSW->mass*(-2.0*n*S->VelEH[2]);
-      Feh[1] = FSW->mass*(n2*S->PosEH[1]);
-      Feh[2] = FSW->mass*(2.0*n*S->VelEH[0] - 3.0*n2*S->PosEH[2]);
-      for(i=0;i<3;i++) {
-         Feh[i] += FSW->mass*
-            RampCoastGlide(S->PosEH[i]-PosCmd[i],S->VelEH[i],0.05*TwoPi,1.0E-2,1.0);
-      }
-      MTxV(S->CLN,Feh,FSW->IdealFrc);
-      /* Attitude Control */
-      MxMT(S->B[0].CN,S->CLN,CBR);
-      C2Q(CBR,qbr);
-      RECTIFYQ(qbr);
-      for(i=0;i<3;i++) {
-         FSW->IdealTrq[i] = FSW->MOI[i]*
-            RampCoastGlide(2.0*qbr[i],S->B[0].wn[i],0.05*TwoPi,1.0E-2,1.0*D2R);
-      }
-      /* Solar Arrays */
-      FSW->GimCmd[0].Ang[0] = 0.0;
-      FSW->GimCmd[1].Ang[0] = 0.0;
-      /* Arm */
-      FSW->GimCmd[2].Ang[1] = 0.0;
-      FSW->GimCmd[3].Ang[0] = 0.0;
-      FSW->GimCmd[4].Ang[0] = 0.0;
-
-}
-/**********************************************************************/
-void ArcChaserFSW(struct SCType *S)
-{
-#define SAFETY_ELLIPSE 0
-#define ACQ_APPROACH_AXIS 1
-#define APPROACH 2
-#define CAPTURE 3
-
-      struct FSWType *FSW;
-      struct FswGimType *FG;
-      long Ig,i;
-
-      FSW = &S->FSW;
-      if (FSW->Init) {
-         FSW->Init = 0;
-         for(Ig=0;Ig<2;Ig++) {
-            FG = &FSW->Gim[Ig];
-            FG->RateGain[0] = 50.0;
-            FG->AngGain[0] = 10.0;
-            FG->MaxRate[0] = 1.0*D2R;
-            FG->MaxTrq[0] = 10.0;
-         }
-         /* Shoulder */
-         FG = &FSW->Gim[2];
-         for(i=0;i<3;i++) {
-            FG->RateGain[i] = 3.0;
-            FG->AngGain[i] = 0.1;
-            FG->MaxRate[i] = 0.1*D2R;
-            FG->MaxTrq[i] = 0.1;
-         }
-         /* Elbow */
-         FG = &FSW->Gim[3];
-         for(i=0;i<3;i++) {
-            FG->RateGain[i] = 3.0;
-            FG->AngGain[i] = 0.1;
-            FG->MaxRate[i] = 0.2*D2R;
-            FG->MaxTrq[i] = 0.1;
-         }
-         /* Wrist */
-         FG = &FSW->Gim[4];
-         for(i=0;i<3;i++) {
-            FG->RateGain[i] = 3.0;
-            FG->AngGain[i] = 0.1;
-            FG->MaxRate[i] = 0.1*D2R;
-            FG->MaxTrq[i] = 0.1;
-         }
-      }
-
-      switch(S->FSW.Mode) {
-         case SAFETY_ELLIPSE:
-            ArcEllipseMode(S);
-         break;
-         case ACQ_APPROACH_AXIS:
-            ArcAcqAxis(S);
-         break;
-         case APPROACH:
-            ArcApproach(S);
-         break;
-         case CAPTURE:
-            ArcCapture(S);
-         break;
-      }
-
-#undef SAFETY_ELLIPSE
-#undef ACQ_APPROACH_AXIS
-#undef APPROACH
-#undef CAPTURE
-}
-/**********************************************************************/
-/* Hexapod rover walks                                                */
-void RoverFSW(struct SCType *S)
-{
+      AC->G[14].Cmd.Ang[0] = Limit(GimCmd[0],-120.0*D2R,120.0*D2R);
+      AC->G[14].Cmd.Ang[1] = Limit(GimCmd[1],-65.0*D2R,65.0*D2R);
 
 }
 /**********************************************************************/
 void CmgFSW(struct SCType *S)
 {
+#if 0
       double wcmd[3],Tcmd[3],Axis[4][3],Gim[4][3],H[4],AngRateCmd[4];
       double Gain;
       long i,j;
@@ -2000,56 +1395,40 @@ void CmgFSW(struct SCType *S)
       if (OutFlag) {
          fprintf(outfile,"%lf\n",Gain);
       }
+#endif
 }
 /**********************************************************************/
 /* Put your custom controller here                                    */
 void AdHocFSW(struct SCType *S)
 {
-      struct FSWType *FSW;
+      struct AcsType *AC;
+      struct AcAdHocCtrlType *C;
       long i;
 
-      FSW = &S->FSW;
+      AC = &S->AC;
+      C = &AC->AdHocCtrl;
 
-      if (FSW->Init) {
-         FSW->Init = 0;
-         FSW->DT = DTSIM;
+      if (C->Init) {
+         C->Init = 0;
          for(i=0;i<3;i++)
-            FindPDGains(FSW->MOI[i],0.1,0.7,
-                        &FSW->Kr[i],&FSW->Kp[i]);
+            FindPDGains(AC->MOI[i][i],0.1,0.7,
+                        &C->Kr[i],&C->Kp[i]);
       }
 
 /* .. Form attitude error signals */
-      RECTIFYQ(FSW->qbn);
+      RECTIFYQ(AC->qbn);
       for(i=0;i<3;i++) {
-         FSW->therr[i] = 2.0*FSW->qbn[i];
-         FSW->werr[i] = FSW->wbn[i];
+         C->therr[i] = 2.0*AC->qbn[i];
+         C->werr[i] = AC->wbn[i];
       }
 
 /* .. Closed-loop attitude control */
       for(i=0;i<3;i++) {
-         FSW->Tcmd[i] =
-         -FSW->Kr[i]*FSW->werr[i]-FSW->Kp[i]*FSW->therr[i];
+         C->Tcmd[i] =
+         -C->Kr[i]*C->werr[i]-C->Kp[i]*C->therr[i];
       }
 
-      for(i=0;i<3;i++) FSW->IdealTrq[i] = FSW->Tcmd[i];
-}
-/**********************************************************************/
-void CmdHandler(void)
-{
-
-}
-/**********************************************************************/
-long ModeTransition(long *TransitionRequested,long *Mode, long *RequestedMode,
-                  long **TransitionIsAllowed)
-{
-     long TransitionExecuted = FALSE;
-
-     if (*TransitionRequested &&
-          TransitionIsAllowed[*Mode][*RequestedMode]) {
-        *Mode = *RequestedMode;
-        TransitionExecuted = TRUE;
-     }
-     return(TransitionExecuted);
+      for(i=0;i<3;i++) AC->IdealTrq[i] = C->Tcmd[i];
 }
 /**********************************************************************/
 /*  This function is called at the simulation rate.  Sub-sampling of  */
@@ -2070,9 +1449,6 @@ void FlightSoftWare(struct SCType *S)
          case AD_HOC_FSW:
             AdHocFSW(S);
             break;
-         case MANUAL_CONTROL_FSW:
-            ManualControlFSW(S);
-            break;
          case SPINNER_FSW:
             SpinnerFSW(S);
             break;
@@ -2082,14 +1458,8 @@ void FlightSoftWare(struct SCType *S)
          case THREE_AXIS_FSW:
             ThreeAxisFSW(S);
             break;
-         case IONCRUISER_FSW:
-            EarthToMoonFSW(S);
-            break;
          case ISS_FSW:
             IssFSW(S);
-            break;
-         case ARC_CHASER_FSW:
-            ArcChaserFSW(S);
             break;
          case CMG_FSW:
             CmgFSW(S);

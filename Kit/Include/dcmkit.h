@@ -30,6 +30,7 @@ void Q2AngleVec(double Q[4], double AngleVec[3]);
 void QW2QDOT(double Q[4],double W[3],double QDOT[4]);
 void PARAXIS(double IB[3][3], double CBA[3][3], double m, double pba[3],
              double IBA[3][3]);
+void PrincipalMOI(double Ib[3][3], double Ip[3], double CPB[3][3]);
 void Q2W(double q[4], double qdot[4], double w[3]);
 void JointPartials(long Init, long IsSpherical,
    long RotSeq, long TrnSeq, double ang[3], double sig[3],

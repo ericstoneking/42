@@ -148,6 +148,9 @@ EXTERN long EndCFD;
 EXTERN SOCKET TxSocket,RxSocket;
 EXTERN long EchoEnabled;
 
+/* Master Random Process */
+EXTERN struct RandomProcessType *RNG;
+
 long SimStep(void);
 void Ephemerides(void);
 void OrbitMotion(void);
@@ -175,7 +178,7 @@ void FindPathVectors(struct SCType *S);
 void FindTotalAngMom(struct SCType *S);
 double FindTotalKineticEnergy(struct SCType *S);
 void UpdateScBoundingBox(struct SCType *S);
-void FindCmgAxisAndTrq(struct CMGType *C);
+void FindCmgTrq(struct CMGType *C,double wb0n[3]);
 void FindUnshadedAreas(struct SCType *S, double DirVecN[3]);
 void RadBelt(float RadiusKm, float MagLatDeg, int NumEnergies, 
       float *ElectronEnergy, float *ProtonEnergy, double **Flux); 
@@ -192,6 +195,7 @@ void InitSpacecraft(struct SCType *S);
 void LoadPlanets(void);
 long DecodeString(char *s);
 void InitFSW(struct SCType *S);
+void InitAC(struct SCType *S);
 void InitLagrangePoints(void);
 
 long LoadTRVfromFile(const char *Path, const char *TrvFileName,

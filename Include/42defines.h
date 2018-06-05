@@ -232,14 +232,11 @@
 #define PASSIVE_FSW 0
 #define PROTOTYPE_FSW 1
 #define AD_HOC_FSW 2
-#define MANUAL_CONTROL_FSW 3
-#define SPINNER_FSW 4
-#define MOMBIAS_FSW 5
-#define THREE_AXIS_FSW 6
-#define IONCRUISER_FSW 7
-#define ISS_FSW 8
-#define ARC_CHASER_FSW 9
-#define CMG_FSW 10
+#define SPINNER_FSW 3
+#define MOMBIAS_FSW 4
+#define THREE_AXIS_FSW 5
+#define ISS_FSW 6
+#define CMG_FSW 7
 
 /* Command Types */
 #define CMD_DIRECTION 0

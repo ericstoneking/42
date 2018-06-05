@@ -567,7 +567,7 @@ doublereal denss_(real *alt, real *dlb, real *tinf, real *tlb, real *xm, real
 
 /*       Calculate Temperature and Density Profiles for MSIS models */
     ret_val = 1.f;
-    z__ = dmax(*alt,*za);
+    z__ = (*alt >= *za ? *alt : *za);
 /*      Eq. A4a */
     zg2 = (z__ - *zlb) * (parmb_1.re + *zlb) / (parmb_1.re + z__);
 /*      Eq. A1a */
