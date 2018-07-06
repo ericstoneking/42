@@ -205,6 +205,7 @@ long DecodeString(char *s)
       else if (!strcmp(s,"FFTB")) return IPC_FFTB;
       else if (!strcmp(s,"SERVER")) return IPC_SERVER;
       else if (!strcmp(s,"CLIENT")) return IPC_CLIENT;
+      else if (!strcmp(s,"GMSEC_CLIENT")) return IPC_GMSEC_CLIENT;
       else {
          printf("Bogus input %s in DecodeString\n",s);
          exit(1);

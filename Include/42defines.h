@@ -260,15 +260,17 @@
 /* Mnemonics for InterProcess Comm */
 #define MNEM_TIME 0
 #define MNEM_SC 1
-#define MNEM_POS 2
-#define MNEM_VEL 3
-#define MNEM_WBN 4
-#define MNEM_QBN 5
-#define MNEM_SVB 6
-#define MNEM_BVB 7
-#define MNEM_HVB 8
-#define MNEM_JOINT 9
-#define MNEM_HWHL 10
+#define MNEM_ORBPOS_N 2
+#define MNEM_ORBVEL_N 3
+#define MNEM_POS_R 4
+#define MNEM_VEL_R 5
+#define MNEM_WBN 6
+#define MNEM_QBN 7
+#define MNEM_SVB 8
+#define MNEM_BVB 9
+#define MNEM_HVB 10
+#define MNEM_JOINT 11
+#define MNEM_HWHL 12
 
 /* Modes for InterProcess Comm */
 #define IPC_OFF 0
@@ -282,6 +284,7 @@
 /* Socket Roles for InterProcess Comm */
 #define IPC_SERVER 0
 #define IPC_CLIENT 1
+#define IPC_GMSEC_CLIENT 2
 
 /* Secs from J2000 to the Unix epoch of 1 Jan 1970 */
 #define UNIX_EPOCH (-946728000.0)

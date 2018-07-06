@@ -44,6 +44,17 @@ FFTBFLAG =
 #GSFCFLAG = 
 GSFCFLAG = -D _USE_GSFC_WATERMARK_
 
+GMSECFLAG =
+GMSECDIR = 
+GMSECINC = 
+GMSECBIN = 
+BMSECLIB = 
+#GMSECFLAG = -D _ENABLE_IPC_GMSEC_
+#GMSECDIR = ~/GMSEC/
+#GMSECINC = -I $(GMSECDIR)include/
+#GMSECBIN = -L $(GMSECDIR)bin/
+#GMSECLIB = -lGMSECAPI
+
 # Basic directories
 HOMEDIR = ./
 PROJDIR = ./
@@ -61,10 +72,10 @@ EMBEDDED =
 
 ifneq ($(strip $(EMBEDDED)),)
    MATLABROOT = "C:/Program Files/MATLAB/R2010b/"
-   MATLABINC = $(MATLABROOT)extern/include/ 
-   SIMULINKINC = $(MATLABROOT)simulink/include/
+   MATLABINC = -I $(MATLABROOT)extern/include/ 
+   SIMULINKINC = -I $(MATLABROOT)simulink/include/
    MATLABLIB = -leng -lmx -lmwmathutil
-   MATLABSRC = $(PROJDIR)External/MATLABSRC/
+   MATLABSRC = -I $(PROJDIR)External/MATLABSRC/
 else
    MATLABROOT =  
    MATLABINC =  
@@ -89,7 +100,7 @@ ifeq ($(42PLATFORM),__APPLE__)
       LIBS = -framework System -framework Carbon -framework OpenGL -framework GLUT $(MATLABLIB)
    else
       LFLAGS = -bind_at_load
-      LIBS = -framework System -framework Carbon -framework OpenGL -framework GLUT
+      LIBS = -framework System -framework Carbon -framework OpenGL -framework GLUT 
    endif
    GUIOBJ = $(OBJ)42GlutGui.o $(OBJ)glkit.o 
    EXENAME = 42
@@ -174,10 +185,10 @@ endif
 #ANSIFLAGS = -Wstrict-prototypes -pedantic -ansi -Werror
 ANSIFLAGS = 
 
-CFLAGS = -Wall -Wshadow -Wno-deprecated -g  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(INC) -I $(KITINC) -I $(KITSRC) -I $(MATLABSRC) -I $(MATLABINC) -I $(SIMULINKINC) -O0 $(ARCHFLAG) $(GUIFLAG) $(SHADERFLAG) $(TIMEFLAG) $(SOCKETFLAG) $(EMBEDDED) $(CFDFLAG) $(FFTBFLAG) $(GSFCFLAG)
+CFLAGS = -Wall -Wshadow -Wno-deprecated -g  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(INC) -I $(KITINC) -I $(KITSRC) $(MATLABSRC) $(MATLABINC) $(SIMULINKINC) $(GMSECINC) -O0 $(ARCHFLAG) $(GUIFLAG) $(SHADERFLAG) $(TIMEFLAG) $(SOCKETFLAG) $(EMBEDDED) $(CFDFLAG) $(FFTBFLAG) $(GSFCFLAG) $(GMSECFLAG)
 
 42OBJ = $(OBJ)42main.o $(OBJ)42exec.o $(OBJ)42actuators.o $(OBJ)42cmd.o \
-$(OBJ)42dynam.o $(OBJ)42environs.o $(OBJ)42ephem.o $(OBJ)42fsw.o \
+$(OBJ)42dynamics.o $(OBJ)42environs.o $(OBJ)42ephem.o $(OBJ)42fsw.o \
 $(OBJ)42init.o $(OBJ)42perturb.o $(OBJ)42report.o \
 $(OBJ)42sensors.o 
 
@@ -199,7 +210,7 @@ endif
 ##########################  Rules to link 42  #############################
 
 42 : $(42OBJ) $(GUIOBJ) $(IPCOBJ) $(FFTBOBJ) $(SLOSHOBJ) $(KITOBJ) $(MATLABOBJ)
-	$(CC) $(LFLAGS) -o $(EXENAME) $(42OBJ) $(GUIOBJ) $(IPCOBJ) $(FFTBOBJ) $(SLOSHOBJ) $(KITOBJ) $(MATLABOBJ) $(LIBS)  
+	$(CC) $(LFLAGS) $(GMSECBIN) -o $(EXENAME) $(42OBJ) $(GUIOBJ) $(IPCOBJ) $(FFTBOBJ) $(SLOSHOBJ) $(KITOBJ) $(MATLABOBJ) $(LIBS) $(GMSECLIB)
 
 ####################  Rules to compile objects  ###########################
 
@@ -215,8 +226,8 @@ $(OBJ)42actuators.o : $(SRC)42actuators.c $(INC)42.h $(INC)42fsw.h  $(INC)fswdef
 $(OBJ)42cmd.o : $(SRC)42cmd.c $(INC)42.h $(INC)42fsw.h  $(INC)fswdefines.h $(INC)fswtypes.h
 	$(CC) $(CFLAGS) -c $(SRC)42cmd.c -o $(OBJ)42cmd.o  
 
-$(OBJ)42dynam.o     : $(SRC)42dynam.c $(INC)42.h 
-	$(CC) $(CFLAGS) -c $(SRC)42dynam.c -o $(OBJ)42dynam.o  
+$(OBJ)42dynamics.o     : $(SRC)42dynamics.c $(INC)42.h 
+	$(CC) $(CFLAGS) -c $(SRC)42dynamics.c -o $(OBJ)42dynamics.o  
 
 $(OBJ)42environs.o  : $(SRC)42environs.c $(INC)42.h
 	$(CC) $(CFLAGS) -c $(SRC)42environs.c -o $(OBJ)42environs.o  

@@ -2061,7 +2061,6 @@ void OpaquePass(void)
 
       for(Isc=0;Isc<Nsc;Isc++) {
          S = &SC[Isc];
-         //if (S->RefOrb == POV.Host.RefOrb) { /* TODO: Improve this */
          if (ScIsVisible(POV.Host.RefOrb,Isc,PosR)) {
             for(Ib=0;Ib<S->Nb;Ib++) {
                B = &S->B[Ib];
@@ -2185,7 +2184,6 @@ void FindModelMatrices(void)
 
       for(Isc=0;Isc<Nsc;Isc++) {
          S = &SC[Isc];
-         //if (S->Exists && S->RefOrb == POV.Host.RefOrb) { /* TODO: Improve this */
          if (ScIsVisible(POV.Host.RefOrb,Isc,PosR)) {
             for(Ib=0;Ib<S->Nb;Ib++) {
                B = &S->B[Ib];
@@ -5940,10 +5938,7 @@ int HandoffToGui(int argc, char **argv)
       /*CheckOpenGLProperties();*/
 
 /* .. Dive into Event Loop */
-      if (TimeMode == FAST_TIME)
-         TimerDuration = 0;
-      else if (TimeMode == REAL_TIME || TimeMode == EXTERNAL_TIME)
-         TimerDuration = (int) (1000.0*DTSIM);
+      TimerDuration = 0;
       TimerHasExpired = 1;
       glutMainLoop();
 

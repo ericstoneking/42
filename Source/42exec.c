@@ -75,6 +75,8 @@ void ManageFlags(void)
 long AdvanceTime(void)
 {
       static long itime = 0;
+      static long PrevTick = 0;
+      static long CurrTick = 1;
       long Done;
 
       /* Advance time to next Timestep */
@@ -87,6 +89,10 @@ long AdvanceTime(void)
                AbsTime = AbsTime0 + SimTime;
                break;
             case REAL_TIME :
+               //while(CurrTick == PrevTick) {
+               //   CurrTick = (long) (1.0E-6*usec()/DTSIM);
+               //}
+               //PrevTick = CurrTick;
                usleep(1.0E6*DTSIM);
                SimTime += DTSIM;
                itime = (long) ((SimTime+0.5*DTSIM)/(DTSIM));
@@ -94,7 +100,10 @@ long AdvanceTime(void)
                AbsTime = AbsTime0 + SimTime;
                break;
             case EXTERNAL_TIME :
-               usleep(1.0E6*DTSIM);
+               while(CurrTick == PrevTick) {
+                  CurrTick = (long) (1.0E-6*usec()/DTSIM);
+               }
+               PrevTick = CurrTick;
                SimTime += DTSIM;
                itime = (long) ((SimTime+0.5*DTSIM)/(DTSIM));
                SimTime = ((double) itime)*DTSIM;

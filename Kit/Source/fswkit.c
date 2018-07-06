@@ -1144,28 +1144,28 @@ void AllocKalmanFilterMeasurement(struct KFMeasType *M,long Nx, long Ny)
          exit(1);
       }
       M->Ny = Ny;
-      M->y = calloc(Ny,sizeof(double));
-      M->Rv = calloc(Ny,sizeof(double *));
+      M->y = (double *) calloc(Ny,sizeof(double));
+      M->Rv = (double **) calloc(Ny,sizeof(double *));
       for(i=0;i<Ny;i++) {
-         M->Rv[i] = calloc(Ny,sizeof(double));
+         M->Rv[i] = (double *) calloc(Ny,sizeof(double));
       }
-      M->H = calloc(Ny,sizeof(double *));
+      M->H = (double **) calloc(Ny,sizeof(double *));
       for(i=0;i<Ny;i++) {
-         M->H[i] = calloc(Nx,sizeof(double));
+         M->H[i] = (double *) calloc(Nx,sizeof(double));
       }
-      M->L = calloc(Nx,sizeof(double *));
-      for(i=0;i<Nx;i++) M->L[i] = calloc(Ny,sizeof(double));
+      M->L = (double **) calloc(Nx,sizeof(double *));
+      for(i=0;i<Nx;i++) M->L[i] = (double *) calloc(Ny,sizeof(double));
       
-      M->HP = calloc(Ny,sizeof(double *));
-      for(i=0;i<Ny;i++) M->HP[i] = calloc(Nx,sizeof(double));
+      M->HP = (double **) calloc(Ny,sizeof(double *));
+      for(i=0;i<Ny;i++) M->HP[i] = (double *) calloc(Nx,sizeof(double));
       
-      M->Hx = calloc(Ny,sizeof(double));
+      M->Hx = (double *) calloc(Ny,sizeof(double));
       
-      M->HPHtRv = calloc(Ny,sizeof(double *));
-      for(i=0;i<Ny;i++) M->HPHtRv[i] = calloc(Ny,sizeof(double));
+      M->HPHtRv = (double **) calloc(Ny,sizeof(double *));
+      for(i=0;i<Ny;i++) M->HPHtRv[i] = (double *) calloc(Ny,sizeof(double));
 
-      M->HPHtRvInv = calloc(Ny,sizeof(double *));
-      for(i=0;i<Ny;i++) M->HPHtRvInv[i] = calloc(Ny,sizeof(double));
+      M->HPHtRvInv = (double **) calloc(Ny,sizeof(double *));
+      for(i=0;i<Ny;i++) M->HPHtRvInv[i] = (double *) calloc(Ny,sizeof(double));
 }
 /******************************************************************************/
 struct KalmanFilterType *CreateKalmanFilter(long Nx, long Nu, long Nw, long Nm)
@@ -1174,49 +1174,49 @@ struct KalmanFilterType *CreateKalmanFilter(long Nx, long Nu, long Nw, long Nm)
 
       struct KalmanFilterType *KF;
       
-      KF = calloc(1,sizeof(struct KalmanFilterType));
+      KF = (struct KalmanFilterType *) calloc(1,sizeof(struct KalmanFilterType));
       
       KF->Nx = Nx;
       KF->Nu = Nu;
       KF->Nw = Nw;
       KF->Nm = Nm;
       
-      KF->x = calloc(Nx,sizeof(double));
-      KF->u = calloc(Nu,sizeof(double));
+      KF->x = (double *) calloc(Nx,sizeof(double));
+      KF->u = (double *) calloc(Nu,sizeof(double));
 
-      KF->Phi = calloc(Nx,sizeof(double *));
+      KF->Phi = (double **) calloc(Nx,sizeof(double *));
       for(i=0;i<Nx;i++) {
-         KF->Phi[i] = calloc(Nx,sizeof(double *));
+         KF->Phi[i] = (double *) calloc(Nx,sizeof(double *));
       }
 
-      KF->Gam = calloc(Nx,sizeof(double *));
+      KF->Gam = (double **) calloc(Nx,sizeof(double *));
       for(i=0;i<Nx;i++) {
-         KF->Gam[i] = calloc(Nu,sizeof(double *));
+         KF->Gam[i] = (double *) calloc(Nu,sizeof(double *));
       }
 
-      KF->Gamw = calloc(Nx,sizeof(double *));
+      KF->Gamw = (double **) calloc(Nx,sizeof(double *));
       for(i=0;i<Nx;i++) {
-         KF->Gamw[i] = calloc(Nw,sizeof(double *));
+         KF->Gamw[i] = (double *) calloc(Nw,sizeof(double *));
       }
       
-      KF->P = calloc(Nx,sizeof(double *));
-      for(i=0;i<Nx;i++) KF->P[i] = calloc(Nx,sizeof(double));
+      KF->P = (double **) calloc(Nx,sizeof(double *));
+      for(i=0;i<Nx;i++) KF->P[i] = (double *) calloc(Nx,sizeof(double));
       
-      KF->Rw = calloc(Nw,sizeof(double *));
+      KF->Rw = (double **) calloc(Nw,sizeof(double *));
       for(i=0;i<Nw;i++) {
-         KF->Rw[i] = calloc(Nw,sizeof(double *));
+         KF->Rw[i] = (double *) calloc(Nw,sizeof(double *));
       }
       
-      KF->Meas = calloc(Nm,sizeof(struct KFMeasType));
+      KF->Meas = (struct KFMeasType *) calloc(Nm,sizeof(struct KFMeasType));
       
-      KF->PhiX = calloc(Nx,sizeof(double));
-      KF->GamU = calloc(Nx,sizeof(double));
+      KF->PhiX = (double *) calloc(Nx,sizeof(double));
+      KF->GamU = (double *) calloc(Nx,sizeof(double));
       
-      KF->PhiP = calloc(Nx,sizeof(double *));
-      for(i=0;i<Nx;i++) KF->PhiP[i] = calloc(Nx,sizeof(double));
+      KF->PhiP = (double **) calloc(Nx,sizeof(double *));
+      for(i=0;i<Nx;i++) KF->PhiP[i] = (double *) calloc(Nx,sizeof(double));
       
-      KF->GRwGt = calloc(Nx,sizeof(double *));
-      for(i=0;i<Nx;i++) KF->GRwGt[i] = calloc(Nx,sizeof(double));
+      KF->GRwGt = (double **) calloc(Nx,sizeof(double *));
+      for(i=0;i<Nx;i++) KF->GRwGt[i] = (double *) calloc(Nx,sizeof(double));
       
       return(KF);
 }
@@ -1226,8 +1226,8 @@ void PopulateKalmanFilterWorkspace(struct KalmanFilterType *KF)
       double **GRw;
       long i,j,k;
 
-      GRw = calloc(KF->Nx,sizeof(double *));
-      for(i=0;i<KF->Nx;i++) GRw[i] = calloc(KF->Nw,sizeof(double));
+      GRw = (double **) calloc(KF->Nx,sizeof(double *));
+      for(i=0;i<KF->Nx;i++) GRw[i] = (double *) calloc(KF->Nw,sizeof(double));
       for(i=0;i<KF->Nx;i++) {
          for(j=0;j<KF->Nw;j++) {
             for(k=0;k<KF->Nw;k++) {
@@ -1235,8 +1235,8 @@ void PopulateKalmanFilterWorkspace(struct KalmanFilterType *KF)
             }
          }
       }
-      KF->GRwGt = calloc(KF->Nx,sizeof(double *));
-      for(i=0;i<KF->Nx;i++) KF->GRwGt[i] = calloc(KF->Nx,sizeof(double));
+      KF->GRwGt = (double **) calloc(KF->Nx,sizeof(double *));
+      for(i=0;i<KF->Nx;i++) KF->GRwGt[i] = (double *) calloc(KF->Nx,sizeof(double));
       for(i=0;i<KF->Nx;i++) {
          for(j=0;j<KF->Nx;j++) {
             for(k=0;k<KF->Nw;k++) {
