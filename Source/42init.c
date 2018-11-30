@@ -36,6 +36,7 @@ long DecodeString(char *s)
       else if (!strcmp(s,"FAST")) return FAST_TIME;
       else if (!strcmp(s,"REAL")) return REAL_TIME;
       else if (!strcmp(s,"EXTERNAL")) return EXTERNAL_TIME;
+      else if (!strcmp(s,"NOS3")) return NOS3_TIME;
       else if (!strcmp(s,"SOL")) return SOL;
       else if (!strcmp(s,"MERCURY")) return MERCURY;
       else if (!strcmp(s,"VENUS")) return VENUS;
@@ -140,6 +141,9 @@ long DecodeString(char *s)
       else if (!strcmp(s,"THREE_AXIS_FSW")) return THREE_AXIS_FSW;
       else if (!strcmp(s,"ISS_FSW")) return ISS_FSW;
       else if (!strcmp(s,"CMG_FSW")) return CMG_FSW;
+      else if (!strcmp(s,"THR_FSW")) return THR_FSW;
+      else if (!strcmp(s,"CFS_FSW")) return CFS_FSW;
+      else if (!strcmp(s,"NOS3_FSW")) return NOS3_FSW;
 
       else if (!strcmp(s,"PHOBOS")) return PHOBOS;
       else if (!strcmp(s,"DEIMOS")) return DEIMOS;
@@ -207,7 +211,7 @@ long DecodeString(char *s)
       else if (!strcmp(s,"CLIENT")) return IPC_CLIENT;
       else if (!strcmp(s,"GMSEC_CLIENT")) return IPC_GMSEC_CLIENT;
       else {
-         printf("Bogus input %s in DecodeString\n",s);
+         printf("Bogus input %s in DecodeString (42init.c:%d)\n",s,__LINE__);
          exit(1);
       }
 }
@@ -476,7 +480,7 @@ void InitOrbit(struct OrbitType *O)
          fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
          O->PolyhedronGravityEnabled = DecodeString(response);
          /* Skip FLIGHT, CENTRAL, THREE_BODY sections */
-         for(j=0;j<34;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(j=0;j<35;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
       else if (O->Regime == ORB_FLIGHT) {
          /* Skip ZERO section */
@@ -503,7 +507,7 @@ void InitOrbit(struct OrbitType *O)
          O->PolyhedronGravityEnabled = DecodeString(response);
 
          /* Skip CENTRAL and THREE_BODY sections */
-         for(j=0;j<31;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(j=0;j<32;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
       else if (O->Regime == ORB_CENTRAL) {
          /* Skip ZERO and FLIGHT sections */
@@ -516,6 +520,8 @@ void InitOrbit(struct OrbitType *O)
             printf("Oops.  Orbit %ld depends on a World that doesn't exist.\n",O->Tag);
             exit(1);
          }
+         fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+         O->J2DriftEnabled = DecodeString(response);
          mu = World[O->World].mu;
          rad = World[O->World].rad;
          O->mu=mu;
@@ -556,9 +562,6 @@ void InitOrbit(struct OrbitType *O)
             O->ArgP *= D2R;
             O->anom *= D2R;
 
-            O->MeanMotion = sqrt(O->mu/(O->SMA*O->SMA*O->SMA));
-            O->Period = TwoPi/O->MeanMotion;
-
             /* Some anomalies are unreachable for hyperbolic trajectories */
             if (O->ecc > 1.0) {
                MaxAnom = Pi - acos(1.0/O->ecc);
@@ -568,13 +571,28 @@ void InitOrbit(struct OrbitType *O)
                }
             }
 
-            /* Find Time of Periapsis passage */
-            O->tp = O->Epoch - TimeSincePeriapsis(O->mu,O->SLR,O->ecc,O->anom);
-
-            /* Find Reference R, V */
-            Eph2RV(O->mu,O->SLR,O->ecc,O->inc,
-                   O->RAAN,O->ArgP,O->Epoch-O->tp,
-                   O->PosN,O->VelN,&O->anom);
+            if (O->J2DriftEnabled) {
+               O->RAAN0 = O->RAAN;
+               O->ArgP0 = O->ArgP;
+               FindJ2DriftParms(O->mu,World[O->World].J2,World[O->World].rad,O);
+               O->tp = O->Epoch - TimeSincePeriapsis(O->MuPlusJ2,O->SLR,O->ecc,O->anom);
+               Eph2RV(O->MuPlusJ2,O->SLR,O->ecc,O->inc,
+                      O->RAAN,O->ArgP,O->Epoch-O->tp,
+                      O->PosN,O->VelN,&O->anom);
+            }
+            else {
+               O->MuPlusJ2 = O->mu;
+               O->RAANdot = 0.0;
+               O->ArgPdot = 0.0;
+               O->J2Fr0 = 0.0;
+               O->J2Fh1 = 0.0;
+               O->MeanMotion = sqrt(O->mu/(O->SMA*O->SMA*O->SMA));
+               O->Period = TwoPi/O->MeanMotion;
+               O->tp = O->Epoch - TimeSincePeriapsis(O->mu,O->SLR,O->ecc,O->anom);
+               Eph2RV(O->mu,O->SLR,O->ecc,O->inc,
+                      O->RAAN,O->ArgP,O->Epoch-O->tp,
+                      O->PosN,O->VelN,&O->anom);
+            }
 
             /* Skip RV and FILE */
             for(j=0;j<4;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
@@ -637,10 +655,11 @@ void InitOrbit(struct OrbitType *O)
 
          /* Skip THREE_BODY section */
          for(j=0;j<17;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+
       }
       else if (O->Regime == ORB_THREE_BODY) {
          /* Skip ZERO, FLIGHT, and CENTRAL sections */
-         for(j=0;j<20;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(j=0;j<21;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
 
          fscanf(infile,"%[^\n] %[\n]",junk,&newline);
          fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
@@ -789,6 +808,7 @@ void InitOrbit(struct OrbitType *O)
       }
 
       fclose(infile);
+
 }
 /**********************************************************************/
 void InitRigidDyn(struct SCType *S)
@@ -1433,7 +1453,7 @@ void InitSpacecraft(struct SCType *S)
       char junk[120],newline,response[120];
       char response1[120],response2[120],response3[120];
       double CBL[3][3],CBF[3][3];
-      long i,j,k,Ib,Ig,Iw,Im,It,Bi,Bo,Ic;
+      long i,j,k,Ib,Ig,Iw,Im,It,Bi,Bo,Ic,Ist,Ifss;
       char RateFrame,AttFrame,AttParm;
       double wlnb[3];
       double wbn[3],CBN[3][3],qbn[4];
@@ -1451,10 +1471,12 @@ void InitSpacecraft(struct SCType *S)
       struct OrbitType *O;
       struct FormationType *Fr;
       struct DynType *D;
-      struct CMGType *C;
       struct GyroType *Gyro;
       struct MagnetometerType *MAG;
       struct CssType *CSS;
+      struct FssType *FSS;
+      struct StarTrackerType *ST;
+      struct GpsType *GPS;
       long OldNgeom;
 
       infile=FileOpen(InOutPath,S->FileName,"r");
@@ -1793,42 +1815,6 @@ void InitSpacecraft(struct SCType *S)
          }
       }
 
-/* .. CMG Parameters */
-      fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-      fscanf(infile,"%ld %[^\n] %[\n]",&S->Ncmg,junk,&newline);
-      S->CMG = (struct CMGType *) calloc(S->Ncmg,sizeof(struct CMGType));
-      if (S->Ncmg == 0) {
-         for(i=0;i<8;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-      }
-      else {
-         for(Ic=0;Ic<S->Ncmg;Ic++) {
-            C = &S->CMG[Ic];
-            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-            fscanf(infile,"%ld %[^\n] %[\n]",&C->DOF,junk,&newline);
-            fscanf(infile,"%lf %lf %lf %ld %[^\n] %[\n]",
-                   &C->ang[0],&C->ang[1],&C->ang[2],&C->Seq,junk,&newline);
-            fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
-                   &C->angrate[0],&C->angrate[1],&C->angrate[2],junk,&newline);
-            for(k=0;k<3;k++) {
-               C->ang[k] *= D2R;
-               C->angrate[k] *= D2R;
-            }
-            fscanf(infile,"%lf %lf %lf %ld %[^\n] %[\n]",
-                   &Ang1,&Ang2,&Ang3,&Seq,junk,&newline);
-            A2C(Seq,Ang1*D2R,Ang2*D2R,Ang3*D2R,C->CGB);
-            fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
-               &C->I[0],&C->I[1],&C->I[2],junk,&newline);
-            fscanf(infile,"%lf %[^\n] %[\n]",&C->H,junk,&newline);
-            fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
-                   &C->MaxAngRate[0],&C->MaxAngRate[1],&C->MaxAngRate[2],
-                   junk,&newline);
-            for(k=0;k<3;k++) {
-               C->MaxAngRate[k] *= D2R;
-            }
-            FindCmgTrq(C,S->B[0].wn);
-         }
-      }
-
 /* .. Gyro Parameters */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Ngyro,junk,&newline);
@@ -1919,19 +1905,126 @@ void InitSpacecraft(struct SCType *S)
             CSS = &S->CSS[Ic];
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&CSS->SampleTime,junk,&newline);
+            CSS->MaxCounter = (long) (CSS->SampleTime/DTSIM+0.5);
+            if (CSS->MaxCounter < 1) {
+               CSS->MaxCounter = 1;
+               CSS->SampleTime = DTSIM;
+               printf("Info:  CSS[%ld].SampleTime was smaller than DTSIM.  It has been adjusted to be DTSIM.\n",Ig);
+            }
+            CSS->SampleCounter = CSS->MaxCounter;
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
                &CSS->Axis[0],&CSS->Axis[1],&CSS->Axis[2],junk,&newline);
             UNITV(CSS->Axis);
             fscanf(infile,"%lf %[^\n] %[\n]",&CSS->FovAng,junk,&newline);
             CSS->FovAng *= D2R;
+            CSS->CosFov = cos(CSS->FovAng);
             fscanf(infile,"%lf %[^\n] %[\n]",&CSS->Scale,junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&CSS->Quant,junk,&newline);
          }
       }
 
-/* .. Star Trackers */
-/* .. GPS Sensors */
 /* .. Fine Sun Sensors */
+      fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      fscanf(infile,"%ld %[^\n] %[\n]",&S->Nfss,junk,&newline);
+      S->FSS = (struct FssType *) calloc(S->Nfss,sizeof(struct FssType));
+      if (S->Nfss == 0) {
+         for(i=0;i<6;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      }
+      else {
+         for(Ifss=0;Ifss<S->Nfss;Ifss++) {
+            FSS = &S->FSS[Ifss];
+            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+            fscanf(infile,"%lf %[^\n] %[\n]",&FSS->SampleTime,junk,&newline);
+            FSS->MaxCounter = (long) (FSS->SampleTime/DTSIM+0.5);
+            if (FSS->MaxCounter < 1) {
+               FSS->MaxCounter = 1;
+               FSS->SampleTime = DTSIM;
+               printf("Info:  FSS[%ld].SampleTime was smaller than DTSIM.  It has been adjusted to be DTSIM.\n",Ig);
+            }
+            FSS->SampleCounter = FSS->MaxCounter;
+            fscanf(infile,"%lf %lf %lf %ld %[^\n] %[\n]",
+               &Ang1,&Ang2,&Ang3,&Seq,junk,&newline);
+            A2C(Seq,Ang1*D2R,Ang2*D2R,Ang3*D2R,FSS->CB);
+            C2Q(FSS->CB,FSS->qb);
+            fscanf(infile,"%lf %lf %[^\n] %[\n]",
+               &FSS->FovAng[0],&FSS->FovAng[1],junk,&newline);
+            for(i=0;i<2;i++) {
+               FSS->FovAng[i] *= D2R;
+            }
+            fscanf(infile,"%lf %[^\n] %[\n]",&FSS->NEA,junk,&newline);
+            FSS->NEA *= D2R;
+            fscanf(infile,"%lf %[^\n] %[\n]",&FSS->Quant,junk,&newline);
+            FSS->Quant *= D2R;
+         }
+      }
+/* .. Star Trackers */
+      fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      fscanf(infile,"%ld %[^\n] %[\n]",&S->Nst,junk,&newline);
+      S->ST = (struct StarTrackerType *) calloc(S->Nst,sizeof(struct StarTrackerType));
+      if (S->Nst == 0) {
+         for(i=0;i<7;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      }
+      else {
+         for(Ist=0;Ist<S->Nst;Ist++) {
+            ST = &S->ST[Ist];
+            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+            fscanf(infile,"%lf %[^\n] %[\n]",&ST->SampleTime,junk,&newline);
+            ST->MaxCounter = (long) (ST->SampleTime/DTSIM+0.5);
+            if (ST->MaxCounter < 1) {
+               ST->MaxCounter = 1;
+               ST->SampleTime = DTSIM;
+               printf("Info:  ST[%ld].SampleTime was smaller than DTSIM.  It has been adjusted to be DTSIM.\n",Ig);
+            }
+            ST->SampleCounter = ST->MaxCounter;
+            fscanf(infile,"%lf %lf %lf %ld %[^\n] %[\n]",
+               &Ang1,&Ang2,&Ang3,&Seq,junk,&newline);
+            A2C(Seq,Ang1*D2R,Ang2*D2R,Ang3*D2R,ST->CB);
+            C2Q(ST->CB,ST->qb);
+            fscanf(infile,"%lf %lf %[^\n] %[\n]",
+               &ST->FovAng[0],&ST->FovAng[1],junk,&newline);
+            for(i=0;i<2;i++) {
+               ST->FovAng[i] *= D2R;
+               ST->CosFov[i] = cos(ST->FovAng[i]);
+            }
+            fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
+               &ST->SunExclAng,&ST->EarthExclAng,&ST->MoonExclAng,junk,&newline);
+            ST->SunExclAng *= D2R;
+            ST->EarthExclAng *= D2R;
+            ST->MoonExclAng *= D2R;
+            ST->CosSunExclAng = cos(ST->SunExclAng);
+            ST->CosEarthExclAng = cos(ST->EarthExclAng);
+            ST->CosMoonExclAng = cos(ST->MoonExclAng);
+            fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
+               &ST->NEA[0],&ST->NEA[1],&ST->NEA[2],junk,&newline);
+            for(i=0;i<3;i++) ST->NEA[i] *= D2R/3600.0;
+            fscanf(infile,"%ld %[^\n] %[\n]",
+               &ST->FlexNode,junk,&newline);
+         }
+      }
+/* .. GPS Sensors */
+      fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      fscanf(infile,"%ld %[^\n] %[\n]",&S->Ngps,junk,&newline);
+      S->GPS = (struct GpsType *) calloc(S->Ngps,sizeof(struct GpsType));
+      if (S->Ngps == 0) {
+         for(i=0;i<5;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      }
+      else {
+         for(Ig=0;Ig<S->Ngps;Ig++) {
+            GPS = &S->GPS[Ig];
+            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+            fscanf(infile,"%lf %[^\n] %[\n]",&GPS->SampleTime,junk,&newline);
+            GPS->MaxCounter = (long) (GPS->SampleTime/DTSIM+0.5);
+            if (GPS->MaxCounter < 1) {
+               GPS->MaxCounter = 1;
+               GPS->SampleTime = DTSIM;
+               printf("Info:  GPS[%ld].SampleTime was smaller than DTSIM.  It has been adjusted to be DTSIM.\n",Ig);
+            }
+            GPS->SampleCounter = GPS->MaxCounter;
+            fscanf(infile,"%lf %[^\n] %[\n]",&GPS->PosNoise,junk,&newline);
+            fscanf(infile,"%lf %[^\n] %[\n]",&GPS->VelNoise,junk,&newline);
+            fscanf(infile,"%lf %[^\n] %[\n]",&GPS->TimeNoise,junk,&newline);
+         }
+      }  
 /* .. Accelerometers */
 
 /* .. Initialize some Orbit and Formation variables */
@@ -2206,6 +2299,7 @@ void LoadPlanets(void)
       double Mu[10] = {1.32715E20,2.18E13,3.2485E14,3.98604E14,
                        4.293E13,1.2761E17,3.792E16,5.788E15,6.8E15,
                        3.2E14};
+      double J2[10] = {0.0,0.0,0.0,1.08263E-3,1.96045E-3,0.0,0.0,0.0,0.0,0.0};
       double Rad[10] = {6.98E8,2.42E6,6.1E6,6.378145E6,3.41E6,
                         7.14E7,6.04E7,2.35E7,2.23E7,7.0E6};
       double W[10] = {2.69E-6,1.23E-6,2.94E-7,7.292115E-5,7.0882E-5,
@@ -2271,6 +2365,7 @@ void LoadPlanets(void)
          strcpy(World[i].ColTexFileName,"NONE");
          strcpy(World[i].BumpTexFileName,"NONE");
 		   World[i].mu=Mu[i];
+		   World[i].J2 = J2[i];
 			World[i].rad=Rad[i];
 			World[i].w=W[i];
          World[i].Parent = SOL;
@@ -2293,8 +2388,14 @@ void LoadPlanets(void)
       World[EARTH].Atmo.DustColor[0] = 1.0;
       World[EARTH].Atmo.DustColor[1] = 1.0;
       World[EARTH].Atmo.DustColor[2] = 1.0;
-      World[EARTH].Atmo.ScaleHt = 8000.0;
-      World[EARTH].Atmo.MaxHt = 5.0*World[EARTH].Atmo.ScaleHt;
+      World[EARTH].Atmo.RayScat[0] = 5.8E-6;
+      World[EARTH].Atmo.RayScat[1] = 13.5E-6;
+      World[EARTH].Atmo.RayScat[2] = 33.1E-6;
+      World[EARTH].Atmo.RayScaleHt = 8000.0;
+      World[EARTH].Atmo.MieScat = 4.0E-6;
+      World[EARTH].Atmo.MieScaleHt = 1200.0;
+      World[EARTH].Atmo.MieG = 0.76;
+      World[EARTH].Atmo.MaxHt = 8.0*World[EARTH].Atmo.RayScaleHt;
       World[EARTH].Atmo.rad = World[EARTH].rad + World[EARTH].Atmo.MaxHt;
 
       World[MARS].Atmo.GasColor[0] = 0.70588;
@@ -2303,8 +2404,14 @@ void LoadPlanets(void)
       World[MARS].Atmo.DustColor[0] = 0.5;
       World[MARS].Atmo.DustColor[1] = 0.5;
       World[MARS].Atmo.DustColor[2] = 0.5;
-      World[MARS].Atmo.ScaleHt = 11000.0;
-      World[MARS].Atmo.MaxHt = 5.0*World[MARS].Atmo.ScaleHt;
+      World[MARS].Atmo.RayScat[0] = 19.918E-6;
+      World[MARS].Atmo.RayScat[1] = 13.57E-6;
+      World[MARS].Atmo.RayScat[2] = 5.75E-6;
+      World[MARS].Atmo.RayScaleHt = 11000.0;
+      World[MARS].Atmo.MieScat = 0.0E-6;
+      World[MARS].Atmo.MieScaleHt = 11000.0;
+      World[MARS].Atmo.MieG = 0.76;
+      World[MARS].Atmo.MaxHt = 8.0*World[MARS].Atmo.RayScaleHt;
       World[MARS].Atmo.rad = World[MARS].rad + World[MARS].Atmo.MaxHt;
 
 /* .. Load planetary orbit elements for date of interest */
@@ -2335,8 +2442,8 @@ void LoadPlanets(void)
 
 /* .. Saturn's Rings */
       World[SATURN].HasRing = 1;
-      World[SATURN].RingInner = 67258.0E3/World[SATURN].rad;
-      World[SATURN].RingOuter = 181328.0E3/World[SATURN].rad;
+      World[SATURN].RingInner = 67258.0E3;
+      World[SATURN].RingOuter = 181328.0E3;
 
       for(i=MERCURY;i<=PLUTO;i++) {
          World[i].RadOfInfluence =
@@ -2372,6 +2479,7 @@ void LoadMoonOfEarth(void)
       char MapFileName[Nm][40] = {"Luna.ppm"};
       float Color[4] = {0.440417f, 0.441343f, 0.441084f,1.0f};
       double mu[Nm] = {4.903E12};
+      double J2[Nm] = {2.027E-4};
       double rad[Nm] = {1.738E6};
       double w[Nm] = {2.66E-6};
       double SMA[Nm] = {384400000.0};
@@ -2418,6 +2526,7 @@ void LoadMoonOfEarth(void)
          for(i=0;i<4;i++) M->Color[i] = Color[i];
          for(i=0;i<14;i++) M->Glyph[i] = Glyph[i];
          M->mu = mu[Im];
+         M->J2 = J2[Im];
          M->rad = rad[Im];
          M->w = w[Im];
          M->PriMerAng = 0.0;

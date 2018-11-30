@@ -6,25 +6,29 @@ FAST                            !  Time Mode (FAST, REAL, or EXTERNAL)
 TRUE                            !  Graphics Front End?
 Inp_Cmd.txt                     !  Command Script File Name
 **************************  Reference Orbits  **************************
-6                               !  Number of Reference Orbits
+8                               !  Number of Reference Orbits
 TRUE   Orb_EOS.txt              !  Input file name for Orb 0
 TRUE   Orb_ISS.txt              !  Input file name for Orb 1
 TRUE   Orb_67P.txt              !  Input file name for Orb 2
 TRUE   Orb_Saturn.txt           !  Input file name for Orb 3
 TRUE   Orb_Jupiter.txt          !  Input file name for Orb 4
 TRUE   Orb_Cube.txt             !  Input file name for Orb 5
+TRUE   Orb_EarthEscape.txt      !  Input file name for Orb 6
+TRUE   Orb_LEO.txt              !  Input file name for Orb 7
 *****************************  Spacecraft  *****************************
-10                              !  Number of Spacecraft
-TRUE  3 SC_Voyager.txt          !  Existence, RefOrb, Input file for SC 0
-TRUE  4 SC_BBM.txt              !  Existence, RefOrb, Input file for SC 0
-TRUE  4 SC_Moai.txt             !  Existence, RefOrb, Input file for SC 2
-TRUE  0 SC_Aura.txt             !  Existence, RefOrb, Input file for SC 3
-TRUE  1 SC_ISS.txt              !  Existence, RefOrb, Input file for SC 4
-TRUE  1 SC_Shuttle.txt          !  Existence, RefOrb, Input file for SC 5
-TRUE  2 SC_IonCruiser.txt       !  Existence, RefOrb, Input file for SC 6
-TRUE  5 SC_Cubesat1U.txt           !  Existence, RefOrb, Input file for SC 7
-TRUE  5 SC_Cubesat3U.txt           !  Existence, RefOrb, Input file for SC 8
-TRUE  5 SC_Cubesat6U.txt           !  Existence, RefOrb, Input file for SC 9
+12                              !  Number of Spacecraft
+TRUE  3 SC_Voyager.txt          !  Existence, RefOrb, Input file for SC  0
+TRUE  4 SC_BBM.txt              !  Existence, RefOrb, Input file for SC  1
+TRUE  4 SC_Moai.txt             !  Existence, RefOrb, Input file for SC  2
+TRUE  0 SC_Aura.txt             !  Existence, RefOrb, Input file for SC  3
+TRUE  1 SC_ISS.txt              !  Existence, RefOrb, Input file for SC  4
+TRUE  1 SC_Shuttle.txt          !  Existence, RefOrb, Input file for SC  5
+TRUE  2 SC_IonCruiser.txt       !  Existence, RefOrb, Input file for SC  6
+TRUE  5 SC_Cubesat1U.txt        !  Existence, RefOrb, Input file for SC  7
+TRUE  5 SC_Cubesat3U.txt        !  Existence, RefOrb, Input file for SC  8
+TRUE  5 SC_Cubesat6U.txt        !  Existence, RefOrb, Input file for SC  9
+TRUE  6 SC_CMG.txt              !  Existence, RefOrb, Input file for SC 10
+TRUE  7 SC_ThrDemo.txt          !  Existence, RefOrb, Input file for SC 11
 ***************************** Environment  *****************************
 09 29 2016                      !  Date (Month, Day, Year)
 10 16 00.00                     !  Greenwich Mean Time (Hr,Min,Sec)

@@ -97,6 +97,7 @@ EXTERN GLuint Font8x11Offset;
 EXTERN struct HexType Hex[20];
 EXTERN struct PentType Pent[12];
 EXTERN double CosVis[4], SinVis[4];
+EXTERN GLuint SunVtxShader,SunFragShader,SunShaderProgram;
 EXTERN GLuint WorldVtxShader,WorldFragShader,WorldShaderProgram;
 EXTERN GLuint RingVtxShader,RingFragShader,RingShaderProgram;
 EXTERN GLuint AtmoVtxShader,AtmoFragShader,AtmoShaderProgram;
@@ -150,11 +151,6 @@ void DrawEgret(double LineOfSight[3],double BuckyPf[32][3],
                GLuint EgretSourceList[32]);
 void DrawPulsars(double LineOfSight[3],double BuckyPf[32][3],
                GLuint PulsarList[32]);
-void LoadSunTextures(GLfloat SunDiskColor[3], GLfloat SunlightColor[3],
-                     GLuint *SunTexTag,GLuint *SunlightTexTag,
-                     GLuint *SunlightRingTexTag);
-void DrawSun(double LoS[3], double SunRad, double rh[3],
-             GLfloat SunDiskColor[3],GLuint SunTexTag);
 GLuint LoadMilkyWay(const char *PathName,const char *FileName, double CGH[3][3],
    double SkyDistance, double AlphaMask[4]);
 GLuint LoadSkyCube(const char *PathName,const char *FileName, double CGH[3][3],
@@ -171,12 +167,6 @@ void LoadPulsars(const char *FileName,double BuckyPf[32][3],
 void DrawUnitCubeSphere(long Ndiv);
 void DrawSkySphere(long Ndiv);
 void DrawUnitMercatorSphere(GLuint Nlat, GLuint Nlng);
-void DrawWorld(double LoS[3],double rad,double drn[3],double CWN[3][3],
-         double svn[3],long HasRing,long HasAtmo,GLfloat WorldColor[4],
-         GLuint TexTag,GLuint ColCubeTag, GLuint BumpCubeTag,
-         GLuint CloudGlossCubeTag, GLuint RingTexTag,
-         GLuint SphereList, GLuint RingList);
-void DrawRing(GLfloat InRad, GLfloat OutRad, GLuint Nring, GLuint Nslice);
 void DrawBullseye(GLfloat Color[4],double p[4]);
 void DrawArrowhead(double v[3],double scale);
 void DrawVector(double v[3], const char Label[8], const char Units[8],

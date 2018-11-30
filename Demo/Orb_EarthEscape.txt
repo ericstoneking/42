@@ -9,14 +9,15 @@ FALSE                         ! Use Polyhedron Gravity
 FALSE                         ! Use Polyhedron Gravity
 ::::::::::::::  Use these lines if Body-Centered Orbit  :::::::::::::::::
 EARTH                         !  Orbit Center
+FALSE                         !  Secular Orbit Drift Due to J2
 KEP                           !  Use Keplerian elements (KEP) or (RV) or FILE
 AE                            !  Use Peri/Apoapsis (PA) or min alt/ecc (AE)
 560.0   560.0                 !  Periapsis & Apoapsis Altitude, km
 500.0  2.0                    !  Min Altitude (km), Eccentricity
 28.5                          !  Inclination (deg)
 0.0                           !  Right Ascension of Ascending Node (deg)
--90.0                           !  Argument of Periapsis (deg)
--110.0                           !  True Anomaly (deg)
+0.0                           !  Argument of Periapsis (deg)
+-90.0                           !  True Anomaly (deg)
 0.0  0.0  0.0                 !  RV Initial Position (km)
 0.0  0.0  0.0                 !  RV Initial Velocity (km/sec)
 TRV  "ORB_ID"                 !  TLE or TRV format, Label to find in file

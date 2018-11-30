@@ -21,6 +21,7 @@
 #include <math.h>
 #include "iokit.h"
 #include "mathkit.h"
+#include "dcmkit.h"
 
 /*
 ** #ifdef __cplusplus

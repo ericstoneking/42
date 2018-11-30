@@ -61,7 +61,7 @@ struct BodyType {
    double pn[3]; /* position of B ref pt in N frame expressed in N frame */
    double CN[3][3]; /* Direction Cosine of B frame in N frame */
    double Trq[3]; /* expressed in B */
-   double Frc[3]; /* expressed in B */
+   double Frc[3]; /* expressed in N */
    double alpha[3]; /* Angular acceleration of B wrt N, expressed in B */
    double accel[3]; /* Linear acceleration of B wrt N, expressed in N */
    char GeomFileName[40];
@@ -200,34 +200,6 @@ struct ThrType {
    long FlexNode;
 };
 
-struct CMGType {
-   long Init;
-   long DOF;     /* 1 or 2 */
-   long Seq; /* Euler Sequence (13x, 23x, 123 or 213) */
-   double Gamma[3][3]; /* Joint Partials */
-   double CG[3][3]; /* Dynamic orientation  (like CBoGo) */
-   double CGB[3][3]; /* Static Mounting DCM (like CGiBi) */
-   double CB[3][3]; /* Total orientation (like CBoBi) */
-   double ang[2]; /*  rad */
-   double angrate[2]; /* rad/sec */
-   double angacc[2];
-   double MaxAngRate[2];
-   double MaxAng[2];
-   double MaxAcc[2];
-   double I[3]; /* Inertias, kg-m^2 (I[2] is rotor inertia) */
-   double H; /* Momentum, constant, Nms */
-   double SpinRate; /* rad/sec */
-   double Trq[3]; /* Exerted on B[0], expressed in B[0] */
-   long FlexNode;
-};
-
-struct AccelType {
-   double PosB[3];  /* Position in B[0] */
-   double Axis[3]; /* Mounting matrix */
-   double acc;  /* Measured acceleration, expressed in A */
-   long FlexNode;
-};
-
 struct GyroType {
    /* Parameters */
    double SampleTime;
@@ -273,57 +245,70 @@ struct MagnetometerType {
 struct CssType {
    /* Parameters */
    double SampleTime;
+   long MaxCounter;
    double Axis[3];
    double FovAng;
+   double CosFov;
    double Scale;
    double Quant;
 
    /* Variables */
+   long SampleCounter;
    long Valid;
    double Illum; /* Units defined by scale */
-};
-
-struct StarTrackerType {
-   /* Parameters */
-   double SampleTime;
-   double qb[4];
-   double CB[3][3];
-   double FovAng[2];
-   double SunExclAng;
-   double EarthExclAng;
-   double MoonExclAng;
-   double NEA[3];
-   long FlexNode;
-
-   /* Variables */
-   long Valid;
-   double qn[4];
-   double qbn[4];
 };
 
 struct FssType {
    /* Parameters */
    double SampleTime;
+   long MaxCounter;
    double qb[4];
    double CB[3][3];
    double FovAng[2];
-   double Noise;
+   double NEA;
    double Quant;
 
    /* Variables */
+   long SampleCounter;
    long Valid;
    double SunAng[2];
    double SunVecS[3];
    double SunVecB[3];
 };
 
+struct StarTrackerType {
+   /* Parameters */
+   double SampleTime;
+   long MaxCounter;
+   double qb[4];
+   double CB[3][3];
+   double FovAng[2];
+   double CosFov[2];
+   double SunExclAng;
+   double CosSunExclAng;
+   double EarthExclAng;
+   double CosEarthExclAng;
+   double MoonExclAng;
+   double CosMoonExclAng;
+   double NEA[3];
+   long FlexNode;
+
+   /* Variables */
+   long SampleCounter;
+   long Valid;
+   double qn[4];
+};
+
 struct GpsType {
    /* Parameters */
    double SampleTime;
+   long MaxCounter;
    double PosNoise;
    double VelNoise;
+   double TimeNoise;
    
    /* Variables */
+   long SampleCounter;
    long Valid;
    long Rollover;
    long Week;
@@ -333,6 +318,13 @@ struct GpsType {
    double PosW[3];
    double VelW[3];
    double Lng,Lat,Alt;
+};
+
+struct AccelType {
+   double PosB[3];  /* Position in B[0] */
+   double Axis[3]; /* Mounting matrix */
+   double acc;  /* Measured acceleration, expressed in A */
+   long FlexNode;
 };
 
 struct JointPathTableType { /* tells if joint is in path of body*/
@@ -407,7 +399,7 @@ struct SCType {
    long Nb;   /* Number of bodies */
    long Ng;   /* Number of joints, = Nb-1 */
    
-   struct AcsType AC;
+   struct AcType AC;
    
    struct BodyType *B;
    struct JointType *G;
@@ -415,26 +407,26 @@ struct SCType {
    long Nw;   /* Number of wheels */
    long Nmtb; /* Number of MTB's */
    long Nthr; /* Number of thrusters */
-   long Ncmg; /* Number of Control Moment Gyros */
    
    struct WhlType *Whl;
    struct MTBType *MTB;
    struct ThrType *Thr;
-   struct CMGType *CMG;
    
-   long Nacc; /* Number of accelerometer axes */
    long Ngyro; /* Number of Gyro axes */
    long Nmag; /* Number of magnetometer axes */
    long Ncss; /* Number of coarse sun sensors */
-   long Nst; /* Number of star trackers */
    long Nfss; /* Number of Fine Sun Sensors */
+   long Nst; /* Number of star trackers */
+   long Ngps; /* Number of GPS receivers */
+   long Nacc; /* Number of accelerometer axes */
    
-   struct AccelType *Accel;
    struct GyroType *Gyro;
    struct MagnetometerType *MAG;
    struct CssType *CSS;
-   struct StarTrackerType *ST;
    struct FssType *FSS;
+   struct StarTrackerType *ST;
+   struct GpsType *GPS;
+   struct AccelType *Accel;
    
    double mass;
    double cm[3]; /* wrt B0 origin, expressed in B0 frame */
@@ -565,7 +557,11 @@ struct AtmoType {
    long Exists;
    float GasColor[3];
    float DustColor[3];
-   double ScaleHt;
+   float RayScat[3];
+   float MieScat;
+   float RayScaleHt;
+   float MieScaleHt;
+   float MieG;
    double MaxHt;
    double rad;
 };
@@ -580,6 +576,7 @@ struct WorldType {
 
    /* Physical Properties */
    double mu; /* Gravitation constant  */
+   double J2; /* Gravitation oblateness parameter */
    double rad; /* Radius */
    double w; /* Spin Rate */
    double RadOfInfluence; /* Radius of Sphere of Influence */
@@ -610,8 +607,8 @@ struct WorldType {
    unsigned int CloudGlossCubeTag;
    long GeomTag;
    unsigned int RingTexTag;
-   unsigned int RingList;
    struct AtmoType Atmo;
+   double NearExtent,FarExtent;
 
    /* State Variables */
    double PosH[3];         /* Position in H frame */

@@ -24,257 +24,46 @@
 */
 
 /**********************************************************************/
-double OpticalDepth(double z1, double z2, double DeltaAngle,
-   double R, double H)
-{
-      double D,Num,Den,th0,Rz0,dth,th,cth,z;
-      long i,N;
-
-      if (DeltaAngle == 0.0) {
-         D = exp(-z1/H)-exp(-z2/H);
-      }
-      else {
-         Num = -((R+z1)-(R+z2)*cos(DeltaAngle));
-         Den =  (-(R+z2)*sin(DeltaAngle));
-         th0 = atan(Num/Den);
-
-         Rz0 = (R+z1)*cos(-th0);
-
-         N = 10;
-         dth = (DeltaAngle)/((double) N);
-         D = 0;
-         for(i=0;i<N;i++) {
-            th = ((double) i)*dth;
-            cth = cos(th-th0);
-            z = Rz0/cth - R;
-            D = D + exp(-z/H)*Rz0/(cth*cth)*dth;
-         }
-         D /= H;
-      }
-
-      return(D);
-}
-/**********************************************************************/
-void DrawDiskSector(double az1, double az2, long Nring, long *k1, long *k2,
-   long *Nk, double **pw, double **nw,
-   double CLW[3][3], double Alt, double R, double ZenW[3])
-{
-      double az,el;
-      long k,i,Ir,Ib,ko,ro,ri,ki;
-      double sinel,cosel,versel;
-      double elmax,del;
-      double pl[3],nl[3];
-
-      if (Alt < 100.0) elmax = acos(R/(R+100.0));
-      else elmax = acos(R/(R+Alt));
-      del = elmax/((double) Nring);
-
-      /* Local origin is sub-POV point on ground */
-      pl[0] = 0.0;
-      pl[1] = 0.0;
-      pl[2] = 0.0;
-      MTxV(CLW,pl,pw[0]);
-      /* Local zenith is up */
-      nl[0] = 0.0;
-      nl[1] = 0.0;
-      nl[2] = 1.0;
-      MTxV(CLW,nl,nw[0]);
-      for(Ir=0;Ir<Nring;Ir++) {
-         el = ((double) (Ir+1))*del;
-         cosel = cos(el);
-         versel = 2.0*sin(el/2.0)*sin(el/2.0); /* versine(x) = 1-cos(x) = 2*sin^2(x/2) */
-         sinel = sin(el);
-         for(k=k1[Ir];k<=k2[Ir];k++) {
-            az = az1 + ((double) (k-k1[Ir]))/((double) (Nk[Ir]-1))*(az2-az1);
-            pl[0] = R*sinel*cos(az);
-            pl[1] = R*sinel*sin(az);
-            pl[2] = -R*versel;
-            MTxV(CLW,pl,pw[k]);
-            nl[0] = sinel*cos(az);
-            nl[1] = sinel*sin(az);
-            nl[2] = cosel;
-            MTxV(CLW,nl,nw[k]);
-         }
-      }
-
-      glBegin(GL_TRIANGLES);
-         glNormal3dv(nw[2]);
-         glVertex3dv(pw[2]);
-         glNormal3dv(nw[0]);
-         glVertex3dv(pw[0]);
-         glNormal3dv(nw[1]);
-         glVertex3dv(pw[1]);
-      glEnd();
-
-      for(Ib=1;Ib<Nring;Ib++) {
-         ro = Ib;
-         ri = Ib-1;
-         glBegin(GL_TRIANGLE_STRIP);
-            for(i=Nk[ri];i>0;i--) {
-               ki = k1[ri]+i-1;
-               ko = k1[ro]+i;
-               glNormal3dv(nw[ko]);
-               glVertex3dv(pw[ko]);
-               glNormal3dv(nw[ki]);
-               glVertex3dv(pw[ki]);
-            }
-            glNormal3dv(nw[k1[ro]]);
-            glVertex3dv(pw[k1[ro]]);
-         glEnd();
-      }
-
-}
-/**********************************************************************/
-void DrawSkySector(struct WorldType *W, double Alt,
-   double az1, double az2, long Nring, long *k1,
-   long *k2, long *Nk, double **pl, double **nl)
+void DrawWorldAsBackdrop(struct WorldType *W,double PosN[3],double svn[3])
 {
       struct AtmoType *A;
-      double az,el;
-      long k,i,Ir,Ib,ko,ro,ri,ki;
-      double sinel,cosel;
-      double elmax,del;
-
-      A = &W->Atmo;
-
-      if (Alt < 100.0) elmax = acos(W->rad/(W->rad+100.0));
-      else elmax = acos(W->rad/(W->rad+Alt));
-      del = elmax/((double) Nring);
-
-      /* Local origin is sub-POV point on ground */
-      pl[0][0] = 0.0;
-      pl[0][1] = 0.0;
-      pl[0][2] = A->MaxHt;
-      /* Local zenith is up */
-      nl[0][0] = 0.0;
-      nl[0][1] = 0.0;
-      nl[0][2] = 1.0;
-      for(Ir=0;Ir<Nring;Ir++) {
-         el = ((double) (Ir+1))*del;
-         cosel = cos(el);
-         sinel = sin(el);
-         for(k=k1[Ir];k<=k2[Ir];k++) {
-            az = az1 + ((double) (k-k1[Ir]))/((double) (Nk[Ir]-1))*(az2-az1);
-            pl[k][0] = A->rad*sinel*cos(az);
-            pl[k][1] = A->rad*sinel*sin(az);
-            pl[k][2] = A->rad*cosel - W->rad;
-            nl[k][0] = sinel*cos(az);
-            nl[k][1] = sinel*sin(az);
-            nl[k][2] = cosel;
-         }
-      }
-
-/* .. Cap of Sky */
-      if (Alt < A->MaxHt) {
-         glBegin(GL_TRIANGLES);
-            glNormal3dv(nl[1]);
-            glVertex3dv(pl[1]);
-            glNormal3dv(nl[0]);
-            glVertex3dv(pl[0]);
-            glNormal3dv(nl[2]);
-            glVertex3dv(pl[2]);
-         glEnd();
-
-         for(Ib=1;Ib<Nring;Ib++) {
-            ro = Ib;
-            ri = Ib-1;
-            glBegin(GL_TRIANGLE_STRIP);
-               for(i=0;i<Nk[ri];i++) {
-                  ki = k1[ri]+i;
-                  ko = k1[ro]+i;
-                  glNormal3dv(nl[ko]);
-                  glVertex3dv(pl[ko]);
-                  glNormal3dv(nl[ki]);
-                  glVertex3dv(pl[ki]);
-               }
-               glNormal3dv(nl[k2[ro]]);
-               glVertex3dv(pl[k2[ro]]);
-            glEnd();
-         }
-      }
-
-/* .. Horizon */
-      glBegin(GL_QUAD_STRIP);
-         ro = Nring-1;
-         for(i=0;i<Nk[ro];i++) {
-            ko = k1[ro]+i;
-            glNormal3dv(nl[ko]);
-            glVertex3d(pl[ko][0]-A->MaxHt*nl[ko][0],
-                       pl[ko][1]-A->MaxHt*nl[ko][1],
-                       pl[ko][2]-A->MaxHt*nl[ko][2]);
-            glVertex3dv(pl[ko]);
-         }
-      glEnd();
-
-}
-/**********************************************************************/
-void DrawWorldDisk(struct WorldType *W,double PosN[3],double svn[3])
-{
-#define NRING 50
-
-      struct AtmoType *A;
-      long Is,Ir,k;
-      double az1,az2;
-      static long k1[NRING],k2[NRING],Nk[NRING];
-      static double **pw, **nw, **pl, **nl;
-      double CLN[3][3],CLW[3][3];
-      double svw[3],svl[3];
-      double PosW[3];
-      double ZenN[3],ZenW[3];
-      double Alt;
-      GLint PovLoc,HasAtmoLoc,AtmoColorLoc;
-      GLint AltLoc,MaxHtLoc,GasColorLoc,DustColorLoc,RadLoc;
-      GLfloat Black[4] = {0.0,0.0,0.0,1.0};
-      GLfloat White[4] = {1.0,1.0,1.0,1.0};
-      GLfloat SpecColor[4] = {0.25,0.25,0.5,1.0};
+      GLint UniLoc;
+      double sve[3],PosE[3],UnitWorldVecE[3],WorldDist;
+      double CosWorldAng,CosAtmoAng,CosRingAng;
+      double CWE[3][3],PosW[3];
       GLfloat LightPos[4] = {0.0,0.0,0.0,0.0};
-      static long First = 1;
-
-      if (First) {
-         First = 0;
-
-         k1[0] = 1;
-         k2[0] = 2;
-         Nk[0] = 2;
-         for(Ir=1;Ir<NRING;Ir++) {
-            k1[Ir] = k2[Ir-1]+1;
-            k2[Ir] = k1[Ir]+Ir+1;
-            Nk[Ir] = Ir+2;
-         }
-         pw = CreateMatrix(k2[NRING-1]+1,3);
-         nw = CreateMatrix(k2[NRING-1]+1,3);
-         pl = CreateMatrix(k2[NRING-1]+1,3);
-         nl = CreateMatrix(k2[NRING-1]+1,3);
-      }
-
+      GLfloat CWEarray[9];
+      long i,j;
+      
       A = &W->Atmo;
-      Alt = MAGV(PosN) - W->rad;
-
-      glMaterialfv(GL_FRONT,GL_AMBIENT,White);
-      glMaterialfv(GL_FRONT,GL_DIFFUSE,White);
-      glMaterialfv(GL_FRONT,GL_SPECULAR,SpecColor);
-      glMaterialfv(GL_FRONT,GL_EMISSION,Black);
-      glMaterialf(GL_FRONT,GL_SHININESS,10.0);
-
-      /* Before Push, H frame, origin at POV */
+      
       glPushMatrix();
-      RotateR2L(W->CNH);
-      CopyUnitV(PosN,ZenN);
-      glTranslated(-Alt*ZenN[0],-Alt*ZenN[1],-Alt*ZenN[2]);
-
-      CopyUnitV(ZenN,CLN[2]);
-      PerpBasis(CLN[2],CLN[0],CLN[1]);
-      MxMT(CLN,W->CWN,CLW);
-      MxV(W->CWN,PosN,PosW);
-      MxV(W->CWN,ZenN,ZenW);
-
-      /* Before Push, N frame, origin at subsat surface */
-      glPushMatrix();
-      RotateR2L(W->CWN);
-
-      MxV(W->CWN,svn,svw);
-      for(k=0;k<3;k++) LightPos[k] = svw[k];
+      glLoadIdentity();
+      
+      /* Transform and scale into Eye frame */
+      MxV(POV.CN,svn,sve);
+      for(i=0;i<3;i++) LightPos[i] = sve[i];
       glLightfv(GL_LIGHT0,GL_POSITION,LightPos);
+      MxV(POV.CN,PosN,PosE);
+      MxV(W->CWN,PosN,PosW);
+      MxMT(W->CWN,POV.CN,CWE);
+      WorldDist = CopyUnitV(PosE,UnitWorldVecE);
+      for(i=0;i<3;i++) UnitWorldVecE[i] = -UnitWorldVecE[i];
+      
+      if (WorldDist > W->rad) {
+         CosWorldAng = sqrt(1.0-W->rad*W->rad/(WorldDist*WorldDist));
+      }
+      else CosWorldAng = 0.0;
+      
+      if (WorldDist > A->rad) {
+         CosAtmoAng = sqrt(1.0-A->rad*A->rad/(WorldDist*WorldDist));
+      }
+      else CosAtmoAng = -1.0;
+      
+      if (WorldDist > W->RingOuter) {
+         CosRingAng = sqrt(1.0-W->RingOuter*W->RingOuter/(WorldDist*WorldDist));
+      }
+      else CosRingAng = -1.0;
 
       glActiveTexture(GL_TEXTURE0);
       glBindTexture(GL_TEXTURE_CUBE_MAP,W->ColCubeTag);
@@ -286,74 +75,109 @@ void DrawWorldDisk(struct WorldType *W,double PosN[3],double svn[3])
       glBindTexture(GL_TEXTURE_1D,W->RingTexTag);
 
       glUseProgram(WorldShaderProgram);
-      PovLoc = glGetUniformLocation(WorldShaderProgram,"PovPosW");
-      HasAtmoLoc = glGetUniformLocation(WorldShaderProgram,"HasAtmo");
-      AtmoColorLoc = glGetUniformLocation(WorldShaderProgram,"AtmoColor");
-      MaxHtLoc = glGetUniformLocation(WorldShaderProgram,"MaxHt");
-      glUniform3f(PovLoc,PosW[0]/W->rad,PosW[1]/W->rad,PosW[2]/W->rad);
-      glUniform1i(HasAtmoLoc,W->Atmo.Exists);
-      glUniform3f(AtmoColorLoc,W->Atmo.GasColor[0],W->Atmo.GasColor[1],
-         W->Atmo.GasColor[2]);
-      glUniform1f(MaxHtLoc,W->Atmo.MaxHt/W->rad);
 
-/* .. Draw six sectors of ground */
-      for(Is=0;Is<6;Is++) {
-         az1 = ((double) Is)*Pi/3.0;
-         az2 = ((double) (Is+1))*Pi/3.0;
-         DrawDiskSector(az1,az2,NRING,k1,k2,Nk,pw,nw,CLW,Alt,W->rad,ZenW);
+      UniLoc = glGetUniformLocation(WorldShaderProgram,"HasAtmo");
+      glUniform1i(UniLoc,A->Exists);
+      
+      UniLoc = glGetUniformLocation(WorldShaderProgram,"Br");
+      glUniform3f(UniLoc,A->RayScat[0],A->RayScat[1],A->RayScat[2]);
+
+      UniLoc = glGetUniformLocation(WorldShaderProgram,"Bm");
+      glUniform1f(UniLoc,A->MieScat);
+
+      UniLoc = glGetUniformLocation(WorldShaderProgram,"Hr");
+      glUniform1f(UniLoc,A->RayScaleHt);
+
+      UniLoc = glGetUniformLocation(WorldShaderProgram,"Hm");
+      glUniform1f(UniLoc,A->MieScaleHt);
+
+      UniLoc = glGetUniformLocation(WorldShaderProgram,"Gm");
+      glUniform1f(UniLoc,A->MieG);
+
+      UniLoc = glGetUniformLocation(WorldShaderProgram,"UnitWorldVecE");
+      glUniform3f(UniLoc,UnitWorldVecE[0],UnitWorldVecE[1],UnitWorldVecE[2]);
+
+      UniLoc = glGetUniformLocation(WorldShaderProgram,"CosWorldAng");
+      glUniform1f(UniLoc,CosWorldAng);
+      
+      UniLoc = glGetUniformLocation(WorldShaderProgram,"CosAtmoAng");
+      glUniform1f(UniLoc,CosAtmoAng);
+      
+      UniLoc = glGetUniformLocation(WorldShaderProgram,"CosRingAng");
+      glUniform1f(UniLoc,CosRingAng);
+      
+      UniLoc = glGetUniformLocation(WorldShaderProgram,"WorldRad");
+      glUniform1f(UniLoc,W->rad);
+      
+      UniLoc = glGetUniformLocation(WorldShaderProgram,"PosEyeW");
+      glUniform3f(UniLoc,PosW[0],PosW[1],PosW[2]);
+      
+      UniLoc = glGetUniformLocation(WorldShaderProgram,"MagPosEye");
+      glUniform1f(UniLoc,MAGV(PosW));
+      
+      UniLoc = glGetUniformLocation(WorldShaderProgram,"CWE");
+      for(i=0;i<3;i++) {
+         for(j=0;j<3;j++) CWEarray[3*i+j] = CWE[i][j];
       }
+      glUniformMatrix3fv(UniLoc,1,1,CWEarray);
+      
+      UniLoc = glGetUniformLocation(WorldShaderProgram,"HasRing");
+      glUniform1i(UniLoc,W->HasRing);
+      
+      glBegin(GL_QUADS);
+         glVertex3d(-POV.Width,-POV.Height,-1.0);
+         glVertex3d( POV.Width,-POV.Height,-1.0);
+         glVertex3d( POV.Width, POV.Height,-1.0);
+         glVertex3d(-POV.Width, POV.Height,-1.0);
+      glEnd();
+      
       glUseProgram(0);
 
-      if (W->Atmo.Exists) {
+      glPopMatrix();
+}
+/**********************************************************************/
+void DrawSunAsBackdrop(void)
+{
+      GLint UniLoc;
+      double svh[3],RadRatio,RadRatio2;
+      double UnitSunVecE[3],SunDist;
+      double CosSunAng,CosCoronaAng;
+      long i;
+      
+      glPushMatrix();
+      glLoadIdentity();
+      
+      /* Transform and scale into Eye frame */
+      for(i=0;i<3;i++) svh[i] = -POV.PosH[i];
+      SunDist = UNITV(svh);
+      MxV(POV.CH,svh,UnitSunVecE);
+      
+      RadRatio = World[0].rad/SunDist;
+      RadRatio2 = RadRatio*RadRatio;
+      CosSunAng = sqrt(1.0-RadRatio2);
+      CosCoronaAng = sqrt(1.0-16.0*RadRatio2);
+      
+      glUseProgram(SunShaderProgram);
 
-         /* glPolygonMode(GL_FRONT, GL_LINE); */
-         glUseProgram(AtmoShaderProgram);
-         AltLoc = glGetUniformLocation(AtmoShaderProgram,"Alt");
-         MaxHtLoc = glGetUniformLocation(AtmoShaderProgram,"MaxHt");
-         GasColorLoc = glGetUniformLocation(AtmoShaderProgram,"GasColor");
-         DustColorLoc = glGetUniformLocation(AtmoShaderProgram,"DustColor");
-         RadLoc = glGetUniformLocation(AtmoShaderProgram,"WorldRadius");
-         glUniform1f(AltLoc,Alt);
-         glUniform1f(MaxHtLoc,A->MaxHt);
-         glUniform3f(GasColorLoc,W->Atmo.GasColor[0],W->Atmo.GasColor[1],
-            W->Atmo.GasColor[2]);
-         glUniform3f(DustColorLoc,W->Atmo.DustColor[0],W->Atmo.DustColor[1],
-            W->Atmo.DustColor[2]);
-         glUniform1f(RadLoc,W->rad);
+      UniLoc = glGetUniformLocation(SunShaderProgram,"UnitSunVecE");
+      glUniform3f(UniLoc,UnitSunVecE[0],UnitSunVecE[1],UnitSunVecE[2]);
 
-         RotateR2L(CLW);
-         MxV(CLW,svw,svl);
-         for(k=0;k<3;k++) LightPos[k] = svl[k];
-         glLightfv(GL_LIGHT0,GL_POSITION,LightPos);
+      UniLoc = glGetUniformLocation(SunShaderProgram,"CosSunAng");
+      glUniform1f(UniLoc,CosSunAng);
+      
+      UniLoc = glGetUniformLocation(SunShaderProgram,"CosCoronaAng");
+      glUniform1f(UniLoc,CosCoronaAng);
+      
+      glBegin(GL_QUADS);
+         glVertex3d(-POV.Width,-POV.Height,-1.0);
+         glVertex3d( POV.Width,-POV.Height,-1.0);
+         glVertex3d( POV.Width, POV.Height,-1.0);
+         glVertex3d(-POV.Width, POV.Height,-1.0);
+      glEnd();
+      
+      glUseProgram(0);
 
-         /* Draw six sectors of sky */
-         for(Is=0;Is<6;Is++) {
-            az1 = ((double) Is)*Pi/3.0;
-            az2 = ((double) (Is+1))*Pi/3.0;
-            DrawSkySector(W,Alt,az1,az2,NRING,k1,k2,Nk,pl,nl);
-         }
-
-         glUseProgram(0);
-         /* glPolygonMode(GL_FRONT, GL_FILL); */
-      }
-
-      glPopMatrix();  /* After Pop: N frame, origin at subsat surface */
-      glPopMatrix();  /* After Pop: H frame, origin at POV */
-
-      if (W->HasRing) {
-         glPushMatrix();
-         RotateR2L(W->CNH);
-         glTranslated(-PosN[0],-PosN[1],-PosN[2]);
-         /* RotateR2L(W->CWN); */
-         glScalef(W->rad,W->rad,W->rad);
-         glActiveTexture(GL_TEXTURE0);
-         glBindTexture(GL_TEXTURE_1D,W->RingTexTag);
-         glUseProgram(RingShaderProgram);
-         glCallList(W->RingList);
-         glUseProgram(0);
-         glActiveTexture(GL_TEXTURE0);
-         glPopMatrix();
-      }
+      glPopMatrix();
 }
 /**********************************************************************/
 void GeomToDisplayLists(struct GeomType *G)
@@ -734,7 +558,7 @@ void DrawThrusterPlume(struct ThrType *Thr)
       GLfloat TipColor[4] = {0.918,0.67,0.25,0.3};
       GLfloat CoreColor[4] = {1.0,0.937,0.259,1.0};
       double Rad = 0.05;
-      double scl = 1.0;
+      double scl = 5.0;
       double p[3],ang,s,c,f;
       double X[3],Y[3]; /* Basis vectors perpendicular to Axis */
       long j;
@@ -1200,17 +1024,12 @@ void DrawFarScene(void)
       double C[3][3];
       static long WorldOrder[NWORLD],TempWO;
       double Zdepth[NWORLD],rh[NWORLD][3],TempZ;
-      double WorldNearPlaneDepth[4] = {1.0,1.0E3,1.0E6,1.0E9};
-      double WorldFarPlaneDepth[4] = {1.0E3,1.0E6,1.0E9,1.0E12};
       long Done;
       struct WorldType *W;
       struct SCType *S;
       double svh[3],PosH[3],PosN[3],svn[3];
       double VisCoef,PixRad,r[3],magr;
-      double NearExtent,FarExtent;
       double PosR[3];
-      long WorldDepthFlag[NWORLD][4],Idepth;
-      long DepthIsNotEmpty[4] = {0,0,0,0};
       GLfloat Black[4] = {0.0,0.0,0.0,1.0};
       GLubyte TdrsGlyph[32] = {0x01,0x80, 0x02,0x40, 0x04,0x20, 0x08,0x10,
                                0x10,0x08, 0x20,0x04, 0x40,0x02, 0x80,0x01,
@@ -1260,6 +1079,7 @@ void DrawFarScene(void)
       /*if (CamShow[PULSAR_SOURCES]) DrawPulsars(LoS,BuckyPf,PulsarList);*/
 
       glClear(GL_DEPTH_BUFFER_BIT);
+      
 
 /* .. Find depth, visibility for each world */
       VisCoef = 0.5*CamHeight/POV.SinFov;
@@ -1268,15 +1088,15 @@ void DrawFarScene(void)
          for(j=0;j<3;j++) rh[Iw][j] = POV.PosH[j]-World[Iw].PosH[j];
          Zdepth[i] = VoV(rh[Iw],LoS);
          if (World[Iw].HasRing) {
-            NearExtent = -Zdepth[i]-4.0*World[Iw].rad;
-            FarExtent  = -Zdepth[i]+4.0*World[Iw].rad;
+            World[Iw].NearExtent = -Zdepth[i]-4.0*World[Iw].rad;
+            World[Iw].FarExtent  = -Zdepth[i]+4.0*World[Iw].rad;
          }
          else {
-            NearExtent = -Zdepth[i]-1.1*World[Iw].rad;
-            FarExtent  = -Zdepth[i]+1.1*World[Iw].rad;
+            World[Iw].NearExtent = -Zdepth[i]-1.1*World[Iw].rad;
+            World[Iw].FarExtent  = -Zdepth[i]+1.1*World[Iw].rad;
          }
          if (World[Iw].Type == SUN) World[Iw].Visibility = WORLD_IS_SUN;
-         else if (FarExtent < 0.0) World[Iw].Visibility = WORLD_IS_OUT_OF_POV;
+         else if (World[Iw].FarExtent < 0.0) World[Iw].Visibility = WORLD_IS_OUT_OF_POV;
          else {
             magr = MAGV(rh[Iw]);
             PixRad = VisCoef*World[Iw].rad/magr;
@@ -1287,14 +1107,6 @@ void DrawFarScene(void)
             else {
                World[Iw].Visibility = WORLD_SHOWS_DISK;
             }
-         }
-         for(Idepth=0;Idepth<4;Idepth++) {
-            if (!(FarExtent < WorldNearPlaneDepth[Idepth] ||
-                NearExtent > WorldFarPlaneDepth[Idepth])) {
-               WorldDepthFlag[Iw][Idepth] = 1;
-               DepthIsNotEmpty[Idepth] = 1;
-            }
-            else WorldDepthFlag[Iw][Idepth] = 0;
          }
       }
 
@@ -1317,90 +1129,48 @@ void DrawFarScene(void)
          }
       }
 
-      glLightModelfv(GL_LIGHT_MODEL_AMBIENT,DistantAmbientLightColor);
-      glLightfv(GL_LIGHT0,GL_DIFFUSE,DistantDiffuseLightColor);
-      glLightfv(GL_LIGHT0,GL_SPECULAR,SpecularLightColor);
+      //glEnable(GL_LIGHTING);
+      //glLightModelfv(GL_LIGHT_MODEL_AMBIENT,DistantAmbientLightColor);
+      //glLightfv(GL_LIGHT0,GL_DIFFUSE,DistantDiffuseLightColor);
+      //glLightfv(GL_LIGHT0,GL_SPECULAR,SpecularLightColor);
 
-      for(Idepth=3;Idepth>=0;Idepth--) {
-         if (DepthIsNotEmpty[Idepth]) {
-            glClear(GL_DEPTH_BUFFER_BIT);
-            glMatrixMode(GL_PROJECTION);
-            glLoadIdentity();
-            gluPerspective(POV.Angle,POV.AR,
-               WorldNearPlaneDepth[Idepth],WorldFarPlaneDepth[Idepth]);
-            glMatrixMode(GL_MODELVIEW);
-
-            /* Draw Worlds */
-            for(i=0;i<Nw;i++) {
-               Iw = WorldOrder[i];
-               if (!World[Iw].HasRing) {
-                  if (WorldDepthFlag[Iw][Idepth]) {
-                     if (World[Iw].Visibility == WORLD_IS_SUN) {
-                        DrawSun(LoS,World[Iw].rad,rh[Iw],
-                           World[Iw].Color,SunTexTag);
-                     }
-                     else if (World[Iw].Visibility == WORLD_IS_POINT_SIZED) {
-                        W = &World[Iw];
-                        glPointSize(2.0);
-                        glMaterialfv(GL_FRONT,GL_EMISSION,W->Color);
-                        glBegin(GL_POINTS);
-                          glVertex3d(-rh[Iw][0],-rh[Iw][1],-rh[Iw][2]);
-                        glEnd();
-                     }
-                     else if (World[Iw].Visibility == WORLD_SHOWS_DISK) {
-                        W = &World[Iw];
-                        for(j=0;j<3;j++) svh[j] = -W->PosH[j];
-                        UNITV(svh);
-                        if (W->GeomTag == 0) {  /* World is sphere */
-                           MxV(W->CNH,rh[Iw],PosN);
-                           MxV(W->CNH,svh,svn);
-                           DrawWorldDisk(W,PosN,svn);
-                        }
-                        else {
-                           glUseProgram(BodyShaderProgram);
-                           glUniform1i(ShadowsEnabledLoc,ShadowsEnabled);
-                           glUniformMatrix3fv(CNELoc,1,0,CNE);
-                           glPushMatrix();
-                           glTranslated(-rh[Iw][0],-rh[Iw][1],-rh[Iw][2]);
-                           RotateR2L(W->CNH);
-                           RotateR2L(W->CWN);
-                           glCallList(Geom[W->GeomTag].OpaqueListTag);
-                           glPopMatrix();
-                           glUseProgram(0);
-                        }
-                     }
-                  }
-               }
+      for(i=0;i<Nw;i++) {
+         Iw = WorldOrder[i];
+         W = &World[Iw];
+         for(j=0;j<3;j++) rh[Iw][j] = POV.PosH[j]-W->PosH[j];
+         if (Iw == 0) {
+            DrawSunAsBackdrop();
+         }
+         else if (W->Visibility == WORLD_IS_POINT_SIZED) {
+         }
+         else if (W->Visibility == WORLD_SHOWS_DISK) {
+            for(j=0;j<3;j++) svh[j] = -W->PosH[j];
+            UNITV(svh);
+            if (W->GeomTag == 0) { /* World is sphere */
+               MxV(W->CNH,rh[Iw],PosN);
+               MxV(W->CNH,svh,svn);
+               DrawWorldAsBackdrop(W,PosN,svn);
             }
-            for(i=0;i<Nw;i++) {
-               Iw = WorldOrder[i];
-               if (World[Iw].HasRing) {
-                  if (WorldDepthFlag[Iw][Idepth]) {
-                     if (World[Iw].Visibility == WORLD_IS_POINT_SIZED) {
-                        W = &World[Iw];
-                        glPointSize(8.0);
-                        glMaterialfv(GL_FRONT,GL_EMISSION,W->Color);
-                        CopyUnitV(rh[Iw],r);
-                        glBegin(GL_POINTS);
-                          glVertex3d(-r[0],-r[1],-r[2]);
-                        glEnd();
-                     }
-                     else if (World[Iw].Visibility == WORLD_SHOWS_DISK) {
-                        W = &World[Iw];
-                        for(j=0;j<3;j++) svh[j] = -W->PosH[j];
-                        UNITV(svh);
-                        MxV(W->CNH,rh[Iw],PosN);
-                        MxV(W->CNH,svh,svn);
-                        DrawWorldDisk(W,PosN,svn);
-                     }
-                  }
-               }
+            else {
+               glClear(GL_DEPTH_BUFFER_BIT);
+               glMatrixMode(GL_PROJECTION);
+               glLoadIdentity();
+               gluPerspective(POV.Angle,POV.AR,
+                  W->NearExtent,W->FarExtent);
+               glMatrixMode(GL_MODELVIEW);
+               glUseProgram(BodyShaderProgram);
+               glUniform1i(ShadowsEnabledLoc,ShadowsEnabled);
+               glUniformMatrix3fv(CNELoc,1,0,CNE);
+               glPushMatrix();
+               glTranslated(-rh[Iw][0],-rh[Iw][1],-rh[Iw][2]);
+               RotateR2L(W->CNH);
+               RotateR2L(W->CWN);
+               glCallList(Geom[W->GeomTag].OpaqueListTag);
+               glPopMatrix();
+               glUseProgram(0);
             }
          }
       }
-      glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE,Black);
-      glMaterialfv(GL_FRONT,GL_SPECULAR,Black);
-      glMaterialfv(GL_FRONT,GL_EMISSION,Black);
 
       glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -1654,7 +1424,7 @@ void DrawProxOps(void)
 void DrawNearAuxObjects(void)
 {
       double AxisLength,r[3],len[3];
-      long Isc,Ib,Ithr,i;
+      long Isc,Ib,Ithr,i,Ig;
       struct SCType *S;
       struct BodyType *B;
       struct GeomType *G;
@@ -1706,7 +1476,6 @@ void DrawNearAuxObjects(void)
          if (S->Exists) {
             glPushMatrix();
 
-//            if (S->RefOrb == POV.Host.RefOrb) { /* TODO: Improve this */
             if (ScIsVisible(POV.Host.RefOrb,Isc,PosR) ) {
                glTranslated(PosR[0],PosR[1],PosR[2]);
                if (CamShow[B_AXES]) {
@@ -1725,6 +1494,29 @@ void DrawNearAuxObjects(void)
                      DrawAxisLabels(GLYPH_B,BBrightColor,
                         0.0,len[0],0.0,len[1],0.0,len[2]);
                      DrawBodyLabel(Ib,BBrightColor,G->BBox.max);
+
+                     /* Draw dots at joints */
+                     glDisable(GL_LIGHTING);
+                     for(Ig=0;Ig<S->Ng;Ig++) {
+                        if (Ib == S->G[Ig].Bin) {
+                           glPointSize(20.0);
+                           glColor4f(0.0,0.0,1.0,0.5);
+                           glBegin(GL_POINTS);
+                              glVertex3dv(S->G[Ig].rin);
+                           glEnd();
+                        }
+                        if (Ib == S->G[Ig].Bout) {
+                           glPointSize(10.0);
+                           glColor4f(1.0,0.0,0.0,0.5);
+                           glBegin(GL_POINTS);
+                              glVertex3dv(S->G[Ig].rout);
+                           glEnd();
+                        }
+                     }
+                     glColor4f(0.0,0.0,0.0,1.0);
+                     glPointSize(1.0);
+                     glEnable(GL_LIGHTING);
+
                      glPopMatrix();
                   }
                }
@@ -1767,12 +1559,12 @@ void DrawNearAuxObjects(void)
                      glTranslated(B->pn[0],B->pn[1],B->pn[2]);
                      RotateR2L(B->CN);
                      if (MAGV(S->AC.svb) > 0.0)
-                        DrawVector(S->AC.svb,"Sfsw"," ",SvbColor,
+                        DrawVector(S->AC.svb,"Sac"," ",SvbColor,
                            1.15*AxisLength,1.0,TRUE);
                      if (MAGV(S->AC.bvb) > 0.0)
-                        DrawVector(S->AC.bvb,"Bfsw","uT",BvbColor,
+                        DrawVector(S->AC.bvb,"Bac","uT",BvbColor,
                            1.15*AxisLength,1.0E6,FALSE);
-                     /*DrawVector(S->AC.Hvb,"H","Nms",HvbColor,AxisLength,
+                     /*DrawVector(S->AC.Hvb,"Hac","Nms",HvbColor,AxisLength,
                         1.0,FALSE);*/
                      glPopMatrix();
                   }
@@ -2968,7 +2760,7 @@ void DrawOrrery(void)
                   glCallList(OrrerySphereList);
                   if (Ip == SATURN) {
                      glColor4fv(SaturnRingColor);
-                     glCallList(OrreryRingList);
+                     //glCallList(OrreryRingList);
                   }
                   glPopMatrix();
                }
@@ -4672,11 +4464,6 @@ void LoadCamLists(void)
          DrawUnitCubeSphere(32);
       #endif
       glEndList();
-
-      World[SATURN].RingList = glGenLists(1);
-      glNewList(World[SATURN].RingList,GL_COMPILE);
-         DrawRing(World[SATURN].RingInner,World[SATURN].RingOuter,20,100);
-      glEndList();
 }
 /**********************************************************************/
 GLuint LoadSpectrum(const char *SpectrumName)
@@ -4747,7 +4534,6 @@ void LoadCamTextures(void)
       struct WorldType *MB;
       long Im,Iw,Ip,Ib;
       char s[80];
-      GLfloat SunlightColor[3] = {1.0,1.0,1.0};
 
 /* .. Load Material Textures */
       for(Im=0;Im<Nmatl;Im++) {
@@ -4771,8 +4557,6 @@ void LoadCamTextures(void)
       World[SOL].Color[1] = 1.0;
       World[SOL].Color[2] = 1.0;
       World[SOL].Color[3] = 1.0;
-      LoadSunTextures(World[SOL].Color,SunlightColor,&SunTexTag,
-         &SunlightTexTag,&SunlightRingTexTag[0]);
 
 /* .. Load Worlds */
       RockballTexTag = PpmToTexTag("./World/","Rockball.ppm",3,GL_REPEAT);
@@ -4784,7 +4568,6 @@ void LoadCamTextures(void)
       NullColCubeTag = PpmToCubeTag("./World/","NullCol",3);
       NullBumpCubeTag = PpmToCubeTag("./World/","NullBump",3);
       NullCloudGlossCubeTag = PpmToCubeTag("./World/","NullCloudGloss",3);
-      NullRingTexTag = PpmToRingTexTag("./World/","NullRing.ppm");
       for(Ip=MERCURY;Ip<=PLUTO; Ip++) {
          if (World[Ip].Exists) {
             Iw = Ip;
@@ -5071,6 +4854,18 @@ void LoadCamShaders(void)
       size_t StrLen;
       char *ShaderText;
 
+      FileToString("./Kit/Shaders/SunVtx.glsl",&ShaderText,&StrLen);
+      SunVtxShader =
+         TextToShader(ShaderText,GL_VERTEX_SHADER,"SunVtx");
+      free(ShaderText);
+
+      FileToString("./Kit/Shaders/SunFrag.glsl",&ShaderText,&StrLen);
+      SunFragShader =
+         TextToShader(ShaderText,GL_FRAGMENT_SHADER,"SunFrag");
+      free(ShaderText);
+
+      SunShaderProgram = BuildShaderProgram(SunVtxShader,SunFragShader,"Sun");
+
       FileToString("./Kit/Shaders/WorldVtx.glsl",&ShaderText,&StrLen);
       WorldVtxShader =
          TextToShader(ShaderText,GL_VERTEX_SHADER,"WorldVtx");
@@ -5083,32 +4878,6 @@ void LoadCamShaders(void)
 
       WorldShaderProgram = BuildShaderProgram(
          WorldVtxShader,WorldFragShader,"World");
-
-      FileToString("./Kit/Shaders/RingVtx.glsl",&ShaderText,&StrLen);
-      RingVtxShader =
-         TextToShader(ShaderText,GL_VERTEX_SHADER,"RingVtx");
-      free(ShaderText);
-
-      FileToString("./Kit/Shaders/RingFrag.glsl",&ShaderText,&StrLen);
-      RingFragShader =
-         TextToShader(ShaderText,GL_FRAGMENT_SHADER,"RingFrag");
-      free(ShaderText);
-
-      RingShaderProgram =
-         BuildShaderProgram(RingVtxShader,RingFragShader,"Ring");
-
-      FileToString("./Kit/Shaders/AtmoVtx.glsl",&ShaderText,&StrLen);
-      AtmoVtxShader =
-         TextToShader(ShaderText,GL_VERTEX_SHADER,"AtmoVtx");
-      free(ShaderText);
-
-      FileToString("./Kit/Shaders/AtmoFrag.glsl",&ShaderText,&StrLen);
-      AtmoFragShader =
-         TextToShader(ShaderText,GL_FRAGMENT_SHADER,"AtmoFrag");
-      free(ShaderText);
-
-      AtmoShaderProgram =
-         BuildShaderProgram(AtmoVtxShader,AtmoFragShader,"Atmo");
 
       FileToString("./Kit/Shaders/BodyVtx.glsl",&ShaderText,&StrLen);
       BodyVtxShader =
@@ -5123,6 +4892,14 @@ void LoadCamShaders(void)
       BodyShaderProgram =
          BuildShaderProgram(BodyVtxShader,BodyFragShader,"Body");
 
+      glUseProgram(SunShaderProgram);
+      UniLoc = glGetUniformLocation(SunShaderProgram,"UnitSunVecE");
+      glUniform3f(UniLoc,1.0,0.0,0.0);
+      UniLoc = glGetUniformLocation(SunShaderProgram,"CosSunAng");
+      glUniform1f(UniLoc,1.0);
+      UniLoc = glGetUniformLocation(SunShaderProgram,"CosCoronaAng");
+      glUniform1f(UniLoc,1.0);
+      
       glUseProgram(WorldShaderProgram);
       UniLoc = glGetUniformLocation(WorldShaderProgram,"MapTexture");
       glUniform1i(UniLoc,0);
@@ -5132,33 +4909,23 @@ void LoadCamShaders(void)
       glUniform1i(UniLoc,2);
       UniLoc = glGetUniformLocation(WorldShaderProgram,"RingTexture");
       glUniform1i(UniLoc,3);
-      UniLoc = glGetUniformLocation(WorldShaderProgram,"PovPosW");
-      glUniform3f(UniLoc,0.0,0.0,1.0);
       UniLoc = glGetUniformLocation(WorldShaderProgram,"HasAtmo");
       glUniform1i(UniLoc,0);
-      UniLoc = glGetUniformLocation(WorldShaderProgram,"AtmoColor");
+      UniLoc = glGetUniformLocation(WorldShaderProgram,"UnitWorldVecE");
+      glUniform3f(UniLoc,0.0,0.0,1.0);
+      UniLoc = glGetUniformLocation(WorldShaderProgram,"CosWorldAng");
+      glUniform1f(UniLoc,0.0);
+      UniLoc = glGetUniformLocation(WorldShaderProgram,"CosAtmoAng");
+      glUniform1f(UniLoc,0.0);
+      UniLoc = glGetUniformLocation(WorldShaderProgram,"WorldRad");
+      glUniform1f(UniLoc,0.0);      
+      UniLoc = glGetUniformLocation(WorldShaderProgram,"PosEyeW");
       glUniform3f(UniLoc,0.0,0.0,0.0);
-      UniLoc = glGetUniformLocation(WorldShaderProgram,"MaxHt");
+      UniLoc = glGetUniformLocation(WorldShaderProgram,"MagPosEye");
       glUniform1f(UniLoc,0.0);
+      UniLoc = glGetUniformLocation(WorldShaderProgram,"CWE");
+      glUniformMatrix3fv(UniLoc,1,1,Eye3x3);
       ValidateShaderProgram(WorldShaderProgram,"World");
-
-      glUseProgram(RingShaderProgram);
-      UniLoc = glGetUniformLocation(RingShaderProgram,"RingTexture");
-      glUniform1i(UniLoc,0);
-      ValidateShaderProgram(RingShaderProgram,"Ring");
-
-      glUseProgram(AtmoShaderProgram);
-      UniLoc = glGetUniformLocation(AtmoShaderProgram,"Alt");
-      glUniform1f(UniLoc,0.0);
-      UniLoc = glGetUniformLocation(AtmoShaderProgram,"MaxHt");
-      glUniform1f(UniLoc,40.0E3);
-      UniLoc = glGetUniformLocation(AtmoShaderProgram,"GasColor");
-      glUniform3f(UniLoc,1.0,0.0,1.0);
-      UniLoc = glGetUniformLocation(AtmoShaderProgram,"DustColor");
-      glUniform3f(UniLoc,1.0,1.0,1.0);
-      UniLoc = glGetUniformLocation(AtmoShaderProgram,"WorldRadius");
-      glUniform1f(UniLoc,6378.145E3);
-      ValidateShaderProgram(AtmoShaderProgram,"Atmo");
 
       glUseProgram(BodyShaderProgram);
       UniLoc = glGetUniformLocation(BodyShaderProgram,"CNE");
@@ -5505,12 +5272,6 @@ void InitOrreryWindow(void)
       DrawUnitCubeSphere(32);
       glEndList();
 
-      OrreryRingList = glGenLists(1);
-      glNewList(OrreryRingList,GL_COMPILE);
-         DrawRing(World[SATURN].RingInner,World[SATURN].RingOuter,20,100);
-      glEndList();
-
-
 }
 /*********************************************************************/
 void ReadGraphicsInpFile(void)
@@ -5697,9 +5458,9 @@ void InitColors(void)
       long i;
 
 
-      DistantDiffuseLightColor[0] = 0.75;
-      DistantDiffuseLightColor[1] = 0.75;
-      DistantDiffuseLightColor[2] = 0.75;
+      DistantDiffuseLightColor[0] = 0.95;
+      DistantDiffuseLightColor[1] = 0.95;
+      DistantDiffuseLightColor[2] = 0.95;
       DistantDiffuseLightColor[3] = 1.0;
 
       for(i=0;i<3;i++)

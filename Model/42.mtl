@@ -244,12 +244,21 @@ NoiseScale 50.0
 NoiseType 0
 
 newmtl CUBE_BLUE
-Ns 20.0
+Ns 100.0
 d 1.0
 illum 2
-Kd 0.2 0.3 1.0
-Ka 0.2 0.3 1.0
-Ks 0.25 0.25 0.25
+Kd 0.05 0.05 0.15
+Ka 0.05 0.05 0.15
+Ks 1.0  1.0  1.0
 Ke 0.0 0.0 0.0
-NoiseBump
-NoiseScale 0.01
+
+newmtl CUBE_ORANGE
+Ns 50.0
+d 1.0
+illum 2
+Kd 0.3 0.25 0.1
+Ka 0.3 0.25 0.1
+Ks 1.0  1.0  1.0
+Ke 0.0 0.0 0.0
+
+

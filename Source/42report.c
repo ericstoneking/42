@@ -77,44 +77,6 @@ double FindTotalUnshadedProjectedArea(struct SCType *S,double VecN[3])
       return(ProjArea);
 }
 /*********************************************************************/
-void CmgReport(void)
-{
-      struct SCType *S;
-      static FILE *Hvnfile;
-      static FILE *Hvbfile;
-      static FILE *CmgAngfile;
-      static FILE *Tcmgfile;
-      static long First = 1;
-      double Tcmg[3];
-      long i;
-
-      if (First) {
-         First = 0;
-         Hvnfile = FileOpen(InOutPath,"Hvn.42","w");
-         Hvbfile = FileOpen(InOutPath,"Hvb.42","w");
-         CmgAngfile = FileOpen(InOutPath,"ang.42","w");
-         Tcmgfile = FileOpen(InOutPath,"Tcmg.42","w");
-      }
-
-      if (OutFlag) {
-         S = &SC[0];
-         fprintf(Hvnfile,"%lf %lf %lf\n",S->Hvn[0],S->Hvn[1],S->Hvn[2]);
-         fprintf(Hvbfile,"%lf %lf %lf\n",S->Hvb[0],S->Hvb[1],S->Hvb[2]);
-         fprintf(CmgAngfile,"%lf %lf %lf %lf\n",
-            S->CMG[0].ang[0]*R2D,S->CMG[1].ang[0]*R2D,
-            S->CMG[2].ang[0]*R2D,S->CMG[3].ang[0]*R2D);
-         Tcmg[0] = 0.0;
-         Tcmg[1] = 0.0;
-         Tcmg[2] = 0.0;
-         for(i=0;i<S->Ncmg;i++) {
-            Tcmg[0] += S->CMG[i].Trq[0];
-            Tcmg[1] += S->CMG[i].Trq[1];
-            Tcmg[2] += S->CMG[i].Trq[2];
-         }
-         fprintf(Tcmgfile,"%lf %lf %lf\n",Tcmg[0],Tcmg[1],Tcmg[2]);
-      }
-}
-/*********************************************************************/
 void PotatoReport(void)
 {
       static FILE *Bodywnfile,*Bodyqnfile;
@@ -199,6 +161,8 @@ void Report(void)
       static FILE *PosRfile,*VelRfile;
       static FILE *Hvnfile,*KEfile;
       static FILE *RPYfile;
+      static FILE *Hwhlfile;
+      static FILE *MTBfile;
       static FILE *ProjAreaFile;
       static char First = TRUE;
       long Isc,i;
@@ -248,6 +212,8 @@ void Report(void)
          KEfile = FileOpen(InOutPath,"KE.42","w");
          ProjAreaFile = FileOpen(InOutPath,"ProjArea.42","w");
          RPYfile = FileOpen(InOutPath,"RPY.42","w");
+         Hwhlfile = FileOpen(InOutPath,"Hwhl.42","w");
+         MTBfile = FileOpen(InOutPath,"MTB.42","w");
       }
 
       if (OutFlag) {
@@ -304,7 +270,9 @@ void Report(void)
             MxMT(SC[0].B[0].CN,SC[0].CLN,CBL);
             C2A(123,CBL,&Roll,&Pitch,&Yaw);
             fprintf(RPYfile,"%lf %lf %lf\n",Roll*R2D,Pitch*R2D,Yaw*R2D);
-
+            fprintf(Hwhlfile,"%lf %lf %lf\n",SC[0].Whl[0].H,SC[0].Whl[1].H,SC[0].Whl[2].H);
+            fprintf(MTBfile,"%lf %lf %lf\n",SC[0].MTB[0].M,SC[0].MTB[1].M,SC[0].MTB[2].M);
+            
             //MagReport();
             //GyroReport();
 
@@ -313,7 +281,6 @@ void Report(void)
       }
 
       if (!strcmp(InOutPath,"./Potato/")) PotatoReport();
-      if (!strcmp(InOutPath,"./CMG/")) CmgReport();
       
 
       if (CleanUpFlag) {

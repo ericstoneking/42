@@ -335,6 +335,7 @@ void Environment(struct SCType *S)
       else S->AtmoDensity = 0.0;
       
 /* .. Radiation Belt Electron and Proton Fluxes, particles/cm^2/sec */
+      #if 0
       if (O->World == EARTH) {
          MxV(World[EARTH].CWN,S->PosN,PosW);
          UNITV(PosW);
@@ -342,6 +343,7 @@ void Environment(struct SCType *S)
          RadBelt(MAGV(S->PosN)/1000.0,fabs(MagLat)*R2D,NumEnergies,
             ElectronEnergy,ProtonEnergy,Flux);
       }
+      #endif
 
 }
 

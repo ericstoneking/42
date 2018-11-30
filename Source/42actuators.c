@@ -200,7 +200,7 @@ void Actuators(struct SCType *S)
 
       long i,j;
       double FrcN[3];
-      struct AcsType *AC;
+      struct AcType *AC;
       struct JointType *G;
       struct AcJointType *AG;
 
@@ -228,7 +228,7 @@ void Actuators(struct SCType *S)
             S->B[0].Trq[j] += S->MTB[i].Trq[j];
          }
       }
-
+      
       /* Gimbal Drives */
       for(i=0;i<AC->Ng;i++) {
          G = &S->G[i];

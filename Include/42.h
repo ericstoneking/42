@@ -63,7 +63,7 @@ EXTERN char CmdFileName[80];
 EXTERN double Pi, TwoPi, HalfPi, SqrtTwo, SqrtHalf, D2R, R2D;
 
 /* Simulation Control */
-EXTERN long TimeMode; /* FAST_TIME, REAL_TIME, EXTERNAL_SYNCH */
+EXTERN long TimeMode; /* FAST_TIME, REAL_TIME, EXTERNAL_SYNCH, NOS3_TIME */
 EXTERN long IpcMode; /* IPC_OFF, IPC_TX, IPC_RX */
 EXTERN long SocketRole; /* IPC_SERVER or IPC_CLIENT */
 EXTERN double SimTime,STOPTIME,DTSIM,DTOUT,DTOUTGL;
@@ -178,7 +178,6 @@ void FindPathVectors(struct SCType *S);
 void FindTotalAngMom(struct SCType *S);
 double FindTotalKineticEnergy(struct SCType *S);
 void UpdateScBoundingBox(struct SCType *S);
-void FindCmgTrq(struct CMGType *C,double wb0n[3]);
 void FindUnshadedAreas(struct SCType *S, double DirVecN[3]);
 void RadBelt(float RadiusKm, float MagLatDeg, int NumEnergies, 
       float *ElectronEnergy, float *ProtonEnergy, double **Flux); 
@@ -206,6 +205,11 @@ void CfdSlosh(struct SCType *S);
 void FakeCfdSlosh(struct SCType *S);
 void SendStatesToSpirent(void);
 
+void NOS3Time(long *year, long *day_of_year, long *month, long *day,
+              long *hour, long *minute, double *second);
+void NOS3SendMessageToFSW(void);
+void NOS3ReceiveMessageFromFSW(void);
+                   
 #ifdef _ENABLE_SOCKETS_
    void InterProcessComm(void);
    void InitInterProcessComm(void);

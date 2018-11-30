@@ -878,6 +878,12 @@ long OCProjectRayOntoGeom(double Point[3],double DirVec[3],
                OC = &O->OctCell[OC->NextOnMiss];
             }
          }
+         else if (OC->NextOnMiss == 0) {
+            Exhausted = 1;
+         }
+         else {
+            OC = &O->OctCell[OC->NextOnMiss];
+         }
       }
 
       return(FoundPoly);
@@ -888,6 +894,7 @@ struct GeomType *LoadWingsObjFile(const char ModelPath[80],const char ObjFilenam
                        struct GeomType *Geom, long *Ngeom, long *GeomTag,
                        long EdgesEnabled)
 {
+#define D2R (0.0174532925199433)
       FILE *infile,*outfile;
       FILE *TmpFile;
       char *txtptr;
@@ -905,6 +912,11 @@ struct GeomType *LoadWingsObjFile(const char ModelPath[80],const char ObjFilenam
       long BeenHereOnce;
       long NoArraySizesFound;
       double Value,Scale = 1.0;
+      double Val1,Val2,Val3;
+      long Seq;
+      double RotM[3][3] = {{1.0,0.0,0.0},{0.0,1.0,0.0},{0.0,0.0,1.0}};
+      double TransVec[3] = {0.0,0.0,0.0};
+      double Vr[3];
       long FirstUse;
 
       char line[512],vtxstring[512],*vtxtoken,MatlName[40];
@@ -1015,8 +1027,19 @@ struct GeomType *LoadWingsObjFile(const char ModelPath[80],const char ObjFilenam
          if (sscanf(line,"# Scale up by %lf to actual size",&Value) == 1) {
             Scale = Value;
          }
+         else if (sscanf(line,"# Translate by [%lf %lf %lf]",
+            &Val1,&Val2,&Val3) == 3) {
+            TransVec[0] = Val1;
+            TransVec[1] = Val2;
+            TransVec[2] = Val3;
+         }
+         else if (sscanf(line,"# Rotate via Seq = %ld by [%lf %lf %lf] deg",
+            &Seq,&Val1,&Val2,&Val3) == 4) {
+            A2C(Seq,Val1*D2R,Val2*D2R,Val3*D2R,RotM);
+         }
          else if (sscanf(line,"v  %lf %lf %lf",&V[0],&V[1],&V[2]) == 3) {
-            for(i=0;i<3;i++) G->V[Ivtx][i] = Scale*V[i];
+            MTxV(RotM,V,Vr);
+            for(i=0;i<3;i++) G->V[Ivtx][i] = Scale*Vr[i]+TransVec[i];
             Ivtx++;
          }
          else if (sscanf(line,"vt %lf %lf",&V[0],&V[1]) == 2 ||
@@ -1030,7 +1053,7 @@ struct GeomType *LoadWingsObjFile(const char ModelPath[80],const char ObjFilenam
                for(i=0;i<3;i++) {
                   V[i] = 1.0;  /* Kludge.  Who defines a zero-length normal?? */
                }
-               printf("Zero-length normal in LoadWingsObjFile %s\n",ObjFilename);
+               /* printf("Zero-length normal in LoadWingsObjFile %s\n",ObjFilename); */
             }
             for(i=0;i<3;i++) G->Vn[Ivn][i] = V[i];
             Ivn++;
@@ -1243,6 +1266,7 @@ struct GeomType *LoadWingsObjFile(const char ModelPath[80],const char ObjFilenam
       *Ngeom = Ng;
       *GeomTag = Ng-1;
       return(Geom);
+#undef D2R
 }
 /*********************************************************************/
 void WriteGeomToObjFile(struct MatlType *Matl,struct GeomType *Geom,const char Path[80],

@@ -78,6 +78,7 @@ long AdvanceTime(void)
       static long PrevTick = 0;
       static long CurrTick = 1;
       long Done;
+      static long First = 1;
 
       /* Advance time to next Timestep */
       #if defined _USE_SYSTEM_TIME_
@@ -112,6 +113,19 @@ long AdvanceTime(void)
                JulDay = AbsTimeToJD(AbsTime);
                JDToGpsTime(JulDay,&GpsRollover,&GpsWeek,&GpsSecond);
                AbsTime0 = AbsTime - SimTime;
+               break;
+            case NOS3_TIME :
+               if (First) {
+                  First = 0;
+                  double JD = YMDHMS2JD(Year, Month, Day, Hour, Minute, Second);
+                  AbsTime0 = JDToAbsTime(JD);
+               }
+               usleep(1.0E6*DTSIM);
+               NOS3Time(&Year,&doy,&Month,&Day,&Hour,&Minute,&Second);
+               AbsTime = DateToAbsTime(Year,Month,Day,Hour,Minute,Second+AbsTimeOffset);
+               JulDay = AbsTimeToJD(AbsTime);
+               JDToGpsTime(JulDay,&GpsRollover,&GpsWeek,&GpsSecond);
+               SimTime = AbsTime - AbsTime0;
                break;
             /* case SSUP_TIME:
             **   RealSystemTime(&Year,&doy,&Month,&Day,&Hour,&Minute,&Second);

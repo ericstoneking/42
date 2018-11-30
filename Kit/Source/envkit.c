@@ -80,12 +80,11 @@ void EGM96(const char *ModelPath, long N, long M, double mass, double pbn[3],
       cph = cos(phi);
 
 /*    Find Fr, Fth, Fph */
-      SphericalHarmonics(N,M,r,phi,theta,Re,mu/Re,C,S,
-                         gradV);
+      SphericalHarmonics(N,M,r,phi,theta,Re,mu/Re,C,S,gradV);
       Fr  = mass*gradV[0];
       Fth = mass*gradV[1];
       Fph = mass*gradV[2];
-
+      
 /*    Transform back to cartesian coords in Newtonian frame */
       Fe[0]=(Fr*sth+Fth*cth)*cph-Fph*sph;
       Fe[1]=(Fr*sth+Fth*cth)*sph+Fph*cph;
@@ -152,8 +151,7 @@ void GMM2B(const char *ModelPath, long N, long M, double mass, double pbn[3],
       cph = cos(phi);
 
 /*    Find Fr, Fth, Fph */
-      SphericalHarmonics(N,M,r,phi,theta,Re,mu/Re,C,S,
-                         gradV);
+      SphericalHarmonics(N,M,r,phi,theta,Re,mu/Re,C,S,gradV);
       Fr  = mass*gradV[0];
       Fth = mass*gradV[1];
       Fph = mass*gradV[2];
@@ -224,8 +222,7 @@ void GLGM2(const char *ModelPath, long N, long M, double mass, double pbn[3],
       cph = cos(phi);
 
 /*    Find Fr, Fth, Fph */
-      SphericalHarmonics(N,M,r,phi,theta,Re,mu/Re,C,S,
-                         gradV);
+      SphericalHarmonics(N,M,r,phi,theta,Re,mu/Re,C,S,gradV);
       Fr  = mass*gradV[0];
       Fth = mass*gradV[1];
       Fph = mass*gradV[2];
@@ -903,7 +900,7 @@ long PolyhedronGravAcc(struct GeomType *G, double Density,
       double re1[3],re2[3],rf1[3],rf2[3],rf3[3],r1,r2,r3,r2xr3[3];
       double Num,Den,Er[3],Fr[3],Le,wf,SumWf,Gsig;
       long PosIsOutside;
-      long Ie,Ip,i,j;
+      long Ie,Ip,i;
       
       for(i=0;i<3;i++) {
          GravAccW[i] = 0.0;
@@ -976,7 +973,7 @@ long PolyhedronGravGrad(struct GeomType *G, double Density, double PosN[3],
       double *V1,*V2,*V3;
       double PosW[3],GravGradW[3][3],GC[3][3];
       double re1[3],re2[3],rf1[3],rf2[3],rf3[3],r1,r2,r3,r2xr3[3];
-      double Num,Den,Er[3],Fr[3],Le,wf,SumWf,Gsig;
+      double Num,Den,Le,wf,SumWf,Gsig;
       long PosIsOutside;
       long Ie,Ip,i,j;
       

@@ -220,6 +220,7 @@
 #define FAST_TIME 0
 #define REAL_TIME 1
 #define EXTERNAL_TIME 2
+#define NOS3_TIME 3
 
 /* World Types */
 #define SUN 0
@@ -237,6 +238,9 @@
 #define THREE_AXIS_FSW 5
 #define ISS_FSW 6
 #define CMG_FSW 7
+#define THR_FSW 8
+#define CFS_FSW 9
+#define NOS3_FSW 10
 
 /* Command Types */
 #define CMD_DIRECTION 0

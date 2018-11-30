@@ -11,21 +11,28 @@
 
 /*    All Other Rights Reserved.                                      */
 
+#ifndef TRUE
+   #define TRUE (1)
+#endif
+
+#ifndef FALSE
+   #define FALSE (0)
+#endif
 
 #ifndef PI
-   #define PI 3.141592653589793
+   #define PI (3.141592653589793)
 #endif
 
 #ifndef TWOPI
-   #define TWOPI 6.283185307179586
+   #define TWOPI (6.283185307179586)
 #endif
 
 #ifndef HALFPI
-   #define HALFPI 1.570796326794897
+   #define HALFPI (1.570796326794897)
 #endif
 
 #ifndef D2R
-   #define D2R 1.74532925199433E-2
+   #define D2R (1.74532925199433E-2)
 #endif
 
 

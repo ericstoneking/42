@@ -44,11 +44,17 @@ FFTBFLAG =
 #GSFCFLAG = 
 GSFCFLAG = -D _USE_GSFC_WATERMARK_
 
+STANDALONEFLAG = 
+#STANDALONEFLAG = -D _AC_STANDALONE_
+
+NOS3FSWFLAG = 
+#NOS3FSWFLAG = -D _ENABLE_NOS3_FSW_
+
 GMSECFLAG =
 GMSECDIR = 
 GMSECINC = 
 GMSECBIN = 
-BMSECLIB = 
+GMSECLIB = 
 #GMSECFLAG = -D _ENABLE_IPC_GMSEC_
 #GMSECDIR = ~/GMSEC/
 #GMSECINC = -I $(GMSECDIR)include/
@@ -119,18 +125,23 @@ ifeq ($(42PLATFORM),__linux__)
       GUIOBJ = $(OBJ)42GlutGui.o $(OBJ)glkit.o 
       #GLINC = -I /usr/include/
       GLINC = -I $(KITDIR)/include/GL/
-      LIBS = -lglut -lGLU -lGL 
+      LIBS = -lglut -lGLU -lGL -ldl -lm
       LFLAGS = -L $(KITDIR)/GL/lib/
       ARCHFLAG = 
    else
       GUIOBJ = 
       GLINC = 
-      LIBS = 
+      LIBS = -ldl -lm
       LFLAGS = 
       ARCHFLAG = 
    endif
+   ifneq ($(strip $(SOCKETFLAG)),)
+      ifneq ($(strip $(NOS3FSWFLAG)),)
+         LIBS += -lpthread
+      endif
+   endif
    EXENAME = 42
-   CC = g++
+   CC = gcc
 endif
 
 ifeq ($(42PLATFORM),__MSYS__)
@@ -182,15 +193,23 @@ else
    FFTBOBJ = 
 endif
 
+# If not _AC_STANDALONE_, link AcApp.c in with the rest of 42 
+ifneq ($(strip $(STANDALONEFLAG)),)
+   ACOBJ = 
+else
+   ACOBJ = $(OBJ)AcApp.o 
+endif
+
 #ANSIFLAGS = -Wstrict-prototypes -pedantic -ansi -Werror
 ANSIFLAGS = 
 
-CFLAGS = -Wall -Wshadow -Wno-deprecated -g  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(INC) -I $(KITINC) -I $(KITSRC) $(MATLABSRC) $(MATLABINC) $(SIMULINKINC) $(GMSECINC) -O0 $(ARCHFLAG) $(GUIFLAG) $(SHADERFLAG) $(TIMEFLAG) $(SOCKETFLAG) $(EMBEDDED) $(CFDFLAG) $(FFTBFLAG) $(GSFCFLAG) $(GMSECFLAG)
+CFLAGS = -Wall -Wshadow -Wno-deprecated -g  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(INC) -I $(KITINC) -I $(KITSRC) $(MATLABSRC) $(MATLABINC) $(SIMULINKINC) $(GMSECINC) -O0 $(ARCHFLAG) $(GUIFLAG) $(SHADERFLAG) $(TIMEFLAG) $(SOCKETFLAG) $(EMBEDDED) $(CFDFLAG) $(FFTBFLAG) $(GSFCFLAG) $(GMSECFLAG) $(STANDALONEFLAG) $(NOS3FSWFLAG)
 
 42OBJ = $(OBJ)42main.o $(OBJ)42exec.o $(OBJ)42actuators.o $(OBJ)42cmd.o \
 $(OBJ)42dynamics.o $(OBJ)42environs.o $(OBJ)42ephem.o $(OBJ)42fsw.o \
 $(OBJ)42init.o $(OBJ)42perturb.o $(OBJ)42report.o \
-$(OBJ)42sensors.o 
+$(OBJ)42sensors.o \
+$(OBJ)42nos3.o
 
 ifneq ($(strip $(CFDFLAG)),)
    SLOSHOBJ = $(OBJ)42CfdSlosh.o
@@ -199,7 +218,8 @@ else
 endif
 
 KITOBJ = $(OBJ)dcmkit.o $(OBJ)envkit.o $(OBJ)fswkit.o $(OBJ)geomkit.o \
-$(OBJ)iokit.o $(OBJ)mathkit.o $(OBJ)nrlmsise00kit.o $(OBJ)msis86kit.o $(OBJ)orbkit.o $(OBJ)radbeltkit.o $(OBJ)sigkit.o $(OBJ)sphkit.o $(OBJ)timekit.o
+$(OBJ)iokit.o $(OBJ)mathkit.o $(OBJ)nrlmsise00kit.o $(OBJ)msis86kit.o \
+$(OBJ)orbkit.o $(OBJ)radbeltkit.o $(OBJ)sigkit.o $(OBJ)sphkit.o $(OBJ)timekit.o
 
 ifneq ($(strip $(EMBEDDED)),)
    MATLABOBJ = $(OBJ)DetectorFSW.o $(OBJ)OpticsFSW.o
@@ -209,8 +229,11 @@ endif
 
 ##########################  Rules to link 42  #############################
 
-42 : $(42OBJ) $(GUIOBJ) $(IPCOBJ) $(FFTBOBJ) $(SLOSHOBJ) $(KITOBJ) $(MATLABOBJ)
-	$(CC) $(LFLAGS) $(GMSECBIN) -o $(EXENAME) $(42OBJ) $(GUIOBJ) $(IPCOBJ) $(FFTBOBJ) $(SLOSHOBJ) $(KITOBJ) $(MATLABOBJ) $(LIBS) $(GMSECLIB)
+42 : $(42OBJ) $(GUIOBJ) $(IPCOBJ) $(FFTBOBJ) $(SLOSHOBJ) $(KITOBJ) $(MATLABOBJ) $(ACOBJ)
+	$(CC) $(LFLAGS) $(GMSECBIN) -o $(EXENAME) $(42OBJ) $(GUIOBJ) $(IPCOBJ) $(FFTBOBJ) $(SLOSHOBJ) $(KITOBJ) $(MATLABOBJ) $(ACOBJ) $(LIBS) $(GMSECLIB)
+
+AcApp : $(OBJ)AcApp.o $(OBJ)dcmkit.o $(OBJ)mathkit.o $(OBJ)fswkit.o $(OBJ)iokit.o
+	$(CC) $(LFLAGS) -o AcApp $(OBJ)AcApp.o $(OBJ)dcmkit.o $(OBJ)mathkit.o $(OBJ)fswkit.o $(OBJ)iokit.o
 
 ####################  Rules to compile objects  ###########################
 
@@ -307,9 +330,14 @@ $(OBJ)OpticsFSW.o	: $(MATLABSRC)OpticsFSW.c
 $(OBJ)42CfdSlosh.o      : $(GSFCSRC)42CfdSlosh.c $(INC)42.h   
 	$(CC) $(CFLAGS) -c $(GSFCSRC)42CfdSlosh.c -o $(OBJ)42CfdSlosh.o  
 
-
-$(OBJ)42fftb.o      : $(GSFCSRC)42fftb.c $(INC)42.h   
+$(OBJ)42fftb.o         : $(GSFCSRC)42fftb.c $(INC)42.h   
 	$(CC) $(CFLAGS) -c $(GSFCSRC)42fftb.c -o $(OBJ)42fftb.o  
+
+$(OBJ)AcApp.o          : $(SRC)AcApp.c $(INC)42fsw.h
+	$(CC) $(CFLAGS) -c $(SRC)AcApp.c -o $(OBJ)AcApp.o
+
+$(OBJ)42nos3.o         : $(SRC)42nos3.c 
+	$(CC) $(CFLAGS) -c $(SRC)42nos3.c -o $(OBJ)42nos3.o  
 
 ########################  Miscellaneous Rules  ############################
 clean :
@@ -318,7 +346,7 @@ ifeq ($(42PLATFORM),_WIN32)
 else ifeq ($(42PLATFORM),_WIN64)
 	del .\Object\*.o .\$(EXENAME) .\InOut\*.42
 else
-	rm $(OBJ)*.o ./$(EXENAME) $(INOUT)*.42 ./Demo/*.42 ./Rx/*.42 ./Tx/*.42
+	rm $(OBJ)*.o ./$(EXENAME) ./AcApp $(INOUT)*.42 ./cFS/*.42 ./Demo/*.42 ./Rx/*.42 ./Tx/*.42
 endif
 
 

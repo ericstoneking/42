@@ -117,7 +117,7 @@ void CmdInterpreter(void)
          }
       }
 
-      while (CmdTime <= SimTime && CmdFileActive) {
+      while (CmdTime <= SimTime+0.5*DTSIM && CmdFileActive) {
          NewCmdProcessed = FALSE;
          /* Look for known command patterns */
 
@@ -126,6 +126,7 @@ void CmdInterpreter(void)
              !strncmp(CmdLine,"//",2) ||
              !strncmp(CmdLine,"#",1) ||
              !strncmp(CmdLine,"\n",1) ||
+             !strncmp(CmdLine,"\r",1) ||
              !strncmp(CmdLine,"%",1)) NewCmdProcessed = TRUE;
 
          /* Sim Commands */

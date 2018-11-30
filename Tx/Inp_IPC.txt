@@ -1,7 +1,7 @@
 <<<<<<<<<<<<<<< 42: InterProcess Comm Configuration File >>>>>>>>>>>>>>>>
 TX                                      ! IPC Mode (OFF,TX,RX,WRITEFILE,READFILE)
 SERVER                                  ! Socket Role (SERVER,CLIENT,GMSEC_CLIENT)
-localhost     42420                     ! Server Host Name, Port 
+localhost     101010                    ! Server Host Name, Port 
 TRUE                                    ! Allow Blocking (i.e. wait on RX)
 TRUE                                    ! Echo to stdout
 13                                      ! Number of mnemonics

@@ -15,8 +15,16 @@
 #ifndef __42FSW_H__
 #define __42FSW_H__
 
+#include <stdlib.h>
 #include <math.h>
+#include "fswdefines.h"
 #include "fswtypes.h"
+#include "mathkit.h"
+#include "dcmkit.h"
+#include "fswkit.h"
+#include "iokit.h"
+
+void AcFsw(struct AcType *AC);
 
 /*
 ** #ifdef __cplusplus

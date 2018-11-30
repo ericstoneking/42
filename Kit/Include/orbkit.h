@@ -83,6 +83,13 @@ struct OrbitType {
    double alpha; /* 1/SMA.  Better behaved than SMA when e near 1.0 */
    double SLR;     /* Semilatus rectum.  Always well behaved */
    double rmin;  /* Periapsis radius.  Always well behaved */
+   long J2DriftEnabled;
+   double MuPlusJ2; /* Effective mu, adjusted for average J2 effect */
+   double RAAN0,ArgP0; /* Initial values */
+   double RAANdot; /* Due to average J2 effect, rad/sec */
+   double ArgPdot; /* Due to average J2 effect, rad/sec */
+   double J2Fr0; /* Orbit-average radial acceleration due to J2 */
+   double J2Fh1; /* Coefficient for orbit-rate normal acceleration due to J2 */ 
 
    double PosN[3]; /* Position, m, expressed in N */
    double VelN[3]; /* Velocity, m/sec, expressed in N */
@@ -167,6 +174,7 @@ void PlanTwoImpulseRendezvous(double mu, double r1e[3], double v1e[3],
    double DV1[3], double DV2[3]);
 void FindLightLagOffsets(double AbsTime, struct OrbitType *Observer,
    struct OrbitType *Target, double PastPos[3], double FuturePos[3]);
+void FindJ2DriftParms(double mu, double J2, double Rw, struct OrbitType *O);
 
 /*
 ** #ifdef __cplusplus

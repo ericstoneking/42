@@ -479,10 +479,20 @@ void OrbitMotion(void)
                }
             }
             else if (O->Regime == ORB_CENTRAL) {
-               Eph2RV(O->mu,O->SLR,O->ecc,
-                      O->inc,O->RAAN,O->ArgP,
-                      AbsTime+DTSIM-O->tp,
-                      O->PosN,O->VelN,&O->anom);
+               if (O->J2DriftEnabled) {
+                  O->RAAN = O->RAAN0 + O->RAANdot*(SimTime - 0.5/O->MeanMotion*sin(2.0*O->ArgP+2.0*O->anom));
+                  O->ArgP = O->ArgP0 + O->ArgPdot*SimTime;
+                  Eph2RV(O->MuPlusJ2,O->SLR,O->ecc,
+                         O->inc,O->RAAN,O->ArgP,
+                         AbsTime+DTSIM-O->tp,
+                         O->PosN,O->VelN,&O->anom);
+               }
+               else {
+                  Eph2RV(O->mu,O->SLR,O->ecc,
+                         O->inc,O->RAAN,O->ArgP,
+                         AbsTime+DTSIM-O->tp,
+                         O->PosN,O->VelN,&O->anom);
+               }
             }
             /* Else is ORB_ZERO or ORB_FLIGHT, and no action required */
          }

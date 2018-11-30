@@ -21,36 +21,6 @@
 */
 
 /**********************************************************************/
-void FindCmgTrq(struct CMGType *C, double wb0n[3])
-{
-#if 0
-      double Ang[3],AngRate[3];
-      double Gs[3],Gds[3],wxGs[3],Ga[3];
-      double ZeroVec[3] = {0.0,0.0,0.0};
-      double ZeroMatrix[3][3] = {{0.0,0.0,0.0},{0.0,0.0,0.0},{0.0,0.0,0.0}};
-      double JunkVec1[3],JunkVec2[3];
-      long i,j;
-      
-      for(i=0;i<C->DOF;i++) {
-         Ang[i] = C->ang[i];
-         AngRate[i] = C->angrate[i];
-      }
-      Ang[C->DOF] = 0.0;
-      AngRate[C->DOF] = C->SpinRate;
-      JointPartials(C->Init,FALSE,C->Seq,123,Ang,AngRate,C->Gamma,Gs,
-         Gds,ZeroVec,ZeroMatrix,JunkVec1,JunkVec2);
-      C->Init = FALSE;
-         
-      VxV(wb0n,Gs,wxGs);
-      for(i=0;i<3;i++) {
-         Ga[i] = 0.0;
-         for(j=0;j<C->DOF;j++) Ga[i] += C->Gamma[i][j]*C->angacc[j];
-      }
-      for(i=0;i<3;i++) Trq[i] = -C->I[i]*(Ga[i] + Gds[i] + wxGs[i]);
-      MTxV(C->CB,Trq,C->Trq);
-#endif      
-}
-/**********************************************************************/
 void PassiveJointFrcTrq(double *u, double *x, struct SCType *S)
 {
       long Ig,i;
@@ -409,11 +379,9 @@ void FindTotalAngMom(struct SCType *S) {
 
       struct BodyType *B;
       struct WhlType *W;
-      struct CMGType *C;
-      double Hb[3],Hn[3],mv[3],rxmv[3],Hwn[3],Hcn[3];
+      double Hb[3],Hn[3],mv[3],rxmv[3],Hwn[3];
       double Hwb[3] = {0.0,0.0,0.0};
-      double Hcb[3] = {0.0,0.0,0.0};
-      long Ib,i,Iwhl,Icmg;
+      long Ib,i,Iwhl;
 
       /* Zero */
       for(i=0;i<3;i++) {
@@ -440,18 +408,6 @@ void FindTotalAngMom(struct SCType *S) {
       MTxV(S->B[0].CN,Hwb,Hwn);
       for(i=0;i<3;i++) S->Hvn[i] += Hwn[i];
 
-      /* CMGs */
-#if 0
-      for(Icmg=0;Icmg<S->Ncmg;Icmg++) {
-         C = &S->CMG[Icmg];
-         for(i=0;i<3;i++) {
-            Hcb[i] += C->A[i]*C->H;
-         }
-      }
-      MTxV(S->B[0].CN,Hcb,Hcn);
-      for(i=0;i<3;i++) S->Hvn[i] += Hcn[i];
-#endif
-
       /* Express in B[0] frame */
       MxV(S->B[0].CN,S->Hvn,S->Hvb);
 }
@@ -460,10 +416,9 @@ double FindTotalKineticEnergy(struct SCType *S)
 {
       struct BodyType *B;
       struct WhlType *W;
-      struct CMGType *C;
       double Iw[3],mv[3];
       double KE = 0.0;
-      long Ib,Iwhl,Icmg;
+      long Ib,Iwhl;
 
       for(Ib=0;Ib<S->Nb;Ib++) {
          B = &S->B[Ib];
@@ -476,13 +431,6 @@ double FindTotalKineticEnergy(struct SCType *S)
          W = &S->Whl[Iwhl];
          KE += 0.5*W->w*W->J*W->w;
       }
-
-#if 0
-      for(Icmg=0;Icmg<S->Ncmg;Icmg++) {
-         C = &S->CMG[Icmg];
-         KE += 0.5*C->H*C->H/C->J;
-      }
-#endif
 
       if (Orb[S->RefOrb].Regime == ORB_ZERO) {
           KE += 0.5*S->mass*VoV(S->VelN,S->VelN);
@@ -1390,13 +1338,12 @@ void FindFlexTerms(struct SCType *S)
 void FindInertiaTrq(struct SCType *S)
 {
       struct BodyType *B;
-      struct CMGType *C;
       double H[3],wxH[3],Ia[3];
       double cPexa[3];
       double CAccR[3];
-      long Ib,i,j,Nf,Icmg;
+      long Ib,i,j,Nf;
 
-      /*  -wxH for B[0], including wheels and CMGs. */
+      /*  -wxH for B[0], including wheels. */
       /*  B[0].AlphaR always = 0 */
       B = &S->B[0];
       MxV(B->I,B->wn,H);
@@ -1406,14 +1353,6 @@ void FindInertiaTrq(struct SCType *S)
             H[i] += S->Whl[j].H*S->Whl[j].A[i];
          }
       }
-#if 0
-      for(Icmg=0;Icmg<S->Ncmg;Icmg++) {
-         C = &S->CMG[Icmg];
-         for(i=0;i<3;i++) {
-            H[i] += C->A[i]*C->H;
-         }
-      }
-#endif
 
       VxV(B->wn,H,wxH);
       for(i=0;i<3;i++) B->InertiaTrq[i] =  -wxH[i];
@@ -1766,11 +1705,10 @@ void KaneNBodyEOM(double *u, double *x, double *h,
                   double *ufdot, double *xfdot,
                   struct SCType *S)
 {
-      long i,j,k,Nk,Ig,Ib,N,ii,jj,Icmg;
+      long i,j,k,Nk,Ig,Ib,N,ii,jj;
       struct DynType *D;
       struct JointType *G;
       struct BodyType *B;
-      struct CMGType *C;
       double WhlTrq[3] = {0.0,0.0,0.0};
       double TrqBo[3],TrqGo[3],TrqBi[3];
       double FrcBo[3],FrcGo[3],FrcBi[3],FrcGi[3];
@@ -1786,17 +1724,6 @@ void KaneNBodyEOM(double *u, double *x, double *h,
             WhlTrq[i] -= S->Whl[j].Trq*S->Whl[j].A[i];
          }
       }
-
-      /* Apply CMG torque to B[0] */
-      #if 0
-      for(Icmg=0;Icmg<S->Ncmg;Icmg++) {
-         C = &S->CMG[Icmg];
-         FindCmgTrq(C,u[0]);
-         for(i=0;i<3;i++) {
-            WhlTrq[i] += C->Trq[i];
-         }
-      }
-      #endif
 
       MapStateVectorToBodyStates(u,x,uf,xf,S);
 
@@ -2013,7 +1940,6 @@ void KaneNBodyEOM(double *u, double *x, double *h,
       for (i=0;i<S->Nw;i++) {
          hdot[i] = S->Whl[i].Trq;
       }
-
 }
 /**********************************************************************/
 /*  PAngVelc (for Constraints)                                        */
@@ -2127,8 +2053,7 @@ void KaneNBodyConstraints(struct SCType *S)
       struct DynType *D;
       struct BodyType *B;
       struct JointType *G;
-      struct CMGType *C;
-      long Ig,Ib,Icmg,i,j;
+      long Ig,Ib,i,j;
       double WhlTrq[3] = {0.0,0.0,0.0};
       double TrqBo[3],TrqGo[3],TrqBi[3];
       double FrcBo[3],FrcGo[3],FrcBi[3],FrcGi[3];
@@ -2143,16 +2068,6 @@ void KaneNBodyConstraints(struct SCType *S)
             WhlTrq[i] -= S->Whl[j].Trq*S->Whl[j].A[i];
          }
       }
-#if 0
-      /* Apply CMG torque to B[0] */
-      for(Icmg=0;Icmg<S->Ncmg;Icmg++) {
-         C = &S->CMG[Icmg];
-         FindCmgAxisAndTrq(C);
-         for(i=0;i<3;i++) {
-            WhlTrq[i] += C->Trq[i];
-         }
-      }
-#endif
 
       MapStateVectorToBodyStates(D->u,D->x,D->uf,D->xf,S);
 
@@ -2311,7 +2226,7 @@ void KaneNBodyRK4(struct SCType *S)
       double *h,*hh,*dh,*hdot;
       double *uf,*uuf,*duf,*ufdot;
       double *xf,*xxf,*dxf,*xfdot;
-      long i,j,iu,Ig;
+      long i,iu,Ig;
       long Nu,Nx,Nw,Nf;
 
       /* Save some typing (and dereferencing) */
@@ -2404,10 +2319,6 @@ void KaneNBodyRK4(struct SCType *S)
          xxf[i] = xf[i] + 0.5*DTSIM*dxf[i];
          xfdot[i] = dxf[i]/6.0;
       }
-      /* Control Moment Gyros */
-      for(i=0;i<S->Ncmg;i++) {
-         for(j=0;j<3;j++) S->CMG[i].ang[j] += 0.5*DTSIM*S->CMG[i].angrate[j];
-      }
 
       /* This call must be made here, so that du is taken at the */
       /* same instant as all the other configuration variables */
@@ -2459,10 +2370,6 @@ void KaneNBodyRK4(struct SCType *S)
          ufdot[i] += duf[i]/3.0;
          xxf[i] = xf[i] + DTSIM*dxf[i];
          xfdot[i] += dxf[i]/3.0;
-      }
-      /* Control Moment Gyros */
-      for(i=0;i<S->Ncmg;i++) {
-         for(j=0;j<3;j++) S->CMG[i].ang[j] += 0.5*DTSIM*S->CMG[i].angrate[j];
       }
 
       /* Fourth Call */
@@ -2523,8 +2430,6 @@ void KaneNBodyRK4(struct SCType *S)
          W->ang = fmod(W->ang,TwoPi);
       }
 
-/* .. CMGs */
-
 /* .. For Accelerometers */
       for(i=0;i<3;i++) S->alfbn[i] = udot[i];
       MxV(S->B[0].CN,&udot[Nu-3],S->abs);
@@ -2545,11 +2450,10 @@ void OneBodyEOM(double *u, double *x, double *h,
       struct BodyType *B;
       struct DynType *D;
       struct FlexNodeType *FN;
-      struct CMGType *C;
       double Hb[3],WhlTorq[3],wxH[3],Trq[3];
       double Iinv[3][3];
       long i,j,k;
-      long If,Nf,In,Icmg;
+      long If,Nf,In;
 
 
       D = &S->Dyn;
@@ -2564,29 +2468,12 @@ void OneBodyEOM(double *u, double *x, double *h,
             Hb[i]+= h[j]*S->Whl[j].A[i];
          }
       }
-#if 0
-      for(Icmg=0;Icmg<S->Ncmg;Icmg++) {
-         C = &S->CMG[Icmg];
-         FindCmgTrq(C,B->wn);
-         for(i=0;i<3;i++) {
-            Hb[i] += C->A[i]*C->H;
-         }
-      }
-#endif
 
 /* .. Build wheel torque in B0 frame */
       for (i=0;i<3;i++) {
          WhlTorq[i]=0.0;
          for (j=0;j<S->Nw;j++){
             WhlTorq[i]-=S->Whl[j].Trq*S->Whl[j].A[i];
-         }
-      }
-
-      /* Apply CMG torque to B[0] */
-      for(Icmg=0;Icmg<S->Ncmg;Icmg++) {
-         C = &S->CMG[Icmg];
-         for(i=0;i<3;i++) {
-            WhlTorq[i] += C->Trq[i];
          }
       }
 
@@ -2714,10 +2601,6 @@ void OneBodyRK4(struct SCType *S)
          xxf[i] = xf[i] + 0.5*DTSIM*dxf[i];
          xfdot[i] = dxf[i]/6.0;
       }
-      /* Control Moment Gyros */
-      for(i=0;i<S->Ncmg;i++) {
-         for(j=0;j<3;j++) S->CMG[i].ang[j] += 0.5*DTSIM*S->CMG[i].angrate[j];
-      }
 
       /* if (OutFlag) ReportBodyAccelerations(S); */
       /* if (OutFlag) ReportUdot(S); */
@@ -2765,10 +2648,6 @@ void OneBodyRK4(struct SCType *S)
          xxf[i] = xf[i] + DTSIM*dxf[i];
          xfdot[i] += dxf[i]/3.0;
       }
-      /* Control Moment Gyros */
-      for(i=0;i<S->Ncmg;i++) {
-         for(j=0;j<3;j++) S->CMG[i].ang[j] += 0.5*DTSIM*S->CMG[i].angrate[j];
-      }
 
       /* Fourth Call */
       OneBodyEOM(uu,xx,hh,uuf,xxf,du,dx,dh,duf,dxf,S);
@@ -2810,8 +2689,6 @@ void OneBodyRK4(struct SCType *S)
          W->ang += W->w*DTSIM;
          W->ang = fmod(W->ang,TwoPi);
       }
-
-/* .. CMGs */
 
 /* .. Flex */
       for(In=0;In<B->NumFlexNodes;In++) {
@@ -2983,7 +2860,12 @@ void EnckeRK4(struct SCType *S)
       R[2] = O->PosN[2];
 
       magr = sqrt(R[0]*R[0]+R[1]*R[1]+R[2]*R[2]);
-      muR3 = O->mu/(magr*magr*magr);
+      if (O->J2DriftEnabled) {
+         muR3 = O->MuPlusJ2/(magr*magr*magr);
+      }
+      else {
+         muR3 = O->mu/(magr*magr*magr);
+      }
 
       u[0] = S->PosR[0];
       u[1] = S->PosR[1];

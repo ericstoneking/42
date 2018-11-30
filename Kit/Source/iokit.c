@@ -23,9 +23,8 @@
 FILE *FileOpen(const char *Path, const char *File, const char *CtrlCode)
 {
       FILE *FilePtr;
-      char *FileName;
+      char FileName[1024];
 
-      FileName = (char *) calloc(strlen(Path)+strlen(File)+1,sizeof(char));
       strcpy(FileName,Path);
       strcat(FileName,File);
       FilePtr=fopen(FileName,CtrlCode);
@@ -33,7 +32,6 @@ FILE *FileOpen(const char *Path, const char *File, const char *CtrlCode)
          printf("Error opening %s: %s\n",FileName, strerror(errno));
          exit(1);
       }
-      free(FileName);
       return(FilePtr);
 }
 /**********************************************************************/

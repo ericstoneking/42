@@ -2526,7 +2526,39 @@ void FindLightLagOffsets(double AbsTime, struct OrbitType *Observer,
 
 #undef SPEED_OF_LIGHT
 }
+/**********************************************************************/
+void FindJ2DriftParms(double mu, double J2, double Rw, struct OrbitType *O)
+{
+#define TWOPI (6.283185307179586)
+      double p2,Coef,e2,e4,sin2i,n;
+      
+      n = sqrt(mu/O->SMA/O->SMA/O->SMA);
+      p2 = O->SLR*O->SLR;
+      Coef = 1.5*J2*Rw*Rw/p2;
+      e2 = O->ecc*O->ecc;
+      e4 = e2*e2;
+      sin2i = sin(O->inc)*sin(O->inc);
 
+/* .. Regression of Ascending Node */
+      O->RAANdot = -Coef*n*cos(O->inc);
+
+/* .. Precession of Periapsis */
+      O->ArgPdot = Coef*n*(2.0-2.5*sin2i);
+      
+/* .. Avg Radial Accel (positive toward zenith) */
+      O->J2Fr0 = -Coef*mu/p2*(1.0+3.0*e2+0.375*e4-1.5*sin2i*(1.0-cos(2.0*O->ArgP)*(1.5*e2+0.25*e4)));
+/* .. Amplitude for orbit-rate orbit-normal accel */
+      O->J2Fh1 = -2.0*Coef*mu/p2*cos(O->inc)*sin(O->inc);
+
+/* .. Effective Mu */
+      O->MuPlusJ2 = O->mu - O->SMA*O->SMA*O->J2Fr0;
+
+/* .. Adjust mean motion, period */
+      O->MeanMotion = sqrt(O->MuPlusJ2/O->SMA/O->SMA/O->SMA);
+      O->Period = TWOPI/O->MeanMotion;
+      
+#undef TWOPI
+}
 
 /* #ifdef __cplusplus
 ** }

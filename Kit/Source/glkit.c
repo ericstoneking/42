@@ -1396,158 +1396,6 @@ void DrawPulsars(double LineOfSight[3],double BuckyPf[32][3],
       glEnable(GL_LIGHTING);
 }
 /**********************************************************************/
-void LoadSunTextures(GLfloat SunDiskColor[3], GLfloat SunlightColor[3],
-                     GLuint *SunTexTag,GLuint *SunlightTexTag,
-                     GLuint *SunlightRingTexTag)
-{
-
-      float f,sinlat;
-      long i,j;
-      GLubyte SunTex[128][4];
-      GLubyte SunlightTex[512][4];
-      GLubyte SunlightRingTex[2048][4];
-      double Pi = 4.0*atan(1.0);
-
-      for(i=0;i<128;i++) {
-         f = 255.0*(127.0-((float) i))/127.0;
-         SunTex[i][0] = (GLubyte) (f*SunDiskColor[0]);
-         SunTex[i][1] = (GLubyte) (f*SunDiskColor[1]);
-         SunTex[i][2] = (GLubyte) (f*SunDiskColor[2]);
-         SunTex[i][3] = (GLubyte) (f);
-      }
-      glGenTextures(1,SunTexTag);
-      glBindTexture(GL_TEXTURE_1D,*SunTexTag);
-      glTexParameteri(GL_TEXTURE_1D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-      glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-      glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,128,0,GL_RGBA,
-         GL_UNSIGNED_BYTE,SunTex);
-
-      for(i=0;i<512;i++) {
-         sinlat = sin((((float) i) - 255.5)/512.0*Pi);
-         if (sinlat < 0.0) {
-            for(j=0;j<3;j++) {
-               SunlightTex[i][j] = 0;
-            }
-         }
-         else {
-            for(j=0;j<3;j++) {
-               /* Cube root chosen for aesthetics */
-               SunlightTex[i][j] =
-                  (GLubyte) (255.0*pow(sinlat,0.33)*SunlightColor[j]);
-            }
-         }
-         for(j=0;j<3;j++) {
-            if (SunlightTex[i][j] < 32) SunlightTex[i][j] = 32;
-         }
-      }
-      for(i=0;i<512;i++) SunlightTex[i][3] = 255;
-
-      glGenTextures(1,SunlightTexTag);
-      glBindTexture(GL_TEXTURE_1D,*SunlightTexTag);
-      glTexParameteri(GL_TEXTURE_1D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-      glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,512,0,GL_RGBA,
-         GL_UNSIGNED_BYTE,SunlightTex);
-
-      for(i=0;i<1000;i++) {
-         for(j=0;j<3;j++)
-            SunlightRingTex[i][j] =
-               (GLubyte) (255.0*SunlightColor[j]);
-      }
-      for(i=1048;i<2048;i++) {
-         for(j=0;j<3;j++)
-            SunlightRingTex[i][j] = 0;
-      }
-      for(i=0;i<48;i++) {
-         f = 255.0*(1.0-((float) i)/48.0);
-         for(j=0;j<3;j++)
-            SunlightRingTex[1000+i][j] =
-               (GLubyte) (f*SunlightColor[j]);
-      }
-      for(i=0;i<2048;i++) SunlightRingTex[i][3] = 255;
-
-      glGenTextures(1,SunlightRingTexTag);
-      glBindTexture(GL_TEXTURE_1D,*SunlightRingTexTag);
-      glTexParameteri(GL_TEXTURE_1D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-      glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,2048,0,GL_RGBA,
-         GL_UNSIGNED_BYTE,SunlightRingTex);
-}
-/**********************************************************************/
-void DrawSun(double LoS[3], double SunRad, double rh[3],
-             GLfloat SunDiskColor[3],GLuint SunTexTag)
-{
-      double TwoPi = 6.28318530717959;
-
-      static long First = 1;
-      static double x1[48];
-      static double x2[48];
-      static double y1[48];
-      static double y2[48];
-      double r[3],LoR,C[3][3];
-      long i;
-
-      if (First) {
-         double CoronaRad = 4.0;
-         First = 0;
-         for(i=0;i<48;i++) {
-            x1[i] = cos(((double) i)/48.0*TwoPi);
-            y1[i] = sin(((double) i)/48.0*TwoPi);
-            x2[i] = CoronaRad*cos(((double) i)/48.0*TwoPi);
-            y2[i] = CoronaRad*sin(((double) i)/48.0*TwoPi);
-         }
-      }
-
-      CopyUnitV(rh,r);
-      LoR = VoV(LoS,r);
-      if (LoR < 0.0) {
-
-         glPushMatrix();
-
-         glTranslatef(-rh[0],-rh[1],-rh[2]);
-         glScalef(SunRad,SunRad,SunRad);
-
-         for(i=0;i<3;i++) C[2][i] = r[i];
-         PerpBasis(C[2],C[0],C[1]);
-         RotateR2L(C);
-
-         /* Solar disk */
-         glMaterialfv(GL_FRONT,GL_EMISSION,SunDiskColor);
-         glBegin(GL_TRIANGLE_FAN);
-            glVertex3f(0.0,0.0,0.0);
-            for(i=0;i<48;i++) {
-               glVertex3f(x1[i],y1[i],0.0);
-            }
-            glVertex3f(x1[0],y1[0],0.0);
-         glEnd();
-
-         /* Corona */
-         glActiveTexture(GL_TEXTURE0);
-         glEnable(GL_TEXTURE_1D);
-         glBindTexture(GL_TEXTURE_1D,SunTexTag);
-         glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
-
-         glBegin(GL_QUAD_STRIP);
-            for(i=0;i<48;i++) {
-               glTexCoord1f(0.008);
-               glVertex3f(x1[i],y1[i],0.0);
-               glTexCoord1f(1.0);
-               glVertex3f(x2[i],y2[i],0.0);
-            }
-            glTexCoord1f(0.008);
-            glVertex3f(x1[0],y1[0],0.0);
-            glTexCoord1f(1.0);
-            glVertex3f(x2[0],y2[0],0.0);
-         glEnd();
-         glDisable(GL_TEXTURE_1D);
-
-         glPopMatrix();
-      }
-}
-/**********************************************************************/
 GLuint LoadMilkyWay(const char *PathName, const char *FileName, double CGH[3][3],
    double SkyDistance, double AlphaMask[4])
 {
@@ -2469,161 +2317,6 @@ void DrawUnitMercatorSphere(GLuint Nlat, GLuint Nlng)
          glEnd();
       }
 }
-/**********************************************************************/
-void DrawRing(GLfloat InRad, GLfloat OutRad, GLuint Nring, GLuint Nslice)
-{
-      GLfloat PosNorm[3] = {0.0,0.0,1.0};
-      GLfloat NegNorm[3] = {0.0,0.0,-1.0};
-      GLfloat White[4] = {1.0,1.0,1.0,1.0};
-      GLfloat Black[4] = {0.0,0.0,0.0,1.0};
-      GLfloat TwoPi = 8.0*atan(1.0);
-      GLfloat dR,dang,Rin,Rout,ang,c,s,r[3];
-      GLfloat Sin,Sout;
-      GLuint Iring,Islice;
-
-      glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE,White);
-      glMaterialfv(GL_FRONT,GL_SPECULAR,Black);
-      glMaterialfv(GL_FRONT,GL_EMISSION,Black);
-
-      dR = (OutRad-InRad)/((GLfloat) Nring);
-      dang = TwoPi/((GLfloat) Nslice);
-      for(Iring=0;Iring<Nring-1;Iring++) {
-         Rin = InRad + ((GLfloat) Iring)*dR;
-         Rout = Rin + dR;
-         Sin = ((GLfloat) Iring)/((GLfloat) Nring);
-         Sout = ((GLfloat) Iring+1)/((GLfloat) Nring);
-         glBegin(GL_QUAD_STRIP);
-            glNormal3fv(PosNorm);
-            for(Islice=0;Islice<=Nslice;Islice++) {
-               ang = ((GLfloat) Islice)*dang;
-               c = cos(ang);
-               s = sin(ang);
-               r[0] = Rin*c;
-               r[1] = Rin*s;
-               r[2] = 0.0;
-               glMultiTexCoord1f(GL_TEXTURE0,Sin);
-               glVertex3fv(r);
-               r[0] = Rout*c;
-               r[1] = Rout*s;
-               r[2] = 0.0;
-               glMultiTexCoord1f(GL_TEXTURE0,Sout);
-               glVertex3fv(r);
-            }
-         glEnd();
-         glBegin(GL_QUAD_STRIP);
-            glNormal3fv(NegNorm);
-            for(Islice=0;Islice<=Nslice;Islice++) {
-               ang = -((GLfloat) Islice)*dang;
-               c = cos(ang);
-               s = sin(ang);
-               r[0] = Rin*c;
-               r[1] = Rin*s;
-               r[2] = 0.0;
-               glMultiTexCoord1f(GL_TEXTURE0,Sin);
-               glVertex3fv(r);
-               r[0] = Rout*c;
-               r[1] = Rout*s;
-               r[2] = 0.0;
-               glMultiTexCoord1f(GL_TEXTURE0,Sout);
-               glVertex3fv(r);
-            }
-         glEnd();
-      }
-}
-/**********************************************************************/
-void DrawWorld(double LoS[3],double rad,double drn[3],double CWN[3][3],
-         double svn[3],long HasRing, long HasAtmo, GLfloat WorldColor[4],
-         GLuint TexTag,GLuint ColCubeTag, GLuint BumpCubeTag,
-         GLuint CloudGlossCubeTag, GLuint RingTexTag,
-         GLuint SphereList, GLuint RingList)
-{
-      long k;
-      double svw[3],PovPosW[3];
-      GLfloat Black[4] = {0.0,0.0,0.0,1.0};
-      GLfloat White[4] = {1.0,1.0,1.0,1.0};
-      GLfloat LightPos[4] = {0.0,0.0,0.0,0.0};
-      GLint PovLoc,HazeLoc;
-      #ifndef _USE_SHADERS_
-         GLfloat DistantAmbientLightColor[4] = {0.1,0.1,0.1,1.0};
-      #endif
-
-      glPushMatrix();
-
-      glMaterialfv(GL_FRONT,GL_AMBIENT,White);
-      glMaterialfv(GL_FRONT,GL_DIFFUSE,White);
-      glMaterialfv(GL_FRONT,GL_SPECULAR,White);
-      glMaterialfv(GL_FRONT,GL_EMISSION,Black);
-      glMaterialf(GL_FRONT,GL_SHININESS,100.0);
-
-#ifndef _USE_SHADERS_
-      /* No shaders or cube maps */
-      /* Scale to project to desired radius */
-      glTranslated(-drn[0],-drn[1],-drn[2]);
-      MxV(CWN,svn,svw);
-      for(k=0;k<3;k++) LightPos[k] = svn[k];
-      glLightfv(GL_LIGHT0,GL_POSITION,LightPos);
-
-      RotateR2L(CWN);
-      glScalef(rad,rad,rad);
-
-      glEnable(GL_TEXTURE_2D);
-      glBindTexture(GL_TEXTURE_2D,TexTag);
-      glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
-      glCallList(SphereList);
-      glDisable(GL_TEXTURE_2D);
-
-      if (HasRing) {
-         glEnable(GL_TEXTURE_1D);
-         glBindTexture(GL_TEXTURE_1D,RingTexTag);
-         glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
-         glLightModelfv(GL_LIGHT_MODEL_AMBIENT,White);
-         glCallList(RingList);
-         glLightModelfv(GL_LIGHT_MODEL_AMBIENT,DistantAmbientLightColor);
-         glDisable(GL_TEXTURE_1D);
-      }
-#else
-      /* Use shaders and cube maps */
-      /* Scale to project to desired radius */
-      glTranslated(-drn[0],-drn[1],-drn[2]);
-
-      /* Modify next 3 lines for multiple suns */
-      MxV(CWN,svn,svw);
-      MxV(CWN,drn,PovPosW);
-      for(k=0;k<3;k++) LightPos[k] = svn[k];
-      glLightfv(GL_LIGHT0,GL_POSITION,LightPos);
-
-      RotateR2L(CWN);
-      glScalef(rad,rad,rad);
-
-      glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_CUBE_MAP,ColCubeTag);
-      glActiveTexture(GL_TEXTURE1);
-      glBindTexture(GL_TEXTURE_CUBE_MAP,BumpCubeTag);
-      glActiveTexture(GL_TEXTURE2);
-      glBindTexture(GL_TEXTURE_CUBE_MAP,CloudGlossCubeTag);
-      glActiveTexture(GL_TEXTURE3);
-      glBindTexture(GL_TEXTURE_1D,RingTexTag);
-
-      glUseProgram(WorldShaderProgram);
-      PovLoc = glGetUniformLocation(WorldShaderProgram,"PovPosW");
-      HazeLoc = glGetUniformLocation(WorldShaderProgram,"HazeEnabled");
-      for(k=0;k<3;k++) PovPosW[k] /= rad;
-      glUniform3f(PovLoc,PovPosW[0],PovPosW[1],PovPosW[2]);
-      glUniform1i(HazeLoc,HasAtmo);
-      glCallList(SphereList);
-
-      if (HasRing) {
-         glActiveTexture(GL_TEXTURE0);
-         glBindTexture(GL_TEXTURE_1D,RingTexTag);
-         glUseProgram(RingShaderProgram);
-         glCallList(RingList);
-      }
-      glUseProgram(0);
-      glActiveTexture(GL_TEXTURE0);
-#endif
-
-      glPopMatrix();
-}
 /*********************************************************************/
 void DrawBullseye(GLfloat Color[4],double p[4])
 {
@@ -3088,19 +2781,21 @@ void CheckOpenGLProperties(void)
 /**********************************************************************/
 /*  The Hammer (or Aitoff-Hammer) projection is an equal-area map     */
 /*  projection.  This function copied from Wikipedia.                 */
+/*  -2*SqrtTwo < x < +2*SqrtTwo                                       */
+/*  -SqrtTwo < y < +SqrtTwo                                           */
 void HammerProjection(double Lng, double Lat, double *x, double *y)
 {
       double SQRTTWO = 1.41421356237310;
 
-      double CosLat,SinLat,CosHalfLng,SinHalfLat,Den;
+      double CosLat,SinLat,CosHalfLng,SinHalfLng,Den;
 
       CosLat = cos(Lat);
       SinLat = sin(Lat);
       CosHalfLng = cos(0.5*Lng);
-      SinHalfLat = sin(0.5*Lat);
+      SinHalfLng = sin(0.5*Lng);
       Den = sqrt(1.0+CosLat*CosHalfLng);
 
-      *x = 2.0*SQRTTWO*CosLat*SinHalfLat/Den;
+      *x = 2.0*SQRTTWO*CosLat*SinHalfLng/Den;
       *y = SQRTTWO*SinLat/Den;
 
 }

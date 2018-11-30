@@ -469,7 +469,7 @@ void UNITQ(double Q[4])
 
       A=sqrt(Q[0]*Q[0]+Q[1]*Q[1]+Q[2]*Q[2]+Q[3]*Q[3]);
       if (A == 0.0) {
-         printf("Divide by zero in UNITQ.  You'll want to fix that.\n");
+         printf("Divide by zero in UNITQ (Line %d of mathkit.c).  You'll want to fix that.\n",__LINE__);
          exit(1);
       }
       else {
@@ -596,8 +596,7 @@ void Legendre(long N, long M, double x,
 /* gradV[2] = Longitudinal (positive east)                            */
 void SphericalHarmonics(long N, long M, double r, double phi,
         double theta, double Re, double K,
-        double C[NMAX+1][NMAX+1], double S[NMAX+1][NMAX+1],
-        double gradV[3])
+        double C[NMAX+1][NMAX+1], double S[NMAX+1][NMAX+1],double gradV[3])
 {
 
       double P[NMAX+1][NMAX+1],sdP[NMAX+1][NMAX+1];
