@@ -690,6 +690,12 @@ void Ephemerides(void)
             S = &SC[Isc];
             O = &Orb[S->RefOrb];
             W = &World[O->World];
+            
+            /* Copy these for convenience */
+            for(i=0;i<3;i++) {
+               S->PosRinN[i] = O->PosN[i];
+               S->VelRinN[i] = O->VelN[i];
+            }
 
             /* Local-vertical frame tied to SC */
             if (O->Regime == ORB_ZERO) {

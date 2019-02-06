@@ -978,11 +978,11 @@ void ContactFrcTrq(struct SCType *S)
       }
 
 /* .. Contact with other S/C */
-      for(Isc=S->Tag+1;Isc<Nsc;Isc++) {
+      for(Isc=S->ID+1;Isc<Nsc;Isc++) {
          Sc = &SC[Isc];
          /* Cheap S/Sc proximity checks */
          if (!Sc->Exists) continue;
-         if (Sc->Tag == S->Tag) continue;
+         if (Sc->ID == S->ID) continue;
          if (Orb[Sc->RefOrb].World != O->World) continue;
          for(i=0;i<3;i++) dx[i] = S->PosN[i] - Sc->PosN[i];
          if (MAGV(dx) > 1.2*(S->BBox.radius + Sc->BBox.radius)) continue;
@@ -1026,7 +1026,7 @@ void EnvTrq(struct SCType *S)
 
       if (E->First) {
          E->First = 0;
-         sprintf(envfilename,"EnvTrq%02li.42",S->Tag);
+         sprintf(envfilename,"EnvTrq%02li.42",S->ID);
          E->envfile = FileOpen(InOutPath,envfilename,"w");
       }
 

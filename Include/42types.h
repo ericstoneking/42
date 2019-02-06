@@ -55,8 +55,8 @@ struct BodyType {
    double c[3]; /* First mass moment about ref pt, expressed in B */
    double I[3][3]; /* Moment of Inertia, about ref pt, expressed in B frame */
    double Hgyro[3];  /* Constant embedded momentum, for CMGs and rotating instruments */
-   double wn[3]; /* Angular Velocity of B expressed in B frame */
-   double qn[4];
+   double wn[3]; /* Angular Velocity of B expressed in B frame [[rad/sec]] =~*/
+   double qn[4]; /* =~*/
    double vn[3]; /* velocity of B ref pt expressed in N frame */
    double pn[3]; /* position of B ref pt in N frame expressed in N frame */
    double CN[3][3]; /* Direction Cosine of B frame in N frame */
@@ -168,7 +168,7 @@ struct JointType {
 };
 
 struct WhlType {
-   double H;  /* Angular Momentum, Nms */
+   double H;  /* Angular Momentum, [[Nms]] =~*/
    double J;  /* Rotary inertia, kg-m^2 */
    double w;  /* Angular speed, rad/sec */
    double A[3]; /* Axis vector wrt Body 0 */
@@ -251,6 +251,7 @@ struct CssType {
    double CosFov;
    double Scale;
    double Quant;
+   long FlexNode;
 
    /* Variables */
    long SampleCounter;
@@ -267,6 +268,7 @@ struct FssType {
    double FovAng[2];
    double NEA;
    double Quant;
+   long FlexNode;
 
    /* Variables */
    long SampleCounter;
@@ -306,6 +308,7 @@ struct GpsType {
    double PosNoise;
    double VelNoise;
    double TimeNoise;
+   long FlexNode;
    
    /* Variables */
    long SampleCounter;
@@ -388,7 +391,7 @@ struct EnvTrqType {
 };
 
 struct SCType {
-   long Tag;     /* SC[Tag].Tag = Tag */
+   long ID;     /* SC[x].ID = x */
    long Exists;
    char Label[40];
    long RotDOF;  /* STEADY, KIN_JOINT, DYN_JOINT */
@@ -431,8 +434,10 @@ struct SCType {
    double mass;
    double cm[3]; /* wrt B0 origin, expressed in B0 frame */
    double I[3][3]; /* Inertia matrix, wrt SC.cm, expressed in B0 frame */
-   double PosR[3]; /* Position of cm wrt Reference Orbit (Orb[RefOrb], or R), m, expressed in N */
-   double VelR[3]; /* Velocity of cm wrt R, m/sec, expressed in N */
+   double PosRinN[3]; /* Position of Reference Orbit [[m]] wrt N =~*/
+   double VelRinN[3]; /* Velocity of Reference Orbit [[m/s]] wrt N =~*/
+   double PosR[3]; /* Position of cm wrt Reference Orbit [[m]], expressed in N =~*/
+   double VelR[3]; /* Velocity of cm wrt R [[m/s]], expressed in N =~*/
    double PosEH[3];  /* Position of cm wrt R, m, in Euler-Hill coords */
    double VelEH[3];  /* Velocity of cm wrt R, m, in Euler-Hill coords */
    double PosN[3];   /* Position of cm wrt origin of N, m, expressed in N */
@@ -443,11 +448,11 @@ struct SCType {
    double VelH[3];  /* Velocity of cm wrt H frame, expressed in H */
    double Frc[3]; /* Force, N, expressed in N */
    double svn[3]; /* Sun-pointing unit vector, expressed in N */
-   double svb[3]; /* Sun-pointing unit vector, expressed in SC.B[0] */
+   double svb[3]; /* Sun-pointing unit vector, expressed in SC.B[0] =~*/
    double bvn[3]; /* Magfield, Tesla, expressed in N */
-   double bvb[3]; /* Magfield, Tesla, expressed in SC.B[0] */
+   double bvb[3]; /* Magfield [[Tesla]], expressed in SC.B[0] =~*/
    double Hvn[3]; /* Total SC angular momentum, Nms, expressed in N */
-   double Hvb[3]; /* Total SC angular momentum, Nms, expressed in SC.B[0] */
+   double Hvb[3]; /* Total SC angular momentum [[Nms]], expressed in SC.B[0] =~*/
    long Eclipse;
    double AtmoDensity;
    double DragCoef;

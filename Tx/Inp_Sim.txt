@@ -1,6 +1,6 @@
 <<<<<<<<<<<<<<<<<  42: The Mostly Harmless Simulator  >>>>>>>>>>>>>>>>>
 ************************** Simulation Control **************************
-REAL                            !  Time Mode (FAST, REAL, or EXTERNAL)
+FAST                            !  Time Mode (FAST, REAL, or EXTERNAL)
 86400.0     1.0                 !  Sim Duration, Step Size [sec]
 1.0                             !  File Output Interval [sec]
 FALSE                           !  Graphics Front End?

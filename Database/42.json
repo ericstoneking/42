@@ -1,0 +1,324 @@
+{
+   "Table Definition": [
+      {
+         "Table Name": "SphereHarmType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "FormationType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "FlexNodeType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "BodyType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name":  "wn",
+               "Description":  "Angular Velocity of B expressed in B frame",
+               "Units":  "rad/sec",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "qn",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Array Size":  "4",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Packet Role":   ""
+            }
+         ]
+      },
+      {
+         "Table Name": "JointType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "WhlType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name":  "H",
+               "Description":  "Angular Momentum,",
+               "Units":  "Nms",
+               "Data Type":  "double",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Packet Role":   ""
+            }
+         ]
+      },
+      {
+         "Table Name": "MTBType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "ThrType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "GyroType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "MagnetometerType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "CssType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "FssType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "StarTrackerType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "GpsType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "AccelType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "JointPathTableType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "BodyPathTableType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "DynType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "EnvTrqType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "SCType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name":  "PosRinN",
+               "Description":  "Position of Reference Orbit wrt N",
+               "Units":  "m",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "VelRinN",
+               "Description":  "Velocity of Reference Orbit wrt N",
+               "Units":  "m/s",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "PosR",
+               "Description":  "Position of cm wrt Reference Orbit, expressed in N",
+               "Units":  "m",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "VelR",
+               "Description":  "Velocity of cm wrt R, expressed in N",
+               "Units":  "m/s",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "svb",
+               "Description":  "Sun-pointing unit vector, expressed in SC.B[0]",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "bvb",
+               "Description":  "Magfield, expressed in SC.B[0]",
+               "Units":  "Tesla",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "Hvb",
+               "Description":  "Total SC angular momentum, expressed in SC.B[0]",
+               "Units":  "Nms",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Packet Role":   ""
+            }
+         ]
+      },
+      {
+         "Table Name": "TargetType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "POVType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "RegionType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "AtmoType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "WorldType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "SpotType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "WidgetType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "FovType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "TdrsType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "GroundStationType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "FBOType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "OrreryPOVType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      }
+   ]
+}

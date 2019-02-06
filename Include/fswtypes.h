@@ -21,7 +21,13 @@
 ** #endif
 */
 
+/* Variable tags for message building: */
+/* > : Send from 42 to standalone */
+/* < : Send from standalone to 42 */
+/* = : Send both ways (eg. 42 Tx to 42 Rx) */
+
 struct CmdVecType {
+   /*~ Internal Variables ~*/
    long Mode;
    long Frame;
    long TrgType;
@@ -37,6 +43,7 @@ struct CmdVecType {
 };
 
 struct CmdType {
+   /*~ Internal Variables ~*/
    long Parm;
    long Frame;
    double AngRate[3];
@@ -51,27 +58,29 @@ struct CmdType {
    double Hvr[3];
    double Hvn[3];
    double OldCRN[3][3];
+
+   /*~ Structures ~*/
    struct CmdVecType PriVec;
    struct CmdVecType SecVec;
 };
 
 struct AcBodyType {
+   /*~ Parameters ~*/
+   double mass; /* [[kg]] >~*/
+   double cm[3]; /* [[m]] >~*/
+   double MOI[3][3]; /* [[kg-m^2]] >~*/
 };
 
 struct AcJointType {
+   /*~ Parameters ~*/
    long IsUnderActiveControl;
    long IsSpherical;
    long RotDOF;
    long TrnDOF;
-   double CGiBi[3][3];
-   double CBoGo[3][3];
-   double COI[3][3];
    long RotSeq;
    long TrnSeq;
-   double Ang[3];
-   double AngRate[3];
-   double Pos[3];
-   double PosRate[3];
+   double CGiBi[3][3];
+   double CBoGo[3][3];
    double AngGain[3];
    double AngRateGain[3];
    double PosGain[3];
@@ -80,101 +89,144 @@ struct AcJointType {
    double MaxPosRate[3];
    double MaxTrq[3];
    double MaxFrc[3];
+
+   /*~ Internal Variables ~*/
+   double Ang[3]; /* [[rad]] >~*/
+   double AngRate[3];
+   double Pos[3];
+   double PosRate[3];
+   double COI[3][3];
+
+   /*~ Structures ~*/
    struct CmdType Cmd;
 };
 
 struct AcGyroType {
+   /*~ Parameters ~*/
    double Axis[3];
-   double Rate;
+
+   /*~ Internal Variables ~*/
+   double Rate; /* [[rad/sec]] >~*/
 };
 
 struct AcMagnetometerType {
+   /*~ Parameters ~*/
    double Axis[3];
-   double Field;
+
+   /*~ Internal Variables ~*/
+   double Field; /* [[Tesla]] >~*/
 };
 
 struct AcCssType {
+   /*~ Parameters ~*/
    double Axis[3];
    double Scale;
-   long Valid;
-   double Illum;
+
+   /*~ Internal Variables ~*/
+   long Valid; /*>~*/
+   double Illum; /*>~*/
 };
 
 struct AcFssType {
+   /*~ Parameters ~*/
    double qb[4];
    double CB[3][3];
-   long Valid;
-   double SunAng[2];
+
+   /*~ Internal Variables ~*/
+   long Valid;       /*>~*/
+   double SunAng[2]; /* [[rad]] >~*/
    double SunVecS[3];
    double SunVecB[3];
 };
 
 struct AcStarTrackerType {
+   /*~ Parameters ~*/
    double qb[4];
    double CB[3][3];
-   long Valid;
-   double qn[4];
+
+   /*~ Internal Variables ~*/
+   long Valid;   /*>~*/
+   double qn[4]; /*>~*/
    double qbn[4];
 };
 
 struct AcGpsType {
-   long Valid;
-   long Rollover;
-   long Week;
-   double Sec;
-   double PosN[3];
-   double VelN[3];
-   double PosW[3];
-   double VelW[3];
-   double Lng,Lat,Alt;
+   /*~ Internal Variables ~*/
+   long Valid; /*>~*/
+   long Rollover; /*>~*/
+   long Week; /*>~*/
+   double Sec; /*>~*/
+   double PosN[3]; /* [[m]] >~*/
+   double VelN[3]; /* [[m/s]] >~*/
+   double PosW[3]; /* [[m]] >~*/
+   double VelW[3]; /* [[m/s]] >~*/
+   double Lng; /* [[rad]] >~*/
+   double Lat; /* [[rad]] >~*/
+   double Alt; /* [[m]] >~*/
 };
 
 struct AcAccelType {
+   /*~ Parameters ~*/
    double PosB[3];
    double Axis[3];
+
+   /*~ Internal Variables ~*/
    double Acc;
 };
 
 struct AcEarthSensorType {
+   /*~ Internal Variables ~*/
    long Valid;
    double Roll;
    double Pitch;
 };
 
 struct AcWhlType {
+   /*~ Parameters ~*/
    double Axis[3];
    double DistVec[3];
    double J;
    double Tmax;
    double Hmax;
+
+   /*~ Internal Variables ~*/
    double w;
-   double H;
-   double Tcmd;
+   double H; /* [[Nms]] >~*/
+   double Tcmd; /* [[N-m]] <~*/
 };
 
 struct AcMtbType {
+   /*~ Parameters ~*/
    double Axis[3];
    double DistVec[3];
    double Mmax;
-   double Mcmd;
+
+   /*~ Internal Variables ~*/
+   double Mcmd; /* [[A-m^2]] <~*/
 };
 
 struct AcThrType {
+   /*~ Parameters ~*/
    double PosB[3];
    double Axis[3];
    double rxA[3];
    double Fmax;
+
+   /*~ Internal Variables ~*/
    double Fcmd;
-   double PulseWidthCmd;
+   double PulseWidthCmd; /* [[sec]] <~*/
 };
 
 struct AcPrototypeCtrlType {
-   long Init;
+   /*~ Parameters ~*/
    double wc;
    double amax;
    double vmax;
    double Kprec;
    double Knute;
+
+   /*~ Internal Variables ~*/
+   long Init;
    double Tcmd[3];
    double qbr[4];
    double therr[3];
@@ -182,19 +234,27 @@ struct AcPrototypeCtrlType {
 };
 
 struct AcAdHocCtrlType {
+   /*~ Parameters ~*/
+   double Kr[3];
+   double Kp[3];
+
+   /*~ Internal Variables ~*/
    long Init;
-   double Kr[3],Kp[3];
-   double therr[3],werr[3];
+   double therr[3];
+   double werr[3];
    double Tcmd[3];
 };
 
 struct AcSpinnerCtrlType {
-   long Init;
+   /*~ Parameters ~*/
    double Ispin,Itrans; 
    double SpinRate;
    double Knute;
    double Kprec;
 
+
+   /*~ Internal Variables ~*/
+   long Init;
    double Bold1,Bold2;
    double xold,yold;
    double rvn[3],rvb[3];
@@ -203,81 +263,145 @@ struct AcSpinnerCtrlType {
 };
 
 struct AcMomBiasCtrlType {
+   /*~ Internal Variables ~*/
    long Init;
 };
 
 struct AcThreeAxisCtrlType {
-   long Init;
+   /*~ Parameters ~*/
    double Kr[3];
    double Kp[3];
    double Kunl;
    
+   /*~ Internal Variables ~*/
+   long Init;
    double Tcmd[3];
    double Hwcmd[3]; 
 };
 
 struct AcIssCtrlType {
-   long Init;
+   /*~ Parameters ~*/
    double Kr[3];
    double Kp[3];
    double Tmax;
+
+   /*~ Internal Variables ~*/
+   long Init;
    double therr[3];
    double werr[3];
 };
 
 struct AcCmgCtrlType {
+   /*~ Parameters ~*/
+   double Kr[3];
+   double Kp[3];
+   
+   /*~ Internal Variables ~*/
    long Init;
-   double Kr[3],Kp[3];
    double therr[3],werr[3];
    double Tcmd[3];
    double AngRateCmd[4];
 };
 
 struct AcThrCtrlType {
+   /*~ Parameters ~*/
+   double Kw[3];
+   double Kth[3];
+   double Kv;
+   double Kp;
+
+   /*~ Internal Variables ~*/
    long Init;
-   double Kw[3],Kth[3];
-   double Kv,Kp;
 };
 
 struct AcCfsCtrlType {
+   /*~ Parameters ~*/
+   double Kr[3];
+   double Kp[3];
+   double Kunl;
+   
+   /*~ Internal Variables ~*/
    long Init;
-   double Kr[3],Kp[3],Kunl;
-   double therr[3],werr[3];
+   double therr[3];
+   double werr[3];
 };
 
 struct AcType {
+   /*~ Parameters ~*/
    long Nb;
    long Ng;
    long Nwhl;
    long Nmtb;
    long Nthr;
    long Ncmg;
-   long Ngyro; /*~*/
+   long Ngyro; 
    long Nmag;
    long Ncss;
    long Nfss;
    long Nst;
    long Ngps;
    long Nacc;
+
+   double DT;
+   double mass;
+   double cm[3];
+   double MOI[3][3];
    
+   /*~ Inputs ~*/
+   double Time; /* Time since J2000 [[sec]] */
+   long Mode;
+   double wbn[3];
+   double qbn[4];
+   double CBN[3][3];
+   double CLN[3][3];
+   double wln[3];
+   double qln[4];
+   double svn[3];
+   double svb[3];
+   double bvn[3];
+   double bvb[3];
+   double PosN[3];
+   double VelN[3];
+   long SunValid;
+   long MagValid;
+   long EphValid;
+   long StValid;
+   
+   /*~ Outputs ~*/
+   long ReqMode;
+
+   double Tcmd[3];
+   double Mcmd[3];
+   double Fcmd[3];
+   
+   double IdealTrq[3];
+   double IdealFrc[3];
+   
+   /*~ Internal Variables ~*/
+   long Init;
+   double qbr[4];
+   double Hvb[3];
+
+   /*~ Structures ~*/
+
    /* Dynamics */
-   struct AcBodyType *B;
-   struct AcJointType *G;
+   struct AcBodyType *B;   /* [*Nb*] */
+   struct AcJointType *G;  /* [*Ng*] */
    
    /* Sensors */
-   struct AcGyroType *Gyro;
-   struct AcMagnetometerType *MAG;
-   struct AcCssType *CSS;
-   struct AcFssType *FSS;
-   struct AcStarTrackerType *ST;
-   struct AcGpsType *GPS;
-   struct AcAccelType *Accel;
+   struct AcGyroType *Gyro;        /* [*Ngyro*] */
+   struct AcMagnetometerType *MAG; /* [*Nmag*] */
+   struct AcCssType *CSS;          /* [*Ncss*] */
+   struct AcFssType *FSS;          /* [*Nfss*] */
+   struct AcStarTrackerType *ST;   /* [*Nst*] */
+   struct AcGpsType *GPS;          /* [*Ngps*] */
+   struct AcAccelType *Accel;      /* [*Nacc*] */
    struct AcEarthSensorType ES;
    
    /* Actuators */
-   struct AcWhlType *Whl;
-   struct AcMtbType *MTB;
-   struct AcThrType *Thr;
+   struct AcWhlType *Whl; /* [*Nwhl*] */
+   struct AcMtbType *MTB; /* [*Nmtb*] */
+   struct AcThrType *Thr; /* [*Nthr*] */
    
    /* Control Modes */
    struct AcPrototypeCtrlType PrototypeCtrl;
@@ -290,42 +414,7 @@ struct AcType {
    struct AcThrCtrlType ThrCtrl;
    struct AcCfsCtrlType CfsCtrl;
    
-   /* Common Parameters */
-   double DT;
-   double mass;
-   double cm[3];
-   double MOI[3][3];
-   
-   /* Common Variables */
-   long Init;
-   long Mode;
-   long ReqMode;
    struct CmdType Cmd;
-   
-   double Time; /* Sec since J2000 */
-   double wbn[3];
-   double qbn[4];
-   double CBN[3][3];
-   double CLN[3][3];
-   double wln[3];
-   double qln[4];
-   double qbr[4];
-   double Hvb[3];
-   double svn[3],svb[3];
-   double bvn[3],bvb[3];
-   double PosN[3];
-   double VelN[3];
-   long SunValid;
-   long MagValid;
-   long EphValid;
-   long StValid;
-   
-   double Tcmd[3];
-   double Mcmd[3];
-   double Fcmd[3];
-   
-   double IdealTrq[3];
-   double IdealFrc[3];
 };
 
 /*

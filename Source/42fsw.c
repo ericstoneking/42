@@ -653,9 +653,9 @@ void ThreeAxisAttitudeCommand(struct SCType *S)
                   SC[SV->TrgSC].B[SV->TrgBody].wn,SV->wn);
             }
             if (MAGV(PV->N) == 0.0 || MAGV(PV->R) == 0.0)
-               printf("Warning: Primary Vector not defined for SC[%ld]\n",S->Tag);
+               printf("Warning: Primary Vector not defined for SC[%ld]\n",S->ID);
             if (MAGV(SV->N) == 0.0 || MAGV(SV->R) == 0.0)
-               printf("Warning: Secondary Vector not defined for SC[%ld]\n",S->Tag);
+               printf("Warning: Secondary Vector not defined for SC[%ld]\n",S->ID);
             TRIAD(PV->N,SV->N,PV->R,SV->R,CRN);
             C2Q(CRN,Cmd->qrn);
             for(i=0;i<3;i++) {

@@ -225,11 +225,11 @@ void EchoDyn(struct SCType *S)
       struct JointType *G;
       long i,j,Ib,Ig,Nf;
 
-      sprintf(OutFileName,"Dyn%02li.42",S->Tag);
+      sprintf(OutFileName,"Dyn%02li.42",S->ID);
       outfile = FileOpen(InOutPath,OutFileName,"w");
 
 /* .. SC Structure */
-      fprintf(outfile,"Dynamics Check for SC[%ld]\n\n",S->Tag);
+      fprintf(outfile,"Dynamics Check for SC[%ld]\n\n",S->ID);
       fprintf(outfile,"Nb: %2li   Ng: %2li\n",S->Nb,S->Ng);
       fprintf(outfile,"Mass:  %lf\n",S->mass);
       fprintf(outfile,"cm:  %lf %lf %lf\n",S->cm[0],S->cm[1],S->cm[2]);
@@ -953,9 +953,9 @@ void InitRigidDyn(struct SCType *S)
       MapJointStatesToStateVector(S);
 
 /* .. Echo tree tables */
-      sprintf(filename,"Tree%02ld.42",S->Tag);
+      sprintf(filename,"Tree%02ld.42",S->ID);
       outfile = FileOpen(InOutPath,filename,"w");
-      fprintf(outfile,"SC %2ld:  Nb = %2ld  Ng = %2ld\n\n",S->Tag,S->Nb,S->Ng);
+      fprintf(outfile,"SC %2ld:  Nb = %2ld  Ng = %2ld\n\n",S->ID,S->Nb,S->Ng);
       fprintf(outfile,"Connect Table:\n\n");
       fprintf(outfile,"     ");
       for(Ig=0;Ig<S->Ng;Ig++) fprintf(outfile,"  G[%02ld]",Ig);
@@ -1009,7 +1009,7 @@ void InitRigidDyn(struct SCType *S)
       fprintf(outfile,"*****************************************************************\n");
       fprintf(outfile,"Body 00:   RotSeq = 123   TrnSeq = 123\n");
       fprintf(outfile,"                                Col in   Col in       Col in\n");
-      fprintf(outfile,"Axis      F/C    u[]  x[]       u%02ld.42   x%02ld.42   Constraint%02ld.42\n",S->Tag,S->Tag,S->Tag);
+      fprintf(outfile,"Axis      F/C    u[]  x[]       u%02ld.42   x%02ld.42   Constraint%02ld.42\n",S->ID,S->ID,S->ID);
       fprintf(outfile,"-----------------------------------------------------------------\n");
       fprintf(outfile,"Rot1       F      00   00         01       01           --\n");
       fprintf(outfile,"Rot2       F      01   01         02       02           --\n");
@@ -1023,7 +1023,7 @@ void InitRigidDyn(struct SCType *S)
          fprintf(outfile,"*****************************************************************\n");
          fprintf(outfile,"Joint %02ld:   RotSeq = %3ld   TrnSeq = %3ld\n",Ig,G->RotSeq,G->TrnSeq);
          fprintf(outfile,"                                Col in   Col in       Col in\n");
-         fprintf(outfile,"Axis      F/C    u[]  x[]       u%02ld.42   x%02ld.42   Constraint%02ld.42\n",S->Tag,S->Tag,S->Tag);
+         fprintf(outfile,"Axis      F/C    u[]  x[]       u%02ld.42   x%02ld.42   Constraint%02ld.42\n",S->ID,S->ID,S->ID);
          fprintf(outfile,"-----------------------------------------------------------------\n");
          for(i=0;i<G->RotDOF;i++) {
             fprintf(outfile,"Rot%ld       F      %02ld   %02ld         %02ld       %02ld           --\n",
@@ -1309,7 +1309,7 @@ void InitFlexModes(struct SCType *S)
             for(i=0;i<B->Nf;i++) {
                wf = sqrt(B->Kf[i][i]/B->Mf[i][i]);
                if (Pi/wf < DTSIM) {
-                  printf("Oops.  Natural frequency of Flex Mode %ld of Body %ld of SC %ld is too high to be sampled at time step of %lf.\n",i,Ib,S->Tag,DTSIM);
+                  printf("Oops.  Natural frequency of Flex Mode %ld of Body %ld of SC %ld is too high to be sampled at time step of %lf.\n",i,Ib,S->ID,DTSIM);
                   printf("Suggest setting DTSIM < %lf sec\n",0.2*TwoPi/wf); /* 5 samples/cycle */
                   exit(1);
                }
@@ -1631,7 +1631,7 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%ld %ld %[^\n] %[\n]",
                    &G->Bin,&G->Bout,junk,&newline);
             if (G->Bin > G->Bout) {
-               printf("Yo!  SC[%ld].G[%ld] inner body index (%ld) is greater than outer body index (%ld)\n",S->Tag,Ig,G->Bin,G->Bout);
+               printf("Yo!  SC[%ld].G[%ld] inner body index (%ld) is greater than outer body index (%ld)\n",S->ID,Ig,G->Bin,G->Bout);
                printf("You must define inner bodies before outer bodies!\n");
                exit(1);
             }
@@ -1644,7 +1644,7 @@ void InitSpacecraft(struct SCType *S)
             G->IsSpherical = DecodeString(response);
             if (G->RotSeq < 100) {
                printf("Invalid RotSeq %ld for SC[%ld].G[%ld].  All three axes required.\n",
-                  G->RotSeq,S->Tag,Ig);
+                  G->RotSeq,S->ID,Ig);
                exit(1);
             }
             i3 = G->RotSeq % 10;         /* Pick off third digit */
@@ -1652,7 +1652,7 @@ void InitSpacecraft(struct SCType *S)
             i1 = G->RotSeq/100;          /* Pick off first digit */
             if (i1 == i2 || i1 == i3 || i2 == i3) {
                printf("Invalid RotSeq %ld for SC[%ld].G[%ld].  Repeated indices are not allowed.\n",
-                  G->RotSeq,S->Tag,Ig);
+                  G->RotSeq,S->ID,Ig);
                exit(1);
             }
 
@@ -1660,7 +1660,7 @@ void InitSpacecraft(struct SCType *S)
                &G->TrnDOF,&G->TrnSeq,junk,&newline);
             if (G->TrnSeq < 100) {
                printf("Invalid TrnSeq %ld for SC[%ld].G[%ld].  All three axes required.\n",
-                  G->TrnSeq,S->Tag,Ig);
+                  G->TrnSeq,S->ID,Ig);
                exit(1);
             }
             i3 = G->TrnSeq % 10;         /* Pick off third digit */
@@ -1668,7 +1668,7 @@ void InitSpacecraft(struct SCType *S)
             i1 = G->TrnSeq/100;          /* Pick off first digit */
             if (i1 == i2 || i1 == i3 || i2 == i3) {
                printf("Invalid TrnSeq %ld for SC[%ld].G[%ld].  Repeated indices are not allowed.\n",
-                  G->TrnSeq,S->Tag,Ig);
+                  G->TrnSeq,S->ID,Ig);
                exit(1);
             }
             fscanf(infile,"%s %s %s %[^\n] %[\n]",
@@ -1777,7 +1777,7 @@ void InitSpacecraft(struct SCType *S)
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nmtb,junk,&newline);
       S->MTB = (struct MTBType *) calloc(S->Nmtb,sizeof(struct MTBType));
       if (S->Nmtb == 0) {
-         for(i=0;i<3;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(i=0;i<4;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
       else {
          for(Im=0;Im<S->Nmtb;Im++) {
@@ -1788,6 +1788,7 @@ void InitSpacecraft(struct SCType *S)
                &S->MTB[Im].A[0],&S->MTB[Im].A[1],&S->MTB[Im].A[2],
                    junk,&newline);
             UNITV(S->MTB[Im].A);
+            fscanf(infile,"%ld %[^\n] %[\n]",&S->MTB[Im].FlexNode,junk,&newline);
          }
       }
 
@@ -1796,7 +1797,7 @@ void InitSpacecraft(struct SCType *S)
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nthr,junk,&newline);
       S->Thr = (struct ThrType *) calloc(S->Nthr,sizeof(struct ThrType));
       if (S->Nthr == 0) {
-         for(i=0;i<4;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(i=0;i<5;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
       else {
          for(It=0;It<S->Nthr;It++) {
@@ -1812,6 +1813,7 @@ void InitSpacecraft(struct SCType *S)
                    &S->Thr[It].PosB[0],
                    &S->Thr[It].PosB[1],
                    &S->Thr[It].PosB[2],junk,&newline);
+            fscanf(infile,"%ld %[^\n] %[\n]",&S->Thr[It].FlexNode,junk,&newline);
          }
       }
 
@@ -1898,7 +1900,7 @@ void InitSpacecraft(struct SCType *S)
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Ncss,junk,&newline);
       S->CSS = (struct CssType *) calloc(S->Ncss,sizeof(struct CssType));
       if (S->Ncss == 0) {
-         for(i=0;i<6;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(i=0;i<7;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
       else {
          for(Ic=0;Ic<S->Ncss;Ic++) {
@@ -1920,6 +1922,7 @@ void InitSpacecraft(struct SCType *S)
             CSS->CosFov = cos(CSS->FovAng);
             fscanf(infile,"%lf %[^\n] %[\n]",&CSS->Scale,junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&CSS->Quant,junk,&newline);
+            fscanf(infile,"%ld %[^\n] %[\n]",&CSS->FlexNode,junk,&newline);
          }
       }
 
@@ -1928,7 +1931,7 @@ void InitSpacecraft(struct SCType *S)
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nfss,junk,&newline);
       S->FSS = (struct FssType *) calloc(S->Nfss,sizeof(struct FssType));
       if (S->Nfss == 0) {
-         for(i=0;i<6;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(i=0;i<7;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
       else {
          for(Ifss=0;Ifss<S->Nfss;Ifss++) {
@@ -1955,6 +1958,7 @@ void InitSpacecraft(struct SCType *S)
             FSS->NEA *= D2R;
             fscanf(infile,"%lf %[^\n] %[\n]",&FSS->Quant,junk,&newline);
             FSS->Quant *= D2R;
+            fscanf(infile,"%ld %[^\n] %[\n]",&FSS->FlexNode,junk,&newline);
          }
       }
 /* .. Star Trackers */
@@ -2006,7 +2010,7 @@ void InitSpacecraft(struct SCType *S)
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Ngps,junk,&newline);
       S->GPS = (struct GpsType *) calloc(S->Ngps,sizeof(struct GpsType));
       if (S->Ngps == 0) {
-         for(i=0;i<5;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(i=0;i<6;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
       else {
          for(Ig=0;Ig<S->Ngps;Ig++) {
@@ -2023,6 +2027,7 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%lf %[^\n] %[\n]",&GPS->PosNoise,junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&GPS->VelNoise,junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&GPS->TimeNoise,junk,&newline);
+            fscanf(infile,"%ld %[^\n] %[\n]",&GPS->FlexNode,junk,&newline);
          }
       }  
 /* .. Accelerometers */
@@ -3410,7 +3415,7 @@ void InitSim(int argc, char **argv)
          fscanf(infile,"%s  %ld %s %[^\n] %[\n]",response,
             &SC[Isc].RefOrb,SC[Isc].FileName,junk,&newline);
          SC[Isc].Exists=DecodeString(response);
-         SC[Isc].Tag = Isc;
+         SC[Isc].ID = Isc;
          if ((SC[Isc].Exists && !Orb[SC[Isc].RefOrb].Exists) || (SC[Isc].RefOrb > Norb)) {
             printf("Yo!  SC[%ld] is assigned to non-existent Orb[%ld]\n",
                Isc,SC[Isc].RefOrb);

@@ -1,0 +1,9 @@
+Using GMSEC
+
+1)  In Makefile, uncomment GMSEC* environment variable settings
+2)  make clean and make (of course)
+3)  Start GMSEC message bus server: MBserver
+4)  In Inp_IPC.txt, set Socket Role to GMSEC_CLIENT
+5)  In Inp_IPC.txt, set Port to whatever MBserver uses (9000 on my installation)
+6)  In terminal window(s), start Rx client first, then Tx client
+

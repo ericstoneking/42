@@ -71,18 +71,22 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 ==============================  MTB 0  =================================
 180.0                         ! Saturation (A-m^2)
 1.0   0.0   0.0               ! MTB Axis Components, [X, Y, Z]
+0                             ! Flex Node Index
 ==============================  MTB 1  =================================
 180.0                         ! Saturation (A-m^2)
 0.0   1.0   0.0               ! MTB Axis Components, [X, Y, Z]
+0                             ! Flex Node Index
 ==============================  MTB 2  =================================
 180.0                         ! Saturation (A-m^2)
 0.0   0.0   1.0               ! MTB Axis Components, [X, Y, Z]
+0                             ! Flex Node Index
 ************************* Thruster Parameters **************************
 0                             ! Number of Thrusters
 ==============================  Thr 0  =================================
  1.0                          ! Thrust Force (N)
 -1.0  0.0  0.0                ! Thrust Axis 
  1.0  1.0  1.0                ! Location in B0, m
+0                             ! Flex Node Index
 ******************************* Gyro ************************************
 0                                ! Number of Gyro Axes
 ============================== Axis 0 ===================================
@@ -114,6 +118,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 90.0                          ! Half-cone Angle, deg
 1.0                           ! Scale Factor
 0.001                         ! Quantization
+0                             ! Flex Node Index
 ************************* Fine Sun Sensor *******************************
 0                             ! Number of Fine Sun Sensors
 =============================== FSS 0 ===================================
@@ -122,6 +127,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 32.0   32.0                   ! X, Y FOV Size, deg
 0.1                           ! Noise Equivalent Angle, deg RMS
 0.5                           ! Quantization, deg
+0                             ! Flex Node Index
 ************************** Star Tracker *********************************
 0                             ! Number of Star Trackers
 =============================== ST 0 ====================================
@@ -138,6 +144,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 4.0                           ! Position Noise, m RMS
 0.02                          ! Velocity Noise, m/sec RMS
 20.0E-9                       ! Time Noise, sec RMS
+0                             ! Flex Node Index
 *************************** Accelerometer *******************************
 0                             ! Number of Accel Axes
 ============================== Axis 0 ===================================

@@ -271,6 +271,7 @@ void WriteStatesToGmsec(void)
       struct OrbitType *O;
       struct JointType *G;
       struct WhlType *W;
+      double qnh[4],qwn[4];
       long Isc,Ig,Iw;
       char line[512];
       char Header[40] = "GMSEC.42.TX.MSG.LOG";
@@ -310,6 +311,11 @@ void WriteStatesToGmsec(void)
          if (EchoEnabled) printf("%s",line);
 
          sprintf(line,"%s  %le %le %le\n",
+            Mnemonic[MNEM_POS_H], S->PosH[0],S->PosH[1],S->PosH[2]);
+         GmsecSend(Header,line);
+         if (EchoEnabled) printf("%s",line);
+
+         sprintf(line,"%s  %le %le %le\n",
             Mnemonic[MNEM_WBN], S->B[0].wn[0],S->B[0].wn[1],S->B[0].wn[2]);
          GmsecSend(Header,line);
          if (EchoEnabled) printf("%s",line);
@@ -334,6 +340,50 @@ void WriteStatesToGmsec(void)
             Mnemonic[MNEM_HVB], S->Hvb[0],S->Hvb[1],S->Hvb[2]);
          GmsecSend(Header,line);
          if (EchoEnabled) printf("%s",line);
+
+         sprintf(line,"%s  %le %le %le\n",
+            Mnemonic[MNEM_EARTH_POS_H], 
+            World[EARTH].eph.PosN[0],
+            World[EARTH].eph.PosN[1],
+            World[EARTH].eph.PosN[2]);
+         GmsecSend(Header,line);
+         if (EchoEnabled) printf("%s",line);
+         
+         C2Q(World[EARTH].CNH,qnh);
+         sprintf(line,"%s  %le %le %le %le\n",
+            Mnemonic[MNEM_EARTH_QNH], 
+            qnh[0],qnh[1],qnh[2],qnh[3]);
+         GmsecSend(Header,line);
+         if (EchoEnabled) printf("%s",line);         
+
+         C2Q(World[EARTH].CWN,qwn);
+         sprintf(line,"%s  %le %le %le %le\n",
+            Mnemonic[MNEM_EARTH_QWN], 
+            qwn[0],qwn[1],qwn[2],qwn[3]);
+         GmsecSend(Header,line);
+         if (EchoEnabled) printf("%s",line);         
+
+         sprintf(line,"%s  %le %le %le\n",
+            Mnemonic[MNEM_LUNA_POS_N], 
+            World[LUNA].eph.PosN[0],
+            World[LUNA].eph.PosN[1],
+            World[LUNA].eph.PosN[2]);
+         GmsecSend(Header,line);
+         if (EchoEnabled) printf("%s",line);
+         
+         C2Q(World[LUNA].CNH,qnh);
+         sprintf(line,"%s  %le %le %le %le\n",
+            Mnemonic[MNEM_LUNA_QNH], 
+            qnh[0],qnh[1],qnh[2],qnh[3]);
+         GmsecSend(Header,line);
+         if (EchoEnabled) printf("%s",line);         
+
+         C2Q(World[LUNA].CWN,qwn);
+         sprintf(line,"%s  %le %le %le %le\n",
+            Mnemonic[MNEM_LUNA_QWN], 
+            qwn[0],qwn[1],qwn[2],qwn[3]);
+         GmsecSend(Header,line);
+         if (EchoEnabled) printf("%s",line);         
 
          for(Ig=0;Ig<S->Ng;Ig++) {
             G = &S->G[Ig];
@@ -628,28 +678,32 @@ void ReadStatesFromSocket(void)
       struct DynType *D;
       long IntVal1,IntVal2,IntVal3,IntVal4;
       double DblVal1,DblVal2,DblVal3,DblVal4,DblVal5,DblVal6;
-      char line[512] = "Blank";
+      char line[256] = "Blank";
       char MnemString[80];
       long Isc,i;
       long RequestTimeRefresh = 0;
       long Done;
       char SocketMessage[4096];
       long Imsg,Iline;
-
+      long MsgLen = 0;
+      
       /* Default SC to apply inputs to */
       Isc = 0;
       while(!SC[Isc].Exists) Isc++;
       S = &SC[Isc];
 
-      /* Message comes in as multi-line */
-      recv(RxSocket,SocketMessage,4096,0);
-
+      /* Messages occasionally get split up in transit.  Make sure you */
+      /* have the whole message by watching for [EOF] */
+      while(MsgLen < 7 || strncmp("[EOF]",&SocketMessage[MsgLen-7],5)) {
+         MsgLen += recv(RxSocket,&SocketMessage[MsgLen],4096,0);
+      }
+      
       Done = 0;
       Imsg = 0;
       while(!Done) {
          /* Parse lines from SocketMessage, newline-delimited */
          Iline = 0;
-         memset(line,'\0',512);
+         memset(line,'\0',256);
          while(SocketMessage[Imsg] != '\n') {
             line[Iline++] = SocketMessage[Imsg++];
          }
@@ -752,7 +806,14 @@ void ReadStatesFromSocket(void)
                S->Whl[IntVal1].H = DblVal1;
             }
          }
-         if (!strncmp(line,"[EOF]",5)) Done = 1;
+         if (!strncmp(line,"[EOF]",5)) {
+            Done = 1;
+            sprintf(line,"[EOF] reached\n");
+         }
+         if (Imsg > 4095) {
+            Done = 1;
+            printf("Imsg limit exceeded\n");
+         }
       }
       /* Acknowledge receipt */
       sprintf(line,"Ack\n");

@@ -75,9 +75,11 @@ void Accelerometer(struct SCType *S,struct AccelType *A)
 void GyroModel(struct SCType *S)
 {
       struct GyroType *G;
+      struct FlexNodeType *FN;
       long Ig;
       double PrevBias,RateError,PrevAngle;
-      long Counts,PrevCounts;
+      double wfn[3];
+      long Counts,PrevCounts,i;
       
       for(Ig=0;Ig<S->Ngyro;Ig++) {
          G = &S->Gyro[Ig];
@@ -85,9 +87,16 @@ void GyroModel(struct SCType *S)
          G->SampleCounter++;
          if (G->SampleCounter >= G->MaxCounter) {
             G->SampleCounter = 0;
-         
-            G->TrueRate = VoV(S->B[0].wn,G->Axis);
-         
+            
+            if (S->FlexActive) {
+               FN = &S->B[0].FlexNode[G->FlexNode];
+               for(i=0;i<3;i++) wfn[i] = S->B[0].wn[i] + FN->angrate[i];
+               G->TrueRate = VoV(wfn,G->Axis);
+            }
+            else {
+               G->TrueRate = VoV(S->B[0].wn,G->Axis);
+            }
+            
             PrevBias = G->CorrCoef*G->Bias;
             G->Bias = PrevBias + G->BiasStabCoef*GaussianRandom(RNG);
             RateError = 0.5*(G->Bias+PrevBias) + G->ARWCoef*GaussianRandom(RNG);
@@ -234,11 +243,13 @@ void FssModel(struct SCType *S)
 void StarTrackerModel(struct SCType *S)
 {
       struct StarTrackerType *ST;
+      struct FlexNodeType *FN;
       static struct RandomProcessType *StNoise;
       struct WorldType *W;
       double qsn[4],Qnoise[4];
       double BoS,OrbRad,LimbAng,NadirVecB[3],BoN;
       double mvn[3],MoonDist,mvb[3],BoM;
+      double qfb[4],qfn[4];
       static long First = 1;
       long Ist,i;
       
@@ -275,7 +286,16 @@ void StarTrackerModel(struct SCType *S)
                if (BoM > cos(LimbAng+ST->MoonExclAng)) ST->Valid = FALSE;
             }
             if (ST->Valid) {
-               QxQ(ST->qb,S->B[0].qn,qsn);
+               if (S->FlexActive) {
+                  FN = &S->B[0].FlexNode[ST->FlexNode];
+                  for(i=0;i<3;i++) qfb[i] = 0.5*FN->ang[i];
+                  qfb[3] = sqrt(1.0-qfb[0]*qfb[0]-qfb[1]*qfb[1]-qfb[2]*qfb[2]);
+                  QxQ(qfb,S->B[0].qn,qfn);
+                  QxQ(ST->qb,qfn,qsn);
+               }
+               else {
+                  QxQ(ST->qb,S->B[0].qn,qsn);
+               }
                /* Add Noise in ST frame */
                for(i=0;i<3;i++) Qnoise[i] = 0.5*ST->NEA[i]*GaussianRandom(StNoise);
                Qnoise[3] = 1.0;
