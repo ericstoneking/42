@@ -4,7 +4,9 @@ We are going to use ubuntu bash on windows
 
 Settings -> Update & security -> For developers, and activate "Developer mode"
 Turn Windows Features on or off 
-      C:\Windows\System32\OptionalFeatures.exe
+.. code-block:: console
+      & C:\Windows\System32\OptionalFeatures.exe
+      
 Activate "Windows Subsystem for Linux (Beta)"
 Wait for the download
 
