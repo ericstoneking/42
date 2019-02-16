@@ -17,36 +17,26 @@ Download 42
 Put 42 folder in C:\
 or open a terminal:
 
-      bash 
-      
-      git clone https://github.com/ericstoneking/42.git 
-           
-      sudo apt update
+.. code-block:: console
+
+     & bash
+     & git clone https://github.com/ericstoneking/42.git 
+     & sudo apt update
+
 Instal `Xming <https://sourceforge.net/projects/xming/>`_ on windows
 Restart computer
 Open terminal
-      bash
-      
-      sudo apt update
 
-      sudo apt-get install vim-gtk
+.. code-block:: console
 
-      sudo apt update
-      
-      sudo apt install gcc
-      
-      DISPLAY=:0 gvim #check that opens a xming window
-
-      sudo apt update
-
-      sudo apt-get install freeglut3-dev
-
-      
-      cd 42
-
-      ls
-
-      make
+      & bash
+      & sudo apt update
+      & sudo apt-get install vim-gtk
+      & sudo apt install gcc
+      & DISPLAY=:0 gvim #check that opens a xming window
+      & sudo apt-get install freeglut3-dev
+      & cd 42
+      & make
 
 
       
