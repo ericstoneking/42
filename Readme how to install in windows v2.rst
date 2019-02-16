@@ -3,6 +3,7 @@ HOW TO INSTALL WHICH WINDOWS
 We are going to use ubuntu bash on windows
 
 Settings -> Update & security -> For developers, and activate "Developer mode"
+
 Turn Windows Features on or off 
 
 .. code-block:: console
