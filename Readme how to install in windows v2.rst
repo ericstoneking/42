@@ -52,3 +52,6 @@ REFERENCES:
 AUTHOR:
 -----
 Eloy Pieto Panadero
+Github: `@Eloypripan <http://github.com/Eloypripan/>`__
+Twiter: `@Eloypripan <http://github.com/Eloypripan/>`__
+Instagram `@Eloypripan <http://github.com/Eloypripan/>`__
