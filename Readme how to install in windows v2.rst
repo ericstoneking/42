@@ -38,6 +38,9 @@ Open terminal
       DISPLAY=:0 gvim #check that opens a xming window
 
       sudo apt update
+
+      sudo apt-get install freeglut3-dev
+
       
       cd 42
 
