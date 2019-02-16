@@ -1,4 +1,4 @@
-HOW TO INSTALL WHICH WINDOWS
+HOW TO INSTALL WHICH WINDOWS WAY 2
 ---------
 We are going to use ubuntu bash on windows
 
@@ -46,3 +46,7 @@ REFERENCES:
 `Ubuntu bash on windows <https://www.xataka.com/aplicaciones/asi-es-usar-la-consola-bash-de-ubuntu-en-windows-10/>`_
 `Xming <https://sourceforge.net/projects/xming/>`_ 
 `Open GL Glut libraries <https://askubuntu.com/questions/96087/how-to-install-opengl-glut-libraries/>`_
+
+AUTHOR:
+-----
+Eloy Pieto Panadero
