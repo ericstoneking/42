@@ -24,7 +24,9 @@ or open a terminal:
      & sudo apt update
 
 Instal `Xming <https://sourceforge.net/projects/xming/>`_ on windows
+
 Restart computer
+
 Open terminal
 
 .. code-block:: console
