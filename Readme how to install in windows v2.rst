@@ -8,7 +8,7 @@ Turn Windows Features on or off
 Activate "Windows Subsystem for Linux (Beta)"
 Wait for the download
 
-Try to open the console and type "bash" if don't work restart computer...
+Try to open the console and type "bash" if don't work; restart computer...
 
 REFERENCE:
 `Ubuntu bash on windows <https://www.xataka.com/aplicaciones/asi-es-usar-la-consola-bash-de-ubuntu-en-windows-10/>`_
