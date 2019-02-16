@@ -15,6 +15,7 @@ Try to open the console and type "bash" if don't work; restart computer...
 
 Download 42
 Put 42 folder in C:\
+
 or open a terminal:
 
 .. code-block:: console
