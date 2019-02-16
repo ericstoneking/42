@@ -42,9 +42,7 @@ REFERENCES:
 -------
 `Ubuntu bash on windows <https://www.xataka.com/aplicaciones/asi-es-usar-la-consola-bash-de-ubuntu-en-windows-10/>`_
 
-`_How to Run Graphical Linux Desktop Applications from Windows 10’s Bash Shell <https://www.howtogeek.com/261575/how-to-run-graphical-linux-desktop-applications-from-windows-10s-bash-shell/>`_
-
-`Xming <https://sourceforge.net/projects/xming/>`_ 
+`How to Run Graphical Linux Desktop Applications from Windows 10’s Bash Shell <https://www.howtogeek.com/261575/how-to-run-graphical-linux-desktop-applications-from-windows-10s-bash-shell/>`_
 
 `Open GL Glut libraries <https://askubuntu.com/questions/96087/how-to-install-opengl-glut-libraries/>`_
 
