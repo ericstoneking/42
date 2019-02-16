@@ -4,6 +4,7 @@ We are going to use ubuntu bash on windows
 
 Settings -> Update & security -> For developers, and activate "Developer mode"
 Turn Windows Features on or off 
+
 .. code-block:: console
       & C:\Windows\System32\OptionalFeatures.exe
       
