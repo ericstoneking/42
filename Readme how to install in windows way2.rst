@@ -8,7 +8,7 @@ Turn Windows Features on or off
 
 .. code-block:: console
 
-      $ C:\Windows\System32\OptionalFeatures.exe
+      & C:\Windows\System32\OptionalFeatures.exe
       
 Activate "Windows Subsystem for Linux (Beta)"
 Wait for the download
