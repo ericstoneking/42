@@ -10,7 +10,8 @@ Turn Windows Features on or off
 
       & C:\Windows\System32\OptionalFeatures.exe
       
-Activate "Windows Subsystem for Linux (Beta)"
+Activate "Windows Subsystem for Linux"
+
 Wait for the download
 
 Try to open the console and type "bash" if don't work; restart computer...
