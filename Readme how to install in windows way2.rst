@@ -34,7 +34,7 @@ or open a terminal:
 
 Instal `Xming <https://sourceforge.net/projects/xming/>`_ on windows
 
-Restart computer
+(Restart computer)
 
 Open terminal
 
