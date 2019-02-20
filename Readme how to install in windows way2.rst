@@ -26,6 +26,7 @@ or open a terminal:
 .. code-block:: console
 
      & bash
+     & sudo apt install git
      & git clone https://github.com/ericstoneking/42.git 
      & sudo apt update
 
