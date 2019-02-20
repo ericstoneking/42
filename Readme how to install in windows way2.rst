@@ -29,6 +29,8 @@ or open a terminal:
      & sudo apt install git
      & git clone https://github.com/ericstoneking/42.git 
      & sudo apt update
+     & exit
+     & exit
 
 Instal `Xming <https://sourceforge.net/projects/xming/>`_ on windows
 
