@@ -14,7 +14,9 @@ Activate "Windows Subsystem for Linux"
 
 Wait for the download
 
-Try to open the console and type "bash" if don't work; restart computer...
+Try to open the "Windows PowerShell(Admin)" and type "bash" if don't work, download "Ubuntu" from "Microsoft Store".
+Wait for the dowload, and open the "Windows PowerShell(Admin)" and type "bash"; 
+(if don't work restart computer...)
 
 Download 42
 Put 42 folder in C:\
@@ -62,5 +64,3 @@ Github: `@Eloypripan <http://github.com/Eloypripan/>`__
 Twiter: `@Eloypripan <http://github.com/Eloypripan/>`__
 
 Instagram `@Eloypripan <http://github.com/Eloypripan/>`__
-
-.
