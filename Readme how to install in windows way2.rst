@@ -46,7 +46,7 @@ Open terminal
       & sudo apt install gcc
       & DISPLAY=:0 gvim #check that opens a xming window    
       & sudo apt-cache search glut 
-      & sudo apt-get install freeglut3
+      & sudo apt-get install freeglut3-dev
       & cd 42
       & make
 
