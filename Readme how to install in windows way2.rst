@@ -44,7 +44,7 @@ Open terminal
       & sudo apt update
       & sudo apt-get install vim-gtk
       & sudo apt install gcc
-      & DISPLAY=:0 gvim #check that opens a xming window    
+      & DISPLAY=:0 gvim #check that opens a xming display window   
       & sudo apt-cache search glut 
       & sudo apt-get install freeglut3-dev
       & cd 42 #use the route where 42 folder is install
