@@ -49,6 +49,7 @@ Open terminal
       & sudo apt-get install freeglut3-dev
       & cd 42 #use the route where 42 folder is install
       & make
+      & DISPAY=:0 ./42 #execute the 42
 
 REFERENCES:
 -------
