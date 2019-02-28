@@ -27,7 +27,7 @@ or open a terminal:
 
      & bash
      & sudo apt install git
-     & git clone https://github.com/ericstoneking/42.git 
+     & git clone https://github.com/Eloypripan/42.git 
      & sudo apt update
      & exit
      & exit
