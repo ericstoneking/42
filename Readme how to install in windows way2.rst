@@ -65,8 +65,8 @@ Eloy Pieto Panadero
 
 Github: `@Eloypripan <http://github.com/Eloypripan/>`__
 
-Twiter: @eloypripan
+Twiter: `@eloypripan <https://twitter.com/eloypripan/>`__
 
-Instagram: `@eloypripan <https://twitter.com/eloypripan/>`__ 
+Instagram: `@eloypripan <https://instagram.com/eloypripan/>`__  
 
 Facebook: Eloy Prieto Panadero
