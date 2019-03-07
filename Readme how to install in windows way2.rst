@@ -70,3 +70,5 @@ Twiter: `@eloypripan <https://twitter.com/eloypripan/>`__
 Instagram: `@eloypripan <https://instagram.com/eloypripan/>`__  
 
 Facebook: `@Eloy Prieto Panadero <https://www.facebook.com/eloypripan/>`__ 
+
+Creative Commons License: https://creativecommons.org/licenses/by-sa/4.0/
