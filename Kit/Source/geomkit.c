@@ -680,18 +680,18 @@ void LoadOctree(struct GeomType *G)
             Ic++;
          }
       }
-/* .. Assign NextOnHit, NextOnMiss */
-      for(i=1;i<585-1;i++) {
-         O->OctCell[i].NextOnMiss = i+1;
-      }
-      for(i=0;i<73;i++) {
-         O->OctCell[i].NextOnHit = O->OctCell[i].Child[0];
-         O->OctCell[O->OctCell[i].Child[7]].NextOnMiss = i+1;
-      }
-      O->OctCell[0].NextOnMiss = 0;
-      O->OctCell[8].NextOnMiss = 0;
-      O->OctCell[72].NextOnMiss = 0;
-      O->OctCell[585-1].NextOnMiss = 0;
+
+/* .. Assign NextOnHit, NextOnMiss (Credit Matt Heron) */
+      for(i=0;i<73;i++)      O->OctCell[i].NextOnHit = 8*i+1;
+      for(i=73;i<585;i++)    O->OctCell[i].NextOnHit = i+1;
+      for(i=80;i<577;i+=8)   O->OctCell[i].NextOnHit = i/8;
+      for(i=136;i<577;i+=64) O->OctCell[i].NextOnHit = (i/8-1)/8;
+      for(i=584;i<585;i++)   O->OctCell[i].NextOnHit = 0;
+   
+      for(i=0;i<585;i++)     O->OctCell[i].NextOnMiss = i+1;
+      for(i=16;i<585;i+=8)   O->OctCell[i].NextOnMiss = i/8;
+      for(i=136;i<585;i+=64) O->OctCell[i].NextOnMiss = (i/8-1)/8;
+      for(i=0;i<585;i=8*i+8) O->OctCell[i].NextOnMiss = 0;
 
 /* .. Find centers, min and max */
       OC = &O->OctCell[0];

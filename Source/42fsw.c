@@ -15,6 +15,9 @@
 #include "42.h"
 
 void AcFsw(struct AcType *AC);
+void WriteToSocket(SOCKET Socket);
+void ReadFromSocket(SOCKET Socket);
+
 
 /* #ifdef __cplusplus
 ** namespace _42 {
@@ -80,9 +83,7 @@ long FswCmdInterpreter(char CmdLine[512],double *CmdTime)
       else if (sscanf(CmdLine,"%lf SC[%ld].G[%ld] Cmd Angles = [%lf %lf %lf] deg",
          CmdTime,&Isc,&Ig,&Ang[0],&Ang[1],&Ang[2]) == 6) {
          NewCmdProcessed = TRUE;
-         Cmd = &SC[Isc].AC.G[Ig].Cmd;
-         Cmd->Parm = PARM_EULER_ANGLES;
-         for(i=0;i<3;i++) Cmd->Ang[i] = Ang[i]*D2R;
+         for(i=0;i<3;i++) SC[Isc].AC.G[Ig].Cmd.Ang[i] = Ang[i]*D2R;
       }
 
       else if (sscanf(CmdLine,"%lf Point SC[%ld].B[%ld] %s Vector [%lf %lf %lf] at RA = %lf deg, Dec = %lf deg",
@@ -740,7 +741,7 @@ void SpinnerCommand(struct SCType *S)
 /* the AC structure.                                                 */
 void InitAC(struct SCType *S)
 {
-      long Ig,i,j,k;
+      long Ib,Ig,i,j,k;
       struct AcType *AC;
       double **A,**Aplus;
       double r[3];
@@ -748,14 +749,31 @@ void InitAC(struct SCType *S)
       AC = &S->AC;
 
       AC->Init = 1;
-
+      
+      AC->ID = S->ID;
+      
       /* Time, Mass */
-      AC->DT = DTSIM;
+      AC->DT = S->FswSampleTime;
       AC->mass = S->mass;
       for (i=0;i<3;i++) {
          AC->cm[i] = S->cm[i];
          for(j=0;j<3;j++) {
             AC->MOI[i][j] = S->I[i][j];
+         }
+      }
+      
+      /* Bodies */
+      AC->Nb = S->Nb;
+      if (AC->Nb > 0) {
+         AC->B = (struct AcBodyType *) calloc(AC->Nb,sizeof(struct AcBodyType));
+         for (Ib=0;Ib<AC->Nb;Ib++) {
+            AC->B[Ib].mass = S->B[Ib].mass;
+            for(i=0;i<3;i++) {
+               AC->B[Ib].cm[i] = S->B[Ib].cm[i];
+               for(j=0;j<3;j++) {
+                  AC->B[Ib].MOI[i][j] = S->B[Ib].I[i][j];
+               }
+            }
          }
       }
       
@@ -806,6 +824,7 @@ void InitAC(struct SCType *S)
       if (AC->Ncss > 0) {
          AC->CSS = (struct AcCssType *) calloc(AC->Ncss,sizeof(struct AcCssType));
          for(i=0;i<S->Ncss;i++) {
+            AC->CSS[i].Body = S->CSS[i].Body;
             for(j=0;j<3;j++) AC->CSS[i].Axis[j] = S->CSS[i].Axis[j];
             AC->CSS[i].Scale = S->CSS[i].Scale;
          }
@@ -1640,10 +1659,6 @@ void AdHocFSW(struct SCType *S)
       for(i=0;i<3;i++) AC->IdealTrq[i] = C->Tcmd[i];
 }
 /**********************************************************************/
-#ifdef _AC_STANDALONE_
-//#include "../Database/42Messages.c"
-#endif
-/**********************************************************************/
 /*  This function is called at the simulation rate.  Sub-sampling of  */
 /*  control loops should be done on a case-by-case basis.             */
 /*  Mode handling, command generation, error determination, feedback  */
@@ -1653,61 +1668,79 @@ void AdHocFSW(struct SCType *S)
 void FlightSoftWare(struct SCType *S)
 {
       static long First = 1;
-      static SOCKET AcSocket;
-      int AcPort = 101010;
+      #ifdef _AC_STANDALONE_
+      static SOCKET AcSocket[2];
+      int AcPort = 10101;
+      long i;
+      #endif
 
-      switch(S->FswTag){
-         case PASSIVE_FSW:
-            break;
-         case PROTOTYPE_FSW:
-            PrototypeFSW(S);
-            break;
-         case AD_HOC_FSW:
-            AdHocFSW(S);
-            break;
-         case SPINNER_FSW:
-            SpinnerFSW(S);
-            break;
-         case MOMBIAS_FSW:
-            MomBiasFSW(S);
-            break;
-         case THREE_AXIS_FSW:
-            ThreeAxisFSW(S);
-            break;
-         case ISS_FSW:
-            IssFSW(S);
-            break;
-         case CMG_FSW:
-            CmgFSW(S);
-            break;
-         case THR_FSW:
-            ThrFSW(S);
-            break;
-         case CFS_FSW:
-            #ifdef _AC_STANDALONE_
-               if (First) {
-                  First = 0;
-                  AcSocket = InitSocketServer(AcPort,TRUE);
-               }
-               //SendMessageToAcApp(AcSocket);
-               //ReceiveMessageFromAcApp(AcSocket);
-               printf("Messages not implemented yet\n");
-            #else
-               AcFsw(&S->AC);
-            #endif
-            //CfsFSW(&S->AC);
-            break;
-         case NOS3_FSW:
-            #if defined(_ENABLE_NOS3_FSW_) && defined(_ENABLE_SOCKETS_) && defined(__linux__)
-               NOS3SendMessageToFSW();
-               NOS3ReceiveMessageFromFSW();
-            #else
-               if (First) {
-                  First = 0;
-                  printf("WARNING:  Must be on Linux and must enable _ENABLE_NOS3_FSW_ to use NOS3_FSW\n");
-               }
-            #endif
-            break;
+      S->FswSampleCounter++;
+      if (S->FswSampleCounter >= S->FswMaxCounter) {
+         S->FswSampleCounter = 0;
+         switch(S->FswTag){
+            case PASSIVE_FSW:
+               break;
+            case PROTOTYPE_FSW:
+               PrototypeFSW(S);
+               break;
+            case AD_HOC_FSW:
+               AdHocFSW(S);
+               break;
+            case SPINNER_FSW:
+               SpinnerFSW(S);
+               break;
+            case MOMBIAS_FSW:
+               MomBiasFSW(S);
+               break;
+            case THREE_AXIS_FSW:
+               ThreeAxisFSW(S);
+               break;
+            case ISS_FSW:
+               IssFSW(S);
+               break;
+            case CMG_FSW:
+               CmgFSW(S);
+               break;
+            case THR_FSW:
+               ThrFSW(S);
+               break;
+            case CFS_FSW:
+               #ifdef _AC_STANDALONE_
+                  if (S->InitAC) {
+                      S->InitAC = 0;
+                     InitAC(S);
+                     AcSocket[S->AC.ID] = InitSocketServer(AcPort+S->AC.ID,TRUE);
+                     
+                     S->AC.ParmLoadEnabled = 1;
+                     S->AC.ParmDumpEnabled = 1;
+                     S->AC.EchoEnabled = 1;
+
+                     WriteToSocket(AcSocket[S->AC.ID]);
+                     ReadFromSocket(AcSocket[S->AC.ID]);
+
+                     S->AC.ParmLoadEnabled = 0;
+                     S->AC.ParmDumpEnabled = 0;
+                  }
+                  else {
+                     WriteToSocket(AcSocket[S->AC.ID]);
+                     ReadFromSocket(AcSocket[S->AC.ID]);
+                  }
+               #else
+                  AcFsw(&S->AC);
+               #endif
+               break;
+            case NOS3_FSW:
+               #if defined(_ENABLE_NOS3_FSW_) && defined(_ENABLE_SOCKETS_) && defined(__linux__)
+                  NOS3SendMessageToFSW();
+                  NOS3ReceiveMessageFromFSW();
+               #else
+                  if (First) {
+                     First = 0;
+                     printf("WARNING:  Must be on Linux and must enable _ENABLE_NOS3_FSW_ to use NOS3_FSW\n");
+                  }
+               #endif
+               break;
+         }
       }
 }
 

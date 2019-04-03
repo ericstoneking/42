@@ -261,28 +261,6 @@
 #define NOMINAL 1
 #define USER_DEFINED 2
 
-/* Mnemonics for InterProcess Comm */
-#define MNEM_TIME 0
-#define MNEM_SC 1
-#define MNEM_ORBPOS_N 2
-#define MNEM_ORBVEL_N 3
-#define MNEM_POS_R 4
-#define MNEM_VEL_R 5
-#define MNEM_POS_H 6
-#define MNEM_WBN 7
-#define MNEM_QBN 8
-#define MNEM_SVB 9
-#define MNEM_BVB 10
-#define MNEM_HVB 11
-#define MNEM_JOINT 12
-#define MNEM_HWHL 13
-#define MNEM_EARTH_POS_H 14
-#define MNEM_EARTH_QNH 15
-#define MNEM_EARTH_QWN 16
-#define MNEM_LUNA_POS_N 17
-#define MNEM_LUNA_QNH 18
-#define MNEM_LUNA_QWN 19
-
 /* Modes for InterProcess Comm */
 #define IPC_OFF 0
 #define IPC_TX 1

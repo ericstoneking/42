@@ -170,7 +170,7 @@ void Report(void)
       double CBL[3][3],Roll,Pitch,Yaw;
       double PosW[3],VelW[3],PosR[3],VelR[3];
       char s[40];
-      double ZAxis[3] = {0.0,0.0,1.0};
+      //double ZAxis[3] = {0.0,0.0,1.0};
 
       if (First) {
          First = FALSE;
@@ -270,7 +270,8 @@ void Report(void)
             MxMT(SC[0].B[0].CN,SC[0].CLN,CBL);
             C2A(123,CBL,&Roll,&Pitch,&Yaw);
             fprintf(RPYfile,"%lf %lf %lf\n",Roll*R2D,Pitch*R2D,Yaw*R2D);
-            fprintf(Hwhlfile,"%lf %lf %lf\n",SC[0].Whl[0].H,SC[0].Whl[1].H,SC[0].Whl[2].H);
+            for(i=0;i<SC[0].Nw;i++) fprintf(Hwhlfile,"%lf ",SC[0].Whl[i].H);
+            fprintf(Hwhlfile,"\n");
             fprintf(MTBfile,"%lf %lf %lf\n",SC[0].MTB[0].M,SC[0].MTB[1].M,SC[0].MTB[2].M);
             
             //MagReport();

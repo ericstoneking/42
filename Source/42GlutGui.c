@@ -1564,8 +1564,10 @@ void DrawNearAuxObjects(void)
                      if (MAGV(S->AC.bvb) > 0.0)
                         DrawVector(S->AC.bvb,"Bac","uT",BvbColor,
                            1.15*AxisLength,1.0E6,FALSE);
-                     /*DrawVector(S->AC.Hvb,"Hac","Nms",HvbColor,AxisLength,
-                        1.0,FALSE);*/
+                     if (MAGV(S->AC.Hvb) > 0.0)
+                        DrawVector(S->AC.Hvb,"Hac","Nms",HvbColor,
+                           1.15*AxisLength,
+                           1.0,FALSE);
                      glPopMatrix();
                   }
                }

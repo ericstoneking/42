@@ -217,7 +217,9 @@ void ManageBoundingBoxes(void)
 void ZeroFrcTrq(void)
 {
       struct SCType *S;
-      long Isc,Ib;
+      struct BodyType *B;
+      struct FlexNodeType *FN;
+      long Isc,Ib,In;
 
       for(Isc=0;Isc<Nsc;Isc++) {
          S = &SC[Isc];
@@ -225,13 +227,28 @@ void ZeroFrcTrq(void)
          S->Frc[1] = 0.0;
          S->Frc[2] = 0.0;
          for(Ib=0;Ib<S->Nb;Ib++) {
-            S->B[Ib].Frc[0] = 0.0;
-            S->B[Ib].Frc[1] = 0.0;
-            S->B[Ib].Frc[2] = 0.0;
-            S->B[Ib].Trq[0] = 0.0;
-            S->B[Ib].Trq[1] = 0.0;
-            S->B[Ib].Trq[2] = 0.0;
+            B = &S->B[Ib];
+            B->Frc[0] = 0.0;
+            B->Frc[1] = 0.0;
+            B->Frc[2] = 0.0;
+            B->Trq[0] = 0.0;
+            B->Trq[1] = 0.0;
+            B->Trq[2] = 0.0;
          }
+         if (S->FlexActive) {
+            for(Ib=0;Ib<S->Nb;Ib++) {
+               B = &S->B[Ib];
+               for(In=0;In<B->NumFlexNodes;In++) {
+                 FN = &B->FlexNode[In];
+                 FN->Frc[0] = 0.0;
+                 FN->Frc[1] = 0.0;
+                 FN->Frc[2] = 0.0;
+                 FN->Trq[0] = 0.0;
+                 FN->Trq[1] = 0.0;
+                 FN->Trq[2] = 0.0;
+               }
+            }
+         }     
       }
 }
 /**********************************************************************/

@@ -2492,43 +2492,42 @@ void OneBodyEOM(double *u, double *x, double *h,
          hdot[i] = S->Whl[i].Trq;
       }
 
-/* .. Flex EOM */
-      for(If=0;If<Nf;If++) {
-         D->FlexFrc[If] = 0.0;
-         for(k=0;k<Nf;k++)
-            D->FlexFrc[If] -= B->Cf[If][k]*B->xi[k]
-                              + B->Kf[If][k]*B->eta[k];
-      }
-      for(In=0;In<B->NumFlexNodes;In++) {
-         FN = &B->FlexNode[In];
-         for(If=0;If<Nf;If++) {
-            D->FlexFrc[If] +=
-               FN->PSI[0][If]*FN->Frc[0] +
-               FN->PSI[1][If]*FN->Frc[1] +
-               FN->PSI[2][If]*FN->Frc[2] +
-               FN->THETA[0][If]*FN->Trq[0] +
-               FN->THETA[1][If]*FN->Trq[1] +
-               FN->THETA[2][If]*FN->Trq[2];
-         }
-      }
-      if (B->MfIsDiagonal) {
-         for(If=0;If<Nf;If++) {
-            ufdot[i] = D->FlexFrc[If]/B->Mf[If][If];
-         }
-      }
-      else {
-         LINSOLVE(B->Mf,ufdot,D->FlexFrc,Nf);
-      }
-
 /* .. Quaternion kinematics */
       xdot[0] = 0.5*( u[0]*x[3]-u[1]*x[2]+u[2]*x[1]);
       xdot[1] = 0.5*( u[0]*x[2]+u[1]*x[3]-u[2]*x[0]);
       xdot[2] = 0.5*(-u[0]*x[1]+u[1]*x[0]+u[2]*x[3]);
       xdot[3] = 0.5*(-u[0]*x[0]-u[1]*x[1]-u[2]*x[2]);
 
-/* .. Flex Kinematics */
-      for(If=0;If<Nf;If++) {
-         xfdot[i] = uf[i];
+/* .. Flex EOM */
+      if (S->FlexActive) {
+         for(If=0;If<Nf;If++) {
+            D->FlexFrc[If] = 0.0;
+            for(k=0;k<Nf;k++)
+               D->FlexFrc[If] -= B->Cf[If][k]*uf[k]
+                                 + B->Kf[If][k]*xf[k];
+            for(In=0;In<B->NumFlexNodes;In++) {
+               FN = &B->FlexNode[In];
+               D->FlexFrc[If] +=
+                  FN->PSI[0][If]*FN->Frc[0] +
+                  FN->PSI[1][If]*FN->Frc[1] +
+                  FN->PSI[2][If]*FN->Frc[2] +
+                  FN->THETA[0][If]*FN->Trq[0] +
+                  FN->THETA[1][If]*FN->Trq[1] +
+                  FN->THETA[2][If]*FN->Trq[2];
+            }
+         }
+         if (B->MfIsDiagonal) {
+            for(If=0;If<Nf;If++) {
+               ufdot[If] = D->FlexFrc[If]/B->Mf[If][If];
+            }
+         }
+         else {
+            LINSOLVE(B->Mf,ufdot,D->FlexFrc,Nf);
+         }
+         /* Flex Kinematics */
+         for(If=0;If<Nf;If++) {
+            xfdot[If] = uf[If];
+         }
       }
 
 }
@@ -2544,7 +2543,7 @@ void OneBodyRK4(struct SCType *S)
       double *h,*hh,*dh,*hdot;
       double *uf,*uuf,*duf,*ufdot;
       double *xf,*xxf,*dxf,*xfdot;
-      long i,j,In;
+      long i,In,If;
       long Nf,Nw;
 
       /* Save some typing (and dereferencing) */
@@ -2691,20 +2690,26 @@ void OneBodyRK4(struct SCType *S)
       }
 
 /* .. Flex */
-      for(In=0;In<B->NumFlexNodes;In++) {
-         FN = &B->FlexNode[In];
-         for(i=0;i<3;i++) {
-            FN->pos[i] = 0.0;
-            FN->vel[i] = 0.0;
-            FN->ang[i] = 0.0;
-            FN->angrate[i] = 0.0;
-            for(j=0;j<B->Nf;j++) {
-               FN->pos[i] += FN->PSI[i][j]*B->eta[j];
-               FN->vel[i] += FN->PSI[i][j]*B->xi[j];
-               FN->ang[i] += FN->THETA[i][j]*B->eta[j];
-               FN->angrate[i] += FN->THETA[i][j]*B->xi[j];
+      if (S->FlexActive) {
+         for(If=0;If<B->Nf;If++) {
+            B->xi[If] = uf[B->f0+If];
+            B->eta[If] = xf[B->f0+If];
+         }
+         for(In=0;In<B->NumFlexNodes;In++) {
+            FN = &B->FlexNode[In];
+            for(i=0;i<3;i++) {
+               FN->pos[i] = 0.0;
+               FN->vel[i] = 0.0;
+               FN->ang[i] = 0.0;
+               FN->angrate[i] = 0.0;
+               for(If=0;If<B->Nf;If++) {
+                  FN->pos[i] += FN->PSI[i][If]*B->eta[If];
+                  FN->vel[i] += FN->PSI[i][If]*B->xi[If];
+                  FN->ang[i] += FN->THETA[i][If]*B->eta[If];
+                  FN->angrate[i] += FN->THETA[i][If]*B->xi[If];
+               }
+               FN->TotAngVel[i] = B->wn[i] + FN->angrate[i];
             }
-            FN->TotAngVel[i] = B->wn[i] + FN->angrate[i];
          }
       }
 

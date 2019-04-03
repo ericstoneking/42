@@ -14,7 +14,7 @@
 
 #include "geomkit.h"
 #include "orbkit.h"
-#include "fswtypes.h"
+#include "AcTypes.h"
 
 #ifndef __42TYPES_H__
 #define __42TYPES_H__
@@ -26,12 +26,14 @@
 */
 
 struct SphereHarmType {
+   /*~ Internal Variables ~*/
    long Type;
    long N;
    long M;
 };
 
 struct FormationType {
+   /*~ Internal Variables ~*/
    char FixedInFrame;
    double CN[3][3];
    double CL[3][3];
@@ -40,6 +42,7 @@ struct FormationType {
 
 /* "Analysis" flex nodes, ("Force" nodes and "Measurement" nodes) */
 struct FlexNodeType {
+   /*~ Internal Variables ~*/
    long ID; /* For referring back to Nastran */
    double PosB[3];
    double **PSI, **THETA; /* Mode shapes, 3 x B.Nf */
@@ -50,13 +53,14 @@ struct FlexNodeType {
 };
 
 struct BodyType {
+   /*~ Internal Variables ~*/
    double mass;
    double cm[3]; /* wrt origin of convenience, expressed in B frame */
    double c[3]; /* First mass moment about ref pt, expressed in B */
    double I[3][3]; /* Moment of Inertia, about ref pt, expressed in B frame */
    double Hgyro[3];  /* Constant embedded momentum, for CMGs and rotating instruments */
-   double wn[3]; /* Angular Velocity of B expressed in B frame [[rad/sec]] =~*/
-   double qn[4]; /* =~*/
+   double wn[3]; /* Angular Velocity of B expressed in B frame [[rad/sec]] [~=~] */
+   double qn[4]; /* [~=~] */
    double vn[3]; /* velocity of B ref pt expressed in N frame */
    double pn[3]; /* position of B ref pt in N frame expressed in N frame */
    double CN[3][3]; /* Direction Cosine of B frame in N frame */
@@ -103,6 +107,7 @@ struct BodyType {
 };
 
 struct JointType {
+   /*~ Internal Variables ~*/
    long IsSpherical;      /* TRUE or FALSE */
    long RotDOF;           /* 0,1,2,3 */
    long TrnDOF;           /* 0,1,2,3 */
@@ -168,7 +173,8 @@ struct JointType {
 };
 
 struct WhlType {
-   double H;  /* Angular Momentum, [[Nms]] =~*/
+   /*~ Internal Variables ~*/
+   double H;  /* Angular Momentum, [[Nms]] [~=~] */
    double J;  /* Rotary inertia, kg-m^2 */
    double w;  /* Angular speed, rad/sec */
    double A[3]; /* Axis vector wrt Body 0 */
@@ -183,6 +189,7 @@ struct WhlType {
 };
 
 struct MTBType {
+   /*~ Internal Variables ~*/
    double M;
    double A[3]; /* Axis vector wrt Body 0 */
    double Mmax;
@@ -191,6 +198,7 @@ struct MTBType {
 };
 
 struct ThrType {
+   /*~ Internal Variables ~*/
    double Fmax;
    double F;
    double A[3]; /* Axis vector wrt Body 0 */
@@ -201,7 +209,7 @@ struct ThrType {
 };
 
 struct GyroType {
-   /* Parameters */
+   /*~ Parameters ~*/
    double SampleTime;
    long MaxCounter;
    double Axis[3];
@@ -218,16 +226,16 @@ struct GyroType {
    double AngNoiseCoef;
    double CorrCoef; /* Correlation Coef, exp(-SampleTime/BiasTime) */
 
-   /* Variables */
+   /*~ Internal Variables ~*/
    long SampleCounter;
-   double TrueRate; /* rad/sec */
+   double TrueRate; /* rad/sec [~>~] */
    double Bias; /* rad/sec */
    double Angle; /* rad */
    double MeasRate; /* rad/sec */
 };
 
 struct MagnetometerType {
-   /* Parameters */
+   /*~ Parameters ~*/
    double SampleTime;
    long MaxCounter;
    double Axis[3];
@@ -237,15 +245,16 @@ struct MagnetometerType {
    double Noise;
    long FlexNode;
 
-   /* Variables */
+   /*~ Internal Variables ~*/
    long SampleCounter;
    double Field; /* Magfield Component, Tesla */
 };
 
 struct CssType {
-   /* Parameters */
+   /*~ Parameters ~*/
    double SampleTime;
    long MaxCounter;
+   long Body;
    double Axis[3];
    double FovAng;
    double CosFov;
@@ -253,14 +262,14 @@ struct CssType {
    double Quant;
    long FlexNode;
 
-   /* Variables */
+   /*~ Internal Variables ~*/
    long SampleCounter;
    long Valid;
    double Illum; /* Units defined by scale */
 };
 
 struct FssType {
-   /* Parameters */
+   /*~ Parameters ~*/
    double SampleTime;
    long MaxCounter;
    double qb[4];
@@ -270,7 +279,7 @@ struct FssType {
    double Quant;
    long FlexNode;
 
-   /* Variables */
+   /*~ Internal Variables ~*/
    long SampleCounter;
    long Valid;
    double SunAng[2];
@@ -279,7 +288,7 @@ struct FssType {
 };
 
 struct StarTrackerType {
-   /* Parameters */
+   /*~ Parameters ~*/
    double SampleTime;
    long MaxCounter;
    double qb[4];
@@ -295,14 +304,14 @@ struct StarTrackerType {
    double NEA[3];
    long FlexNode;
 
-   /* Variables */
+   /*~ Internal Variables ~*/
    long SampleCounter;
    long Valid;
    double qn[4];
 };
 
 struct GpsType {
-   /* Parameters */
+   /*~ Parameters ~*/
    double SampleTime;
    long MaxCounter;
    double PosNoise;
@@ -310,7 +319,7 @@ struct GpsType {
    double TimeNoise;
    long FlexNode;
    
-   /* Variables */
+   /*~ Internal Variables ~*/
    long SampleCounter;
    long Valid;
    long Rollover;
@@ -324,6 +333,7 @@ struct GpsType {
 };
 
 struct AccelType {
+   /*~ Internal Variables ~*/
    double PosB[3];  /* Position in B[0] */
    double Axis[3]; /* Mounting matrix */
    double acc;  /* Measured acceleration, expressed in A */
@@ -331,16 +341,19 @@ struct AccelType {
 };
 
 struct JointPathTableType { /* tells if joint is in path of body*/
+   /*~ Internal Variables ~*/
    long InPath;
    double rho[3];
 };
 
 struct BodyPathTableType { /* tells if inner body is in path of outer body*/
+   /*~ Internal Variables ~*/
    long InPath;
    double Coi[3][3];
 };
 
 struct DynType {
+   /*~ Internal Variables ~*/
    long Nu;   /* 6 + Sum(Joint DOFs) */
    long Nx;   /* 7 + Sum(Joint DOFs), (spherical gives 4) */
    long **ConnectTable;  /* Nb x Ng */
@@ -385,35 +398,32 @@ struct DynType {
 };
 
 struct EnvTrqType {
+   /*~ Internal Variables ~*/
    long First;
    FILE *envfile;
    double Hs[3];
 };
 
 struct SCType {
+   /*~ Internal Variables ~*/
    long ID;     /* SC[x].ID = x */
    long Exists;
    char Label[40];
    long RotDOF;  /* STEADY, KIN_JOINT, DYN_JOINT */
    long OrbDOF;  /* FIXED, EULER_HILL, ENCKE, COWELL */
    long RefOrb;
-   long FswTag;  /* Tag for FSW function */
+   long FswTag;  /* Tag for FSW function, eg. PROTOTYPE_FSW */
+   double FswSampleTime;
+   long FswMaxCounter;
+   long FswSampleCounter;
+   long InitAC;
 
    long Nb;   /* Number of bodies */
    long Ng;   /* Number of joints, = Nb-1 */
    
-   struct AcType AC;
-   
-   struct BodyType *B;
-   struct JointType *G;
-   
    long Nw;   /* Number of wheels */
    long Nmtb; /* Number of MTB's */
    long Nthr; /* Number of thrusters */
-   
-   struct WhlType *Whl;
-   struct MTBType *MTB;
-   struct ThrType *Thr;
    
    long Ngyro; /* Number of Gyro axes */
    long Nmag; /* Number of magnetometer axes */
@@ -423,36 +433,26 @@ struct SCType {
    long Ngps; /* Number of GPS receivers */
    long Nacc; /* Number of accelerometer axes */
    
-   struct GyroType *Gyro;
-   struct MagnetometerType *MAG;
-   struct CssType *CSS;
-   struct FssType *FSS;
-   struct StarTrackerType *ST;
-   struct GpsType *GPS;
-   struct AccelType *Accel;
-   
    double mass;
    double cm[3]; /* wrt B0 origin, expressed in B0 frame */
    double I[3][3]; /* Inertia matrix, wrt SC.cm, expressed in B0 frame */
-   double PosRinN[3]; /* Position of Reference Orbit [[m]] wrt N =~*/
-   double VelRinN[3]; /* Velocity of Reference Orbit [[m/s]] wrt N =~*/
-   double PosR[3]; /* Position of cm wrt Reference Orbit [[m]], expressed in N =~*/
-   double VelR[3]; /* Velocity of cm wrt R [[m/s]], expressed in N =~*/
+   double PosR[3]; /* Position of cm wrt Reference Orbit [[m]], expressed in N [~=~] */
+   double VelR[3]; /* Velocity of cm wrt R [[m/s]], expressed in N [~=~] */
    double PosEH[3];  /* Position of cm wrt R, m, in Euler-Hill coords */
    double VelEH[3];  /* Velocity of cm wrt R, m, in Euler-Hill coords */
    double PosN[3];   /* Position of cm wrt origin of N, m, expressed in N */
    double VelN[3];   /* Velocity of cm wrt origin of N, m/sec, expressed in N */
-   double CLN[3][3]; /* Note that SC.CLN != Orb[RefOrb].CLN if SC.Rrel != 0 */
+   double CLN[3][3]; /* Note that SC.CLN != Orb[RefOrb].CLN if SC.PosR != 0.0 */
    double wln[3]; /* Expressed in N */
    double PosH[3];  /* Position of cm wrt H frame, expressed in H */
    double VelH[3];  /* Velocity of cm wrt H frame, expressed in H */
    double Frc[3]; /* Force, N, expressed in N */
    double svn[3]; /* Sun-pointing unit vector, expressed in N */
-   double svb[3]; /* Sun-pointing unit vector, expressed in SC.B[0] =~*/
+   double svb[3]; /* Sun-pointing unit vector, expressed in SC.B[0] [~=~] */
    double bvn[3]; /* Magfield, Tesla, expressed in N */
-   double bvb[3]; /* Magfield [[Tesla]], expressed in SC.B[0] =~*/
+   double bvb[3]; /* Magfield [[Tesla]], expressed in SC.B[0] [~=~] */
    double Hvn[3]; /* Total SC angular momentum, Nms, expressed in N */
-   double Hvb[3]; /* Total SC angular momentum [[Nms]], expressed in SC.B[0] =~*/
+   double Hvb[3]; /* Total SC angular momentum [[Nms]], expressed in SC.B[0] [~=~] */
    long Eclipse;
    double AtmoDensity;
    double DragCoef;
@@ -487,9 +487,25 @@ struct SCType {
    struct BoundingBoxType BBox;
    /* See ReadStatesFromSocket */
    long RequestStateRefresh;
+   
+   /*~ Structures ~*/
+   struct AcType AC;
+   struct BodyType *B;           /* [*Nb*] */
+   struct JointType *G;          /* [*Ng*] */
+   struct WhlType *Whl;          /* [*Nw*] */
+   struct MTBType *MTB;          /* [*Nmtb*] */
+   struct ThrType *Thr;          /* [*Nthr*] */
+   struct GyroType *Gyro;        /* [*Ngyro*] */
+   struct MagnetometerType *MAG; /* [*Nmag*] */
+   struct CssType *CSS;          /* [*Ncss*] */
+   struct FssType *FSS;          /* [*Nfss*] */
+   struct StarTrackerType *ST;   /* [*Nst*] */
+   struct GpsType *GPS;          /* [*Ngps*] */
+   struct AccelType *Accel;      /* [*Nacc*] */
 };
 
 struct TargetType {
+   /*~ Internal Variables ~*/
    long Type;
    long World;
    long RefOrb;
@@ -502,6 +518,7 @@ struct TargetType {
 };
 
 struct POVType {
+   /*~ Internal Variables ~*/
    long Mode; /* Track Host, Track Target, or Fixed in Host */
    struct TargetType Host;
    struct TargetType Target;
@@ -542,6 +559,7 @@ struct POVType {
 };
 
 struct RegionType {
+   /*~ Internal Variables ~*/
    long Exists;
    long World;
    double Lng,Lat,Alt; /* Origin location */
@@ -559,6 +577,7 @@ struct RegionType {
 };
 
 struct AtmoType {
+   /*~ Internal Variables ~*/
    long Exists;
    float GasColor[3];
    float DustColor[3];
@@ -572,12 +591,14 @@ struct AtmoType {
 };
 
 struct WorldType {
+   /*~ Parameters ~*/
+   
    /* Relationships */
    long Exists;
    long Type; /* STAR, PLANET, MOON, ASTEROID, COMET */
    long Parent;
    long Nsat;
-   long *Sat;
+   long *Sat; /* [*Nsat*] */
 
    /* Physical Properties */
    double mu; /* Gravitation constant  */
@@ -591,8 +612,6 @@ struct WorldType {
    double RingInner, RingOuter;
    double Density; /* For minor bodies, polyhedron gravity */
 
-   /* Ephemeris */
-   struct OrbitType eph; /* Ephemeris Parameters */
 
    /* Graphical Properties */
    long HasRing;
@@ -612,22 +631,30 @@ struct WorldType {
    unsigned int CloudGlossCubeTag;
    long GeomTag;
    unsigned int RingTexTag;
-   struct AtmoType Atmo;
    double NearExtent,FarExtent;
 
-   /* State Variables */
-   double PosH[3];         /* Position in H frame */
-   double VelH[3];         /* Velocity in H frame */
    double CNH[3][3]; /* DCM from heliocentric ecliptic frame
                         to world-centric equatorial inertial frame */
+   double qnh[4]; /* ~*/
+
+   /*~ Internal Variables ~*/
+   
+   double PosH[3];         /* Position in H frame [~=~] */
+   double VelH[3];         /* Velocity in H frame */
    double PriMerAng; /* Angle from N1 to prime meridian */
    double CWN[3][3]; /* DCM from world-centric inertial frame
                         to world-centric rotating frame */
+   double qwn[4]; /* ~*/
    long Visibility; /* Too small to see, point-sized, or shows disk */
    float ModelMatrix[16];
+
+   /*~ Structures ~*/
+   struct OrbitType eph; /* Ephemeris */
+   struct AtmoType Atmo;
 };
 
 struct SpotType {
+   /*~ Internal Variables ~*/
    long xmin,ymin;
    long xmax,ymax;
    long Visible;
@@ -635,6 +662,7 @@ struct SpotType {
 };
 
 struct WidgetType {
+   /*~ Internal Variables ~*/
    long xmin,ymin;
    long xmax,ymax;
    float BorderColor[4];
@@ -646,6 +674,7 @@ struct WidgetType {
 };
 
 struct FovType {
+   /*~ Internal Variables ~*/
    long Type; /* WIREFRAME, SOLID, or VECTOR */
    long NearExists;
    long FarExists;
@@ -663,6 +692,7 @@ struct FovType {
 };
 
 struct TdrsType {
+   /*~ Internal Variables ~*/
    long Exists;
    double JD;
    double rw[3]; /* Position vector in ECEF frame */
@@ -674,6 +704,7 @@ struct TdrsType {
 };
 
 struct GroundStationType {
+   /*~ Internal Variables ~*/
    long Exists;
    long World;
    long Show;
@@ -684,6 +715,7 @@ struct GroundStationType {
 
 /* Framebuffer Objects for Spacecraft Shadows */
 struct FBOType {
+   /*~ Internal Variables ~*/
    unsigned int FrameTag;
    unsigned int Height, Width;
    unsigned int RenderTag;
@@ -692,6 +724,7 @@ struct FBOType {
 
 /* Orrery POV is different from POV */
 struct OrreryPOVType {
+   /*~ Internal Variables ~*/
    long Regime;  /* CENTRAL or THREE_BODY */
    long CenterType;
    long World;

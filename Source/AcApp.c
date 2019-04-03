@@ -11,38 +11,40 @@
 
 /*    All Other Rights Reserved.                                      */
 
-#ifdef _AC_STANDALONE_
-   #include "42fsw.h" 
-#else
-   #include "42.h"
-#endif
+#include "Ac.h" 
 
 /* #ifdef __cplusplus
 ** namespace _42 {
 ** using namespace Kit;
 ** #endif
 */
-#ifdef _AC_STANDALONE_
 
-#if 1
+extern void WriteToFile(FILE *StateFile, struct AcType *AC);
+extern void WriteToGmsec(struct AcType *AC);
+extern void WriteToSocket(SOCKET Socket, struct AcType *AC);
+extern void ReadFromFile(FILE *StateFile, struct AcType *AC);
+extern void ReadFromGmsec(struct AcType *AC);
+extern void ReadFromSocket(SOCKET Socket, struct AcType *AC);
+
+#ifdef _AC_STANDALONE_
 /**********************************************************************/
 /* This function copies needed parameters from the SC structure to    */
 /* the AC structure.  This is a crude first pass.  It only allocates  */
 /* memory for the structures, and counts on the data to be filled in  */
 /* via messages.                                                      */
-void InitAC(struct AcType *AC)
+void AllocateAC(struct AcType *AC)
 {
-      long Ig;
 
-      AC->Init = 1;
+      /* Bodies */
+      AC->Nb = 2;
+      if (AC->Nb > 0) {
+         AC->B = (struct AcBodyType *) calloc(AC->Nb,sizeof(struct AcBodyType));
+      }
 
       /* Joints */
       AC->Ng = 1;
       if (AC->Ng > 0) {
          AC->G = (struct AcJointType *) calloc(AC->Ng,sizeof(struct AcJointType));
-         for(Ig=0;Ig<AC->Ng;Ig++) {
-            AC->G[Ig].IsUnderActiveControl = 1;
-         }
       }
       
       /* Wheels */
@@ -103,199 +105,18 @@ void InitAC(struct AcType *AC)
       
       /* Accelerometer Axes */
 
+
+}
+/**********************************************************************/
+void InitAC(struct AcType *AC)
+{
+      AC->Init = 1;
+      
+      AC->EchoEnabled = 1;
       
       /* Controllers */
       AC->CfsCtrl.Init = 1;      
 }
-#else
-/**********************************************************************/
-/* This function copies needed parameters from the SC structure to    */
-/* the AC structure.                                                  */
-/* This version is copy/pasted from 42fsw.c.  Obviously won't work    */
-/* as is.  Needs work.                                                */
-void InitAC(struct AcType *AC)
-{
-      long Ig,i,j,k;
-      double **A,**Aplus;
-
-      AC->Init = 1;
-
-      /* Joints */
-      AC->Ng = S->Ng;
-      if (S->Ng > 0) {
-         AC->G = (struct AcJointType *) calloc(S->Ng,sizeof(struct AcJointType));
-         for(Ig=0;Ig<AC->Ng;Ig++) {
-            AC->G[Ig].IsUnderActiveControl = TRUE;
-            AC->G[Ig].IsSpherical = S->G[Ig].IsSpherical;
-            AC->G[Ig].RotDOF = S->G[Ig].RotDOF;
-            AC->G[Ig].TrnDOF = S->G[Ig].TrnDOF;
-            for(i=0;i<3;i++) {
-               for(j=0;j<3;j++) {
-                  AC->G[Ig].CGiBi[i][j] = S->G[Ig].CGiBi[i][j];
-                  AC->G[Ig].CBoGo[i][j] = S->G[Ig].CBoGo[i][j];
-               }
-            }
-            AC->G[Ig].RotSeq = S->G[Ig].RotSeq;
-            AC->G[Ig].TrnSeq = S->G[Ig].TrnSeq;
-         }
-      }
-      
-      /* Gyro Axes */
-      AC->Ngyro = S->Ngyro;
-      if (S->Ngyro > 0) {
-         AC->Gyro = (struct AcGyroType *) calloc(S->Ngyro,sizeof(struct AcGyroType));
-         for(i=0;i<S->Ngyro;i++) {
-            for(j=0;j<3;j++) {
-               AC->Gyro[i].Axis[j] = S->Gyro[i].Axis[j];
-            }
-         }
-      }
-
-      /* Magnetometer Axes */
-      AC->Nmag = S->Nmag;
-      if (S->Nmag > 0) {
-         AC->MAG = (struct AcMagnetometerType *) calloc(S->Nmag,sizeof(struct AcMagnetometerType));
-         for(i=0;i<S->Nmag;i++) {
-            for(j=0;j<3;j++) {
-               AC->MAG[i].Axis[j] = S->MAG[i].Axis[j];
-            }
-         }
-      }
-
-      /* Coarse Sun Sensors */
-      AC->Ncss = S->Ncss;
-      AC->CSS = (struct AcCssType *) calloc(S->Ncss,sizeof(struct AcCssType));
-      for(i=0;i<S->Ncss;i++) {
-         for(j=0;j<3;j++) AC->CSS[i].Axis[j] = S->CSS[i].Axis[j];
-         AC->CSS[i].Scale = S->CSS[i].Scale;
-      }
-      
-      /* Fine Sun Sensors */
-      AC->Nfss = S->Nfss;
-      AC->FSS = (struct AcFssType *) calloc(S->Nfss,sizeof(struct AcFssType));
-      for(k=0;k<S->Nfss;k++) {
-         for(i=0;i<3;i++) {
-            for(j=0;j<3;j++) AC->FSS[k].CB[i][j] = S->FSS[k].CB[i][j];
-         }
-         for(i=0;i<4;i++) AC->FSS[k].qb[i] = S->FSS[k].qb[i];
-      }
-
-      /* Star Trackers */
-      AC->Nst = S->Nst;
-      AC->ST = (struct AcStarTrackerType *) calloc(S->Nst,sizeof(struct AcStarTrackerType));
-      for(k=0;k<S->Nst;k++) {
-         for(i=0;i<3;i++) {
-            for(j=0;j<3;j++) AC->ST[k].CB[i][j] = S->ST[k].CB[i][j];
-         }
-         for(i=0;i<4;i++) AC->ST[k].qb[i] = S->ST[k].qb[i];
-      }
-
-      /* GPS */
-      AC->Ngps = S->Ngps;
-      AC->GPS = (struct AcGpsType *) calloc(S->Ngps,sizeof(struct AcGpsType));      
-      
-      /* Accelerometer Axes */
-
-      /* Wheels */
-      AC->Nwhl = S->Nw;
-      if (S->Nw > 0) {
-         AC->Whl = (struct AcWhlType *) calloc(AC->Nwhl,sizeof(struct AcWhlType));
-         A = CreateMatrix(3,AC->Nwhl);
-         Aplus = CreateMatrix(AC->Nwhl,3);
-         for (i=0;i<S->Nw;i++) {
-            for (j=0;j<3;j++) {
-               AC->Whl[i].Axis[j] = S->Whl[i].A[j];
-               A[j][i] = S->Whl[i].A[j];
-            }
-         }
-         if (S->Nw == 1) {
-            for(i=0;i<3;i++) AC->Whl[0].DistVec[i] = AC->Whl[0].Axis[i]; 
-         }
-         else if (S->Nw >= 2) {
-            PINVG(A,Aplus,3,S->Nw);
-            for(i=0;i<AC->Nwhl;i++) {
-               for(j=0;j<3;j++) {
-                  AC->Whl[i].DistVec[j] = Aplus[i][j];
-               }
-            }
-         }
-         DestroyMatrix(A,3);
-         DestroyMatrix(Aplus,AC->Nwhl);
-         for(i=0;i<S->Nw;i++) {
-            AC->Whl[i].J = S->Whl[i].J;
-            AC->Whl[i].Tmax = S->Whl[i].Tmax;
-            AC->Whl[i].Hmax = S->Whl[i].Hmax;
-         }
-      }
-
-      /* Magnetic Torquer Bars */
-      AC->Nmtb = S->Nmtb;
-      if (S->Nmtb > 0) {
-         AC->MTB = (struct AcMtbType *) calloc(AC->Nmtb,sizeof(struct AcMtbType));
-         A = CreateMatrix(3,AC->Nmtb);
-         Aplus = CreateMatrix(AC->Nmtb,3);
-         for (i=0;i<S->Nmtb;i++) {
-            for (j=0;j<3;j++) {
-               AC->MTB[i].Axis[j] = S->MTB[i].A[j];
-               A[j][i] = S->MTB[i].A[j];
-            }
-         }
-         if (S->Nmtb == 1) {
-            for(i=0;i<3;i++) AC->MTB[0].DistVec[i] = AC->MTB[0].Axis[i]; 
-         }
-         else if (S->Nmtb >= 2) {
-            PINVG(A,Aplus,3,S->Nmtb);
-            for(i=0;i<AC->Nmtb;i++) {
-               for(j=0;j<3;j++) {
-                  AC->MTB[i].DistVec[j] = Aplus[i][j];
-               }
-            }
-         }
-         DestroyMatrix(A,3);
-         DestroyMatrix(Aplus,AC->Nmtb);
-         for(i=0;i<S->Nmtb;i++) {
-            AC->MTB[i].Mmax = S->MTB[i].Mmax;
-         }
-      }
-
-      /* Thrusters */
-      AC->Nthr = S->Nthr;
-      if (S->Nthr > 0) {
-         AC->Thr = (struct AcThrType *) calloc(AC->Nthr,sizeof(struct AcThrType));
-         for(i=0;i<S->Nthr;i++) {
-            AC->Thr[i].Fmax = S->Thr[i].Fmax;
-            for(j=0;j<3;j++) {
-               AC->Thr[i].Axis[j] = S->Thr[i].A[j];
-               AC->Thr[i].PosB[j] = S->Thr[i].PosB[j];
-            }
-         }
-      }
-      
-      /* Control Moment Gyros */
-
-      AC->DT = DTSIM;
-      AC->mass = S->mass;
-      for (i=0;i<3;i++) {
-         for(j=0;j<3;j++) {
-            AC->MOI[i][j] = S->I[i][j];
-         }
-      }
-      
-      /* Controllers */
-      AC->PrototypeCtrl.Init = 1;
-      AC->AdHocCtrl.Init = 1;
-      AC->SpinnerCtrl.Init = 1;
-      AC->MomBiasCtrl.Init = 1;
-      AC->ThreeAxisCtrl.Init = 1;
-      AC->IssCtrl.Init = 1;
-      AC->CmgCtrl.Init = 1;
-      AC->CfsCtrl.Init = 1;
-      
-      AC->PrototypeCtrl.wc = 0.05*TwoPi;
-      AC->PrototypeCtrl.amax = 0.01;
-      AC->PrototypeCtrl.vmax = 0.5*D2R;
-}
-#endif
 #endif
 /**********************************************************************/
 /*  Some Simple Sensor Processing Functions                           */
@@ -574,8 +395,8 @@ void AcFsw(struct AcType *AC)
       struct AcCfsCtrlType *C;
       struct AcJointType *G;
       double L1[3],L2[3],L3[3];
-      double Hb[3],HxB[3];
-      long i;
+      double HxB[3];
+      long i,j;
       
       C = &AC->CfsCtrl;
       G = &AC->G[0];
@@ -598,35 +419,57 @@ void AcFsw(struct AcType *AC)
       GpsProcessing(AC);
       
 /* .. Commanded Attitude */
-      CopyUnitV(AC->PosN,L3);
-      VxV(AC->PosN,AC->VelN,L2);
-      UNITV(L2);
-      UNITV(L3);
-      for(i=0;i<3;i++) {
-         L2[i] = -L2[i];
-         L3[i] = -L3[i];
+      if (AC->GPS[0].Valid) {
+         CopyUnitV(AC->PosN,L3);
+         VxV(AC->PosN,AC->VelN,L2);
+         UNITV(L2);
+         UNITV(L3);
+         for(i=0;i<3;i++) {
+            L2[i] = -L2[i];
+            L3[i] = -L3[i];
+         }
+         VxV(L2,L3,L1);
+         UNITV(L1);
+         for(i=0;i<3;i++) {
+            AC->CLN[0][i] = L1[i];
+            AC->CLN[1][i] = L2[i];
+            AC->CLN[2][i] = L3[i];
+         }
+         C2Q(AC->CLN,AC->qln);
+         AC->wln[1] = -MAGV(AC->VelN)/MAGV(AC->PosN);
       }
-      VxV(L2,L3,L1);
-      UNITV(L1);
-      for(i=0;i<3;i++) {
-         AC->CLN[0][i] = L1[i];
-         AC->CLN[1][i] = L2[i];
-         AC->CLN[2][i] = L3[i];
+      else {
+         for(i=0;i<3;i++) {
+            for(j=0;j<3;j++) {
+               AC->CLN[i][j] = 0.0;
+            }
+            AC->CLN[i][i] = 1.0;
+            AC->qln[i] = 0.0;
+            AC->wln[i] = 0.0;
+         }
+         AC->qln[3] = 1.0;
       }
-      C2Q(AC->CLN,AC->qln);
-      AC->wln[1] = -MAGV(AC->VelN)/MAGV(AC->PosN);
             
 /* .. Attitude Control */
-      QxQT(AC->qbn,AC->qln,AC->qbr);
-      RECTIFYQ(AC->qbr);
+      if (AC->StValid) {
+         QxQT(AC->qbn,AC->qln,AC->qbr);
+         RECTIFYQ(AC->qbr);
+      }
+      else {
+         for(i=0;i<3;i++) AC->qbr[i] = 0.0;
+         AC->qbr[3] = 1.0;
+      }
       for(i=0;i<3;i++) {
-         C->therr[i] = Limit(2.0*AC->qbr[i],-0.05,0.05);
+         C->therr[i] = Limit(2.0*AC->qbr[i],-0.1,0.1);
          C->werr[i] = AC->wbn[i] - AC->wln[i];
          AC->Tcmd[i] = Limit(-C->Kr[i]*C->werr[i] - C->Kp[i]*C->therr[i],-0.1,0.1);
       }
 /* .. Momentum Management */
-      for(i=0;i<3;i++) Hb[i] = AC->MOI[i][i]*AC->wbn[i] + AC->Whl[i].H;
-      VxV(Hb,AC->bvb,HxB);
+      for(i=0;i<3;i++) {
+         AC->Hvb[i] = AC->MOI[i][i]*AC->wbn[i];
+         for(j=0;j<AC->Nwhl;j++) AC->Hvb[i] += AC->Whl[j].Axis[i]*AC->Whl[j].H;
+      }
+      VxV(AC->Hvb,AC->bvb,HxB);
       for(i=0;i<3;i++) AC->Mcmd[i] = C->Kunl*HxB[i];
       
 /* .. Solar Array Steering */
@@ -638,25 +481,42 @@ void AcFsw(struct AcType *AC)
 }
 #ifdef _AC_STANDALONE_
 /**********************************************************************/
-/* Send/receive messages from 42 */
-//#include "../Database/AcMessages.c"
-/**********************************************************************/
 int main(int argc, char **argv)
 {
+      FILE *ParmDumpFile;
+      char FileName[120];
       struct AcType AC;
       SOCKET Socket;
       char hostname[20] = "localhost";
-      int Port = 101010;
+      int Port = 10101;
       
+      if (argc > 1) {
+         AC.ID = atoi(argv[1]);
+         Port = 10101 + AC.ID;
+      }
+      
+      ReadAcInpFile();      
+      AllocateAC(&AC);
+      
+      Socket = InitSocketClient(hostname,Port,1);
+      
+      /* Load parms */
+      AC.EchoEnabled = 1;
+      ReadFromSocket(Socket,&AC);
       
       InitAC(&AC);
+      AcFsw(&AC);
       
-      Socket = InitSocketClient(hostname,Port,TRUE);
+      sprintf(FileName,"./Database/AcParmDump%02ld.txt",AC.ID);
+      ParmDumpFile = fopen(FileName,"wt");
+      WriteToFile(ParmDumpFile,&AC);
+      fclose(ParmDumpFile);
+      WriteToSocket(Socket,&AC);
       
       while(1) {
-         //ReceiveMessageFromSim(Socket);
+         ReadFromSocket(Socket,&AC);
          AcFsw(&AC);
-         //SendMessageToSim(Socket);
+         WriteToSocket(Socket,&AC);
       }
       
       return(0);

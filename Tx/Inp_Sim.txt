@@ -1,7 +1,7 @@
 <<<<<<<<<<<<<<<<<  42: The Mostly Harmless Simulator  >>>>>>>>>>>>>>>>>
 ************************** Simulation Control **************************
 FAST                            !  Time Mode (FAST, REAL, or EXTERNAL)
-86400.0     1.0                 !  Sim Duration, Step Size [sec]
+86400.0     0.1                 !  Sim Duration, Step Size [sec]
 1.0                             !  File Output Interval [sec]
 FALSE                           !  Graphics Front End?
 Inp_Cmd.txt                     !  Command Script File Name
@@ -34,16 +34,16 @@ FALSE                           !  Contact Forces and Torques
 FALSE                           !  CFD Slosh Forces and Torques
 FALSE                           !  Output Environmental Torques to Files
 ********************* Celestial Bodies of Interest *********************
-TRUE                            !  Mercury
-TRUE                            !  Venus
+FALSE                           !  Mercury
+FALSE                           !  Venus
 TRUE                            !  Earth and Luna
-TRUE                            !  Mars and its moons
-TRUE                            !  Jupiter and its moons
-TRUE                            !  Saturn and its moons
-TRUE                            !  Uranus and its moons
-TRUE                            !  Neptune and its moons
-TRUE                            !  Pluto and its moons
-TRUE                            !  Asteroids and Comets
+FALSE                           !  Mars and its moons
+FALSE                           !  Jupiter and its moons
+FALSE                           !  Saturn and its moons
+FALSE                           !  Uranus and its moons
+FALSE                           !  Neptune and its moons
+FALSE                           !  Pluto and its moons
+FALSE                           !  Asteroids and Comets
 ***************** Lagrange Point Systems of Interest ******************
 FALSE                           !  Earth-Moon
 FALSE                           !  Sun-Earth

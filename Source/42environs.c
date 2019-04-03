@@ -267,13 +267,15 @@ void TwoSigmaAtmoParam(void)
 }
 
 /**********************************************************************/
+/* #define _RADBELT_ */
 void Environment(struct SCType *S)
 {
       struct OrbitType *O;
       struct WorldType *P;
       double Alt;
       double PosW[3];
-      int NumEnergies = 5;
+      #ifdef _RADBELT_
+      int NumEnergies = 5; */
       float ElectronEnergy[5] = {0.15,0.5,1.0,3.0,4.0}; /* MeV */
       float ProtonEnergy[5] = {4.0,10.0,20.0,30.0,50.0}; /* MeV */
       static double **Flux;
@@ -284,6 +286,7 @@ void Environment(struct SCType *S)
          First = 0;
          Flux = CreateMatrix(4,NumEnergies);
       }
+      #endif
 
       O = &Orb[S->RefOrb];
       P = &World[O->World];
@@ -335,7 +338,7 @@ void Environment(struct SCType *S)
       else S->AtmoDensity = 0.0;
       
 /* .. Radiation Belt Electron and Proton Fluxes, particles/cm^2/sec */
-      #if 0
+      #ifdef _RADBELT_
       if (O->World == EARTH) {
          MxV(World[EARTH].CWN,S->PosN,PosW);
          UNITV(PosW);

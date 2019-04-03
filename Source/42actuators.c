@@ -21,10 +21,10 @@
 */
 
 /**********************************************************************/
-void ThrModel(double *PulseWidthCmd,double DT,double cm[3],
-              struct ThrType *Thr)
+void ThrModel(double *PulseWidthCmd,double DT,struct ThrType *Thr,
+   struct SCType *S)
 {
-
+      struct FlexNodeType *FN;
       double r[3];
       long i;
 
@@ -44,20 +44,33 @@ void ThrModel(double *PulseWidthCmd,double DT,double cm[3],
       Thr->Frc[1] = Thr->F*Thr->A[1];
       Thr->Frc[2] = Thr->F*Thr->A[2];
 
-      for(i=0;i<3;i++) r[i] = Thr->PosB[i] - cm[i];
+      for(i=0;i<3;i++) r[i] = Thr->PosB[i] - S->B[0].cm[i];
       VxV(r,Thr->Frc,Thr->Trq);
 
+      if (S->FlexActive) {
+         FN = &S->B[0].FlexNode[Thr->FlexNode];
+         for(i=0;i<3;i++) {
+            FN->Trq[i] += Thr->Trq[i];
+            FN->Frc[i] += Thr->Frc[i];
+         }
+      }
 }
 /**********************************************************************/
-void WhlModel(double Tcmd,double H,double Hmax,double Tmax, double *Trq)
+void WhlModel(double Tcmd,struct WhlType *W,struct SCType *S)
 {
+      struct FlexNodeType *FN;
+      long i;
 
-      *Trq = Tcmd;
-      if (*Trq < -Tmax) *Trq = -Tmax;
-      if (*Trq >  Tmax) *Trq =  Tmax;
-      if (*Trq < 0.0 && H <= -Hmax) *Trq = 0.0;
-      if (*Trq > 0.0 && H >=  Hmax) *Trq = 0.0;
+      W->Trq = Tcmd;
+      if (W->Trq < -W->Tmax) W->Trq = -W->Tmax;
+      if (W->Trq >  W->Tmax) W->Trq =  W->Tmax;
+      if (W->Trq < 0.0 && W->H <= -W->Hmax) W->Trq = 0.0;
+      if (W->Trq > 0.0 && W->H >=  W->Hmax) W->Trq = 0.0;
 
+      if (S->FlexActive) {
+         FN = &S->B[0].FlexNode[W->FlexNode];
+         for(i=0;i<3;i++) FN->Trq[i] += W->Trq*W->A[i];
+      }
 
 }
 /**********************************************************************/
@@ -213,11 +226,7 @@ void Actuators(struct SCType *S)
       }
       /* Wheels */
       for(i=0;i<S->Nw;i++) {
-         WhlModel(AC->Whl[i].Tcmd,
-                  S->Whl[i].H,
-                  S->Whl[i].Hmax,
-                  S->Whl[i].Tmax,
-                 &S->Whl[i].Trq);
+         WhlModel(AC->Whl[i].Tcmd,&S->Whl[i],S);
       }
       /* MTBs */
       for(i=0;i<S->Nmtb;i++){
@@ -249,7 +258,7 @@ void Actuators(struct SCType *S)
 
       /* Thrusters */
       for(i=0;i<S->Nthr;i++) {
-         ThrModel(&AC->Thr[i].PulseWidthCmd,DTSIM,S->B[0].cm,&S->Thr[i]);
+         ThrModel(&AC->Thr[i].PulseWidthCmd,DTSIM,&S->Thr[i],S);
          MTxV(S->B[0].CN,S->Thr[i].Frc,FrcN);
          for(j=0;j<3;j++) {
             S->B[0].Trq[j] += S->Thr[i].Trq[j];

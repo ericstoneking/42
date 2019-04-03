@@ -33,6 +33,7 @@
                "Array Size":  "3",
                "Sim Read/Write":   "READ_WRITE",
                "App Read/Write":   "READ_WRITE",
+               "Cmd Read":   "",
                "Packet Role":   ""
             },
             {
@@ -43,6 +44,7 @@
                "Array Size":  "4",
                "Sim Read/Write":   "READ_WRITE",
                "App Read/Write":   "READ_WRITE",
+               "Cmd Read":   "",
                "Packet Role":   ""
             }
          ]
@@ -65,6 +67,7 @@
                "Data Type":  "double",
                "Sim Read/Write":   "READ_WRITE",
                "App Read/Write":   "READ_WRITE",
+               "Cmd Read":   "",
                "Packet Role":   ""
             }
          ]
@@ -87,7 +90,16 @@
          "Table Name": "GyroType",
          "Table Type": "Structure",
          "Table Data": [
-
+            {
+               "Variable Name":  "TrueRate",
+               "Description":  "rad/sec",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Sim Read/Write":   "WRITE",
+               "App Read/Write":   "READ",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            }
          ]
       },
       {
@@ -165,26 +177,6 @@
          "Table Type": "Structure",
          "Table Data": [
             {
-               "Variable Name":  "PosRinN",
-               "Description":  "Position of Reference Orbit wrt N",
-               "Units":  "m",
-               "Data Type":  "double",
-               "Array Size":  "3",
-               "Sim Read/Write":   "READ_WRITE",
-               "App Read/Write":   "READ_WRITE",
-               "Packet Role":   ""
-            },
-            {
-               "Variable Name":  "VelRinN",
-               "Description":  "Velocity of Reference Orbit wrt N",
-               "Units":  "m/s",
-               "Data Type":  "double",
-               "Array Size":  "3",
-               "Sim Read/Write":   "READ_WRITE",
-               "App Read/Write":   "READ_WRITE",
-               "Packet Role":   ""
-            },
-            {
                "Variable Name":  "PosR",
                "Description":  "Position of cm wrt Reference Orbit, expressed in N",
                "Units":  "m",
@@ -192,6 +184,7 @@
                "Array Size":  "3",
                "Sim Read/Write":   "READ_WRITE",
                "App Read/Write":   "READ_WRITE",
+               "Cmd Read":   "",
                "Packet Role":   ""
             },
             {
@@ -202,6 +195,7 @@
                "Array Size":  "3",
                "Sim Read/Write":   "READ_WRITE",
                "App Read/Write":   "READ_WRITE",
+               "Cmd Read":   "",
                "Packet Role":   ""
             },
             {
@@ -212,6 +206,7 @@
                "Array Size":  "3",
                "Sim Read/Write":   "READ_WRITE",
                "App Read/Write":   "READ_WRITE",
+               "Cmd Read":   "",
                "Packet Role":   ""
             },
             {
@@ -222,6 +217,7 @@
                "Array Size":  "3",
                "Sim Read/Write":   "READ_WRITE",
                "App Read/Write":   "READ_WRITE",
+               "Cmd Read":   "",
                "Packet Role":   ""
             },
             {
@@ -232,6 +228,7 @@
                "Array Size":  "3",
                "Sim Read/Write":   "READ_WRITE",
                "App Read/Write":   "READ_WRITE",
+               "Cmd Read":   "",
                "Packet Role":   ""
             }
          ]
@@ -268,7 +265,17 @@
          "Table Name": "WorldType",
          "Table Type": "Structure",
          "Table Data": [
-
+            {
+               "Variable Name":  "PosH",
+               "Description":  "Position in H frame",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            }
          ]
       },
       {
@@ -318,6 +325,544 @@
          "Table Type": "Structure",
          "Table Data": [
 
+         ]
+      },
+      {
+         "Table Name": "CmdVecType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "CmdType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name":  "Ang",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ",
+               "App Read/Write":   "WRITE",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "qrl",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Array Size":  "4",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "READ",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "qrn",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Array Size":  "4",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "READ",
+               "Packet Role":   ""
+            }
+         ]
+      },
+      {
+         "Table Name": "AcBodyType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "AcJointType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name":  "Ang",
+               "Description":  "",
+               "Units":  "rad",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "WRITE",
+               "App Read/Write":   "READ",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            }
+         ]
+      },
+      {
+         "Table Name": "AcGyroType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name":  "Rate",
+               "Description":  "",
+               "Units":  "rad/sec",
+               "Data Type":  "double",
+               "Sim Read/Write":   "WRITE",
+               "App Read/Write":   "READ",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            }
+         ]
+      },
+      {
+         "Table Name": "AcMagnetometerType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name":  "Field",
+               "Description":  "",
+               "Units":  "Tesla",
+               "Data Type":  "double",
+               "Sim Read/Write":   "WRITE",
+               "App Read/Write":   "READ",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            }
+         ]
+      },
+      {
+         "Table Name": "AcCssType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name":  "Valid",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "long",
+               "Sim Read/Write":   "WRITE",
+               "App Read/Write":   "READ",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "Illum",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Sim Read/Write":   "WRITE",
+               "App Read/Write":   "READ",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            }
+         ]
+      },
+      {
+         "Table Name": "AcFssType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name":  "Valid",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "long",
+               "Sim Read/Write":   "WRITE",
+               "App Read/Write":   "READ",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "SunAng",
+               "Description":  "",
+               "Units":  "rad",
+               "Data Type":  "double",
+               "Array Size":  "2",
+               "Sim Read/Write":   "WRITE",
+               "App Read/Write":   "READ",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            }
+         ]
+      },
+      {
+         "Table Name": "AcStarTrackerType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name":  "Valid",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "long",
+               "Sim Read/Write":   "WRITE",
+               "App Read/Write":   "READ",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "qn",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Array Size":  "4",
+               "Sim Read/Write":   "WRITE",
+               "App Read/Write":   "READ",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            }
+         ]
+      },
+      {
+         "Table Name": "AcGpsType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name":  "Valid",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "long",
+               "Sim Read/Write":   "WRITE",
+               "App Read/Write":   "READ",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "Rollover",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "long",
+               "Sim Read/Write":   "WRITE",
+               "App Read/Write":   "READ",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "Week",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "long",
+               "Sim Read/Write":   "WRITE",
+               "App Read/Write":   "READ",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "Sec",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Sim Read/Write":   "WRITE",
+               "App Read/Write":   "READ",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "PosN",
+               "Description":  "",
+               "Units":  "m",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "WRITE",
+               "App Read/Write":   "READ",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "VelN",
+               "Description":  "",
+               "Units":  "m/s",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "WRITE",
+               "App Read/Write":   "READ",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "PosW",
+               "Description":  "",
+               "Units":  "m",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "WRITE",
+               "App Read/Write":   "READ",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "VelW",
+               "Description":  "",
+               "Units":  "m/s",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "WRITE",
+               "App Read/Write":   "READ",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "Lng",
+               "Description":  "",
+               "Units":  "rad",
+               "Data Type":  "double",
+               "Sim Read/Write":   "WRITE",
+               "App Read/Write":   "READ",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "Lat",
+               "Description":  "",
+               "Units":  "rad",
+               "Data Type":  "double",
+               "Sim Read/Write":   "WRITE",
+               "App Read/Write":   "READ",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "Alt",
+               "Description":  "",
+               "Units":  "m",
+               "Data Type":  "double",
+               "Sim Read/Write":   "WRITE",
+               "App Read/Write":   "READ",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            }
+         ]
+      },
+      {
+         "Table Name": "AcAccelType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "AcEarthSensorType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "AcWhlType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name":  "H",
+               "Description":  "",
+               "Units":  "Nms",
+               "Data Type":  "double",
+               "Sim Read/Write":   "WRITE",
+               "App Read/Write":   "READ",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "Tcmd",
+               "Description":  "",
+               "Units":  "N-m",
+               "Data Type":  "double",
+               "Sim Read/Write":   "READ",
+               "App Read/Write":   "WRITE",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            }
+         ]
+      },
+      {
+         "Table Name": "AcMtbType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name":  "Mcmd",
+               "Description":  "",
+               "Units":  "A-m^2",
+               "Data Type":  "double",
+               "Sim Read/Write":   "READ",
+               "App Read/Write":   "WRITE",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            }
+         ]
+      },
+      {
+         "Table Name": "AcThrType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name":  "PulseWidthCmd",
+               "Description":  "",
+               "Units":  "sec",
+               "Data Type":  "double",
+               "Sim Read/Write":   "READ",
+               "App Read/Write":   "WRITE",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            }
+         ]
+      },
+      {
+         "Table Name": "AcPrototypeCtrlType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "AcAdHocCtrlType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "AcSpinnerCtrlType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "AcMomBiasCtrlType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "AcThreeAxisCtrlType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "AcIssCtrlType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "AcCmgCtrlType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "AcThrCtrlType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "AcCfsCtrlType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "AcType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name":  "ParmLoadEnabled",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "long",
+               "Sim Read/Write":   "WRITE",
+               "App Read/Write":   "READ",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "ParmDumpEnabled",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "long",
+               "Sim Read/Write":   "WRITE",
+               "App Read/Write":   "READ",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "svb",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ",
+               "App Read/Write":   "WRITE",
+               "Cmd Read":   "",
+               "Packet Role":   "IN"
+            },
+            {
+               "Variable Name":  "bvb",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ",
+               "App Read/Write":   "WRITE",
+               "Cmd Read":   "",
+               "Packet Role":   "IN"
+            },
+            {
+               "Variable Name":  "Hvb",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ",
+               "App Read/Write":   "WRITE",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            }
+         ]
+      },
+      {
+         "Table Name": "LagrangePointType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "LagrangeSystemType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "OrbitType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name":  "PosN",
+               "Description":  "Position,, expressed in N",
+               "Units":  "m",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "VelN",
+               "Description":  "Velocity,, expressed in N",
+               "Units":  "m/sec",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            }
          ]
       }
    ]

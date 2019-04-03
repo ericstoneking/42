@@ -3,6 +3,7 @@ Lunar Reconnaissance Orbiter  !  Description
 "LRO"                         !  Label
 LroSpriteAlpha.ppm            !  Sprite File Name
 PASSIVE_FSW                   !  Flight Software Identifier
+0.2                           !  FSW Sample Time, sec
 ************************* Orbit Parameters ****************************
 FIXED                         !  Orbit Prop FIXED, EULER_HILL, or ENCKE
 CM                            !  Pos of CM or ORIGIN, wrt F
@@ -286,7 +287,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0                             ! Number of Coarse Sun Sensors
 ============================== CSS 0 ====================================
 0.1                           ! Sample Time,sec
-1.0  1.0  1.0                 ! Axis expressed in Body Frame
+0   1.0  1.0  1.0             ! Axis expressed in Body Frame
 90.0                          ! Half-cone Angle, deg
 1.0                           ! Scale Factor
 0.001                         ! Quantization

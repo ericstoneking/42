@@ -30,32 +30,68 @@
 */
 
 struct LagrangePointType {
-   double PosN[3],VelN[3]; /* Pos, vel wrt N frame of Body 1 (larger grav center), [m, m/sec] */
-   double X0,Y0; /* Locations wrt Body 1, in Synodic Frame, m */
-   double R1,R2;
-   double Kxx,Kxy,Kyy,Zw1,Zw2,Zs;
-   double w1,w2,sigma,wz; /* Modal frequencies (or time constant), rad/sec */
-   double ca1,sa1;
-   double ca2,sa2;
-   double AR1,AR2; /* Modal aspect ratios */
+   /*~ Internal Variables ~*/
+   double PosN[3]; /* Pos wrt N frame of Body 1 (larger grav center), [[m]] */
+   double VelN[3]; /* Vel wrt N frame of Body 1 (larger grav center), [[m/sec]] */
+   double X0; /* Radial location wrt Body 1, in Synodic Frame, m */
+   double Y0; /* Transversed location wrt Body 1, in Synodic Frame, m */
+   double R1;
+   double R2;
+   double Kxx;
+   double Kxy;
+   double Kyy;
+   double Zw1;
+   double Zw2;
+   double Zs;
+   /* Modal frequencies (or time constant), rad/sec */
+   double w1;
+   double w2;
+   double sigma;
+   double wz; 
+   
+   double ca1;
+   double sa1;
+   double ca2;
+   double sa2;
+   /* Modal aspect ratios */
+   double AR1;
+   double AR2; 
 };
 
 struct LagrangeSystemType {
+   /*~ Internal Variables ~*/
    long Exists;
    char Name[20];
-   long Body1,Body2;
-   double mu1,mu2;
+   long Body1;
+   long Body2;
+   double mu1;
+   double mu2;
    double rho;
-   double SLR,ecc,inc,RAAN,ArgP,tp;
-   double SMA,MeanRate,Period; /* Rotating frame parameters */
-   double D,Ddot,Ddotdot;  /* Nondimensional distance from m1 to m2, and derivatives */
-   double th,thdot,thdotdot; /* True anomaly, and derivatives */
+   double SLR;
+   double ecc;
+   double inc;
+   double RAAN;
+   double ArgP;
+   double tp;
+   double SMA;
+   double MeanRate;
+   double Period;
+   /* Nondimensional distance from m1 to m2, and derivatives */
+   double D;
+   double Ddot;
+   double Ddotdot;  
+   /* True anomaly, and derivatives */
+   double th;
+   double thdot;
+   double thdotdot; 
    struct LagrangePointType LP[5];
    double CLH[3][3];
    double CLN[3][3];
 };
 
 struct OrbitType {
+   /*~ Parameters ~*/
+
    long  Tag;   /* Orb[Tag].Tag = Tag */
    long  Exists;
    double Epoch;  /* Sec since J2000 epoch at which orbit elements are referenced */
@@ -63,48 +99,74 @@ struct OrbitType {
    long  PolyhedronGravityEnabled;
    long  World;
    long Region;
+   
    /* For Three-Body Orbit Description */
    long  Sys;  /* e.g. SUNEARTH, EARTHMOON, SUNJUPITER */
    long  LP;   /* Lagrange Point [0-4] */
-   long  Body1, Body2;
-   double mu1, mu2;
+   long  Body1;
+   long  Body2;
+   double mu1;
+   double mu2;
    long LagDOF;
-   double Ax,Bx,Cx,Dx,Ay,By,Cy,Dy,Az,Bz;  /* Modal parameters, m */
-   double x,y,z,xdot,ydot,zdot;  /* Linearized motion about LP (X0,Y0), m and m/sec */
+   /* Modal parameters, m */
+   double Ax;
+   double Bx;
+   double Cx;
+   double Dx;
+   double Ay;
+   double By;
+   double Cy;
+   double Dy;
+   double Az;
+   double Bz;  
+
    /* For Central Orbit Description */
    double mu;
-   double SMA;  /* Semi-major axis */
-   double ecc;
-   double inc;  /* Inclination, rad */
-   double RAAN; /* Right Ascension of Ascending Node, rad */
-   double ArgP; /* Argument of Periapsis, rad */
-   double tp; /* Time of Periapsis Passage, sec since J2000 epoch */
-   double anom; /* True Anomaly, rad */
-   double alpha; /* 1/SMA.  Better behaved than SMA when e near 1.0 */
-   double SLR;     /* Semilatus rectum.  Always well behaved */
-   double rmin;  /* Periapsis radius.  Always well behaved */
+   double SMA;  /* Semi-major axis [[m]] */
+   double ecc;  /* Eccentricity */
+   double inc;  /* Inclination, [[rad]] */
+   double RAAN; /* Right Ascension of Ascending Node, [[rad]] */
+   double ArgP; /* Argument of Periapsis, [[rad]] */
+   double tp; /* Time of Periapsis Passage, [[sec]] since J2000 epoch */
+   double alpha; /* 1/SMA.  Better behaved than SMA when e near 1.0 [[1/m]] */
+   double SLR;     /* Semilatus rectum.  Always well behaved [[m]] */
+   double rmin;  /* Periapsis radius.  Always well behaved [[m]] */
+   double Period;
+   double MeanMotion;
+   char FileName[20];
    long J2DriftEnabled;
    double MuPlusJ2; /* Effective mu, adjusted for average J2 effect */
-   double RAAN0,ArgP0; /* Initial values */
+   /* Initial values */
+   double RAAN0;
+   double ArgP0; 
    double RAANdot; /* Due to average J2 effect, rad/sec */
    double ArgPdot; /* Due to average J2 effect, rad/sec */
    double J2Fr0; /* Orbit-average radial acceleration due to J2 */
    double J2Fh1; /* Coefficient for orbit-rate normal acceleration due to J2 */ 
+   FILE *SplineFile;
 
-   double PosN[3]; /* Position, m, expressed in N */
-   double VelN[3]; /* Velocity, m/sec, expressed in N */
+   /*~ Internal Variables ~*/
+   /* Linearized three-body motion about LP (X0,Y0), m and m/sec */
+   double x;
+   double y;
+   double z;
+   double xdot;
+   double ydot;
+   double zdot;  
+   
+   /* For Central Orbit Description */
+   double anom; /* True Anomaly, rad */
+   double PosN[3]; /* Position, [[m]], expressed in N [~=~] */
+   double VelN[3]; /* Velocity, [[m/sec]], expressed in N [~=~] */
    double CLN[3][3]; /* For ZERO, L = N.  For FLIGHT, L = ENU.  For CENTRAL, L = LVLH.  For THREE_BODY, L = XYZ */
    double wln[3]; /* Expressed in N */
-   double Period;
-   double MeanMotion;
-   char FileName[20];
    /* Fit spline to data file */
-   FILE *SplineFile;
    double NodeAbsTime[4];
    double NodePos[4][3];
    double NodeVel[4][3];
 };
 
+/*~ Prototypes ~*/
 struct OrbitType *CloneOrbit(struct OrbitType *OldOrb, long *Norb,
    long Iorb);
 double TrueAnomaly(double mu, double p, double e, double t);

@@ -78,8 +78,7 @@ void GyroModel(struct SCType *S)
       struct FlexNodeType *FN;
       long Ig;
       double PrevBias,RateError,PrevAngle;
-      double wfn[3];
-      long Counts,PrevCounts,i;
+      long Counts,PrevCounts;
       
       for(Ig=0;Ig<S->Ngyro;Ig++) {
          G = &S->Gyro[Ig];
@@ -90,8 +89,7 @@ void GyroModel(struct SCType *S)
             
             if (S->FlexActive) {
                FN = &S->B[0].FlexNode[G->FlexNode];
-               for(i=0;i<3;i++) wfn[i] = S->B[0].wn[i] + FN->angrate[i];
-               G->TrueRate = VoV(wfn,G->Axis);
+               G->TrueRate = VoV(FN ->TotAngVel,G->Axis);
             }
             else {
                G->TrueRate = VoV(S->B[0].wn,G->Axis);
@@ -149,6 +147,7 @@ void CssModel(struct SCType *S)
       long Counts, Icss; 
       double Signal; 
       double SoA; 
+      double svb[3];
          
       for(Icss=0;Icss<S->Ncss;Icss++) {
          CSS = &S->CSS[Icss];
@@ -162,7 +161,8 @@ void CssModel(struct SCType *S)
                CSS->Illum = 0.0; 
             }
             else {
-               SoA = VoV(S->svb,CSS->Axis);
+               MxV(S->B[CSS->Body].CN,S->svn,svb);
+               SoA = VoV(svb,CSS->Axis);
                if (SoA > CSS->CosFov) {
                   /* Sun within FOV */
                   CSS->Valid = TRUE;

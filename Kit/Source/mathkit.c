@@ -167,7 +167,7 @@ void MINV(double A[3][3], double B[3][3])
          -A[2][1]*A[1][2]*A[0][0]-A[2][2]*A[1][0]*A[0][1];
 
       if (DET == 0.0) {
-         printf("Attempted inversion of singular matrix in MINV.  Bailing out.");
+         printf("Attempted inversion of singular matrix in MINV.  Bailing out.\n");
          exit(1);
       }
 

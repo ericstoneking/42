@@ -1173,6 +1173,10 @@ void InitFlexModes(struct SCType *S)
                FN = &B->FlexNode[In];
                FN->PSI = CreateMatrix(3,B->Nf);
                FN->THETA = CreateMatrix(3,B->Nf);
+               for(i=0;i<3;i++) {
+                  FN->Frc[i] = 0.0;
+                  FN->Trq[i] = 0.0;
+               }
             }
 
             /**** Joint Node Mode Shapes ****/
@@ -1486,6 +1490,15 @@ void InitSpacecraft(struct SCType *S)
       fscanf(infile,"%s %[^\n] %[\n]",S->SpriteFileName,junk,&newline);
       fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
       S->FswTag = DecodeString(response);
+      fscanf(infile,"%lf %[^\n] %[\n]",&S->FswSampleTime,junk,&newline);
+      S->FswMaxCounter = (long) (S->FswSampleTime/DTSIM+0.5);
+      if (S->FswMaxCounter < 1) {
+         S->FswMaxCounter = 1;
+         S->FswSampleTime = DTSIM;
+         printf("Info:  FswSampleTime was smaller than DTSIM.  It has been adjusted to be DTSIM.\n");
+      }
+      S->FswSampleCounter = S->FswMaxCounter;
+      S->InitAC = 1;
 
 /* .. Orbit Parameters */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
@@ -1914,8 +1927,8 @@ void InitSpacecraft(struct SCType *S)
                printf("Info:  CSS[%ld].SampleTime was smaller than DTSIM.  It has been adjusted to be DTSIM.\n",Ig);
             }
             CSS->SampleCounter = CSS->MaxCounter;
-            fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
-               &CSS->Axis[0],&CSS->Axis[1],&CSS->Axis[2],junk,&newline);
+            fscanf(infile,"%ld  %lf %lf %lf %[^\n] %[\n]",
+               &CSS->Body,&CSS->Axis[0],&CSS->Axis[1],&CSS->Axis[2],junk,&newline);
             UNITV(CSS->Axis);
             fscanf(infile,"%lf %[^\n] %[\n]",&CSS->FovAng,junk,&newline);
             CSS->FovAng *= D2R;
@@ -2286,7 +2299,9 @@ void LoadSun(void)
          W->eph.VelN[i]=0.0;
          for(j=0;j<3;j++) W->CNH[i][j] = 0.0;
          W->CNH[i][i] = 1.0;
+         W->qnh[i] = 0.0;
       }
+      W->qnh[3] = 1.0;
 }
 /*********************************************************************/
 void LoadPlanets(void)
@@ -2438,10 +2453,12 @@ void LoadPlanets(void)
 
       /* Planetocentric Inertial Reference Frames */
       A2C(123,-23.4392911*D2R,0.0,0.0,World[EARTH].CNH);
+      C2Q(World[EARTH].CNH,World[EARTH].qnh);
       for(i=MERCURY;i<=PLUTO;i++) {
          if (i != EARTH) {
             A2C(312,(PoleRA[i]+90.0)*D2R,(90.0-PoleDec[i])*D2R,0.0,CNJ);
             MxM(CNJ,World[EARTH].CNH,World[i].CNH);
+            C2Q(World[i].CNH,World[i].qnh);
          }
       }
 
@@ -2464,16 +2481,16 @@ void LoadPlanets(void)
             for(j=0;j<3;j++) World[i].PosH[j] = Eph->PosN[j];
             World[i].PriMerAng = fmod(World[i].w*AbsTime,TwoPi);
             SimpRot(Zaxis,World[i].PriMerAng,World[i].CWN);
+            C2Q(World[i].CWN,World[i].qwn);
          }
       }
 /* .. Earth rotation is a special case */
       GMST = JD2GMST(JulDay);
       World[EARTH].PriMerAng = TwoPi*GMST;
       SimpRot(Zaxis,World[EARTH].PriMerAng,World[EARTH].CWN);
+      C2Q(World[EARTH].CWN,World[EARTH].qwn);
 
       strcpy(World[EARTH].BumpTexFileName,"EarthBump.ppm");
-
-
 }
 /*********************************************************************/
 void LoadMoonOfEarth(void)
@@ -2561,6 +2578,7 @@ void LoadMoonOfEarth(void)
 
          LunaInertialFrame(JulDay,CNJ);
          MxM(CNJ,World[EARTH].CNH,M->CNH);
+         C2Q(M->CNH,M->qnh);
          M->PriMerAng = LunaPriMerAng(JulDay);
          M->Type = MOON;
       }
@@ -2646,6 +2664,7 @@ void LoadMoonsOfMars(void)
          for(i=0;i<3;i++) {
             for(j=0;j<3;j++) M->CNH[i][j] = P->CNH[i][j];
          }
+         C2Q(M->CNH,M->qnh);
          for(i=0;i<4;i++) M->Color[i] = 1.0;
          M->Type = MOON;
       }
@@ -2761,6 +2780,7 @@ void LoadMoonsOfJupiter(void)
          for(i=0;i<3;i++) {
             for(j=0;j<3;j++) M->CNH[i][j] = P->CNH[i][j];
          }
+         C2Q(M->CNH,M->qnh);
          for(i=0;i<4;i++) M->Color[i] = 1.0;
          M->Type = MOON;
       }
@@ -2871,6 +2891,7 @@ void LoadMoonsOfSaturn(void)
          for(i=0;i<3;i++) {
             for(j=0;j<3;j++) M->CNH[i][j] = P->CNH[i][j];
          }
+         C2Q(M->CNH,M->qnh);
          for(i=0;i<4;i++) M->Color[i] = 1.0;
          M->Type = MOON;
       }
@@ -2955,6 +2976,7 @@ void LoadMoonsOfUranus(void)
          for(i=0;i<3;i++) {
             for(j=0;j<3;j++) M->CNH[i][j] = P->CNH[i][j];
          }
+         C2Q(M->CNH,M->qnh);
          for(i=0;i<4;i++) M->Color[i] = 1.0;
          M->Type = MOON;
       }
@@ -3039,6 +3061,7 @@ void LoadMoonsOfNeptune(void)
          for(i=0;i<3;i++) {
             for(j=0;j<3;j++) M->CNH[i][j] = P->CNH[i][j];
          }
+         C2Q(M->CNH,M->qnh);
          for(i=0;i<4;i++) M->Color[i] = 1.0;
          M->Type = MOON;
       }
@@ -3124,6 +3147,7 @@ void LoadMoonsOfPluto(void)
          for(i=0;i<3;i++) {
             for(j=0;j<3;j++) M->CNH[i][j] = P->CNH[i][j];
          }
+         C2Q(M->CNH,M->qnh);
          for(i=0;i<4;i++) M->Color[i] = 1.0;
          M->Type = MOON;
       }
@@ -3167,6 +3191,7 @@ void LoadMinorBodies(void)
          fscanf(infile,"%lf %lf %[^\n] %[\n]",&PoleRA,&PoleDec,junk,&newline);
          A2C(312,(PoleRA+90.0)*D2R,(90.0-PoleDec)*D2R,0.0,CNJ);
          MxM(CNJ,World[EARTH].CNH,W->CNH);
+         C2Q(W->CNH,W->qnh);
          E->Exists = TRUE;
          E->Regime = ORB_CENTRAL;
          E->World = SOL;
@@ -3211,6 +3236,7 @@ void LoadMinorBodies(void)
          }
          W->PriMerAng = fmod(W->w*AbsTime,TwoPi);
          SimpRot(ZAxis,W->PriMerAng,W->CWN);
+         C2Q(W->CWN,W->qwn);
 
       }
       fclose(infile);
@@ -3579,6 +3605,7 @@ void InitSim(int argc, char **argv)
          World[LUNA].PriMerAng =
             atan2(Eph->PosN[1],Eph->PosN[0])+Pi;
          SimpRot(Zaxis,World[LUNA].PriMerAng,World[LUNA].CWN);
+         C2Q(World[LUNA].CWN,World[LUNA].qwn);
          for(j=0;j<3;j++) {
             World[LUNA].PosH[j] = rh[j] + World[EARTH].PosH[j];
             World[LUNA].VelH[j] = vh[j] + World[EARTH].VelH[j];
@@ -3596,6 +3623,7 @@ void InitSim(int argc, char **argv)
                       Eph->ArgP,AbsTime-Eph->tp,Eph->PosN,Eph->VelN,&Eph->anom);
                World[Iw].PriMerAng = fmod(World[i].w*AbsTime,TwoPi);
                SimpRot(Zaxis,World[Iw].PriMerAng,World[Iw].CWN);
+               C2Q(World[Iw].CWN,World[Iw].qwn);
                MTxV(World[Ip].CNH,Eph->PosN,rh);
                MTxV(World[Ip].CNH,Eph->VelN,vh);
                for(i=0;i<3;i++) {
