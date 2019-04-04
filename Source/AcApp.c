@@ -495,7 +495,6 @@ int main(int argc, char **argv)
          Port = 10101 + AC.ID;
       }
       
-      ReadAcInpFile();      
       AllocateAC(&AC);
       
       Socket = InitSocketClient(hostname,Port,1);

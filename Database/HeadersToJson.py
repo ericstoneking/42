@@ -234,7 +234,7 @@ def main():
                         CmdMsgDir = 'READ'
                      #endif
                   
-                     if Name != '' and (SimMsgDir != '' or AppMsgDir != '' or CmdMsgDir != ''):
+                     if Name != '' and (SimMsgDir != '' or AppMsgDir != '' or CmdMsgDir != '' or Role != ''):
                         if IsFirstEntry:
                            outfile.write('            {\n')
                         else:
