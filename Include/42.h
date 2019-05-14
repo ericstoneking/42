@@ -68,8 +68,6 @@ EXTERN long IpcMode; /* IPC_OFF, IPC_TX, IPC_RX */
 EXTERN long SocketRole; /* IPC_SERVER or IPC_CLIENT */
 EXTERN double SimTime,STOPTIME,DTSIM,DTOUT,DTOUTGL;
 EXTERN long OutFlag,GLOutFlag,GLEnable,CleanUpFlag;
-EXTERN double AbsTime; /* Absolute Time, sec since J2000 Epoch */
-EXTERN double AbsTimeOffset; /* Added to AbsTime to account for offsets between TAI, TDB, etc */
 
 /* Environment */
 EXTERN struct SphereHarmType MagModel;  /* -3,...,10 */
@@ -89,11 +87,17 @@ EXTERN long RwaImbalanceActive;
 EXTERN long ContactActive;
 EXTERN long SloshActive;
 EXTERN long ComputeEnvTrq;
+EXTERN long EphemOption; /* VSOP87 or DE430 */
 
-/* Calendar Time */
-EXTERN double AbsTime0; /* Time in sec since J2000 Epoch at Sim Start */
+/* Calendar Time is all based in Terrestrial Dynamical Time (TT or TDT) unless otherwise noted */
+EXTERN double AbsTime0; /* Time in sec since J2000 Epoch at Sim Start (TT) */
+EXTERN double AbsTime; /* Absolute Time (TT), sec since J2000 Epoch */
+EXTERN double AtomicTime; /* TAI = TT - 32.184 sec, sec since J2000 */
+EXTERN double LeapSec; /* Add to civil time (UTC) to synch with TAI */
+EXTERN double CivilTime; /* UTC = TAI - LeapSec */
+EXTERN double GpsTime; /* GPS Time = TAI - 19.0 sec */
 EXTERN double JulDay;
-EXTERN long doy,Year,Month,Day,Hour,Minute;
+EXTERN long doy,Year,Month,Day,Hour,Minute;  /* Based in TT */
 EXTERN double Second;
 EXTERN long GpsRollover,GpsWeek;
 EXTERN double GpsSecond;
@@ -192,6 +196,7 @@ void InitSim(int argc, char **argv);
 void InitOrbits(void);
 void InitSpacecraft(struct SCType *S);
 void LoadPlanets(void);
+long LoadDE430(char DE430Path[80],double JD);
 long DecodeString(char *s);
 void InitFSW(struct SCType *S);
 void InitAC(struct SCType *S);

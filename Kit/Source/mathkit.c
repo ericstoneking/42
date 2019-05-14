@@ -1608,7 +1608,43 @@ double CubicSpline(double x, double X[4], double Y[4])
 
       return(a+u*(b+u*(c+u*d)));
 }
-
+/******************************************************************************/
+void Cheb3DToPosVel(long n, double Coef[20][3], double x, 
+   double Pos[3], double Vel[3])
+{
+      double T[20]; /* Chebyshev polynomials of first kind */
+      double U[20]; /* Chebyshev polynomials of second kind */
+      long k,i;
+      
+      if (x < -1.0 || x > 1.0) {
+         printf("x out of range in Cheb3DToPosVel.  Bailing out.\n");
+         exit(1);
+      }
+      if (n > 20) {
+         printf("n out of range in Cheb3DToPosVel.  Bailing out.\n");
+         exit(1);
+      }
+      
+      /* Polynomials */
+      T[0] = 1.0;
+      T[1] = x;
+      U[0] = 1.0;
+      U[1] = 2.0*x;
+      for(k=1;k<n-1;k++) {
+         T[k+1] = 2.0*x*T[k] - T[k-1];
+         U[k+1] = 2.0*x*U[k] - U[k-1];
+      }
+      
+      /* Position, Velocity */
+      for(i=0;i<3;i++) {
+         Pos[i] = Coef[0][i]*T[0];
+         Vel[i] = 0.0;
+         for(k=1;k<n;k++) {
+            Pos[i] += Coef[k][i]*T[k];
+            Vel[i] += Coef[k][i]*((double) k)*U[k-1];
+         }
+      }
+}
 /* #ifdef __cplusplus
 ** }
 ** #endif

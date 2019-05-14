@@ -107,6 +107,8 @@ long ProjectPointOntoPoly(double Point[3], double DirVec[3],
 long ProjectPointOntoTriangle(double A[3], double B[3], double C[3],
       double DirVec[3], double Pt[3], double ProjPt[3], double Bary[4]);
 double CubicSpline(double x, double X[4], double Y[4]);
+void Cheb3DToPosVel(long n, double Coef[20][3], double x, 
+   double Pos[3], double Vel[3]);
 
 /*
 ** #ifdef __cplusplus

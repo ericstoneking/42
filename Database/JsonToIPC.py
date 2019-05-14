@@ -53,7 +53,7 @@ def WriteProlog():
       
       if Pipe == "Socket":
          outfile.write("      int Success;\n")
-         outfile.write("      char AckMsg[8] = \"Ack\\n\";\n")
+         outfile.write("      char AckMsg[5] = \"Ack\\n\";\n")
          outfile.write("      char Msg[16384];\n")
          outfile.write("      long MsgLen = 0;\n")
          outfile.write("      long LineLen;\n")
@@ -138,11 +138,11 @@ def ReadProlog():
          outfile.write("      char Msg[16384];\n")
          outfile.write("      GMSEC_Message GsMsg;\n")
          outfile.write("      GMSEC_Field Field;\n")
-         outfile.write("      char AckMsg[8] = \"Ack\\n\";\n")
+         outfile.write("      char AckMsg[5] = \"Ack\\n\";\n")
          outfile.write("      long Imsg,Iline;\n")
       elif Pipe == "Socket":
          outfile.write("      char Msg[16384];\n")
-         outfile.write("      char AckMsg[8] = \"Ack\\n\";\n")
+         outfile.write("      char AckMsg[5] = \"Ack\\n\";\n")
          outfile.write("      long Imsg,Iline;\n")
       #endif
       outfile.write("      double DbleVal[30];\n")
@@ -212,7 +212,7 @@ def WriteEpilog():
          outfile.write("      MsgLen += LineLen;\n")
          outfile.write("      Success = send(Socket,Msg,strlen(Msg),0);\n\n")
          outfile.write("      /* Wait for Ack */\n");
-         outfile.write("      recv(Socket,AckMsg,8,0);\n")
+         outfile.write("      recv(Socket,AckMsg,5,0);\n")
       elif Pipe == "Gmsec":
          outfile.write("      LineLen = strlen(line);\n")
          outfile.write("      memcpy(&Msg[MsgLen],line,LineLen);\n")
@@ -323,13 +323,13 @@ def WriteCodeBlock(Indent,FmtPrefix,ArrayIdx,ArgPrefix,VarString,IdxLen,Ni,Nj,St
       line = Indent+"   sprintf(line,\""
       line += FmtPrefix
       line += VarString
-      line += " = ["
+      line += " = "
       for i in range (0,Ni):
          for j in range (0,Nj):
             line += " "+FormatString
          #next j
       #next i
-      line += "]\\n\",\n"+"      "+Indent+ArrayIdx+StructIdxString
+      line += "\\n\",\n"+"      "+Indent+ArrayIdx+StructIdxString
       if Nj > 1:
          for i in range (0,Ni):
             for j in range (0,Nj):
@@ -368,13 +368,13 @@ def ReadCodeBlock(Indent,FmtPrefix,ArrayIdx,ArgPrefix,ArgString,VarString,IdxLen
       line = Indent+"if (sscanf(line,\""
       line += FmtPrefix
       line += VarString
-      line += " = ["
+      line += " = "
       for i in range (0,Ni):
          for j in range (0,Nj):
             line += " "+FormatString
          #next j
       #next i
-      line += "]\","+"\n   "+Indent+"&"+ArrayIdx+StructIdxString
+      line += "\","+"\n   "+Indent+"&"+ArrayIdx+StructIdxString
       if Nj > 1:
          for i in range (0,Ni):
             for j in range (0,Nj):
@@ -451,10 +451,12 @@ def ParseStruct(StructList,Struct,Indent,FmtPrefix,ArrayIdx,ArgPrefix,StructIdxS
                Nj = 1
             #endif
             if DataType == "long":
-               FormatString = "%ld"
+               WriteFormatString = "%ld"
+               ReadFormatString = "%ld"
                ArgString = "LongVal"
             else:
-               FormatString = "%le"
+               WriteFormatString = "%18.12le"
+               ReadFormatString = "%le"
                ArgString = "DbleVal"
             #endif            
             if Prog == "Sim":
@@ -467,20 +469,20 @@ def ParseStruct(StructList,Struct,Indent,FmtPrefix,ArrayIdx,ArgPrefix,StructIdxS
             PktRole = Var["Packet Role"]
             if ParmPass == 1:
                if Verb == "WriteTo" and PktRole == "PRM" and ReadWrite == "":
-                  WriteCodeBlock(Indent,FmtPrefix,ArrayIdx,ArgPrefix,VarString,IdxLen,Ni,Nj,StructIdxString,FormatString)
+                  WriteCodeBlock(Indent,FmtPrefix,ArrayIdx,ArgPrefix,VarString,IdxLen,Ni,Nj,StructIdxString,WriteFormatString)
                #endif
                if Verb == "ReadFrom" and PktRole == "PRM" and ReadWrite == "":
-                  ReadCodeBlock(Indent,FmtPrefix,ArrayIdx,ArgPrefix,ArgString,VarString,IdxLen,Ni,Nj,StructIdxString,Narg+Ni*Nj,FormatString)
+                  ReadCodeBlock(Indent,FmtPrefix,ArrayIdx,ArgPrefix,ArgString,VarString,IdxLen,Ni,Nj,StructIdxString,Narg+Ni*Nj,ReadFormatString)
                #endif
             else:
                if Verb == "WriteTo" and ReadWrite in ["WRITE","READ_WRITE"]:
-                  WriteCodeBlock(Indent,FmtPrefix,ArrayIdx,ArgPrefix,VarString,IdxLen,Ni,Nj,StructIdxString,FormatString)
+                  WriteCodeBlock(Indent,FmtPrefix,ArrayIdx,ArgPrefix,VarString,IdxLen,Ni,Nj,StructIdxString,WriteFormatString)
                #endif
                if Verb == "ReadFrom" and ReadWrite in ["READ","READ_WRITE"]:
-                  ReadCodeBlock(Indent,FmtPrefix,ArrayIdx,ArgPrefix,ArgString,VarString,IdxLen,Ni,Nj,StructIdxString,Narg+Ni*Nj,FormatString)
+                  ReadCodeBlock(Indent,FmtPrefix,ArrayIdx,ArgPrefix,ArgString,VarString,IdxLen,Ni,Nj,StructIdxString,Narg+Ni*Nj,ReadFormatString)
                #endif
                if Prog == "Sim" and Verb == "ReadFrom" and Pipe == "Cmd" and Var["Cmd Read"] == "READ":
-                  ReadCodeBlock(Indent,FmtPrefix,ArrayIdx,ArgPrefix,ArgString,VarString,IdxLen,Ni,Nj,StructIdxString,Narg+Ni*Nj,FormatString)
+                  ReadCodeBlock(Indent,FmtPrefix,ArrayIdx,ArgPrefix,ArgString,VarString,IdxLen,Ni,Nj,StructIdxString,Narg+Ni*Nj,ReadFormatString)
                #endif
             #endif
          else: # struct

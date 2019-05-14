@@ -210,6 +210,9 @@ long DecodeString(char *s)
       else if (!strcmp(s,"SERVER")) return IPC_SERVER;
       else if (!strcmp(s,"CLIENT")) return IPC_CLIENT;
       else if (!strcmp(s,"GMSEC_CLIENT")) return IPC_GMSEC_CLIENT;
+      
+      else if (!strcmp(s,"VSOP87")) return EPH_VSOP87;
+      else if (!strcmp(s,"DE430")) return EPH_DE430;
       else {
          printf("Bogus input %s in DecodeString (42init.c:%d)\n",s,__LINE__);
          exit(1);
@@ -1817,7 +1820,8 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&S->Thr[It].Fmax,
                    junk,&newline);
-            fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
+            fscanf(infile,"%ld %lf %lf %lf %[^\n] %[\n]",
+                   &S->Thr[It].Body,
                    &S->Thr[It].A[0],
                    &S->Thr[It].A[1],
                    &S->Thr[It].A[2],junk,&newline);
@@ -2562,7 +2566,7 @@ void LoadMoonOfEarth(void)
          E->RAAN = RAAN[Im];
          E->ArgP = omg[Im];
 
-         Epoch = DateToAbsTime(EpochYear[Im],EpochMon[Im],EpochDay[Im],EpochHour[Im],0,0.0+AbsTimeOffset);
+         Epoch = DateToAbsTime(EpochYear[Im],EpochMon[Im],EpochDay[Im],EpochHour[Im],0,0.0);
          E->MeanMotion = sqrt(E->mu/(E->SMA*E->SMA*E->SMA));
          E->Period = TwoPi/E->MeanMotion;
          E->tp = Epoch - MeanAnom[Im]*D2R/E->MeanMotion;
@@ -2646,7 +2650,7 @@ void LoadMoonsOfMars(void)
          E->RAAN = RAAN[Im]*D2R;
          E->ArgP = omg[Im];
 
-         Epoch = DateToAbsTime(EpochYear[Im],EpochMon[Im],EpochDay[Im],0,0,0.0+AbsTimeOffset);
+         Epoch = DateToAbsTime(EpochYear[Im],EpochMon[Im],EpochDay[Im],0,0,0.0);
          E->MeanMotion = sqrt(E->mu/(E->SMA*E->SMA*E->SMA));
          E->Period = TwoPi/E->MeanMotion;
          E->tp = Epoch - MeanAnom[Im]*D2R/E->MeanMotion;
@@ -2762,7 +2766,7 @@ void LoadMoonsOfJupiter(void)
          E->RAAN = RAAN[Im]*D2R;
          E->ArgP = omg[Im]*D2R;
 
-         Epoch = DateToAbsTime(EpochYear[Im],EpochMon[Im],EpochDay[Im],0,0,0.0+AbsTimeOffset);
+         Epoch = DateToAbsTime(EpochYear[Im],EpochMon[Im],EpochDay[Im],0,0,0.0);
          E->MeanMotion = sqrt(E->mu/(E->SMA*E->SMA*E->SMA));
          E->Period = TwoPi/E->MeanMotion;
          E->tp = Epoch - MeanAnom[Im]*D2R/E->MeanMotion;
@@ -2873,7 +2877,7 @@ void LoadMoonsOfSaturn(void)
          E->RAAN = RAAN[Im];
          E->ArgP = omg[Im];
 
-         Epoch = DateToAbsTime(EpochYear[Im],EpochMon[Im],EpochDay[Im],0,0,0.0+AbsTimeOffset);
+         Epoch = DateToAbsTime(EpochYear[Im],EpochMon[Im],EpochDay[Im],0,0,0.0);
          E->MeanMotion = sqrt(E->mu/(E->SMA*E->SMA*E->SMA));
          E->Period = TwoPi/E->MeanMotion;
          E->tp = Epoch - MeanAnom[Im]*D2R/E->MeanMotion;
@@ -2958,7 +2962,7 @@ void LoadMoonsOfUranus(void)
          E->RAAN = RAAN[Im];
          E->ArgP = omg[Im];
 
-         Epoch = DateToAbsTime(EpochYear[Im],EpochMon[Im],EpochDay[Im],0,0,0.0+AbsTimeOffset);
+         Epoch = DateToAbsTime(EpochYear[Im],EpochMon[Im],EpochDay[Im],0,0,0.0);
          E->MeanMotion = sqrt(E->mu/(E->SMA*E->SMA*E->SMA));
          E->Period = TwoPi/E->MeanMotion;
          E->tp = Epoch - MeanAnom[Im]*D2R/E->MeanMotion;
@@ -3043,7 +3047,7 @@ void LoadMoonsOfNeptune(void)
          E->RAAN = RAAN[Im];
          E->ArgP = omg[Im];
 
-         Epoch = DateToAbsTime(EpochYear[Im],EpochMon[Im],EpochDay[Im],0,0,0.0+AbsTimeOffset);
+         Epoch = DateToAbsTime(EpochYear[Im],EpochMon[Im],EpochDay[Im],0,0,0.0);
          E->MeanMotion = sqrt(E->mu/(E->SMA*E->SMA*E->SMA));
          E->Period = TwoPi/E->MeanMotion;
          E->tp = Epoch - MeanAnom[Im]*D2R/E->MeanMotion;
@@ -3129,7 +3133,7 @@ void LoadMoonsOfPluto(void)
          E->RAAN = RAAN[Im];
          E->ArgP = omg[Im];
 
-         Epoch = DateToAbsTime(EpochYear[Im],EpochMon[Im],EpochDay[Im],EpochHour[Im],0,0.0+AbsTimeOffset);
+         Epoch = DateToAbsTime(EpochYear[Im],EpochMon[Im],EpochDay[Im],EpochHour[Im],0,0.0);
          E->MeanMotion = sqrt(E->mu/(E->SMA*E->SMA*E->SMA));
          E->Period = TwoPi/E->MeanMotion;
          E->tp = Epoch - MeanAnom[Im]*D2R/E->MeanMotion;
@@ -3204,7 +3208,7 @@ void LoadMinorBodies(void)
          fscanf(infile,"%ld %ld %ld %ld %[^\n] %[\n]",
             &EpochYear,&EpochMon,&EpochDay,&EpochHour,junk,&newline);
          fscanf(infile,"%lf %[^\n] %[\n]",&E->anom,junk,&newline);
-         Epoch = DateToAbsTime(EpochYear,EpochMon,EpochDay,EpochHour,0,0.0+AbsTimeOffset);
+         Epoch = DateToAbsTime(EpochYear,EpochMon,EpochDay,EpochHour,0,0.0);
          E->MeanMotion = sqrt(E->mu/(E->SMA*E->SMA*E->SMA));
          E->Period = TwoPi/E->MeanMotion;
          E->alpha = 1.0/E->SMA;
@@ -3358,6 +3362,343 @@ void InitLagrangePoints(void)
          }
       }
 }
+/******************************************************************************/
+long LoadDE430(char DE430Path[80],double JD)
+{
+      FILE *infile;
+      double Block[1020];
+      long BlockNum,NumEntries;
+      long FoundBlock;
+      char line[511];
+      double JD1,JD2;
+      long i,n,Ic,Iw;
+      long Nseg,Start,N;
+      struct Cheb3DType *Cheb;
+      struct OrbitType *Eph;
+      struct WorldType *W;
+      double JDavg,JDunit,x;
+      double rh[3],vh[3];
+      double EarthMoonBaryPosH[3],EarthMoonBaryVelH[3];
+      double EMRAT = 81.30056907419062; /* Earth-Moon mass ratio */
+      double ZAxis[3] = {0.0,0.0,1.0}; 
+      double PosJ[3],VelJ[3];
+      double qJ2000H[4] = {-0.203123038887,  0.0,  0.0,  0.979153221449};
+
+/* .. Select input file */
+      if (JD < 2433264.5) {
+         printf("JD earlier than DE430 input files.  Falling back to lower-precision planetary ephemerides.\n");
+         return(1);
+      }
+      else if (JD < 2469808.5) {
+         infile = FileOpen(DE430Path,"ascp1950.430","rt");
+      }
+      else if (JD < 2506352.5) {
+         infile = FileOpen(DE430Path,"ascp2050.430","rt");
+      }
+      else if (JD < 2542864.5) {
+         infile = FileOpen(DE430Path,"ascp2150.430","rt");
+      }
+      else {
+         printf("JD later than available DE430 input files.  Falling back to lower-precision planetary ephemerides.\n");
+         return(1);
+      }
+
+/* .. Search for block */
+      FoundBlock = 0;
+      while(!FoundBlock) {
+         fgets(line,512,infile);
+         if (sscanf(line,"%ld %ld",&BlockNum,&NumEntries) == 2) {
+         fgets(line,512,infile);
+            if (sscanf(line,"%lf %lf %lf",&Block[0],&Block[1],&Block[2]) == 3) {
+               if (JD >= Block[0] && JD < Block[1]) {
+                  FoundBlock = 1;
+                  JD1 = Block[0];
+                  JD2 = Block[1];
+               }
+            }
+         }
+      }
+      
+/* .. Load block */ 
+      for(i=1;i<340;i++) {
+         fgets(line,512,infile);
+         sscanf(line,"%lf %lf %lf",&Block[3*i],&Block[3*i+1],&Block[3*i+2]);
+      }
+      fclose(infile);
+            
+/* .. Distribute to Worlds [Starting Entry (1-based), Order, Number of Segments] */
+      /* Mercury [3 14 4] */
+      Iw = MERCURY;
+      Nseg = 4;
+      Start = 3-1;
+      N = 14;
+      World[Iw].eph.Ncheb = Nseg;
+      World[Iw].eph.Cheb = (struct Cheb3DType *) calloc(Nseg,sizeof(struct Cheb3DType));
+      for(Ic=0;Ic<Nseg;Ic++) {
+         Cheb = &World[Iw].eph.Cheb[Ic];
+         Cheb->JD1 = JD1 + ((double) Ic)*(JD2-JD1)/((double) Nseg);
+         Cheb->JD2 = JD2 - ((double) (Nseg-1-Ic))*(JD2-JD1)/((double) Nseg);
+         Cheb->N = N;
+         for(n=0;n<N;n++) {
+            for(i=0;i<3;i++) {
+               Cheb->Coef[n][i] = Block[Start + N*3*Ic + N*i+n];
+            }
+         }
+      }
+      /* Venus [171 10 2] */
+      Iw = VENUS;
+      Nseg = 2;
+      Start = 171-1;
+      N = 10;
+      World[Iw].eph.Ncheb = Nseg;
+      World[Iw].eph.Cheb = (struct Cheb3DType *) calloc(Nseg,sizeof(struct Cheb3DType));
+      for(Ic=0;Ic<Nseg;Ic++) {
+         Cheb = &World[Iw].eph.Cheb[Ic];
+         Cheb->JD1 = JD1 + ((double) Ic)*(JD2-JD1)/((double) Nseg);
+         Cheb->JD2 = JD2 - ((double) (Nseg-1-Ic))*(JD2-JD1)/((double) Nseg);
+         Cheb->N = N;
+         for(n=0;n<N;n++) {
+            for(i=0;i<3;i++) {
+               Cheb->Coef[n][i] = Block[Start + N*3*Ic + N*i+n];
+            }
+         }
+      }
+      /* Earth-Moon barycenter [231 13 2] */
+      Iw = EARTH;
+      Nseg = 2;
+      Start = 231-1;
+      N = 13;
+      World[Iw].eph.Ncheb = Nseg;
+      World[Iw].eph.Cheb = (struct Cheb3DType *) calloc(Nseg,sizeof(struct Cheb3DType));
+      for(Ic=0;Ic<Nseg;Ic++) {
+         Cheb = &World[Iw].eph.Cheb[Ic];
+         Cheb->JD1 = JD1 + ((double) Ic)*(JD2-JD1)/((double) Nseg);
+         Cheb->JD2 = JD2 - ((double) (Nseg-1-Ic))*(JD2-JD1)/((double) Nseg);
+         Cheb->N = N;
+         for(n=0;n<N;n++) {
+            for(i=0;i<3;i++) {
+               Cheb->Coef[n][i] = Block[Start + N*3*Ic + N*i+n];
+            }
+         }
+      }
+      /* Mars [309 11 1] */
+      Iw = MARS;
+      Nseg = 1;
+      Start = 309-1;
+      N = 11;
+      World[Iw].eph.Ncheb = Nseg;
+      World[Iw].eph.Cheb = (struct Cheb3DType *) calloc(Nseg,sizeof(struct Cheb3DType));
+      for(Ic=0;Ic<Nseg;Ic++) {
+         Cheb = &World[Iw].eph.Cheb[Ic];
+         Cheb->JD1 = JD1 + ((double) Ic)*(JD2-JD1)/((double) Nseg);
+         Cheb->JD2 = JD2 - ((double) (Nseg-1-Ic))*(JD2-JD1)/((double) Nseg);
+         Cheb->N = N;
+         for(n=0;n<N;n++) {
+            for(i=0;i<3;i++) {
+               Cheb->Coef[n][i] = Block[Start + N*3*Ic + N*i+n];
+            }
+         }
+      }
+      /* Jupiter [342 8 1] */
+      Iw = JUPITER;
+      Nseg = 1;
+      Start = 342-1;
+      N = 8;
+      World[Iw].eph.Ncheb = Nseg;
+      World[Iw].eph.Cheb = (struct Cheb3DType *) calloc(Nseg,sizeof(struct Cheb3DType));
+      for(Ic=0;Ic<Nseg;Ic++) {
+         Cheb = &World[Iw].eph.Cheb[Ic];
+         Cheb->JD1 = JD1 + ((double) Ic)*(JD2-JD1)/((double) Nseg);
+         Cheb->JD2 = JD2 - ((double) (Nseg-1-Ic))*(JD2-JD1)/((double) Nseg);
+         Cheb->N = N;
+         for(n=0;n<N;n++) {
+            for(i=0;i<3;i++) {
+               Cheb->Coef[n][i] = Block[Start + N*3*Ic + N*i+n];
+            }
+         }
+      }
+      /* Saturn [366 7 1] */
+      Iw = SATURN;
+      Nseg = 1;
+      Start = 366-1;
+      N = 7;
+      World[Iw].eph.Ncheb = Nseg;
+      World[Iw].eph.Cheb = (struct Cheb3DType *) calloc(Nseg,sizeof(struct Cheb3DType));
+      for(Ic=0;Ic<Nseg;Ic++) {
+         Cheb = &World[Iw].eph.Cheb[Ic];
+         Cheb->JD1 = JD1 + ((double) Ic)*(JD2-JD1)/((double) Nseg);
+         Cheb->JD2 = JD2 - ((double) (Nseg-1-Ic))*(JD2-JD1)/((double) Nseg);
+         Cheb->N = N;
+         for(n=0;n<N;n++) {
+            for(i=0;i<3;i++) {
+               Cheb->Coef[n][i] = Block[Start + N*3*Ic + N*i+n];
+            }
+         }
+      }
+      /* Uranus [387 6 1] */
+      Iw = URANUS;
+      Nseg = 1;
+      Start = 387-1;
+      N = 6;
+      World[Iw].eph.Ncheb = Nseg;
+      World[Iw].eph.Cheb = (struct Cheb3DType *) calloc(Nseg,sizeof(struct Cheb3DType));
+      for(Ic=0;Ic<Nseg;Ic++) {
+         Cheb = &World[Iw].eph.Cheb[Ic];
+         Cheb->JD1 = JD1 + ((double) Ic)*(JD2-JD1)/((double) Nseg);
+         Cheb->JD2 = JD2 - ((double) (Nseg-1-Ic))*(JD2-JD1)/((double) Nseg);
+         Cheb->N = N;
+         for(n=0;n<N;n++) {
+            for(i=0;i<3;i++) {
+               Cheb->Coef[n][i] = Block[Start + N*3*Ic + N*i+n];
+            }
+         }
+      }
+      /* Neptune [405 6 1] */
+      Iw = NEPTUNE;
+      Nseg = 1;
+      Start = 405-1;
+      N = 6;
+      World[Iw].eph.Ncheb = Nseg;
+      World[Iw].eph.Cheb = (struct Cheb3DType *) calloc(Nseg,sizeof(struct Cheb3DType));
+      for(Ic=0;Ic<Nseg;Ic++) {
+         Cheb = &World[Iw].eph.Cheb[Ic];
+         Cheb->JD1 = JD1 + ((double) Ic)*(JD2-JD1)/((double) Nseg);
+         Cheb->JD2 = JD2 - ((double) (Nseg-1-Ic))*(JD2-JD1)/((double) Nseg);
+         Cheb->N = N;
+         for(n=0;n<N;n++) {
+            for(i=0;i<3;i++) {
+               Cheb->Coef[n][i] = Block[Start + N*3*Ic + N*i+n];
+            }
+         }
+      }
+      /* Pluto [423 6 1] */
+      Iw = PLUTO;
+      Nseg = 1;
+      Start = 423-1;
+      N = 6;
+      World[Iw].eph.Ncheb = Nseg;
+      World[Iw].eph.Cheb = (struct Cheb3DType *) calloc(Nseg,sizeof(struct Cheb3DType));
+      for(Ic=0;Ic<Nseg;Ic++) {
+         Cheb = &World[Iw].eph.Cheb[Ic];
+         Cheb->JD1 = JD1 + ((double) Ic)*(JD2-JD1)/((double) Nseg);
+         Cheb->JD2 = JD2 - ((double) (Nseg-1-Ic))*(JD2-JD1)/((double) Nseg);
+         Cheb->N = N;
+         for(n=0;n<N;n++) {
+            for(i=0;i<3;i++) {
+               Cheb->Coef[n][i] = Block[Start + N*3*Ic + N*i+n];
+            }
+         }
+      }
+      /* Moon (geocentric) [441 13 8] */
+      Iw = LUNA;
+      Nseg = 8;
+      Start = 441-1;
+      N = 13;
+      World[Iw].eph.Ncheb = Nseg;
+      World[Iw].eph.Cheb = (struct Cheb3DType *) calloc(Nseg,sizeof(struct Cheb3DType));
+      for(Ic=0;Ic<Nseg;Ic++) {
+         Cheb = &World[Iw].eph.Cheb[Ic];
+         Cheb->JD1 = JD1 + ((double) Ic)*(JD2-JD1)/((double) Nseg);
+         Cheb->JD2 = JD2 - ((double) (Nseg-1-Ic))*(JD2-JD1)/((double) Nseg);
+         Cheb->N = N;
+         for(n=0;n<N;n++) {
+            for(i=0;i<3;i++) {
+               Cheb->Coef[n][i] = Block[Start + N*3*Ic + N*i+n];
+            }
+         }
+      }
+      /* Sun [753 11 2] */
+      Iw = SOL;
+      Nseg = 2;
+      Start = 753-1;
+      N = 11;
+      World[Iw].eph.Ncheb = Nseg;
+      World[Iw].eph.Cheb = (struct Cheb3DType *) calloc(Nseg,sizeof(struct Cheb3DType));
+      for(Ic=0;Ic<Nseg;Ic++) {
+         Cheb = &World[Iw].eph.Cheb[Ic];
+         Cheb->JD1 = JD1 + ((double) Ic)*(JD2-JD1)/((double) Nseg);
+         Cheb->JD2 = JD2 - ((double) (Nseg-1-Ic))*(JD2-JD1)/((double) Nseg);
+         Cheb->N = N;
+         for(n=0;n<N;n++) {
+            for(i=0;i<3;i++) {
+               Cheb->Coef[n][i] = Block[Start + N*3*Ic + N*i+n];
+            }
+         }
+      }
+
+/* .. Initialize Planetary Pos/Vel */
+      for(Iw=SOL;Iw<=LUNA;Iw++) {
+         W = &World[Iw];
+         Eph = &W->eph;
+         /* Determine segment */
+         Ic=0;
+         while(JulDay > Eph->Cheb[Ic].JD2) Ic++;
+         /* Apply Chebyshev polynomials */
+         Cheb = &Eph->Cheb[Ic];
+         JDavg = 0.5*(Cheb->JD1+Cheb->JD2);
+         JDunit = 0.5*(Cheb->JD2-Cheb->JD1);
+         x = (JulDay-JDavg)/JDunit;
+         Cheb3DToPosVel(Cheb->N,Cheb->Coef,x,PosJ,VelJ);
+         for(i=0;i<3;i++) {
+            PosJ[i] *= 1000.0;
+            VelJ[i] *= 1000.0/(JDunit*86400.0);
+         }
+         QTxV(qJ2000H,PosJ,Eph->PosN);
+         QTxV(qJ2000H,VelJ,Eph->VelN);
+      }
+      /* Adjust for barycenters */
+      /* Move planets from barycentric to Sun-centered */
+      for(Iw=MERCURY;Iw<=PLUTO;Iw++) {
+         W = &World[Iw];
+         for(i=0;i<3;i++) {
+            W->eph.PosN[i] -= World[SOL].eph.PosN[i];
+            W->eph.VelN[i] -= World[SOL].eph.VelN[i];
+            W->PosH[i] = W->eph.PosN[i];
+            W->VelH[i] = W->eph.VelN[i];
+         }
+         W->PriMerAng = fmod(W->w*AbsTime,TwoPi);
+         SimpRot(ZAxis,W->PriMerAng,W->CWN);
+      }
+      /* Move Sun to origin */
+      for(i=0;i<3;i++) {
+         World[SOL].PosH[i] = 0.0;
+         World[SOL].VelH[i] = 0.0;
+         World[SOL].eph.PosN[i] = 0.0;
+         World[SOL].eph.VelN[i] = 0.0;
+      }
+      /* Adjust Earth from Earth-Moon barycenter */
+      for(i=0;i<3;i++) {
+         EarthMoonBaryPosH[i] = World[EARTH].eph.PosN[i];
+         EarthMoonBaryVelH[i] = World[EARTH].eph.VelN[i];
+         World[EARTH].eph.PosN[i] -= World[LUNA].eph.PosN[i]/EMRAT;
+         World[EARTH].eph.VelN[i] -= World[LUNA].eph.VelN[i]/EMRAT;
+         World[EARTH].PosH[i] = World[EARTH].eph.PosN[i];
+         World[EARTH].VelH[i] = World[EARTH].eph.VelN[i];
+      }
+      /* Move Moon from barycentric to Earth-centered */
+      for(i=0;i<3;i++) {
+         rh[i] = World[LUNA].eph.PosN[i]*(1.0+1.0/EMRAT);
+         vh[i] = World[LUNA].eph.VelN[i]*(1.0+1.0/EMRAT);
+         World[LUNA].PosH[i] = World[EARTH].PosH[i] + rh[i];
+         World[LUNA].VelH[i] = World[EARTH].VelH[i] + vh[i];
+      }
+      /* Rotate Moon into ECI */
+      MxV(World[EARTH].CNH,rh,World[LUNA].eph.PosN);
+      MxV(World[EARTH].CNH,vh,World[LUNA].eph.VelN);
+      World[LUNA].PriMerAng = LunaPriMerAng(JulDay);
+      SimpRot(ZAxis,World[LUNA].PriMerAng,World[LUNA].CWN);
+      
+      for(Iw=MERCURY;Iw<=LUNA;Iw++) {
+         Eph = &World[Iw].eph;
+         RV2Eph(AbsTime,Eph->mu,Eph->PosN,Eph->VelN,
+                &Eph->SMA,&Eph->ecc,&Eph->inc,
+                &Eph->RAAN,&Eph->ArgP,&Eph->anom,
+                &Eph->tp,&Eph->SLR,&Eph->alpha,&Eph->rmin,
+                &Eph->MeanMotion,&Eph->Period);
+      }
+
+      return(0);
+}
 /**********************************************************************/
 void InitSim(int argc, char **argv)
 {
@@ -3455,7 +3796,7 @@ void InitSim(int argc, char **argv)
              junk,&newline);
       fscanf(infile,"%ld %ld %lf %[^\n] %[\n]",&Hour,&Minute,&Second,
              junk,&newline);
-      fscanf(infile,"%lf %[^\n] %[\n]",&AbsTimeOffset,junk,&newline);
+      fscanf(infile,"%lf %[^\n] %[\n]",&LeapSec,junk,&newline);
 /* .. Choices for Modeling Solar Activity */
       fscanf(infile,"%s  %[^\n] %[\n]",response,junk,&newline);
       UseFileForInterpolation=DecodeString(response);
@@ -3500,6 +3841,8 @@ void InitSim(int argc, char **argv)
       ComputeEnvTrq=DecodeString(response);
 /* .. Celestial Bodies */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+      EphemOption = DecodeString(response);
       for(i=MERCURY;i<=PLUTO;i++){
          fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
          World[i].Exists=DecodeString(response);
@@ -3544,15 +3887,20 @@ void InitSim(int argc, char **argv)
             RealSystemTime(&Year,&doy,&Month,&Day,&Hour,&Minute,&Second);
          }
       #endif
-      AbsTime0 = DateToAbsTime(Year,Month,Day,Hour,Minute,Second+AbsTimeOffset);
+      AbsTime0 = DateToAbsTime(Year,Month,Day,Hour,Minute,Second);
       doy = MD2DOY(Year,Month,Day);
       JulDay = AbsTimeToJD(AbsTime0);
       AbsTime = AbsTime0;
+      AtomicTime = AbsTime - 32.184; /* TAI */
+      CivilTime = AtomicTime - LeapSec; /* UTC "clock" time */
+      GpsTime = AtomicTime - 19.0;
       JDToGpsTime(JulDay,&GpsRollover,&GpsWeek,&GpsSecond);
 
 /* .. Load Sun and Planets */
       LoadSun();
       LoadPlanets();
+      /* JPL planetary ephems */
+      LoadDE430(ModelPath,JulDay);
 
 /* .. Load Moons */
       if (World[EARTH].Exists) LoadMoonOfEarth();

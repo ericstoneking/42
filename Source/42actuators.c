@@ -216,6 +216,7 @@ void Actuators(struct SCType *S)
       struct AcType *AC;
       struct JointType *G;
       struct AcJointType *AG;
+      struct ThrType *Thr;
 
       AC = &S->AC;
 
@@ -258,11 +259,12 @@ void Actuators(struct SCType *S)
 
       /* Thrusters */
       for(i=0;i<S->Nthr;i++) {
-         ThrModel(&AC->Thr[i].PulseWidthCmd,DTSIM,&S->Thr[i],S);
-         MTxV(S->B[0].CN,S->Thr[i].Frc,FrcN);
+         Thr = &S->Thr[i];
+         ThrModel(&AC->Thr[i].PulseWidthCmd,DTSIM,Thr,S);
+         MTxV(S->B[Thr->Body].CN,Thr->Frc,FrcN);
          for(j=0;j<3;j++) {
-            S->B[0].Trq[j] += S->Thr[i].Trq[j];
-            S->B[0].Frc[j] += FrcN[j];
+            S->B[Thr->Body].Trq[j] += Thr->Trq[j];
+            S->B[Thr->Body].Frc[j] += FrcN[j];
          }
       }
       if (ThrusterPlumesActive) {

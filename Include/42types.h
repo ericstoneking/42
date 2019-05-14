@@ -201,6 +201,7 @@ struct ThrType {
    /*~ Internal Variables ~*/
    double Fmax;
    double F;
+   long Body; /* Body that thruster is mounted on */
    double A[3]; /* Axis vector wrt Body 0 */
    double PosB[3]; /* Position vector in Body 0 */
    double Frc[3]; /* Force exerted */

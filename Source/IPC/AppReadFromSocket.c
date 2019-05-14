@@ -12,7 +12,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
       long RequestTimeRefresh = 0;
       long Done;
       char Msg[16384];
-      char AckMsg[8] = "Ack\n";
+      char AckMsg[5] = "Ack\n";
       long Imsg,Iline;
       double DbleVal[30];
       long LongVal[30];
@@ -41,7 +41,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
             &Year,&doy,&Hour,&Minute,&Second) == 5)
             RequestTimeRefresh = 1;
 
-         if (sscanf(line,"SC[%ld].AC.ParmLoadEnabled = [ %ld]",
+         if (sscanf(line,"SC[%ld].AC.ParmLoadEnabled =  %ld",
             &Isc,
             &LongVal[0]) == 2) {
             if (Isc == AC->ID) {
@@ -49,7 +49,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
             }
          }
 
-         if (sscanf(line,"SC[%ld].AC.ParmDumpEnabled = [ %ld]",
+         if (sscanf(line,"SC[%ld].AC.ParmDumpEnabled =  %ld",
             &Isc,
             &LongVal[0]) == 2) {
             if (Isc == AC->ID) {
@@ -57,7 +57,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
             }
          }
 
-         if (sscanf(line,"SC[%ld].AC.G[%ld].Ang = [ %le %le %le]",
+         if (sscanf(line,"SC[%ld].AC.G[%ld].Ang =  %le %le %le",
             &Isc,&i,
             &DbleVal[0],
             &DbleVal[1],
@@ -69,7 +69,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
             }
          }
 
-         if (sscanf(line,"SC[%ld].AC.Gyro[%ld].Rate = [ %le]",
+         if (sscanf(line,"SC[%ld].AC.Gyro[%ld].Rate =  %le",
             &Isc,&i,
             &DbleVal[0]) == 3) {
             if (Isc == AC->ID) {
@@ -77,7 +77,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
             }
          }
 
-         if (sscanf(line,"SC[%ld].AC.MAG[%ld].Field = [ %le]",
+         if (sscanf(line,"SC[%ld].AC.MAG[%ld].Field =  %le",
             &Isc,&i,
             &DbleVal[0]) == 3) {
             if (Isc == AC->ID) {
@@ -85,7 +85,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
             }
          }
 
-         if (sscanf(line,"SC[%ld].AC.CSS[%ld].Valid = [ %ld]",
+         if (sscanf(line,"SC[%ld].AC.CSS[%ld].Valid =  %ld",
             &Isc,&i,
             &LongVal[0]) == 3) {
             if (Isc == AC->ID) {
@@ -93,7 +93,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
             }
          }
 
-         if (sscanf(line,"SC[%ld].AC.CSS[%ld].Illum = [ %le]",
+         if (sscanf(line,"SC[%ld].AC.CSS[%ld].Illum =  %le",
             &Isc,&i,
             &DbleVal[0]) == 3) {
             if (Isc == AC->ID) {
@@ -101,7 +101,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
             }
          }
 
-         if (sscanf(line,"SC[%ld].AC.FSS[%ld].Valid = [ %ld]",
+         if (sscanf(line,"SC[%ld].AC.FSS[%ld].Valid =  %ld",
             &Isc,&i,
             &LongVal[0]) == 3) {
             if (Isc == AC->ID) {
@@ -109,7 +109,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
             }
          }
 
-         if (sscanf(line,"SC[%ld].AC.FSS[%ld].SunAng = [ %le %le]",
+         if (sscanf(line,"SC[%ld].AC.FSS[%ld].SunAng =  %le %le",
             &Isc,&i,
             &DbleVal[0],
             &DbleVal[1]) == 4) {
@@ -119,7 +119,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
             }
          }
 
-         if (sscanf(line,"SC[%ld].AC.ST[%ld].Valid = [ %ld]",
+         if (sscanf(line,"SC[%ld].AC.ST[%ld].Valid =  %ld",
             &Isc,&i,
             &LongVal[0]) == 3) {
             if (Isc == AC->ID) {
@@ -127,7 +127,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
             }
          }
 
-         if (sscanf(line,"SC[%ld].AC.ST[%ld].qn = [ %le %le %le %le]",
+         if (sscanf(line,"SC[%ld].AC.ST[%ld].qn =  %le %le %le %le",
             &Isc,&i,
             &DbleVal[0],
             &DbleVal[1],
@@ -141,7 +141,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
             }
          }
 
-         if (sscanf(line,"SC[%ld].AC.GPS[%ld].Valid = [ %ld]",
+         if (sscanf(line,"SC[%ld].AC.GPS[%ld].Valid =  %ld",
             &Isc,&i,
             &LongVal[0]) == 3) {
             if (Isc == AC->ID) {
@@ -149,7 +149,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
             }
          }
 
-         if (sscanf(line,"SC[%ld].AC.GPS[%ld].Rollover = [ %ld]",
+         if (sscanf(line,"SC[%ld].AC.GPS[%ld].Rollover =  %ld",
             &Isc,&i,
             &LongVal[0]) == 3) {
             if (Isc == AC->ID) {
@@ -157,7 +157,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
             }
          }
 
-         if (sscanf(line,"SC[%ld].AC.GPS[%ld].Week = [ %ld]",
+         if (sscanf(line,"SC[%ld].AC.GPS[%ld].Week =  %ld",
             &Isc,&i,
             &LongVal[0]) == 3) {
             if (Isc == AC->ID) {
@@ -165,7 +165,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
             }
          }
 
-         if (sscanf(line,"SC[%ld].AC.GPS[%ld].Sec = [ %le]",
+         if (sscanf(line,"SC[%ld].AC.GPS[%ld].Sec =  %le",
             &Isc,&i,
             &DbleVal[0]) == 3) {
             if (Isc == AC->ID) {
@@ -173,7 +173,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
             }
          }
 
-         if (sscanf(line,"SC[%ld].AC.GPS[%ld].PosN = [ %le %le %le]",
+         if (sscanf(line,"SC[%ld].AC.GPS[%ld].PosN =  %le %le %le",
             &Isc,&i,
             &DbleVal[0],
             &DbleVal[1],
@@ -185,7 +185,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
             }
          }
 
-         if (sscanf(line,"SC[%ld].AC.GPS[%ld].VelN = [ %le %le %le]",
+         if (sscanf(line,"SC[%ld].AC.GPS[%ld].VelN =  %le %le %le",
             &Isc,&i,
             &DbleVal[0],
             &DbleVal[1],
@@ -197,7 +197,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
             }
          }
 
-         if (sscanf(line,"SC[%ld].AC.GPS[%ld].PosW = [ %le %le %le]",
+         if (sscanf(line,"SC[%ld].AC.GPS[%ld].PosW =  %le %le %le",
             &Isc,&i,
             &DbleVal[0],
             &DbleVal[1],
@@ -209,7 +209,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
             }
          }
 
-         if (sscanf(line,"SC[%ld].AC.GPS[%ld].VelW = [ %le %le %le]",
+         if (sscanf(line,"SC[%ld].AC.GPS[%ld].VelW =  %le %le %le",
             &Isc,&i,
             &DbleVal[0],
             &DbleVal[1],
@@ -221,7 +221,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
             }
          }
 
-         if (sscanf(line,"SC[%ld].AC.GPS[%ld].Lng = [ %le]",
+         if (sscanf(line,"SC[%ld].AC.GPS[%ld].Lng =  %le",
             &Isc,&i,
             &DbleVal[0]) == 3) {
             if (Isc == AC->ID) {
@@ -229,7 +229,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
             }
          }
 
-         if (sscanf(line,"SC[%ld].AC.GPS[%ld].Lat = [ %le]",
+         if (sscanf(line,"SC[%ld].AC.GPS[%ld].Lat =  %le",
             &Isc,&i,
             &DbleVal[0]) == 3) {
             if (Isc == AC->ID) {
@@ -237,7 +237,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
             }
          }
 
-         if (sscanf(line,"SC[%ld].AC.GPS[%ld].Alt = [ %le]",
+         if (sscanf(line,"SC[%ld].AC.GPS[%ld].Alt =  %le",
             &Isc,&i,
             &DbleVal[0]) == 3) {
             if (Isc == AC->ID) {
@@ -245,7 +245,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
             }
          }
 
-         if (sscanf(line,"SC[%ld].AC.Whl[%ld].H = [ %le]",
+         if (sscanf(line,"SC[%ld].AC.Whl[%ld].H =  %le",
             &Isc,&i,
             &DbleVal[0]) == 3) {
             if (Isc == AC->ID) {
@@ -254,7 +254,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
          }
 
          if (AC->ParmLoadEnabled) {
-            if (sscanf(line,"SC[%ld].AC.ID = [ %ld]",
+            if (sscanf(line,"SC[%ld].AC.ID =  %ld",
                &Isc,
                &LongVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -262,7 +262,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.EchoEnabled = [ %ld]",
+            if (sscanf(line,"SC[%ld].AC.EchoEnabled =  %ld",
                &Isc,
                &LongVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -270,7 +270,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.Nb = [ %ld]",
+            if (sscanf(line,"SC[%ld].AC.Nb =  %ld",
                &Isc,
                &LongVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -278,7 +278,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.Ng = [ %ld]",
+            if (sscanf(line,"SC[%ld].AC.Ng =  %ld",
                &Isc,
                &LongVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -286,7 +286,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.Nwhl = [ %ld]",
+            if (sscanf(line,"SC[%ld].AC.Nwhl =  %ld",
                &Isc,
                &LongVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -294,7 +294,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.Nmtb = [ %ld]",
+            if (sscanf(line,"SC[%ld].AC.Nmtb =  %ld",
                &Isc,
                &LongVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -302,7 +302,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.Nthr = [ %ld]",
+            if (sscanf(line,"SC[%ld].AC.Nthr =  %ld",
                &Isc,
                &LongVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -310,7 +310,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.Ncmg = [ %ld]",
+            if (sscanf(line,"SC[%ld].AC.Ncmg =  %ld",
                &Isc,
                &LongVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -318,7 +318,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.Ngyro = [ %ld]",
+            if (sscanf(line,"SC[%ld].AC.Ngyro =  %ld",
                &Isc,
                &LongVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -326,7 +326,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.Nmag = [ %ld]",
+            if (sscanf(line,"SC[%ld].AC.Nmag =  %ld",
                &Isc,
                &LongVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -334,7 +334,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.Ncss = [ %ld]",
+            if (sscanf(line,"SC[%ld].AC.Ncss =  %ld",
                &Isc,
                &LongVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -342,7 +342,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.Nfss = [ %ld]",
+            if (sscanf(line,"SC[%ld].AC.Nfss =  %ld",
                &Isc,
                &LongVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -350,7 +350,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.Nst = [ %ld]",
+            if (sscanf(line,"SC[%ld].AC.Nst =  %ld",
                &Isc,
                &LongVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -358,7 +358,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.Ngps = [ %ld]",
+            if (sscanf(line,"SC[%ld].AC.Ngps =  %ld",
                &Isc,
                &LongVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -366,7 +366,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.Nacc = [ %ld]",
+            if (sscanf(line,"SC[%ld].AC.Nacc =  %ld",
                &Isc,
                &LongVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -374,7 +374,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.DT = [ %le]",
+            if (sscanf(line,"SC[%ld].AC.DT =  %le",
                &Isc,
                &DbleVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -382,7 +382,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.mass = [ %le]",
+            if (sscanf(line,"SC[%ld].AC.mass =  %le",
                &Isc,
                &DbleVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -390,7 +390,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.cm = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.cm =  %le %le %le",
                &Isc,
                &DbleVal[0],
                &DbleVal[1],
@@ -402,7 +402,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.MOI = [ %le %le %le %le %le %le %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.MOI =  %le %le %le %le %le %le %le %le %le",
                &Isc,
                &DbleVal[0],
                &DbleVal[1],
@@ -426,7 +426,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.B[%ld].mass = [ %le]",
+            if (sscanf(line,"SC[%ld].AC.B[%ld].mass =  %le",
                &Isc,&i,
                &DbleVal[0]) == 3) {
                if (Isc == AC->ID) {
@@ -434,7 +434,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.B[%ld].cm = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.B[%ld].cm =  %le %le %le",
                &Isc,&i,
                &DbleVal[0],
                &DbleVal[1],
@@ -446,7 +446,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.B[%ld].MOI = [ %le %le %le %le %le %le %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.B[%ld].MOI =  %le %le %le %le %le %le %le %le %le",
                &Isc,&i,
                &DbleVal[0],
                &DbleVal[1],
@@ -470,7 +470,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.G[%ld].IsUnderActiveControl = [ %ld]",
+            if (sscanf(line,"SC[%ld].AC.G[%ld].IsUnderActiveControl =  %ld",
                &Isc,&i,
                &LongVal[0]) == 3) {
                if (Isc == AC->ID) {
@@ -478,7 +478,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.G[%ld].IsSpherical = [ %ld]",
+            if (sscanf(line,"SC[%ld].AC.G[%ld].IsSpherical =  %ld",
                &Isc,&i,
                &LongVal[0]) == 3) {
                if (Isc == AC->ID) {
@@ -486,7 +486,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.G[%ld].RotDOF = [ %ld]",
+            if (sscanf(line,"SC[%ld].AC.G[%ld].RotDOF =  %ld",
                &Isc,&i,
                &LongVal[0]) == 3) {
                if (Isc == AC->ID) {
@@ -494,7 +494,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.G[%ld].TrnDOF = [ %ld]",
+            if (sscanf(line,"SC[%ld].AC.G[%ld].TrnDOF =  %ld",
                &Isc,&i,
                &LongVal[0]) == 3) {
                if (Isc == AC->ID) {
@@ -502,7 +502,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.G[%ld].RotSeq = [ %ld]",
+            if (sscanf(line,"SC[%ld].AC.G[%ld].RotSeq =  %ld",
                &Isc,&i,
                &LongVal[0]) == 3) {
                if (Isc == AC->ID) {
@@ -510,7 +510,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.G[%ld].TrnSeq = [ %ld]",
+            if (sscanf(line,"SC[%ld].AC.G[%ld].TrnSeq =  %ld",
                &Isc,&i,
                &LongVal[0]) == 3) {
                if (Isc == AC->ID) {
@@ -518,7 +518,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.G[%ld].CGiBi = [ %le %le %le %le %le %le %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.G[%ld].CGiBi =  %le %le %le %le %le %le %le %le %le",
                &Isc,&i,
                &DbleVal[0],
                &DbleVal[1],
@@ -542,7 +542,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.G[%ld].CBoGo = [ %le %le %le %le %le %le %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.G[%ld].CBoGo =  %le %le %le %le %le %le %le %le %le",
                &Isc,&i,
                &DbleVal[0],
                &DbleVal[1],
@@ -566,7 +566,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.G[%ld].AngGain = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.G[%ld].AngGain =  %le %le %le",
                &Isc,&i,
                &DbleVal[0],
                &DbleVal[1],
@@ -578,7 +578,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.G[%ld].AngRateGain = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.G[%ld].AngRateGain =  %le %le %le",
                &Isc,&i,
                &DbleVal[0],
                &DbleVal[1],
@@ -590,7 +590,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.G[%ld].PosGain = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.G[%ld].PosGain =  %le %le %le",
                &Isc,&i,
                &DbleVal[0],
                &DbleVal[1],
@@ -602,7 +602,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.G[%ld].PosRateGain = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.G[%ld].PosRateGain =  %le %le %le",
                &Isc,&i,
                &DbleVal[0],
                &DbleVal[1],
@@ -614,7 +614,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.G[%ld].MaxAngRate = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.G[%ld].MaxAngRate =  %le %le %le",
                &Isc,&i,
                &DbleVal[0],
                &DbleVal[1],
@@ -626,7 +626,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.G[%ld].MaxPosRate = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.G[%ld].MaxPosRate =  %le %le %le",
                &Isc,&i,
                &DbleVal[0],
                &DbleVal[1],
@@ -638,7 +638,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.G[%ld].MaxTrq = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.G[%ld].MaxTrq =  %le %le %le",
                &Isc,&i,
                &DbleVal[0],
                &DbleVal[1],
@@ -650,7 +650,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.G[%ld].MaxFrc = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.G[%ld].MaxFrc =  %le %le %le",
                &Isc,&i,
                &DbleVal[0],
                &DbleVal[1],
@@ -662,7 +662,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.Gyro[%ld].Axis = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.Gyro[%ld].Axis =  %le %le %le",
                &Isc,&i,
                &DbleVal[0],
                &DbleVal[1],
@@ -674,7 +674,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.MAG[%ld].Axis = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.MAG[%ld].Axis =  %le %le %le",
                &Isc,&i,
                &DbleVal[0],
                &DbleVal[1],
@@ -686,7 +686,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.CSS[%ld].Body = [ %ld]",
+            if (sscanf(line,"SC[%ld].AC.CSS[%ld].Body =  %ld",
                &Isc,&i,
                &LongVal[0]) == 3) {
                if (Isc == AC->ID) {
@@ -694,7 +694,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.CSS[%ld].Axis = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.CSS[%ld].Axis =  %le %le %le",
                &Isc,&i,
                &DbleVal[0],
                &DbleVal[1],
@@ -706,7 +706,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.CSS[%ld].Scale = [ %le]",
+            if (sscanf(line,"SC[%ld].AC.CSS[%ld].Scale =  %le",
                &Isc,&i,
                &DbleVal[0]) == 3) {
                if (Isc == AC->ID) {
@@ -714,7 +714,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.FSS[%ld].qb = [ %le %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.FSS[%ld].qb =  %le %le %le %le",
                &Isc,&i,
                &DbleVal[0],
                &DbleVal[1],
@@ -728,7 +728,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.FSS[%ld].CB = [ %le %le %le %le %le %le %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.FSS[%ld].CB =  %le %le %le %le %le %le %le %le %le",
                &Isc,&i,
                &DbleVal[0],
                &DbleVal[1],
@@ -752,7 +752,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.ST[%ld].qb = [ %le %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.ST[%ld].qb =  %le %le %le %le",
                &Isc,&i,
                &DbleVal[0],
                &DbleVal[1],
@@ -766,7 +766,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.ST[%ld].CB = [ %le %le %le %le %le %le %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.ST[%ld].CB =  %le %le %le %le %le %le %le %le %le",
                &Isc,&i,
                &DbleVal[0],
                &DbleVal[1],
@@ -790,7 +790,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.Accel[%ld].PosB = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.Accel[%ld].PosB =  %le %le %le",
                &Isc,&i,
                &DbleVal[0],
                &DbleVal[1],
@@ -802,7 +802,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.Accel[%ld].Axis = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.Accel[%ld].Axis =  %le %le %le",
                &Isc,&i,
                &DbleVal[0],
                &DbleVal[1],
@@ -814,7 +814,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.Whl[%ld].Axis = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.Whl[%ld].Axis =  %le %le %le",
                &Isc,&i,
                &DbleVal[0],
                &DbleVal[1],
@@ -826,7 +826,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.Whl[%ld].DistVec = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.Whl[%ld].DistVec =  %le %le %le",
                &Isc,&i,
                &DbleVal[0],
                &DbleVal[1],
@@ -838,7 +838,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.Whl[%ld].J = [ %le]",
+            if (sscanf(line,"SC[%ld].AC.Whl[%ld].J =  %le",
                &Isc,&i,
                &DbleVal[0]) == 3) {
                if (Isc == AC->ID) {
@@ -846,7 +846,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.Whl[%ld].Tmax = [ %le]",
+            if (sscanf(line,"SC[%ld].AC.Whl[%ld].Tmax =  %le",
                &Isc,&i,
                &DbleVal[0]) == 3) {
                if (Isc == AC->ID) {
@@ -854,7 +854,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.Whl[%ld].Hmax = [ %le]",
+            if (sscanf(line,"SC[%ld].AC.Whl[%ld].Hmax =  %le",
                &Isc,&i,
                &DbleVal[0]) == 3) {
                if (Isc == AC->ID) {
@@ -862,7 +862,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.MTB[%ld].Axis = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.MTB[%ld].Axis =  %le %le %le",
                &Isc,&i,
                &DbleVal[0],
                &DbleVal[1],
@@ -874,7 +874,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.MTB[%ld].DistVec = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.MTB[%ld].DistVec =  %le %le %le",
                &Isc,&i,
                &DbleVal[0],
                &DbleVal[1],
@@ -886,7 +886,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.MTB[%ld].Mmax = [ %le]",
+            if (sscanf(line,"SC[%ld].AC.MTB[%ld].Mmax =  %le",
                &Isc,&i,
                &DbleVal[0]) == 3) {
                if (Isc == AC->ID) {
@@ -894,7 +894,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.Thr[%ld].PosB = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.Thr[%ld].PosB =  %le %le %le",
                &Isc,&i,
                &DbleVal[0],
                &DbleVal[1],
@@ -906,7 +906,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.Thr[%ld].Axis = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.Thr[%ld].Axis =  %le %le %le",
                &Isc,&i,
                &DbleVal[0],
                &DbleVal[1],
@@ -918,7 +918,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.Thr[%ld].rxA = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.Thr[%ld].rxA =  %le %le %le",
                &Isc,&i,
                &DbleVal[0],
                &DbleVal[1],
@@ -930,7 +930,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.Thr[%ld].Fmax = [ %le]",
+            if (sscanf(line,"SC[%ld].AC.Thr[%ld].Fmax =  %le",
                &Isc,&i,
                &DbleVal[0]) == 3) {
                if (Isc == AC->ID) {
@@ -938,7 +938,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.PrototypeCtrl.wc = [ %le]",
+            if (sscanf(line,"SC[%ld].AC.PrototypeCtrl.wc =  %le",
                &Isc,
                &DbleVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -946,7 +946,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.PrototypeCtrl.amax = [ %le]",
+            if (sscanf(line,"SC[%ld].AC.PrototypeCtrl.amax =  %le",
                &Isc,
                &DbleVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -954,7 +954,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.PrototypeCtrl.vmax = [ %le]",
+            if (sscanf(line,"SC[%ld].AC.PrototypeCtrl.vmax =  %le",
                &Isc,
                &DbleVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -962,7 +962,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.PrototypeCtrl.Kprec = [ %le]",
+            if (sscanf(line,"SC[%ld].AC.PrototypeCtrl.Kprec =  %le",
                &Isc,
                &DbleVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -970,7 +970,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.PrototypeCtrl.Knute = [ %le]",
+            if (sscanf(line,"SC[%ld].AC.PrototypeCtrl.Knute =  %le",
                &Isc,
                &DbleVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -978,7 +978,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.AdHocCtrl.Kr = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.AdHocCtrl.Kr =  %le %le %le",
                &Isc,
                &DbleVal[0],
                &DbleVal[1],
@@ -990,7 +990,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.AdHocCtrl.Kp = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.AdHocCtrl.Kp =  %le %le %le",
                &Isc,
                &DbleVal[0],
                &DbleVal[1],
@@ -1002,7 +1002,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.SpinnerCtrl.Ispin = [ %le]",
+            if (sscanf(line,"SC[%ld].AC.SpinnerCtrl.Ispin =  %le",
                &Isc,
                &DbleVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -1010,7 +1010,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.SpinnerCtrl.Itrans = [ %le]",
+            if (sscanf(line,"SC[%ld].AC.SpinnerCtrl.Itrans =  %le",
                &Isc,
                &DbleVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -1018,7 +1018,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.SpinnerCtrl.SpinRate = [ %le]",
+            if (sscanf(line,"SC[%ld].AC.SpinnerCtrl.SpinRate =  %le",
                &Isc,
                &DbleVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -1026,7 +1026,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.SpinnerCtrl.Knute = [ %le]",
+            if (sscanf(line,"SC[%ld].AC.SpinnerCtrl.Knute =  %le",
                &Isc,
                &DbleVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -1034,7 +1034,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.SpinnerCtrl.Kprec = [ %le]",
+            if (sscanf(line,"SC[%ld].AC.SpinnerCtrl.Kprec =  %le",
                &Isc,
                &DbleVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -1042,7 +1042,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.ThreeAxisCtrl.Kr = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.ThreeAxisCtrl.Kr =  %le %le %le",
                &Isc,
                &DbleVal[0],
                &DbleVal[1],
@@ -1054,7 +1054,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.ThreeAxisCtrl.Kp = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.ThreeAxisCtrl.Kp =  %le %le %le",
                &Isc,
                &DbleVal[0],
                &DbleVal[1],
@@ -1066,7 +1066,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.ThreeAxisCtrl.Kunl = [ %le]",
+            if (sscanf(line,"SC[%ld].AC.ThreeAxisCtrl.Kunl =  %le",
                &Isc,
                &DbleVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -1074,7 +1074,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.IssCtrl.Kr = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.IssCtrl.Kr =  %le %le %le",
                &Isc,
                &DbleVal[0],
                &DbleVal[1],
@@ -1086,7 +1086,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.IssCtrl.Kp = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.IssCtrl.Kp =  %le %le %le",
                &Isc,
                &DbleVal[0],
                &DbleVal[1],
@@ -1098,7 +1098,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.IssCtrl.Tmax = [ %le]",
+            if (sscanf(line,"SC[%ld].AC.IssCtrl.Tmax =  %le",
                &Isc,
                &DbleVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -1106,7 +1106,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.CmgCtrl.Kr = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.CmgCtrl.Kr =  %le %le %le",
                &Isc,
                &DbleVal[0],
                &DbleVal[1],
@@ -1118,7 +1118,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.CmgCtrl.Kp = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.CmgCtrl.Kp =  %le %le %le",
                &Isc,
                &DbleVal[0],
                &DbleVal[1],
@@ -1130,7 +1130,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.ThrCtrl.Kw = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.ThrCtrl.Kw =  %le %le %le",
                &Isc,
                &DbleVal[0],
                &DbleVal[1],
@@ -1142,7 +1142,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.ThrCtrl.Kth = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.ThrCtrl.Kth =  %le %le %le",
                &Isc,
                &DbleVal[0],
                &DbleVal[1],
@@ -1154,7 +1154,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.ThrCtrl.Kv = [ %le]",
+            if (sscanf(line,"SC[%ld].AC.ThrCtrl.Kv =  %le",
                &Isc,
                &DbleVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -1162,7 +1162,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.ThrCtrl.Kp = [ %le]",
+            if (sscanf(line,"SC[%ld].AC.ThrCtrl.Kp =  %le",
                &Isc,
                &DbleVal[0]) == 2) {
                if (Isc == AC->ID) {
@@ -1170,7 +1170,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.CfsCtrl.Kr = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.CfsCtrl.Kr =  %le %le %le",
                &Isc,
                &DbleVal[0],
                &DbleVal[1],
@@ -1182,7 +1182,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.CfsCtrl.Kp = [ %le %le %le]",
+            if (sscanf(line,"SC[%ld].AC.CfsCtrl.Kp =  %le %le %le",
                &Isc,
                &DbleVal[0],
                &DbleVal[1],
@@ -1194,7 +1194,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
                }
             }
 
-            if (sscanf(line,"SC[%ld].AC.CfsCtrl.Kunl = [ %le]",
+            if (sscanf(line,"SC[%ld].AC.CfsCtrl.Kunl =  %le",
                &Isc,
                &DbleVal[0]) == 2) {
                if (Isc == AC->ID) {

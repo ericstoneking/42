@@ -89,6 +89,15 @@ struct LagrangeSystemType {
    double CLN[3][3];
 };
 
+/* Chebyshev coefficients.  Used for DE430 planetary ephemerides. */
+struct Cheb3DType {
+   /* Coefficients only valid for JD1 <= JulDay < JD2 */
+   double JD1;
+   double JD2;
+   long N; /* Order <= 20 */
+   double Coef[20][3];
+};
+
 struct OrbitType {
    /*~ Parameters ~*/
 
@@ -164,6 +173,9 @@ struct OrbitType {
    double NodeAbsTime[4];
    double NodePos[4][3];
    double NodeVel[4][3];
+   /* Chebyshev Coefficients */
+   long Ncheb;
+   struct Cheb3DType *Cheb;
 };
 
 /*~ Prototypes ~*/

@@ -77,62 +77,62 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 12                            ! Number of Thrusters
 ==============================  Thr 0  =================================
  1.0                          ! Thrust Force (N)
--1.0  0.0  0.0                ! Thrust Axis 
+0  -1.0  0.0  0.0             ! Body, Thrust Axis 
  1.0  1.0  1.0                ! Location in B0, m
 0                             ! Flex Node Index
 ==============================  Thr 1  =================================
  1.0                          ! Thrust Force (N)
- 0.0 -1.0  0.0                ! Thrust Axis 
+0   0.0 -1.0  0.0             ! Body, Thrust Axis 
  1.0  1.0  1.0                ! Location in B0, m
 0                             ! Flex Node Index
 ==============================  Thr 2  =================================
  1.0                          ! Thrust Force (N)
- 0.0  0.0 -1.0                ! Thrust Axis 
+0   0.0  0.0 -1.0             ! Body, Thrust Axis 
  1.0  1.0  1.0                ! Location in B0, m
 0                             ! Flex Node Index
 ==============================  Thr 3  =================================
  1.0                          ! Thrust Force (N)
--1.0  0.0  0.0                ! Thrust Axis 
+0  -1.0  0.0  0.0             ! Body, Thrust Axis 
  1.0 -1.0 -1.0                ! Location in B0, m
 0                             ! Flex Node Index
 ==============================  Thr 4  =================================
  1.0                          ! Thrust Force (N)
- 0.0  1.0  0.0                ! Thrust Axis 
+0   0.0  1.0  0.0             ! Body, Thrust Axis 
  1.0 -1.0 -1.0                ! Location in B0, m
 0                             ! Flex Node Index
 ==============================  Thr 5  =================================
  1.0                          ! Thrust Force (N)
- 0.0  0.0  1.0                ! Thrust Axis 
+0   0.0  0.0  1.0             ! Body, Thrust Axis 
  1.0 -1.0 -1.0                ! Location in B0, m
 0                             ! Flex Node Index
 ==============================  Thr 6  =================================
  1.0                          ! Thrust Force (N)
- 1.0  0.0  0.0                ! Thrust Axis 
+0   1.0  0.0  0.0             ! Body, Thrust Axis 
 -1.0  1.0 -1.0                ! Location in B0, m
 0                             ! Flex Node Index
 ==============================  Thr 7  =================================
  1.0                          ! Thrust Force (N)
- 0.0 -1.0  0.0                ! Thrust Axis 
+0   0.0 -1.0  0.0             ! Body, Thrust Axis 
 -1.0  1.0 -1.0                ! Location in B0, m
 0                             ! Flex Node Index
 ==============================  Thr 8  =================================
  1.0                          ! Thrust Force (N)
- 0.0  0.0  1.0                ! Thrust Axis 
+0   0.0  0.0  1.0             ! Body, Thrust Axis 
 -1.0  1.0 -1.0                ! Location in B0, m
 0                             ! Flex Node Index
 ==============================  Thr 9  =================================
  1.0                          ! Thrust Force (N)
- 1.0  0.0  0.0                ! Thrust Axis 
+0   1.0  0.0  0.0             ! Body, Thrust Axis 
 -1.0 -1.0  1.0                ! Location in B0, m
 0                             ! Flex Node Index
 ==============================  Thr 10  ================================
  1.0                          ! Thrust Force (N)
- 0.0  1.0  0.0                ! Thrust Axis 
+0   0.0  1.0  0.0             ! Body, Thrust Axis 
 -1.0 -1.0  1.0                ! Location in B0, m
 0                             ! Flex Node Index
 ==============================  Thr 11  ================================
  1.0                          ! Thrust Force (N)
- 0.0  0.0 -1.0                ! Thrust Axis 
+0   0.0  0.0 -1.0             ! Body, Thrust Axis 
 -1.0 -1.0  1.0                ! Location in B0, m
 0                             ! Flex Node Index
 ******************************* Gyro ************************************

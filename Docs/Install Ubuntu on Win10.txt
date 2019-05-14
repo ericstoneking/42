@@ -1,0 +1,75 @@
+HOW TO INSTALL UBUNTU on Windows 10
+
+[Editor's Note:  This procedure is contributed by Eloy Pieto Panadero (see contact info at the end).  New with Windows 10, Windows supports an ubuntu shell.  It's about time, IMHO.  Thanks to Eloy for seizing on this new capability and writing down the steps for us.  ETS]
+
+We are going to use ubuntu bash on windows
+
+
+Window Button -> Settings -> Update & security -> For developers, and activate "Developer mode"
+
+Turn Windows Features on or off
+In Windows Power Shell (admin):
+
+   & C:\Windows\System32\OptionalFeatures.exe
+
+Activate "Windows Subsystem for Linux"
+
+Wait for the download
+
+Try to open the "Windows PowerShell(Admin)" and type "bash" if don't work, download "Ubuntu" from "Microsoft Store". Wait for the dowload, and open the "Windows PowerShell(Admin)" and type "bash"; (if don't work restart computer...)
+
+[Edit:  If you're reading this, you already know where and how to get 42.  ETS]
+
+Install Xming on windows
+
+(Restart computer)
+
+Open terminal  
+
+[Edit:  This was an adventure for me.  Here's what I ended up with:
+
+Run XLaunch.  Note the "Display number".  You'll need that later.  You don't need to start a client at this time --- just click on through.  XLaunch won't do anything visible, but it'll start up an Xming server process in the background.
+
+In the Windows->Run command line:
+   bash  
+This opens a bash window in the folder (/mnt/c/Users/Eric), which is good.
+   DISPLAY=:0 xterm &
+This opens up a new xterm window.  The DISPLAY that you provide (0 here) needs to match the one from XLaunch.  If you get an error like "xterm:  Xt error: Can't open display :0", then something is wrong with your background Xming server process.
+
+Note that /mnt/c/Users/Eric isn't my home folder in the usual linux sense.  If I enter "cd ", xterm (or bash) will put me in /home/eric/.  This is part of an isolated linux-style directory structure that is secretly buried deep within my User/Eric folder.  I find this offputting, since I would like to use my usual tools (text editors, Octave, etc) on my inputs and outputs, and not being able to find them puts a kink in that.  There is a simple fix, though.  cd to your home/yourname folder, and edit the .profile you find there.  Add this line:
+   export HOME=/mnt/c/Users/yourname
+or wherever you would like your home folder to be.  You can also put 
+  export DISPLAY=:0
+in to set your default display.  ETS]
+
+& bash
+& sudo apt update
+& sudo apt-get install vim-gtk
+& sudo apt install gcc
+& DISPLAY=:1 gvim #check that opens a xming display window
+& sudo apt-cache search glut
+& sudo apt-get install freeglut3-dev
+& cd 42 #use the route where 42 folder is install
+& make
+& DISPLAY=:1 ./42 #execute the 42
+
+[I add this line to my .profile:
+   export PATH=.:$PATH
+which adds the current directory to the path, so I don't have to type the "./" every time. ETS]
+
+******************************************************************************************
+REFERENCES:
+
+Ubuntu bash on windows: https://www.xataka.com/aplicaciones/asi-es-usar-la-consola-bash-de-ubuntu-en-windows-10/
+
+How to Run Graphical Linux Desktop Applications from Windows 10’s Bash Shell: https://www.howtogeek.com/261575/how-to-run-graphical-linux-desktop-applications-from-windows-10s-bash-shell/
+
+Open GL Glut libraries: https://askubuntu.com/questions/96087/how-to-install-opengl-glut-libraries/
+
+******************************************************************************************
+This procedure was contributed by Eloy Pieto Panadero
+   Github: @Eloypripan
+   Twiter: @eloypripan
+   Instagram: @eloypripan
+   Facebook: @Eloy Prieto Panadero
+   Creative Commons License: https://creativecommons.org/licenses/by-sa/4.0/

@@ -109,7 +109,8 @@ long AdvanceTime(void)
                itime = (long) ((SimTime+0.5*DTSIM)/(DTSIM));
                SimTime = ((double) itime)*DTSIM;
                RealSystemTime(&Year,&doy,&Month,&Day,&Hour,&Minute,&Second,DTSIM);
-               AbsTime = DateToAbsTime(Year,Month,Day,Hour,Minute,Second+AbsTimeOffset);
+               AtomicTime = DateToAbsTime(Year,Month,Day,Hour,Minute,Second+LeapSec);
+               AbsTime = AtomicTime + 32.184;
                JulDay = AbsTimeToJD(AbsTime);
                JDToGpsTime(JulDay,&GpsRollover,&GpsWeek,&GpsSecond);
                AbsTime0 = AbsTime - SimTime;
@@ -122,14 +123,16 @@ long AdvanceTime(void)
                }
                usleep(1.0E6*DTSIM);
                NOS3Time(&Year,&doy,&Month,&Day,&Hour,&Minute,&Second);
-               AbsTime = DateToAbsTime(Year,Month,Day,Hour,Minute,Second+AbsTimeOffset);
+               AtomicTime = DateToAbsTime(Year,Month,Day,Hour,Minute,Second+LeapSec);
+               AbsTime = AtomicTime + 32.184;
                JulDay = AbsTimeToJD(AbsTime);
                JDToGpsTime(JulDay,&GpsRollover,&GpsWeek,&GpsSecond);
                SimTime = AbsTime - AbsTime0;
                break;
             /* case SSUP_TIME:
             **   RealSystemTime(&Year,&doy,&Month,&Day,&Hour,&Minute,&Second);
-            **   AbsTime = DateToAbsTime(Year,Month,Day,Hour,Minute,Second+AbsTimeOffset);
+            **   AtomicTime = DateToAbsTime(Year,Month,Day,Hour,Minute,Second+LeapSec);
+            **   AbsTime = AtomicTime + 32.184;
             **   JulDay = AbsTimeToJD(AbsTime);
             **   SimTime = AbsTime - AbsTime0;
             **   break;

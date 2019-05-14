@@ -1,0 +1,1 @@
+This sim case is to demonstrate running the controller code in AcApp.c either embedded within 42 or as a standalone app communicating with 42 via sockets.  See Docs/Using Standalone AcApp/Using Standalone AcApp.txt for a full description.

@@ -1587,12 +1587,14 @@ void DrawNearAuxObjects(void)
 //               glTranslated(S->PosR[0],S->PosR[1],S->PosR[2]);
             if (ScIsVisible(POV.Host.RefOrb,Isc,PosR)) {
                glTranslated(PosR[0],PosR[1],PosR[2]);
-               B = &S->B[0];
-               glTranslated(B->pn[0],B->pn[1],B->pn[2]);
-               RotateR2L(B->CN);
-               glTranslated(-B->cm[0],-B->cm[1],-B->cm[2]);
                for(Ithr=0;Ithr<S->Nthr;Ithr++) {
+                  B = &S->B[S->Thr[Ithr].Body];
+                  glPushMatrix();
+                  glTranslated(B->pn[0],B->pn[1],B->pn[2]);
+                  RotateR2L(B->CN);
+                  glTranslated(-B->cm[0],-B->cm[1],-B->cm[2]);
                   DrawThrusterPlume(&S->Thr[Ithr]);
+                  glPopMatrix();
                }
             }
 
@@ -5033,12 +5035,12 @@ void InitCamWindow(void)
       glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
       glutInitWindowSize(CamWidth,CamHeight);
       CamWindow = glutCreateWindow(CamTitle);
-	   #if (defined(GLEW_BUILD) || defined(GLEW_STATIC))
-	   if (GLEW_OK != glewInit()) {
-		   printf("glew failed to initialize in InitCamWindow\n");
-		   exit(1);
-	   }
-	   #endif
+      #if (defined(GLEW_BUILD) || defined(GLEW_STATIC))
+      if (GLEW_OK != glewInit()) {
+         printf("glew failed to initialize in InitCamWindow\n");
+         exit(1);
+      }
+      #endif
 
       glutSetWindow(CamWindow);
       glutPositionWindow(0,30);

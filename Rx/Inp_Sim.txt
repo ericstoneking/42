@@ -1,6 +1,6 @@
 <<<<<<<<<<<<<<<<<  42: The Mostly Harmless Simulator  >>>>>>>>>>>>>>>>>
 ************************** Simulation Control **************************
-FAST                            !  Time Mode (FAST, REAL, or EXTERNAL)
+REAL                            !  Time Mode (FAST, REAL, or EXTERNAL)
 86400.0     0.1                 !  Sim Duration, Step Size [sec]
 1.0                             !  File Output Interval [sec]
 TRUE                            !  Graphics Front End?
@@ -34,6 +34,7 @@ FALSE                           !  Contact Forces and Torques
 FALSE                           !  CFD Slosh Forces and Torques
 FALSE                           !  Output Environmental Torques to Files
 ********************* Celestial Bodies of Interest *********************
+VSOP87                          ! Ephem Option (VSOP87 or DE430)
 TRUE                            !  Mercury
 TRUE                            !  Venus
 TRUE                            !  Earth and Luna
