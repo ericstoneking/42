@@ -364,7 +364,7 @@ ifeq ($(42PLATFORM),_WIN32)
 else ifeq ($(42PLATFORM),_WIN64)
 	del .\Object\*.o .\$(EXENAME) .\InOut\*.42
 else
-	rm $(OBJ)*.o ./$(EXENAME) ./AcApp $(INOUT)*.42 ./cFS/*.42 ./Demo/*.42 ./Rx/*.42 ./Tx/*.42
+	rm -f $(OBJ)*.o ./$(EXENAME) ./AcApp $(INOUT)*.42 ./cFS/*.42 ./Demo/*.42 ./Rx/*.42 ./Tx/*.42
 endif
 
 
