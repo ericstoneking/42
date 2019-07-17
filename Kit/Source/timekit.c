@@ -98,7 +98,7 @@ void JD2YMDHMS(double JD,long *Year, long *Month, long *Day,
                          long *Hour, long *Minute, double *Second)
 {
       double Z,F,A,B,C,D,E,alpha;
-		double FD;
+      double FD;
 
       Z= floor(JD+0.5);
       F=(JD+0.5)-Z;
@@ -128,14 +128,14 @@ void JD2YMDHMS(double JD,long *Year, long *Month, long *Day,
          *Year = (long) (C - 4715.0);
       }
 
-		FD = FD - floor(FD);
-		FD = FD * 24.0;
-		*Hour = (long) FD;
-		FD = FD - floor(FD);
-		FD = FD * 60.0;
-		*Minute = (long) FD;
-		FD = FD - floor(FD);
-		*Second = FD * 60.0;
+      FD = FD - floor(FD);
+      FD = FD * 24.0;
+      *Hour = (long) FD;
+      FD = FD - floor(FD);
+      FD = FD * 60.0;
+      *Minute = (long) FD;
+      FD = FD - floor(FD);
+      *Second = FD * 60.0;
 
 }
 /**********************************************************************/
@@ -148,7 +148,7 @@ void AbsTimeToDate(double AbsTime, long *Year, long *Month, long *Day,
                   long *Hour, long *Minute, double *Second, double LSB)
 {
       double Z,F,A,B,C,D,E,alpha;
-		double FD,JD;
+      double FD,JD;
 
       JD = AbsTime/86400.0 + 2451545.0;
 

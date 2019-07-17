@@ -205,7 +205,7 @@
 #define ORBDOF_ENCKE 2
 #define ORBDOF_COWELL 3
 
-#define EPH_VSOP87 0
+#define EPH_MEAN 0
 #define EPH_DE430 1
 
 #define REFPT_CM 0

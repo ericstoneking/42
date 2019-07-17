@@ -1645,7 +1645,7 @@ void LoadEgretCatalog(const char *EgretFileName,double BuckyPf[32][3],
             glColor4fv(Black);
          glEndList();
       }
-	   glPointSize(2.0);
+      glPointSize(2.0);
 #undef Nsource
 #undef D2R
 }

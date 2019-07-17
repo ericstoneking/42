@@ -17,7 +17,7 @@
 /*  "Texturing & Modeling: A Procedural Approach", 3rd edition        */
 
 void Worley(double at[3], long max_order,
-	    double *F, double (*delta)[3], unsigned long *ID,
+       double *F, double (*delta)[3], unsigned long *ID,
        long DistanceType);
 
 void MixColor(float C1[3], float C2[3], double f, float C[3]);

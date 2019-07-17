@@ -16,7 +16,6 @@ LAL                           ! Ang Vel wrt [NL], Att [QA] wrt [NLF]
 0.0    0.0    0.0    213      ! Angles (deg) & Euler Sequence
 ***************************  Dynamics Flags  ***************************
 DYN_JOINT                     ! Rotation STEADY, KIN_JOINT, or DYN_JOINT
-TRUE                          ! Assume constant mass properties
 FALSE                         ! Passive Joint Forces and Torques Enabled
 FALSE                         ! Compute Constraint Forces and Torques
 REFPT_CM                      ! Mass Props referenced to REFPT_CM or REFPT_JOINT

@@ -432,85 +432,85 @@ void TRARA1(float FL, float BB0, float *E,float *F,int N, int *DESCR)
       NL=XNL*DESCR[4];                             
       if (BB0 < 1.0 ) BB0=1.0;                                             
       NB = ( BB0-1.0)*DESCR[6-1];  
-		/*                                                                       
-		 * I2 IS THE NUMBER OF ELEMENTS IN THE FLUX MAP FOR THE FIRST ENERGY.  
-		 * I3 IS THE INDEX OF THE LAST ELEMENT OF THE SECOND ENERGY MAP.       
-		 * L3 IS THE LENGTH OF THE MAP FOR THE THIRD ENERGY.                   
-		 * E1 IS THE ENERGY OF THE FIRST ENERGY MAP (UNSCALED)                 
-		 * E2 IS THE ENERGY OF THE SECOND ENERGY MAP (UNSCALED)                
-		 */
+      /*                                                                       
+       * I2 IS THE NUMBER OF ELEMENTS IN THE FLUX MAP FOR THE FIRST ENERGY.  
+       * I3 IS THE INDEX OF THE LAST ELEMENT OF THE SECOND ENERGY MAP.       
+       * L3 IS THE LENGTH OF THE MAP FOR THE THIRD ENERGY.                   
+       * E1 IS THE ENERGY OF THE FIRST ENERGY MAP (UNSCALED)                 
+       * E2 IS THE ENERGY OF THE SECOND ENERGY MAP (UNSCALED)                
+       */
       I1 =0;                                                             
       I2=MAP[1-1];                                                        
       I3=I2+MAP[I2+1-1]; 
       L3=MAP[I3+1-1];                                                      
       E1=MAP[I1+2-1]/ESCALE;
       E2=MAP[I2+2-1]/ESCALE;
-		/*
-		 * S0, S1, S2 ARE LOGICAL VARIABLES WHICH INDICATE WHETHER THE FLUX FOR 
-		 * A PARTICULAR E, B, L POINT HAS ALREADY BEEN FOUND IN A PREVIOUS CALL  
-		 * TO FUNCTION TRARA2. IF NOT, S.. =.TRUE.
-		 */
+      /*
+       * S0, S1, S2 ARE LOGICAL VARIABLES WHICH INDICATE WHETHER THE FLUX FOR 
+       * A PARTICULAR E, B, L POINT HAS ALREADY BEEN FOUND IN A PREVIOUS CALL  
+       * TO FUNCTION TRARA2. IF NOT, S.. =.TRUE.
+       */
       S1 = 1;
       S2 = 1;             
 /* 
  *       ENERGY LOOP
  */ 
       /* DO 3 IE=1,N */
-		for(IE=1; IE<=N; IE++) {                                                      
-			/*
-			 * FOR EACH ENERGY E(I) FIND THE SUCCESSIVE ENERGIES E0,E1,E2 IN 
-			 * MODEL MAP, WHICH OBEY  E0 < E1 < E(I) < E2 . 
-			 */
-			while (!( (E[IE-1] <= E2) || L3==0 ) ) {                                  
-				I0=I1;                                                             
-				I1=I2;                                                            
-				I2=I3;                                                             
-				I3=I3+L3;                                                          
-				/* L3=MAP(I3-1) */
-			   L3 = MAP[I3+1-1];                                                      
-				E0=E1;                                                             
-				E1=E2;                                                             
-				/* E2=MAP[I2+2]/ESCALE */
-			   E2=MAP[I2+2-1]/ESCALE;
-				S0=S1;                                                            
-				S1=S2;                                                            
-				/* S2=.TRUE. */
-			   S2=1;                                                         
-				F0=F1;                                                             
-				F1=F2;                                
+      for(IE=1; IE<=N; IE++) {                                                      
+         /*
+          * FOR EACH ENERGY E(I) FIND THE SUCCESSIVE ENERGIES E0,E1,E2 IN 
+          * MODEL MAP, WHICH OBEY  E0 < E1 < E(I) < E2 . 
+          */
+         while (!( (E[IE-1] <= E2) || L3==0 ) ) {                                  
+            I0=I1;                                                             
+            I1=I2;                                                            
+            I2=I3;                                                             
+            I3=I3+L3;                                                          
+            /* L3=MAP(I3-1) */
+            L3 = MAP[I3+1-1];                                                      
+            E0=E1;                                                             
+            E1=E2;                                                             
+            /* E2=MAP[I2+2]/ESCALE */
+            E2=MAP[I2+2-1]/ESCALE;
+            S0=S1;                                                            
+            S1=S2;                                                            
+            /* S2=.TRUE. */
+            S2=1;                                                         
+            F0=F1;                                                             
+            F1=F2;                                
          } /* while continues here */
 
-			/*
-			 * CALL TRARA2 TO INTERPOLATE THE FLUX-MAPS FOR E1,E2 IN L-B/B0-
-			 * SPACE TO FIND FLUXES F1,F2 [IF THEY HAVE NOT ALREADY BEEN 
-			 * CALCULATED FOR A PREVIOUS E(I)].
-			 */
-			if(S1) F1=TRARA2(&MAP[I1+3-1], NL, NB)/FSCALE;
-			if(S2) F2=TRARA2(&MAP[I2+3-1],NL,NB)/FSCALE;
-			S1 = 0;
-			S2 = 0;                                                        
-			/*
-			 * FINALLY, INTERPOLATE IN ENERGY.
-			 */
-			F[IE-1]=F1+(F2-F1)*(E[IE-1]-E1)/(E2-E1);
-			if (F2 <= 0.0 || I1 == 0 ) {
-			   /*                                                                       
-				 * --------- SPECIAL INTERPOLATION ---------------------------------
-				 * IF THE FLUX FOR THE SECOND ENERGY CANNOT BE FOUND (I.E. F2=0.0),
-				 * AND THE ZEROTH ENERGY MAP HAS BEEN DEFINED (I.E. I1 NOT EQUAL 0), 
-				 * THEN INTERPOLATE USING THE FLUX MAPS FOR THE ZEROTH AND FIRST 
-				 * ENERGY AND CHOOSE THE MINIMUM OF THIS INTERPOLATIONS AND THE
-				 * INTERPOLATION THAT WAS DONE WITH F2=0. 
-				 */                                                                       
-				/* IF(S0) F0=TRARA2(&MAP(I0+3),NL,NB)/FSCALE  */
-				if (S0) F0=TRARA2(&MAP[I0+3-1],NL,NB)/FSCALE;
-				/* S0=.FALSE. */
-				S0=0;                                                        
-				/* F(IE)=AMIN1(F(IE),F0+(F1-F0)*(E(IE)-E0)/(E1-E0)) */
-				if ( F[IE-1] < F0+(F1-F0)*(E[IE-1]-E0)/(E1-E0) )
-					F[IE-1] =  F0+(F1-F0)*(E[IE-1]-E0)/(E1-E0);
-			 }    
-		}  /* major for loop continues here */
+         /*
+          * CALL TRARA2 TO INTERPOLATE THE FLUX-MAPS FOR E1,E2 IN L-B/B0-
+          * SPACE TO FIND FLUXES F1,F2 [IF THEY HAVE NOT ALREADY BEEN 
+          * CALCULATED FOR A PREVIOUS E(I)].
+          */
+         if(S1) F1=TRARA2(&MAP[I1+3-1], NL, NB)/FSCALE;
+         if(S2) F2=TRARA2(&MAP[I2+3-1],NL,NB)/FSCALE;
+         S1 = 0;
+         S2 = 0;                                                        
+         /*
+          * FINALLY, INTERPOLATE IN ENERGY.
+          */
+         F[IE-1]=F1+(F2-F1)*(E[IE-1]-E1)/(E2-E1);
+         if (F2 <= 0.0 || I1 == 0 ) {
+            /*                                                                       
+             * --------- SPECIAL INTERPOLATION ---------------------------------
+             * IF THE FLUX FOR THE SECOND ENERGY CANNOT BE FOUND (I.E. F2=0.0),
+             * AND THE ZEROTH ENERGY MAP HAS BEEN DEFINED (I.E. I1 NOT EQUAL 0), 
+             * THEN INTERPOLATE USING THE FLUX MAPS FOR THE ZEROTH AND FIRST 
+             * ENERGY AND CHOOSE THE MINIMUM OF THIS INTERPOLATIONS AND THE
+             * INTERPOLATION THAT WAS DONE WITH F2=0. 
+             */                                                                       
+            /* IF(S0) F0=TRARA2(&MAP(I0+3),NL,NB)/FSCALE  */
+            if (S0) F0=TRARA2(&MAP[I0+3-1],NL,NB)/FSCALE;
+            /* S0=.FALSE. */
+            S0=0;                                                        
+            /* F(IE)=AMIN1(F(IE),F0+(F1-F0)*(E(IE)-E0)/(E1-E0)) */
+            if ( F[IE-1] < F0+(F1-F0)*(E[IE-1]-E0)/(E1-E0) )
+               F[IE-1] =  F0+(F1-F0)*(E[IE-1]-E0)/(E1-E0);
+          }    
+      }  /* major for loop continues here */
   
       F[IE-1] = F[IE-1] > 0 ? F[IE-1] : 0;                                           
       return;
@@ -552,27 +552,27 @@ void RadBelt(float RadiusKm, float MagLatDeg, int NumEnergies,
 
       MAP = MapAeMin;
       TRARA1(Lvalue, BB0, ElectronEnergy, LogFlux, NumEnergies, Descriptors[AE_MIN]);
-		for(Ie=0;Ie<NumEnergies;Ie++) {
-			Flux[AE_MIN][Ie] = (double) pow((double) 10.0,(double) LogFlux[Ie]);
-		}
+      for(Ie=0;Ie<NumEnergies;Ie++) {
+         Flux[AE_MIN][Ie] = (double) pow((double) 10.0,(double) LogFlux[Ie]);
+      }
 
       MAP = MapApMin;
       TRARA1(Lvalue, BB0, ProtonEnergy, LogFlux, NumEnergies, Descriptors[AP_MIN]);
-		for(Ie=0;Ie<NumEnergies;Ie++) {
-			Flux[AP_MIN][Ie] = (double) pow((double) 10.0,(double) LogFlux[Ie]);
-		}
+      for(Ie=0;Ie<NumEnergies;Ie++) {
+         Flux[AP_MIN][Ie] = (double) pow((double) 10.0,(double) LogFlux[Ie]);
+      }
  
       MAP = MapAeMax;
       TRARA1(Lvalue, BB0, ElectronEnergy, LogFlux, NumEnergies, Descriptors[AE_MAX]);
-		for(Ie=0;Ie<NumEnergies;Ie++) {
-			Flux[AE_MAX][Ie] = (double) pow((double) 10.0,(double) LogFlux[Ie]);
-		}
+      for(Ie=0;Ie<NumEnergies;Ie++) {
+         Flux[AE_MAX][Ie] = (double) pow((double) 10.0,(double) LogFlux[Ie]);
+      }
 
       MAP = MapApMax;
       TRARA1(Lvalue, BB0, ProtonEnergy, LogFlux, NumEnergies, Descriptors[AP_MAX]);
-		for(Ie=0;Ie<NumEnergies;Ie++) {
-			Flux[AP_MAX][Ie] = (double) pow((double) 10.0,(double) LogFlux[Ie]);
-		}
+      for(Ie=0;Ie<NumEnergies;Ie++) {
+         Flux[AP_MAX][Ie] = (double) pow((double) 10.0,(double) LogFlux[Ie]);
+      }
  }
 /******************************************************************************/
 /* Driver for unit-testing purposes                                           */

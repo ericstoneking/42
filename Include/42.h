@@ -155,6 +155,8 @@ EXTERN long EchoEnabled;
 /* Master Random Process */
 EXTERN struct RandomProcessType *RNG;
 
+EXTERN double DynRunTime;
+
 long SimStep(void);
 void Ephemerides(void);
 void OrbitMotion(void);

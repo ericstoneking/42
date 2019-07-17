@@ -12,7 +12,7 @@ TRUE   Orb_LEO.txt              !  Input file name for Orb 0
 1                               !  Number of Spacecraft
 TRUE  0 SC_Simple.txt           !  Existence, RefOrb, Input file for SC 0
 ***************************** Environment  *****************************
-06 21 2016                      !  Date (Month, Day, Year)
+05 21 2019                      !  Date (Month, Day, Year)
 12 00 00.00                     !  Greenwich Mean Time (Hr,Min,Sec)
 0.0                             !  Time Offset (sec)
 USER_DEFINED                    !  Model Date Interpolation for Solar Flux and AP values?(TWOSIGMA_KP, NOMINAL or USER_DEFINED)
@@ -34,7 +34,7 @@ FALSE                           !  Contact Forces and Torques
 FALSE                           !  CFD Slosh Forces and Torques
 FALSE                           !  Output Environmental Torques to Files
 ********************* Celestial Bodies of Interest *********************
-VSOP87                          ! Ephem Option (VSOP87 or DE430)
+MEAN                            !  Ephem Option (MEAN or DE430)
 FALSE                           !  Mercury
 FALSE                           !  Venus
 TRUE                            !  Earth and Luna

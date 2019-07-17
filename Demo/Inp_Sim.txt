@@ -52,7 +52,7 @@ FALSE                           !  Contact Forces and Torques
 FALSE                           !  CFD Slosh Forces and Torques
 FALSE                           !  Output Environmental Torques to Files
 ********************* Celestial Bodies of Interest *********************
-VSOP87                          ! Ephem Option (VSOP87 or DE430)
+MEAN                            !  Ephem Option (MEAN or DE430)
 TRUE                            !  Mercury
 TRUE                            !  Venus
 TRUE                            !  Earth and Luna

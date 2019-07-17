@@ -77,43 +77,6 @@ double FindTotalUnshadedProjectedArea(struct SCType *S,double VecN[3])
       return(ProjArea);
 }
 /*********************************************************************/
-void PotatoReport(void)
-{
-      static FILE *Bodywnfile,*Bodyqnfile;
-      static FILE *Bodyvnfile,*Bodypnfile;
-      struct SCType *S;
-      struct BodyType *B;
-      long Ib;
-      static long First = 1;
-
-      if (First) {
-         First = 0;
-         Bodywnfile = FileOpen(InOutPath,"Bodywn.42","w");
-         Bodyqnfile = FileOpen(InOutPath,"Bodyqn.42","w");
-         Bodyvnfile = FileOpen(InOutPath,"Bodyvn.42","w");
-         Bodypnfile = FileOpen(InOutPath,"Bodypn.42","w");
-      }
-
-      if (OutFlag) {
-         S = &SC[0];
-         for(Ib=0;Ib<S->Nb;Ib++) {
-            B = &S->B[Ib];
-            fprintf(Bodywnfile,"%lf %lf %lf ",
-               B->wn[0],B->wn[1],B->wn[2]);
-            fprintf(Bodyqnfile,"%lf %lf %lf %lf ",
-               B->qn[0],B->qn[1],B->qn[2],B->qn[3]);
-            fprintf(Bodyvnfile,"%lf %lf %lf ",
-               B->vn[0],B->vn[1],B->vn[2]);
-            fprintf(Bodypnfile,"%lf %lf %lf ",
-               B->pn[0],B->pn[1],B->pn[2]);
-         }
-         fprintf(Bodywnfile,"\n");
-         fprintf(Bodyqnfile,"\n");
-         fprintf(Bodyvnfile,"\n");
-         fprintf(Bodypnfile,"\n");
-      }
-}
-/*********************************************************************/
 void MagReport(void)
 {
       static FILE *magfile;
@@ -281,7 +244,8 @@ void Report(void)
 
       }
 
-      if (!strcmp(InOutPath,"./Potato/")) PotatoReport();
+      /* An example how to call specialized reporting based on sim case */
+      /* if (!strcmp(InOutPath,"./Potato/")) PotatoReport(); */
       
 
       if (CleanUpFlag) {

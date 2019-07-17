@@ -468,8 +468,6 @@ struct SCType {
    double asn[3];  /* Non-gravitational accel of SC.cm in N */
    double alfbn[3]; /* Angular accel of B wrt N, expressed in B */
    double abs[3];  /* Non-grav accel of B[0].cm, wrt SC.cm, in N */
-   /* For dynamics model construction */
-   long MassIsConstant;
    /* Enable/Disable Passive Joint Forces or Torques (i.e. spring/damper) */
    long PassiveJointFrcTrqEnabled;
    /* Constraint forces and torques are computed if requested */

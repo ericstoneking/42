@@ -1,0 +1,12 @@
+\bibitem{42}
+Stoneking, Eric, {\it 42: A General-Purpose Spacecraft Simulation}, NASA Software Designation GSC-16720-1, 2010-2019.  https://sourceforge.net/projects/fortytwospacecraftsimulation, https://github.com/ericstoneking/42.
+
+or 
+
+@misc{Stoneking10,
+  author          = {Eric Stoneking},
+  title           = {{42: A General-Purpose Spacecraft Simulation}},
+  year            = {2010--2019},
+  howpublished    = {NASA Software Designation GSC-16720-1},
+  url             = {https://sourceforge.net/projects/fortytwospacecraftsimulation, https://github.com/ericstoneking/42}
+}

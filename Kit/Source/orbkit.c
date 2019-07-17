@@ -552,15 +552,15 @@ double RV2RVp(double mu, double r[3], double v[3], double rp[3], double vp[3])
       return(anom);
 }
 /**********************************************************************/
-/*  This function finds the mean orbit of planet "i", and its         */
-/*  position and velocity.  Ref. Chap 31 of Meeus, "Astronomical      */
-/*  Algorithms", second edition, QB51.3.E43, M42, 1998.               */
+/*  This function finds the mean orbit of planet "i" with respect to  */
+/*  the mean-equinox-of-date frame.  Ref. Chap 31 of Meeus,           */
+/*  "Astronomical Algorithms", second edition, QB51.3.E43, M42, 1998. */
 /*  Index 1=Mercury, 2=Venus, ... 9=Pluto.  0=Sun is not used.        */
 /*  Note that the elements for Pluto are not from Meeus, but from a   */
 /*  lower-fidelity data set from JPL.                                 */
 void PlanetEphemerides(long i, double JD, double mu,
        double *SMA, double *ecc, double *inc, double *RAAN, double *ArgP,
-		 double *tp, double *anom, double *SLR, double *alpha, double *rmin,
+       double *tp, double *anom, double *SLR, double *alpha, double *rmin,
        double *MeanMotion, double *Period)
 {
 #define TWOPI (6.283185307179586)

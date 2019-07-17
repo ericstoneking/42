@@ -330,6 +330,19 @@ struct AcCfsCtrlType {
    double werr[3];
 };
 
+struct AcThrSteerCtrlType {
+   /*~ Parameters ~*/
+   double Kr[3];
+   double Kp[3];
+
+   /*~ Internal Variables ~*/
+   long Init;
+   double therr[3];
+   double werr[3];
+   double ierr[3];
+   double Tcmd[3];
+};
+
 struct AcType {
    /*~ Parameters ~*/
    long ID; /* Spacecraft ID */
@@ -421,6 +434,7 @@ struct AcType {
    struct AcCmgCtrlType CmgCtrl;
    struct AcThrCtrlType ThrCtrl;
    struct AcCfsCtrlType CfsCtrl;
+   struct AcThrSteerCtrlType ThrSteerCtrl;
    
    struct CmdType Cmd;
 };

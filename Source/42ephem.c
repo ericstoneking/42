@@ -533,7 +533,7 @@ void Ephemerides(void)
       JDToGpsTime(JulDay,&GpsRollover,&GpsWeek,&GpsSecond);
 
 /* .. Locate Planets and Luna */
-      if (EphemOption == EPH_VSOP87) {
+      if (EphemOption == EPH_MEAN) {
          for(Ip=MERCURY;Ip<=PLUTO;Ip++){
             if(World[Ip].Exists) {
                W = &World[Ip];
@@ -616,24 +616,22 @@ void Ephemerides(void)
             World[SOL].eph.VelN[i] = 0.0;
          }
          /* Adjust Earth from Earth-Moon barycenter */
+         /* (Moon PosVel is geocentric, not from barycenter) */
          for(i=0;i<3;i++) {
             EarthMoonBaryPosH[i] = World[EARTH].eph.PosN[i];
             EarthMoonBaryVelH[i] = World[EARTH].eph.VelN[i];
-            World[EARTH].eph.PosN[i] -= World[LUNA].eph.PosN[i]/EMRAT;
-            World[EARTH].eph.VelN[i] -= World[LUNA].eph.VelN[i]/EMRAT;
+            World[EARTH].eph.PosN[i] -= World[LUNA].eph.PosN[i]/(1.0+EMRAT);
+            World[EARTH].eph.VelN[i] -= World[LUNA].eph.VelN[i]/(1.0+EMRAT);
             World[EARTH].PosH[i] = World[EARTH].eph.PosN[i];
             World[EARTH].VelH[i] = World[EARTH].eph.VelN[i];
          }
-         /* Move Moon from barycentric to Earth-centered */
          for(i=0;i<3;i++) {
-            rh[i] = World[LUNA].eph.PosN[i]*(1.0+1.0/EMRAT);
-            vh[i] = World[LUNA].eph.VelN[i]*(1.0+1.0/EMRAT);
-            World[LUNA].PosH[i] = World[EARTH].PosH[i] + rh[i];
-            World[LUNA].VelH[i] = World[EARTH].VelH[i] + vh[i];
+            World[LUNA].PosH[i] = World[EARTH].PosH[i] + World[LUNA].eph.PosN[i];
+            World[LUNA].VelH[i] = World[EARTH].VelH[i] + World[LUNA].eph.VelN[i];
          }
          /* Rotate Moon into ECI */
-         MxV(World[EARTH].CNH,rh,World[LUNA].eph.PosN);
-         MxV(World[EARTH].CNH,vh,World[LUNA].eph.VelN);
+         QxV(qJ2000H,rh,World[LUNA].eph.PosN);
+         QxV(qJ2000H,vh,World[LUNA].eph.VelN);
          World[LUNA].PriMerAng = LunaPriMerAng(JulDay);
          SimpRot(ZAxis,World[LUNA].PriMerAng,World[LUNA].CWN);
       }

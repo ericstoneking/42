@@ -202,7 +202,7 @@ long LoadTleFromFile(const char *Path, const char *TleFileName, const char *TleL
 double RV2RVp(double mu, double r[3], double v[3], double rp[3], double vp[3]);
 void PlanetEphemerides(long i, double JD, double mu,
        double *SMA, double *ecc, double *inc, double *RAAN, double *omg,
-		 double *tp, double *anom, double *p, double *alpha, double *rmin,
+       double *tp, double *anom, double *p, double *alpha, double *rmin,
        double *MeanMotion, double *Period);
 void LunaPosition(double JD, double r[3]);
 void LunaInertialFrame(double JulDay, double CNJ[3][3]);

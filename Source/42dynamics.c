@@ -452,9 +452,9 @@ void SteadyAttitudeMotion(struct SCType *S)
 
       if (S->Nb == 1) {
          B = &S->B[0];
-		   QW2QDOT(B->qn,B->wn,qdot);
-			for(i=0;i<4;i++) B->qn[i] += qdot[i]*DTSIM;
-			UNITQ(B->qn);
+         QW2QDOT(B->qn,B->wn,qdot);
+         for(i=0;i<4;i++) B->qn[i] += qdot[i]*DTSIM;
+         UNITQ(B->qn);
          Q2C(B->qn,B->CN);
       }
       else {
@@ -465,7 +465,7 @@ void SteadyAttitudeMotion(struct SCType *S)
             G = &S->G[Ig];
             if (G->IsSpherical) {
                QW2QDOT(&D->x[G->Rotx0],&D->u[G->Rotu0],qdot);
-			      for(i=0;i<4;i++) D->x[G->Rotx0+i] += qdot[i]*DTSIM;
+               for(i=0;i<4;i++) D->x[G->Rotx0+i] += qdot[i]*DTSIM;
             }
             else {
                for(i=0;i<G->RotDOF;i++)
@@ -2431,8 +2431,9 @@ void KaneNBodyRK4(struct SCType *S)
       }
 
 /* .. For Accelerometers */
-      for(i=0;i<3;i++) S->alfbn[i] = udot[i];
-      MxV(S->B[0].CN,&udot[Nu-3],S->abs);
+      KaneNBodyEOM(u,x,h,uf,xf,du,dx,dh,duf,dxf,S);
+      for(i=0;i<3;i++) S->alfbn[i] = du[i];
+      MxV(S->B[0].CN,&du[Nu-3],S->abs);
 
       FindTotalAngMom(S);
 
@@ -2852,7 +2853,7 @@ void EnckeRK4(struct SCType *S)
 {
       double accel[3],R[3], magr,muR3;
       double u[6],uu[6],m1[6],m2[6],m3[6],m4[6];
-		long j;
+      long j;
       struct OrbitType *O;
 
       O = &Orb[S->RefOrb];
@@ -2921,7 +2922,7 @@ void CowellEOM(double u[6], double udot[6], double mu,
 void CowellRK4(struct SCType *S)
 {
       double u[6],uu[6],m1[6],m2[6],m3[6],m4[6];
-		long j;
+      long j;
       struct OrbitType *O;
 
       O = &Orb[S->RefOrb];
@@ -2982,7 +2983,7 @@ void PolyhedronCowellEOM(double u[6], double udot[6],
 void PolyhedronCowellRK4(struct SCType *S)
 {
       double u[6],uu[6],m1[6],m2[6],m3[6],m4[6];
-		long j;
+      long j;
       struct OrbitType *O;
       struct WorldType *W;
       struct GeomType *G;
@@ -3063,7 +3064,7 @@ void ThreeBodyEnckeRK4(struct SCType *S)
 {
       double accel[3],R1[3],MagR1,muR13,R2[3],MagR2,muR23;
       double u[6],uu[6],m1[6],m2[6],m3[6],m4[6];
-		long j;
+      long j;
       struct OrbitType *O,*E;
 
       O = &Orb[S->RefOrb];
@@ -3133,7 +3134,7 @@ void EulHillRK4(struct SCType *S)
 {
       double accelN[3],accel[3],R;
       double u[6],uu[6],m1[6],m2[6],m3[6],m4[6];
-		long j;
+      long j;
       struct OrbitType *O;
 
       O = &Orb[S->RefOrb];
@@ -3202,7 +3203,7 @@ void ThreeBodyOrbitEOM(double mu1, double mu2, double p[3],
 void ThreeBodyOrbitRK4(struct OrbitType *O)
 {
       double u[6],uu[6],m1[6],m2[6],m3[6],m4[6];
-		long j;
+      long j;
 
       u[0] = O->PosN[0];
       u[1] = O->PosN[1];
@@ -3277,6 +3278,7 @@ void PartitionForces(struct SCType *S)
 void Dynamics(struct SCType *S)
 {
       struct OrbitType *O;
+      double tic, toc;
 
       O = &Orb[S->RefOrb];
 
@@ -3290,12 +3292,15 @@ void Dynamics(struct SCType *S)
          **   break;
          */
          default :
+            tic = usec();
             if (S->Nb > 1) {
                KaneNBodyRK4(S);
             }
             else {
                OneBodyRK4(S);
             }
+            toc = usec();
+            DynRunTime += 1.0E-6*(toc - tic);
       }
 
       switch(O->Regime) {

@@ -18,7 +18,7 @@
 
 /**  barf  [ba:rf]  2.  "He suggested using FORTRAN, and everybody barfed."
 
-	- From The Shogakukan DICTIONARY OF NEW ENGLISH (Second edition) */
+   - From The Shogakukan DICTIONARY OF NEW ENGLISH (Second edition) */
 
 #ifndef F2C_INCLUDE
 #define F2C_INCLUDE
@@ -59,82 +59,82 @@ typedef long ftnint;
 
 /*external read, write*/
 typedef struct
-{	flag cierr;
-	ftnint ciunit;
-	flag ciend;
-	char *cifmt;
-	ftnint cirec;
+{  flag cierr;
+   ftnint ciunit;
+   flag ciend;
+   char *cifmt;
+   ftnint cirec;
 } cilist;
 
 /*internal read, write*/
 typedef struct
-{	flag icierr;
-	char *iciunit;
-	flag iciend;
-	char *icifmt;
-	ftnint icirlen;
-	ftnint icirnum;
+{  flag icierr;
+   char *iciunit;
+   flag iciend;
+   char *icifmt;
+   ftnint icirlen;
+   ftnint icirnum;
 } icilist;
 
 /*open*/
 typedef struct
-{	flag oerr;
-	ftnint ounit;
-	char *ofnm;
-	ftnlen ofnmlen;
-	char *osta;
-	char *oacc;
-	char *ofm;
-	ftnint orl;
-	char *oblnk;
+{  flag oerr;
+   ftnint ounit;
+   char *ofnm;
+   ftnlen ofnmlen;
+   char *osta;
+   char *oacc;
+   char *ofm;
+   ftnint orl;
+   char *oblnk;
 } olist;
 
 /*close*/
 typedef struct
-{	flag cerr;
-	ftnint cunit;
-	char *csta;
+{  flag cerr;
+   ftnint cunit;
+   char *csta;
 } cllist;
 
 /*rewind, backspace, endfile*/
 typedef struct
-{	flag aerr;
-	ftnint aunit;
+{  flag aerr;
+   ftnint aunit;
 } alist;
 
 /* inquire */
 typedef struct
-{	flag inerr;
-	ftnint inunit;
-	char *infile;
-	ftnlen infilen;
-	ftnint	*inex;	/*parameters in standard's order*/
-	ftnint	*inopen;
-	ftnint	*innum;
-	ftnint	*innamed;
-	char	*inname;
-	ftnlen	innamlen;
-	char	*inacc;
-	ftnlen	inacclen;
-	char	*inseq;
-	ftnlen	inseqlen;
-	char 	*indir;
-	ftnlen	indirlen;
-	char	*infmt;
-	ftnlen	infmtlen;
-	char	*inform;
-	ftnint	informlen;
-	char	*inunf;
-	ftnlen	inunflen;
-	ftnint	*inrecl;
-	ftnint	*innrec;
-	char	*inblank;
-	ftnlen	inblanklen;
+{  flag inerr;
+   ftnint inunit;
+   char *infile;
+   ftnlen infilen;
+   ftnint   *inex;   /*parameters in standard's order*/
+   ftnint   *inopen;
+   ftnint   *innum;
+   ftnint   *innamed;
+   char  *inname;
+   ftnlen   innamlen;
+   char  *inacc;
+   ftnlen   inacclen;
+   char  *inseq;
+   ftnlen   inseqlen;
+   char  *indir;
+   ftnlen   indirlen;
+   char  *infmt;
+   ftnlen   infmtlen;
+   char  *inform;
+   ftnint   informlen;
+   char  *inunf;
+   ftnlen   inunflen;
+   ftnint   *inrecl;
+   ftnint   *innrec;
+   char  *inblank;
+   ftnlen   inblanklen;
 } inlist;
 
 #define VOID void
 
-union Multitype {	/* for multiple entry points */
+union Multitype { /* for multiple entry points */
    integer1 g;
    shortint h;
    integer i;
@@ -147,21 +147,21 @@ union Multitype {	/* for multiple entry points */
 
 typedef union Multitype Multitype;
 
-typedef long Long;	/* No longer used; formerly in Namelist */
+typedef long Long;   /* No longer used; formerly in Namelist */
 
-struct Vardesc {	/* for Namelist */
-	char *name;
-	char *addr;
-	ftnlen *dims;
-	int  type;
-	};
+struct Vardesc {  /* for Namelist */
+   char *name;
+   char *addr;
+   ftnlen *dims;
+   int  type;
+   };
 typedef struct Vardesc Vardesc;
 
 struct Namelist {
-	char *name;
-	Vardesc **vars;
-	int nvars;
-	};
+   char *name;
+   Vardesc **vars;
+   int nvars;
+   };
 typedef struct Namelist Namelist;
 
 #define f2c_abs(x) ((x) >= 0 ? (x) : -(x))
@@ -207,10 +207,10 @@ typedef /* Character */ VOID (*H_fp)();
 typedef /* Subroutine */ int (*S_fp)();
 #endif
 /* E_fp is for real functions when -R is not specified */
-typedef VOID C_f;	/* complex function */
-typedef VOID H_f;	/* character function */
-typedef VOID Z_f;	/* double complex function */
-typedef doublereal E_f;	/* real function with -R not specified */
+typedef VOID C_f; /* complex function */
+typedef VOID H_f; /* character function */
+typedef VOID Z_f; /* double complex function */
+typedef doublereal E_f; /* real function with -R not specified */
 
 /* undef any lower-case symbols that your C compiler predefines, e.g.: */
 
@@ -242,7 +242,7 @@ typedef doublereal E_f;	/* real function with -R not specified */
 
 struct gts3c_86Type {
     real tlb, s, db04, db16, db28, db32, db40, db48, db01, za, t0, z0, g0, rl,
-	     dd, db14;
+        dd, db14;
 };
 
 EXTERN struct gts3c_86Type gts3c_86;
@@ -250,20 +250,20 @@ EXTERN struct gts3c_86Type gts3c_86;
 #define gts3c_1 gts3c_86
 
 struct lower5_1_ {
-    real ptm[8], pdm[56]	/* was [8][7] */;
+    real ptm[8], pdm[56]   /* was [8][7] */;
 };
 
 #define lower5_1 (*(struct lower5_1_ *) &lower5_)
 
 struct parm5_1_ {
-    real pt[150], pd[1050]	/* was [150][7] */, ps[150], pdl[50]	/*
-	    was [25][2] */;
+    real pt[150], pd[1050] /* was [150][7] */, ps[150], pdl[50]   /*
+       was [25][2] */;
 };
 struct parm5_2_ {
     real pt1[50], pt2[50], pt3[50], pa1[50], pa2[50], pa3[50], pb1[50], pb2[
-	    50], pb3[50], pc1[50], pc2[50], pc3[50], pd1[50], pd2[50], pd3[50]
-	    , pe1[50], pe2[50], pe3[50], pf1[50], pf2[50], pf3[50], pg1[50],
-	    pg2[50], pg3[50], ph1[50], ph2[50], ph3[50], pi1[50];
+       50], pb3[50], pc1[50], pc2[50], pc3[50], pd1[50], pd2[50], pd3[50]
+       , pe1[50], pe2[50], pe3[50], pf1[50], pf2[50], pf3[50], pg1[50],
+       pg2[50], pg3[50], ph1[50], ph2[50], ph3[50], pi1[50];
 };
 
 #define parm5_1 (*(struct parm5_1_ *) &parm5_)
@@ -306,8 +306,8 @@ EXTERN struct lsqv_86Type lsqv_86;
 #define lsqv_1 lsqv_86
 
 struct ipoly_86Type {
-    real plg[36]	/* was [9][4] */, ctloc, stloc, c2tloc, s2tloc,
-	    c3tloc, s3tloc;
+    real plg[36]  /* was [9][4] */, ctloc, stloc, c2tloc, s2tloc,
+       c3tloc, s3tloc;
     integer iyr;
     real day, df, dfa, apd, apdf, apt[4];
 };
@@ -337,8 +337,8 @@ EXTERN struct parm5_Type parm5_;
 
 /*====================================================================*/
 int gts5_(integer *iyd, real *sec, real *alt, real *glat,
-	real *glong, real *stl, real *f107a, real *f107, real *ap, integer *
-	mass, real *d__, real *t);
+   real *glong, real *stl, real *f107a, real *f107, real *ap, integer *
+   mass, real *d__, real *t);
 int tselec_86(real *);
 int tretrv_86(real *svv);
 /*====================================================================*/

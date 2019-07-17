@@ -38,7 +38,7 @@ int exec(int argc,char **argv);
 
 int main(int argc,char **argv)
 {
- 	   return(exec(argc,argv));
+      return(exec(argc,argv));
 }
 
 /*

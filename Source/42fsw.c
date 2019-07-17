@@ -949,6 +949,7 @@ void InitAC(struct SCType *S)
       AC->CmgCtrl.Init = 1;
       AC->ThrCtrl.Init = 1;
       AC->CfsCtrl.Init = 1;
+      AC->ThrSteerCtrl.Init = 1;
       
       AC->PrototypeCtrl.wc = 0.05*TwoPi;
       AC->PrototypeCtrl.amax = 0.01;
@@ -1258,14 +1259,14 @@ void ThreeAxisFSW(struct SCType *S)
 
       if (C->Init) {
          C->Init = 0;
-			for(j=0;j<3;j++) {
-				AC->G[0].Cmd.AngRate[j] = 0.0;
-				AC->G[0].Cmd.Ang[j] = 0.0;
-				AC->G[0].MaxAngRate[j] = 0.2*D2R;
-				AC->G[0].MaxTrq[j] = 100.0;
-				FindPDGains(S->B[1].I[1][1],0.02*TwoPi,1.0,
-					&AC->G[0].AngRateGain[j],&AC->G[0].AngGain[j]);
-			}
+         for(j=0;j<3;j++) {
+            AC->G[0].Cmd.AngRate[j] = 0.0;
+            AC->G[0].Cmd.Ang[j] = 0.0;
+            AC->G[0].MaxAngRate[j] = 0.2*D2R;
+            AC->G[0].MaxTrq[j] = 100.0;
+            FindPDGains(S->B[1].I[1][1],0.02*TwoPi,1.0,
+               &AC->G[0].AngRateGain[j],&AC->G[0].AngGain[j]);
+         }
 
          for(i=0;i<3;i++) {
             FindPDGains(AC->MOI[i][i],0.1,0.7,

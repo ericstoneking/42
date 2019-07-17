@@ -323,7 +323,7 @@ def WriteCodeBlock(Indent,FmtPrefix,ArrayIdx,ArgPrefix,VarString,IdxLen,Ni,Nj,St
       line = Indent+"   sprintf(line,\""
       line += FmtPrefix
       line += VarString
-      line += " = "
+      line += " ="
       for i in range (0,Ni):
          for j in range (0,Nj):
             line += " "+FormatString
@@ -368,7 +368,7 @@ def ReadCodeBlock(Indent,FmtPrefix,ArrayIdx,ArgPrefix,ArgString,VarString,IdxLen
       line = Indent+"if (sscanf(line,\""
       line += FmtPrefix
       line += VarString
-      line += " = "
+      line += " ="
       for i in range (0,Ni):
          for j in range (0,Nj):
             line += " "+FormatString

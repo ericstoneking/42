@@ -924,6 +924,8 @@ void LINSOLVE(double **A, double *x, double *b, long n)
 /*  This method can only be used if A is positive definite            */
 /*  (symmetric), but it is roughly twice as fast as Gaussian          */
 /*  Elimination.                                                      */
+/*  In testing, this didn't live up to the hype, being slightly       */
+/*  slower than LINSOLVE.  I must have an inefficiency.               */               
 void CholeskySolve(double **A, double *x, double *b, long n)
 {
       double **L, *D, **LD;

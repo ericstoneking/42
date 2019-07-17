@@ -27,9 +27,12 @@ Instrument FOV view.  Use for docking camera as well as instruments.
 
 Migrate ST and CSS windows from SatCam to 42.
 
+Draw ST and CSS FOVs based on SC_ files in addition to Inp_FOV list.
+
 Finish implementing commands in Prototype.rtf
 
 Atmospheric Scattering
+Procedural clouds based on gyres?
 
 SPH Slosh?
 

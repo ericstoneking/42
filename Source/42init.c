@@ -211,7 +211,7 @@ long DecodeString(char *s)
       else if (!strcmp(s,"CLIENT")) return IPC_CLIENT;
       else if (!strcmp(s,"GMSEC_CLIENT")) return IPC_GMSEC_CLIENT;
       
-      else if (!strcmp(s,"VSOP87")) return EPH_VSOP87;
+      else if (!strcmp(s,"MEAN")) return EPH_MEAN;
       else if (!strcmp(s,"DE430")) return EPH_DE430;
       else {
          printf("Bogus input %s in DecodeString (42init.c:%d)\n",s,__LINE__);
@@ -1567,8 +1567,6 @@ void InitSpacecraft(struct SCType *S)
       fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
       S->RotDOF=DecodeString(response);
       fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
-      S->MassIsConstant=DecodeString(response);
-      fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
       S->PassiveJointFrcTrqEnabled=DecodeString(response);
       fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
       S->ConstraintsRequested=DecodeString(response);
@@ -2388,10 +2386,10 @@ void LoadPlanets(void)
          strcpy(World[i].MapFileName,MapFileName[i]);
          strcpy(World[i].ColTexFileName,"NONE");
          strcpy(World[i].BumpTexFileName,"NONE");
-		   World[i].mu=Mu[i];
-		   World[i].J2 = J2[i];
-			World[i].rad=Rad[i];
-			World[i].w=W[i];
+         World[i].mu=Mu[i];
+         World[i].J2 = J2[i];
+         World[i].rad=Rad[i];
+         World[i].w=W[i];
          World[i].Parent = SOL;
          World[i].eph.World = SOL;
          World[i].eph.mu = World[SOL].mu;

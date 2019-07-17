@@ -2037,9 +2037,9 @@ void DrawClock(void)
 {
       GLfloat Black[4] = {0.0,0.0,0.0,1.0};
       float ClockColor[4] = {0.8,0.8,0.5,1.0};
-      char s[40];
-      char TlmLabel[40] = "   Tlm Time: ";
-      char SysLabel[40] = "System Time: ";
+      char s[80];
+      char TlmLabel[80] = "   Tlm Time: ";
+      char SysLabel[80] = "System Time: ";
 
       glBlendFunc (GL_SRC_ALPHA, GL_ONE);
       glEnable(GL_BLEND);
@@ -2169,6 +2169,7 @@ void DrawMap(void)
       float OrbitColor[4] = {1.0,1.0,1.0,1.0};
       float OrbitKnotColor[4] = {1.0,1.0,1.0,1.0};
       GLfloat GroundStationColor[4] = {0.7,0.5,0.1,1.0};
+      GLfloat NonHostColor[4] = {0.5,0.5,0.5,1.0};
       struct OrbitType *Eph;
       struct SCType *S;
       struct WorldType *W;
@@ -2176,7 +2177,7 @@ void DrawMap(void)
       double Zaxis[3] = {0.0,0.0,1.0};
       double CEW[3][3],CEN[3][3],CWH[3][3],svh[3],svw[3];
       float OldLng,OldLat;
-      long i,k,Im;
+      long i,k,Im,Isc;
       double rmh[3],rmn[3];
 
       glClear(GL_COLOR_BUFFER_BIT);
@@ -2353,7 +2354,95 @@ void DrawMap(void)
          }
          glPointSize(1.0);
 
-/* .. SC Sprite */
+         /* Orbits of SC that aren't the POV host */
+         for(Isc=0;Isc<Nsc;Isc++) {
+            if (SC[Isc].Exists && Orb[SC[Isc].RefOrb].World == Orb[S->RefOrb].World && Isc != S->ID) {
+            
+               /* SC Sprite */
+               MxV(W->CWN,SC[Isc].PosN,p);
+               UNITV(p);
+               Lng = atan2(p[1],p[0])*R2D;
+               Lat = asin(p[2])*R2D;
+               glEnable(GL_TEXTURE_2D);
+               glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+               glBindTexture(GL_TEXTURE_2D,SC[Isc].SpriteTexTag);
+               x=12.0;
+               y=0.5*x;
+               glBegin(GL_QUADS);
+                  glTexCoord2f(0.0,1.0);
+                  glVertex2f(Lng-x,Lat-y);
+                  glTexCoord2f(1.0,1.0);
+                  glVertex2f(Lng+x,Lat-y);
+                  glTexCoord2f(1.0,0.0);
+                  glVertex2f(Lng+x,Lat+y);
+                  glTexCoord2f(0.0,0.0);
+                  glVertex2f(Lng-x,Lat+y);
+               glEnd();
+               glDisable(GL_TEXTURE_2D);
+
+               glEnable(GL_LINE_SMOOTH);
+
+               /* Horizon Circle */
+               glLineWidth(1.5);
+               MxV(W->CWN,SC[Isc].PosN,axis);
+               UNITV(axis);
+               lngc = atan2(axis[1],axis[0]);
+               latc = asin(axis[2]);
+               rad = acos(W->rad/magr);
+               glColor4fv(NonHostColor);
+               DrawSmallCircle(lngc,latc,rad);
+
+               /* Projected orbit track */
+               glPointSize(3.0);
+               glLineWidth(1.0);
+               Eph = &Orb[SC[Isc].RefOrb];
+               Eph2RV(Eph->mu,Eph->SLR,Eph->ecc,Eph->inc,Eph->RAAN,Eph->ArgP,
+                  AbsTime-3600.0-Eph->tp,rn,vn,&anom);
+               SimpRot(Zaxis,-3600.0*W->w,CEW);
+               MxM(CEW,W->CWN,CEN);
+               MxV(CEN,rn,re);
+               magr = MAGV(re);
+               OldLng = atan2(re[1],re[0])*R2D;
+               OldLat = asin(re[2]/magr)*R2D;
+               for(k=-60;k<61;k++) {
+                  dt = ((double) k)*60.0;
+                  Eph2RV(Eph->mu,Eph->SLR,Eph->ecc,Eph->inc,Eph->RAAN,Eph->ArgP,
+                     AbsTime+dt-Eph->tp,rn,vn,&anom);
+                  SimpRot(Zaxis,W->w*dt,CEW);
+                  MxM(CEW,W->CWN,CEN);
+                  MxV(CEN,rn,re);
+                  magr = MAGV(re);
+                  Lng = atan2(re[1],re[0])*R2D;
+                  Lat = asin(re[2]/magr)*R2D;
+                  glColor4fv(NonHostColor);
+                  glBegin(GL_LINES);
+                     if (fabs(Lng-OldLng) < 180.0) {
+                        glVertex2f(OldLng,OldLat);
+                        glVertex2f(Lng,Lat);
+                     }
+                     else if(Lng > OldLng) {
+                        glVertex2f(OldLng+360.0,OldLat);
+                        glVertex2f(Lng,Lat);
+                        glVertex2f(OldLng,OldLat);
+                        glVertex2f(Lng-360.0,Lat);
+                     }
+                     else {
+                        glVertex2f(OldLng-360.0,OldLat);
+                        glVertex2f(Lng,Lat);
+                        glVertex2f(OldLng,OldLat);
+                        glVertex2f(Lng+360.0,Lat);
+                     }
+                  glEnd();
+                  OldLng = Lng;
+                  OldLat = Lat;
+               }
+               glLineWidth(1.0);
+               glDisable(GL_LINE_SMOOTH);
+            }
+         }
+
+/* .. POV Host SC */
+         /* SC Sprite */
          MxV(W->CWN,S->PosN,p);
          UNITV(p);
          Lng = atan2(p[1],p[0])*R2D;
@@ -2377,7 +2466,7 @@ void DrawMap(void)
 
          glEnable(GL_LINE_SMOOTH);
 
-/* .. Horizon Circle */
+         /* Horizon Circle */
          glLineWidth(1.5);
          MxV(W->CWN,S->PosN,axis);
          UNITV(axis);
@@ -2387,7 +2476,7 @@ void DrawMap(void)
          glColor4fv(GroundStationColor);
          DrawSmallCircle(lngc,latc,rad);
 
-/* .. Projected orbit track */
+         /* Projected orbit track */
          glPointSize(3.0);
          glLineWidth(1.0);
          Eph = &Orb[POV.Host.RefOrb];
@@ -2449,6 +2538,7 @@ void DrawMap(void)
          }
          glLineWidth(1.0);
          glDisable(GL_LINE_SMOOTH);
+
 
 /* .. TDRS in View */
          if (POV.Host.World == EARTH && CamShow[TDRS]) DrawTdrsMap();

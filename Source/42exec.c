@@ -343,6 +343,8 @@ int exec(int argc,char **argv)
       long Isc;
       long Done = 0;
 
+      DynRunTime = 0.0;
+
       InitSim(argc,argv);
       for (Isc=0;Isc<Nsc;Isc++) {
          if (SC[Isc].Exists) {
@@ -368,6 +370,7 @@ int exec(int argc,char **argv)
          }
       #endif
 
+      printf("\n\nDynamics Run Time = %lf sec\n",DynRunTime);
       return(0);
 }
 

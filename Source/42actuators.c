@@ -44,7 +44,7 @@ void ThrModel(double *PulseWidthCmd,double DT,struct ThrType *Thr,
       Thr->Frc[1] = Thr->F*Thr->A[1];
       Thr->Frc[2] = Thr->F*Thr->A[2];
 
-      for(i=0;i<3;i++) r[i] = Thr->PosB[i] - S->B[0].cm[i];
+      for(i=0;i<3;i++) r[i] = Thr->PosB[i] - S->B[Thr->Body].cm[i];
       VxV(r,Thr->Frc,Thr->Trq);
 
       if (S->FlexActive) {
@@ -100,7 +100,7 @@ void GimbalModel(long DOF,double Rate[3],double Ang[3],
          AngErr = fmod(Ang[i] - AngCmd[i],TwoPi);
          if (AngErr > Pi) AngErr -= TwoPi;
          if (AngErr < -Pi) AngErr += TwoPi;
-         DesiredRate = Limit(RateCmd[i] - AngGain[i]*AngErr,
+         DesiredRate = Limit(RateCmd[i] - AngGain[i]/RateGain[i]*AngErr,
                              -MaxRate[i],MaxRate[i]);
          Trq[i] = Limit(-RateGain[i]*(Rate[i]-DesiredRate),
                         -MaxTrq[i],MaxTrq[i]);
@@ -117,7 +117,7 @@ void TranslationalModel(long DOF, double Rate[3], double Pos[3],
 
    for(i=0;i<DOF;i++) {
       PosErr = Pos[i] - PosCmd[i];
-      DesiredRate = Limit(RateCmd[i] - PosGain[i]*PosErr,
+      DesiredRate = Limit(RateCmd[i] - PosGain[i]/RateGain[i]*PosErr,
                           -MaxRate[i],MaxRate[i]);
       Frc[i] = Limit(-RateGain[i]*(Rate[i]-DesiredRate),
                      -MaxFrc[i],MaxFrc[i]);

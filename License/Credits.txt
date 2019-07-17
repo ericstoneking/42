@@ -38,3 +38,5 @@ J.M. Picone, A.E. Hedin, D.P. Drob, and A.C. Aikin, NRLMSISE-00 empirical model 
 
 The radiation belt models (ae8min,ap8min,ae8max,ap8max) are courtesy of the National Space Science Data Center and the Community Coordinated Modeling Center at NASA Goddard Space Flight Center.  They are available (as C or Fortran code) from https://ccmc.gsfc.nasa.gov/pub/modelweb/radiation_belt/radbelt/
 
+DE430 planetery ephemerides courtesy of JPL:
+ftp://ssd.jpl.nasa.gov/pub/eph/planets/ascii/de430/
