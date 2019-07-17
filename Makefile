@@ -38,7 +38,7 @@ CFDFLAG =
 FFTBFLAG = 
 #FFTBFLAG = -D _ENABLE_FFTB_CODE_
 
-#GSFCFLAG = 
+#GSFCFLAG =
 GSFCFLAG = -D _USE_GSFC_WATERMARK_
 
 STANDALONEFLAG = 
@@ -50,10 +50,10 @@ NOS3FSWFLAG =
 GMSECFLAG =
 #GMSECFLAG = -D _ENABLE_GMSEC_
 ifeq ($(strip $(GMSECFLAG)),)
-   GMSECDIR = 
-   GMSECINC = 
-   GMSECBIN = 
-   GMSECLIB = 
+   GMSECDIR =
+   GMSECINC =
+   GMSECBIN =
+   GMSECLIB =
 else
    GMSECDIR = ~/GMSEC/
    GMSECINC = -I $(GMSECDIR)include/
@@ -180,15 +180,15 @@ endif
 ifneq ($(strip $(GMSECFLAG)),)
    GMSECOBJ = $(OBJ)gmseckit.o
    ACIPCOBJ = $(OBJ)AppReadFromFile.o $(OBJ)AppWriteToGmsec.o $(OBJ)AppReadFromGmsec.o \
-      $(OBJ)AppWriteToSocket.o $(OBJ)AppReadFromSocket.o $(OBJ)AppWriteToFile.o 
+      $(OBJ)AppWriteToSocket.o $(OBJ)AppReadFromSocket.o $(OBJ)AppWriteToFile.o
    SIMIPCOBJ = $(OBJ)SimWriteToFile.o $(OBJ)SimWriteToGmsec.o $(OBJ)SimWriteToSocket.o \
-      $(OBJ)SimReadFromFile.o $(OBJ)SimReadFromGmsec.o $(OBJ)SimReadFromSocket.o 
+      $(OBJ)SimReadFromFile.o $(OBJ)SimReadFromGmsec.o $(OBJ)SimReadFromSocket.o
 else
-   GMSECOBJ = 
+   GMSECOBJ =
    ACIPCOBJ = $(OBJ)AppReadFromFile.o \
-      $(OBJ)AppWriteToSocket.o $(OBJ)AppReadFromSocket.o $(OBJ)AppWriteToFile.o 
+      $(OBJ)AppWriteToSocket.o $(OBJ)AppReadFromSocket.o $(OBJ)AppWriteToFile.o
    SIMIPCOBJ = $(OBJ)SimWriteToFile.o $(OBJ)SimWriteToSocket.o \
-      $(OBJ)SimReadFromFile.o $(OBJ)SimReadFromSocket.o 
+      $(OBJ)SimReadFromFile.o $(OBJ)SimReadFromSocket.o
 endif
 
 42OBJ = $(OBJ)42main.o $(OBJ)42exec.o $(OBJ)42actuators.o $(OBJ)42cmd.o \
@@ -204,10 +204,10 @@ $(OBJ)orbkit.o $(OBJ)radbeltkit.o $(OBJ)sigkit.o $(OBJ)sphkit.o $(OBJ)timekit.o
 ACKITOBJ = $(OBJ)dcmkit.o $(OBJ)mathkit.o $(OBJ)fswkit.o $(OBJ)iokit.o $(OBJ)timekit.o
 
 ACIPCOBJ = $(OBJ)AppReadFromFile.o \
-$(OBJ)AppWriteToSocket.o $(OBJ)AppReadFromSocket.o $(OBJ)AppWriteToFile.o 
+$(OBJ)AppWriteToSocket.o $(OBJ)AppReadFromSocket.o $(OBJ)AppWriteToFile.o
 
 #ANSIFLAGS = -Wstrict-prototypes -pedantic -ansi -Werror
-ANSIFLAGS = 
+ANSIFLAGS =
 
 CFLAGS = -Wall -Wshadow -Wno-deprecated -g  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(INC) -I $(KITINC) -I $(KITSRC) $(GMSECINC) -O0 $(ARCHFLAG) $(GUIFLAG) $(SHADERFLAG) $(TIMEFLAG) $(SOCKETFLAG) $(CFDFLAG) $(FFTBFLAG) $(GSFCFLAG) $(GMSECFLAG) $(STANDALONEFLAG) $(NOS3FSWFLAG)
 
@@ -313,7 +313,7 @@ $(OBJ)42CfdSlosh.o      : $(GSFCSRC)42CfdSlosh.c $(INC)42.h
 	$(CC) $(CFLAGS) -c $(GSFCSRC)42CfdSlosh.c -o $(OBJ)42CfdSlosh.o  
 
 $(OBJ)42fftb.o         : $(GSFCSRC)42fftb.c $(INC)42.h   
-	$(CC) $(CFLAGS) -c $(GSFCSRC)42fftb.c -o $(OBJ)42fftb.o  
+	$(CC) $(CFLAGS) -c $(GSFCSRC)42fftb.c -o $(OBJ)42fftb.o
 
 $(OBJ)AcApp.o          : $(SRC)AcApp.c $(INC)Ac.h $(INC)AcTypes.h
 	$(CC) $(CFLAGS) -c $(SRC)AcApp.c -o $(OBJ)AcApp.o
@@ -364,7 +364,7 @@ ifeq ($(42PLATFORM),_WIN32)
 else ifeq ($(42PLATFORM),_WIN64)
 	del .\Object\*.o .\$(EXENAME) .\InOut\*.42
 else
-	rm $(OBJ)*.o ./$(EXENAME) ./AcApp $(INOUT)*.42 ./cFS/*.42 ./Demo/*.42 ./Rx/*.42 ./Tx/*.42
+	rm -f $(OBJ)*.o ./$(EXENAME) ./AcApp $(INOUT)*.42 ./cFS/*.42 ./Demo/*.42 ./Rx/*.42 ./Tx/*.42
 endif
 
 
