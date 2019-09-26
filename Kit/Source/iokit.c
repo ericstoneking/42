@@ -143,6 +143,14 @@ SOCKET InitSocketServer(int Port, int AllowBlocking)
          printf("Error opening server socket.\n");
          exit(1);
       }
+
+      int opt = 1;
+      if (setsockopt(init_sockfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
+      {
+        printf("Error setting socket option.\n");
+        exit(1);
+      }
+
       memset((char *) &Server,0,sizeof(Server));
       Server.sin_family = AF_INET;
       Server.sin_addr.s_addr = INADDR_ANY;
