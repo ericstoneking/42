@@ -95,7 +95,7 @@ struct Cheb3DType {
    double JD1;
    double JD2;
    long N; /* Order <= 20 */
-   double Coef[20][3];
+   double Coef[3][20];
 };
 
 struct OrbitType {

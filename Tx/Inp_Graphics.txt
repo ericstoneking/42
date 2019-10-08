@@ -3,6 +3,7 @@
 Skymap09.txt                       !  Star Catalog File Name
 TRUE                               !  Map Window Exists
 FALSE                              !  Orrery Window Exists
+FALSE                              !  Unit Sphere Window Exists
 ******************************* POV *********************************
 FALSE                              !  Pause at Startup
 TRACK_HOST                         !  POV Mode (TRACK_HOST, TRACK_TARGET, FIXED_IN_HOST)
@@ -48,3 +49,7 @@ TRUE  "Clock"                      !  Show Clock
 TRUE  "Tlm Clock"                  !  Show Clock
 FALSE "Credits"                    !  Show Credits
 TRUE  "Night"                      !  Show Night
+********************* Unit Sphere Show Menu *************************
+TRUE                               !  Show Major Constellations
+TRUE                               !  Show Zodiac Constellations
+FALSE                              !  Show Minor Constellations

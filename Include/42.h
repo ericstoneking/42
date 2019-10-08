@@ -157,6 +157,8 @@ EXTERN struct RandomProcessType *RNG;
 
 EXTERN double DynRunTime;
 
+EXTERN struct ConstellationType Constell[89];
+
 long SimStep(void);
 void Ephemerides(void);
 void OrbitMotion(void);

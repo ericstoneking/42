@@ -60,7 +60,7 @@
 #define ONSCREEN 0
 #define OFFSCREEN 1
 
-EXTERN long MapWindowExists, OrreryWindowExists;
+EXTERN long MapWindowExists, OrreryWindowExists,SphereWindowExists;
 
 EXTERN double RunTime,FrameRate,RealTimeDT;
 EXTERN long TimerHasExpired;
@@ -118,6 +118,8 @@ EXTERN GLuint SunSpriteTexTag;
 EXTERN GLuint AntiSunSpriteTexTag;
 EXTERN GLuint MoonSpriteTexTag;
 EXTERN GLuint LogoTexTag;
+EXTERN GLuint SphereSunSpriteTexTag;
+EXTERN GLuint SphereMoonSpriteTexTag;
 
 EXTERN char StarCatFileName[80];
 EXTERN double BuckyPf[32][3];
@@ -166,6 +168,18 @@ EXTERN struct WidgetType TargetWidget;
 EXTERN struct WidgetType CamShowWidget;
 
 EXTERN struct WidgetType OrreryWidget;
+
+EXTERN GLuint SphereWindow;
+EXTERN long NumSphereWindowMenuLines;
+EXTERN long SphereWindowWidth;
+EXTERN long SphereWindowHeight;
+EXTERN struct WidgetType CenterWidget;
+EXTERN struct WidgetType SphereShowWidget;
+EXTERN struct WidgetType VectorsWidget;
+EXTERN struct WidgetType FOVsWidget;
+EXTERN struct WidgetType GridsWidget;
+EXTERN struct WidgetType AxesWidget;
+EXTERN long ShowConstellations[3];
 
 EXTERN long TlmIsStatic;
 EXTERN long UseEphFromTlm;

@@ -35,15 +35,15 @@ FALSE                           !  CFD Slosh Forces and Torques
 FALSE                           !  Output Environmental Torques to Files
 ********************* Celestial Bodies of Interest *********************
 MEAN                            !  Ephem Option (MEAN or DE430)
-FALSE                           !  Mercury
-FALSE                           !  Venus
+TRUE                            !  Mercury
+TRUE                            !  Venus
 TRUE                            !  Earth and Luna
-FALSE                           !  Mars and its moons
-FALSE                           !  Jupiter and its moons
-FALSE                           !  Saturn and its moons
-FALSE                           !  Uranus and its moons
-FALSE                           !  Neptune and its moons
-FALSE                           !  Pluto and its moons
+TRUE                            !  Mars and its moons
+TRUE                            !  Jupiter and its moons
+TRUE                            !  Saturn and its moons
+TRUE                            !  Uranus and its moons
+TRUE                            !  Neptune and its moons
+TRUE                            !  Pluto and its moons
 FALSE                           !  Asteroids and Comets
 ***************** Lagrange Point Systems of Interest ******************
 FALSE                           !  Earth-Moon

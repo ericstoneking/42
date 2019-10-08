@@ -183,6 +183,11 @@ void DrawRollPitchYaw(long xc, long yc, long PixScale,
    double RollCmd, double PitchCmd, double YawCmd,
    GLfloat GaugeColor[4], GLfloat BarColor[4]);
 void DrawSmallCircle(double lngc, double latc, double rad);
+void DrawMercatorGrid(double CVA[3][3]);
+void DrawMercatorLine(double lngA, double latA, double lngB, double latB);
+void DrawMercatorSquare(double CCV[3][3], double FOV[2]);
+void DrawMercatorVector(double lng, double lat, char *label);
+void DrawMercatorAxes(double CAV[3][3], char *label);
 void CheckOpenGLProperties(void);
 void HammerProjection(double Lng, double Lat, double *x, double *y);
 void VecToCube(long N, double p[3], long *f, long *i, long *j);

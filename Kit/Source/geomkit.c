@@ -937,7 +937,8 @@ struct GeomType *LoadWingsObjFile(const char ModelPath[80],const char ObjFilenam
       Geom = (struct GeomType *) realloc(Geom,Ng*sizeof(struct GeomType));
       G = &Geom[Ng-1];
 
-      strncpy(G->ObjFileName,ObjFilename,40);
+      strncpy(G->ObjFileName,ObjFilename,39);
+      G->ObjFileName[39] = 0; /* Null-terminated string */
       G->Nmatl = 0;
       G->Nv = 0;
       G->Nvt = 0;

@@ -20,6 +20,9 @@
 ** #endif
 */
 /**********************************************************************/
+/*  Substantial contributions to this model provided                  */
+/*  by Jeffrey Calixto, 2019 summer intern.                           */
+/*                                                                    */
 /*  Acceleration of a point A fixed in SC[Isc].B[0], expressed in     */
 /*  B[0].  Due to 42's accounting of forces (esp. gravity), the       */
 /*  gravity-gradient force accounting for the offset from             */
@@ -27,49 +30,88 @@
 /*  gravity terms apply equally to A and B[0].  (Assuming gravity-    */
 /*  gradient from non-spherical primary and 3rd-body forces is        */
 /*  negligible.)  Surface forces are included in S->         */
-void Accelerometer(struct SCType *S,struct AccelType *A)
+void AccelerometerModel(struct SCType *S)
 {
+      struct AccelType *A;
       double p[3],wxp[3],wxwxp[3],axp[3],ab[3];
       double r,Coef,rhatn[3],rhat[3],rhatop;
       double accb[3],asnb[3];
       long j;
-      struct BodyType *B;
+      struct BodyType *B; 
+      struct FlexNodeType *FN;
+      long Ia;
+      double PrevBias,PrevDV,AccError;
+      long Counts,PrevCounts;
 
       B = &S->B[0];
 
-/* .. Vector from cm of B0 to A */
-      for(j=0;j<3;j++) p[j] = A->PosB[j] - B->cm[j];
+     for(Ia=0;Ia<S->Nacc;Ia++) { 
+         A = &S->Accel[Ia];
+         A->SampleCounter++; 
+         if (A->SampleCounter >= A->MaxCounter) {
+            A->SampleCounter = 0;
 
-/* .. abn and alfbn are byproducts of NbodyAttitudeRK4 */
-      VxV(B->wn,p,wxp);
-      VxV(B->wn,wxp,wxwxp);
-      VxV(S->alfbn,p,axp);
-      MxV(B->CN,S->abs,ab);
+            /* Vector from cm of B0 to A */
+            for(j=0;j<3;j++) 
+               p[j] = A->PosB[j] - B->cm[j];
 
-/* .. Acceleration of a point fixed in an accelerating, rotating body */
-      for(j=0;j<3;j++) accb[j] = ab[j]+axp[j]+wxwxp[j];
+            /* abs and alfbn are byproducts of NbodyAttitudeRK4 */
+            VxV(B->wn,p,wxp);
+            VxV(B->wn,wxp,wxwxp);
+            VxV(S->alfbn,p,axp);
+            MxV(B->CN,S->abs,ab);
 
-/* .. Grav-grad force (see Hughes, p.246, eq (56)) */
-      if (GGActive) {
-         r = MAGV(S->PosN);
-         Coef = -3.0*Orb[S->RefOrb].mu/(r*r*r);
-         CopyUnitV(S->PosN,rhatn);
-         MxV(B->CN,rhatn,rhat);
-         rhatop = VoV(rhat,p);
-         for(j=0;j<3;j++) {
-            accb[j] += Coef*(p[j]-3.0*rhat[j]*rhatop);
+            /* Acceleration of a point fixed in an accelerating, rotating body */
+            for(j=0;j<3;j++) accb[j] = ab[j]+axp[j]+wxwxp[j];
+
+            /* Grav-grad force (see Hughes, p.246, eq (56)) */
+            if (GGActive) {
+               r = MAGV(S->PosN);
+               Coef = -3.0*Orb[S->RefOrb].mu/(r*r*r);
+               CopyUnitV(S->PosN,rhatn);
+               MxV(B->CN,rhatn,rhat);
+               rhatop = VoV(rhat,p);
+               for(j=0;j<3;j++) {
+                  accb[j] += Coef*(p[j]-3.0*rhat[j]*rhatop);
+               }
+            }
+
+            /* Add acceleration of SC cm from external surface forces */
+            MxV(B->CN,S->asn,asnb);
+            for(j=0;j<3;j++) accb[j] += asnb[j];
+
+
+            /* .. Add noise, etc. */
+            /* this is the noise added for the accelerometer ( the Edited ) */
+
+             
+            if (S->FlexActive) {
+               FN = &S->B[0].FlexNode[A->FlexNode];  
+               A->TrueAcc = VoV(FN->TotTrnVel,A->Axis); /* TODO: Fix this */
+            }
+            else {
+               A->TrueAcc = VoV(accb,A->Axis); 
+            }                                        
+            
+            PrevBias = A->CorrCoef*A->Bias;
+            A->Bias = PrevBias + A->BiasStabCoef*GaussianRandom(RNG);
+            AccError = 0.5*(A->Bias+PrevBias) + A->DVRWCoef*GaussianRandom(RNG);
+         
+            A->MeasAcc = Limit(A->Scale*A->TrueAcc + AccError,
+               -A->MaxAcc,A->MaxAcc); 
+         
+            PrevDV = A->DV; 
+            A->DV = PrevDV + A->MeasAcc*A->SampleTime 
+               + A->DVNoiseCoef*GaussianRandom(RNG);
+         
+            PrevCounts = (long) (PrevDV/A->Quant+0.5);
+            Counts = (long) (A->DV/A->Quant+0.5);
+
+            A->MeasAcc = ((double) (Counts - PrevCounts))*A->Quant/A->SampleTime;
+            
+            S->AC.Accel[Ia].Acc = A->MeasAcc;
          }
       }
-
-/* .. Add acceleration of SC cm from external surface forces */
-      MxV(B->CN,S->asn,asnb);
-      for(j=0;j<3;j++) accb[j] += asnb[j];
-
-/* .. Find component along Accel axis */
-      A->acc = VoV(accb,A->Axis);
-
-/* .. Add noise, etc. */
-
 }
 /**********************************************************************/
 void GyroModel(struct SCType *S)
@@ -89,7 +131,7 @@ void GyroModel(struct SCType *S)
             
             if (S->FlexActive) {
                FN = &S->B[0].FlexNode[G->FlexNode];
-               G->TrueRate = VoV(FN ->TotAngVel,G->Axis);
+               G->TrueRate = VoV(FN->TotAngVel,G->Axis);
             }
             else {
                G->TrueRate = VoV(S->B[0].wn,G->Axis);
@@ -212,8 +254,8 @@ void FssModel(struct SCType *S)
                MxV(FSS->CB,S->svb,svs);
                SunAng[0] = asin(svs[0]);
                SunAng[1] = asin(svs[1]);
-               if (fabs(SunAng[0]) < FSS->FovAng[0] && 
-                   fabs(SunAng[1]) < FSS->FovAng[1] &&
+               if (fabs(SunAng[0]) < FSS->FovHalfAng[0] && 
+                   fabs(SunAng[1]) < FSS->FovHalfAng[1] &&
                    svs[2] > 0.0) {
                   FSS->Valid = TRUE;
                }
@@ -394,6 +436,11 @@ void Sensors(struct SCType *S)
       for(i=0;i<3;i++) {
          AC->svn[i] = S->svn[i];
          AC->bvn[i] = S->bvn[i];
+      }
+
+      /* Accelerometer */
+      if (S->Nacc > 0) {
+         AccelerometerModel(S);
       }
 
       /* Gyro */

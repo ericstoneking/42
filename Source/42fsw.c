@@ -861,6 +861,15 @@ void InitAC(struct SCType *S)
       }     
       
       /* Accelerometer Axes */
+      AC->Nacc = S->Nacc;
+      if (AC->Nacc > 0) {
+         AC->Accel = (struct AcAccelType *) calloc(AC->Nacc,sizeof(struct AcAccelType));
+         for(i=0;i<S->Nacc;i++) {
+            for(j=0;j<3;j++) {
+               AC->Accel[i].Axis[j] = S->Accel[i].Axis[j];
+            }
+         }
+      }
 
       /* Wheels */
       AC->Nwhl = S->Nw;
@@ -954,6 +963,11 @@ void InitAC(struct SCType *S)
       AC->PrototypeCtrl.wc = 0.05*TwoPi;
       AC->PrototypeCtrl.amax = 0.01;
       AC->PrototypeCtrl.vmax = 0.5*D2R;
+      
+      /* Initialize variables to avoid divide-by-zero before first sensor measurements */
+      AC->qbn[3] = 1.0;
+      AC->svb[0] = 1.0;
+      AC->bvb[0] = 1.0E-4;
 }
 /**********************************************************************/
 /* The effective inertia for a gimbal is assumed to be the moment of  */
@@ -1047,6 +1061,7 @@ void PrototypeFSW(struct SCType *S)
       else {
          if (C->Init) {
             C->Init = 0;
+            
             for(Ig=0;Ig<AC->Ng;Ig++) {
                FindAppendageInertia(Ig,S,Iapp);
                for(j=0;j<3;j++) {
@@ -1669,12 +1684,20 @@ void AdHocFSW(struct SCType *S)
 void FlightSoftWare(struct SCType *S)
 {
       static long First = 1;
+      long InitSocket;
       #ifdef _AC_STANDALONE_
       static SOCKET AcSocket[2];
       int AcPort = 10101;
       long i;
       #endif
-
+      
+      if (S->InitAC) {
+         S->InitAC = 0;
+         InitAC(S);
+         InitSocket = 1;
+      }
+      else InitSocket = 0;
+      
       S->FswSampleCounter++;
       if (S->FswSampleCounter >= S->FswMaxCounter) {
          S->FswSampleCounter = 0;
@@ -1707,9 +1730,7 @@ void FlightSoftWare(struct SCType *S)
                break;
             case CFS_FSW:
                #ifdef _AC_STANDALONE_
-                  if (S->InitAC) {
-                      S->InitAC = 0;
-                     InitAC(S);
+                  if (InitSocket) {
                      AcSocket[S->AC.ID] = InitSocketServer(AcPort+S->AC.ID,TRUE);
                      
                      S->AC.ParmLoadEnabled = 1;

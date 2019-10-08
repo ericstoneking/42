@@ -763,6 +763,22 @@ void WriteToFile(FILE *StateFile, struct AcType *AC)
          if (AC->EchoEnabled) printf("%s",line);
          fprintf(StateFile,"%s",line);
 
+         sprintf(line,"SC[%ld].AC.ThrSteerCtrl.Kr = %18.12le %18.12le %18.12le\n",
+            Isc,
+            AC->ThrSteerCtrl.Kr[0],
+            AC->ThrSteerCtrl.Kr[1],
+            AC->ThrSteerCtrl.Kr[2]);
+         if (AC->EchoEnabled) printf("%s",line);
+         fprintf(StateFile,"%s",line);
+
+         sprintf(line,"SC[%ld].AC.ThrSteerCtrl.Kp = %18.12le %18.12le %18.12le\n",
+            Isc,
+            AC->ThrSteerCtrl.Kp[0],
+            AC->ThrSteerCtrl.Kp[1],
+            AC->ThrSteerCtrl.Kp[2]);
+         if (AC->EchoEnabled) printf("%s",line);
+         fprintf(StateFile,"%s",line);
+
       }
 
       sprintf(line,"[EOF]\n\n");

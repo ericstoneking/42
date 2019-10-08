@@ -237,6 +237,7 @@ void MapStateVectorToBodyStates(double *u, double *x, double *uf,
                      FN->angrate[i] += FN->THETA[i][If]*B->xi[If];
                   }
                   FN->TotAngVel[i] = B->wn[i] + FN->angrate[i];
+                  /* TODO: FN->TotTrnAcc = ... */
                }
             }
          }

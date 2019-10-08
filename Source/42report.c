@@ -127,6 +127,7 @@ void Report(void)
       static FILE *Hwhlfile;
       static FILE *MTBfile;
       static FILE *ProjAreaFile;
+      static FILE *AccFile;
       static char First = TRUE;
       long Isc,i;
       struct DynType *D;
@@ -177,6 +178,7 @@ void Report(void)
          RPYfile = FileOpen(InOutPath,"RPY.42","w");
          Hwhlfile = FileOpen(InOutPath,"Hwhl.42","w");
          MTBfile = FileOpen(InOutPath,"MTB.42","w");
+         AccFile = FileOpen(InOutPath,"Acc.42","w");
       }
 
       if (OutFlag) {
@@ -236,6 +238,7 @@ void Report(void)
             for(i=0;i<SC[0].Nw;i++) fprintf(Hwhlfile,"%lf ",SC[0].Whl[i].H);
             fprintf(Hwhlfile,"\n");
             fprintf(MTBfile,"%lf %lf %lf\n",SC[0].MTB[0].M,SC[0].MTB[1].M,SC[0].MTB[2].M);
+            fprintf(AccFile,"%le %le\n",SC[0].Accel[0].TrueAcc, SC[0].Accel[0].MeasAcc);
             
             //MagReport();
             //GyroReport();

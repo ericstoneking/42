@@ -229,6 +229,14 @@ void ReadFromFile(FILE *StateFile, struct AcType *AC)
             }
          }
 
+         if (sscanf(line,"SC[%ld].AC.Accel[%ld].Acc = %le",
+            &Isc,&i,
+            &DbleVal[0]) == 3) {
+            if (Isc == AC->ID) {
+               AC->Accel[i].Acc = DbleVal[0];
+            }
+         }
+
          if (sscanf(line,"SC[%ld].AC.Whl[%ld].H = %le",
             &Isc,&i,
             &DbleVal[0]) == 3) {
@@ -1183,6 +1191,30 @@ void ReadFromFile(FILE *StateFile, struct AcType *AC)
                &DbleVal[0]) == 2) {
                if (Isc == AC->ID) {
                   AC->CfsCtrl.Kunl = DbleVal[0];
+               }
+            }
+
+            if (sscanf(line,"SC[%ld].AC.ThrSteerCtrl.Kr = %le %le %le",
+               &Isc,
+               &DbleVal[0],
+               &DbleVal[1],
+               &DbleVal[2]) == 4) {
+               if (Isc == AC->ID) {
+                  AC->ThrSteerCtrl.Kr[0] = DbleVal[0];
+                  AC->ThrSteerCtrl.Kr[1] = DbleVal[1];
+                  AC->ThrSteerCtrl.Kr[2] = DbleVal[2];
+               }
+            }
+
+            if (sscanf(line,"SC[%ld].AC.ThrSteerCtrl.Kp = %le %le %le",
+               &Isc,
+               &DbleVal[0],
+               &DbleVal[1],
+               &DbleVal[2]) == 4) {
+               if (Isc == AC->ID) {
+                  AC->ThrSteerCtrl.Kp[0] = DbleVal[0];
+                  AC->ThrSteerCtrl.Kp[1] = DbleVal[1];
+                  AC->ThrSteerCtrl.Kp[2] = DbleVal[2];
                }
             }
 

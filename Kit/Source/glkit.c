@@ -2741,6 +2741,229 @@ void DrawSmallCircle(double lngc, double latc, double rad)
       glEnd();
 
 }
+/*********************************************************************/
+/* Draws a full grid of any orientation on a Mercator projection.
+   CVA is the DCM from the Axis frame to the Viewing frame           */
+void DrawMercatorGrid(double CVA[3][3])
+{
+      long min = 30; /* Degrees between each minor gridline */
+      long maj = 90; /* Degrees between each major gridline */
+
+      double D2R = 0.0174532925199433;
+
+      double norm[3];
+      double x[3] = {1,0,0};
+      double z[3] = {0,0,1};
+
+      long ang; /* Tracked in degrees */
+      double lng,lat;
+      double CNA[3][3]; /* DCM from normal vector to axis frame */
+      double CNV[3][3]; /* DCM from normal vector to viewing frame */
+
+      /* Latitude lines */
+      MxV(CVA,z,norm);
+
+      VecToLngLat(norm,&lng,&lat);
+
+      for (ang = min; ang < 179; ang = ang+min) {
+         glLineWidth(1.0);
+         DrawSmallCircle(lng, lat, ang*D2R);
+      }
+
+      for (ang = maj; ang < 179; ang = ang+maj) {
+         glLineWidth(2.0);
+         DrawSmallCircle(lng, lat, ang*D2R);
+      }
+
+      /* Longitude lines */
+      for (ang = 0; ang < 179; ang = ang+min) {
+         SimpRot(z,ang*D2R,CNA);
+         MxMT(CNA,CVA,CNV);
+         MTxV(CNV,x,norm);
+
+         VecToLngLat(norm,&lng,&lat);
+
+         glLineWidth(1.0);
+         DrawSmallCircle(lng,lat,90*D2R);
+      }
+
+      for (ang = 0; ang < 179; ang = ang+maj) {
+         SimpRot(z,ang*D2R,CNA);
+         MxMT(CNA,CVA,CNV);
+         MTxV(CNV,x,norm);
+
+         VecToLngLat(norm,&lng,&lat);
+
+         glLineWidth(2.0);
+         DrawSmallCircle(lng,lat,90*D2R);
+      }
+
+      glLineWidth(1);
+}
+/*********************************************************************/
+/* Draws a great circle arc between two points (angular distance must
+   be less than 180 degrees)                                         */
+void DrawMercatorLine(double lngA, double latA, double lngB, double latB)
+{
+      double R2D = 57.2957795130823;
+      double A[3],B[3],norm[3],C[3][3],ang,totalang,p[3];
+      double x,y,xold,yold;
+
+      A[0] = cos(lngA)*cos(latA);
+      A[1] = sin(lngA)*cos(latA);
+      A[2] = sin(latA);
+
+      B[0] = cos(lngB)*cos(latB);
+      B[1] = sin(lngB)*cos(latB);
+      B[2] = sin(latB);
+
+      totalang = acos(VoV(A,B));
+
+      VxV(A,B,norm);
+      UNITV(norm);
+      SimpRot(A,0.0,C);
+      MxV(C,A,p);
+      VecToLngLat(p,&xold,&yold);
+      xold *= R2D;
+      yold *= R2D;
+      glBegin(GL_LINES);
+         for(ang = 0.0; ang < 1.01*totalang; ang += 0.05*totalang) {
+            SimpRot(norm,-ang,C);
+            MxV(C,A,p);
+            VecToLngLat(p,&x,&y);
+            x *= R2D;
+            y *= R2D;
+            
+            if (fabs(xold-x) > 180) { /* >180deg (crosses 180lng) - draw two lines */
+               if (xold < 0) {
+                  glVertex2f(xold,yold); 
+                  glVertex2f(x-360,y);
+                  glVertex2f(xold+360,yold);
+                  glVertex2f(x,y);
+               } 
+               else {
+                  glVertex2f(xold,yold); 
+                  glVertex2f(x+360,y);
+                  glVertex2f(xold-360,yold);
+                  glVertex2f(x,y);
+               }
+            } 
+            else { /* <180deg - draw one line */
+               glVertex2f(xold,yold); 
+               glVertex2f(x,y);
+            }
+            
+            xold = x;
+            yold = y;
+         }
+      glEnd();
+
+}
+/**********************************************************************/
+/* Draws a square FOV on a Mercator projection using DrawMercatorLine.
+   Square is centered on x-axis of CCV; FOV half-angles given in radians.
+   CVS = DCM from Center of square to Viewing frame                   */
+void DrawMercatorSquare(double CVS[3][3], double FOV[2])
+{
+      double p[3],q[3];
+      double zaxis[3] = {0, 0, 1};
+      double lngA,latA,lngB,latB;
+      double xang[4],yang[4];
+      double CPC[3][3]; /* DCM from Center to corner Point */
+      long i,j;
+
+
+      xang[0] = -FOV[0]; /* x to the left, y up, z out of the sensor in boresight direction */
+      xang[1] =  FOV[0];
+      xang[2] =  FOV[0];
+      xang[3] = -FOV[0];
+
+      yang[0] = -FOV[1];
+      yang[1] = -FOV[1];
+      yang[2] =  FOV[1];
+      yang[3] =  FOV[1];
+
+      for (i=0; i<4; i++) {
+         A2C(21,xang[i],-yang[i],0.0,CPC);
+         MxV(CPC,zaxis,q); /* Assume sensor axis is z-axis */
+         MxV(CVS,q,p);
+         VecToLngLat(p,&lngA,&latA);
+
+         j = (i+1)%4;
+         A2C(21,xang[j],-yang[j],0.0,CPC);
+         MxV(CPC,zaxis,q); /* Assume sensor axis is z-axis */
+         MxV(CVS,q,p);
+         VecToLngLat(p,&lngB,&latB);
+
+         DrawMercatorLine(lngA,latA,lngB,latB);
+      }
+}
+/**********************************************************************/
+/* Draws a small X at the lat/lng point of a vector, as well as label;
+   lat and lng are in radians                                         */
+void DrawMercatorVector(double lng, double lat, char *label)
+{
+      double R2D = 57.2957795130823;
+
+      glLineWidth(1);
+
+      lat *= R2D;
+      lng *= R2D;
+
+      glBegin(GL_LINES);
+         glVertex2f(lng-2,lat-2);
+         glVertex2f(lng+2,lat+2);
+         glVertex2f(lng+2,lat-2);
+         glVertex2f(lng-2,lat+2);
+      glEnd();
+
+      glRasterPos2f(lng+2.5*strlen(label),lat-12);
+      DrawBitmapString(GLUT_BITMAP_8_BY_13,label);
+}
+/**********************************************************************/
+/* Draws all 6 primary axes on a Mercator projection
+   CAV is the DCM from the Axis frame to the Viewing frame            */
+void DrawMercatorAxes(double CVA[3][3], char *label)
+{
+      double TwoPi = 6.28318530717959;
+
+      double x[6] = {1,-1, 0, 0, 0, 0};
+      double y[6] = {0, 0, 1,-1, 0, 0};
+      double z[6] = {0, 0, 0, 0, 1,-1};
+      
+      double a[3],v[3];
+      long i;
+      double lat,lng;
+      char str[20];
+
+      for (i=0; i<6; i++) {
+         a[0] = x[i];
+         a[1] = y[i];
+         a[2] = z[i];
+
+         MxV(CVA,a,v);
+
+         VecToLngLat(v,&lng,&lat);
+
+         if (a[0]+a[1]+a[2] > 0) {
+            sprintf(str,"+%s%ld",label,(long)i/2 + 1);
+         } 
+         else {
+            sprintf(str,"-%s%ld",label,(long)i/2 + 1);            
+         }
+
+         DrawMercatorVector(lng,lat,str);
+
+         if (lng > 180-8*strlen(label)) {
+            DrawMercatorVector(lng-TwoPi,lat,str);
+         }
+
+         if (lng < -180+8*strlen(label)) {
+            DrawMercatorVector(lng+TwoPi,lat,str);
+         }
+
+      }
+}
 /**********************************************************************/
 /*  When porting to a new platform, check for OpenGL version,        */
 /*  extensions, etc.                                                  */

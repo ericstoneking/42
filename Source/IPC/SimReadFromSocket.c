@@ -39,6 +39,26 @@ void ReadFromSocket(SOCKET Socket)
             &Year,&doy,&Hour,&Minute,&Second) == 5)
             RequestTimeRefresh = 1;
 
+         if (sscanf(line,"Orb[%ld].PosN = %le %le %le",
+            &Iorb,
+            &DbleVal[0],
+            &DbleVal[1],
+            &DbleVal[2]) == 4) {
+            Orb[Iorb].PosN[0] = DbleVal[0];
+            Orb[Iorb].PosN[1] = DbleVal[1];
+            Orb[Iorb].PosN[2] = DbleVal[2];
+         }
+
+         if (sscanf(line,"Orb[%ld].VelN = %le %le %le",
+            &Iorb,
+            &DbleVal[0],
+            &DbleVal[1],
+            &DbleVal[2]) == 4) {
+            Orb[Iorb].VelN[0] = DbleVal[0];
+            Orb[Iorb].VelN[1] = DbleVal[1];
+            Orb[Iorb].VelN[2] = DbleVal[2];
+         }
+
          if (sscanf(line,"SC[%ld].PosR = %le %le %le",
             &Isc,
             &DbleVal[0],
@@ -221,26 +241,6 @@ void ReadFromSocket(SOCKET Socket)
             World[Iw].eph.VelN[0] = DbleVal[0];
             World[Iw].eph.VelN[1] = DbleVal[1];
             World[Iw].eph.VelN[2] = DbleVal[2];
-         }
-
-         if (sscanf(line,"Orb[%ld].PosN = %le %le %le",
-            &Iorb,
-            &DbleVal[0],
-            &DbleVal[1],
-            &DbleVal[2]) == 4) {
-            Orb[Iorb].PosN[0] = DbleVal[0];
-            Orb[Iorb].PosN[1] = DbleVal[1];
-            Orb[Iorb].PosN[2] = DbleVal[2];
-         }
-
-         if (sscanf(line,"Orb[%ld].VelN = %le %le %le",
-            &Iorb,
-            &DbleVal[0],
-            &DbleVal[1],
-            &DbleVal[2]) == 4) {
-            Orb[Iorb].VelN[0] = DbleVal[0];
-            Orb[Iorb].VelN[1] = DbleVal[1];
-            Orb[Iorb].VelN[2] = DbleVal[2];
          }
 
          for(Isc=0;Isc<Nsc;Isc++) {
@@ -1016,6 +1016,26 @@ void ReadFromSocket(SOCKET Socket)
                      &Isc,
                      &DbleVal[0]) == 2) {
                      SC[Isc].AC.CfsCtrl.Kunl = DbleVal[0];
+                  }
+
+                  if (sscanf(line,"SC[%ld].AC.ThrSteerCtrl.Kr = %le %le %le",
+                     &Isc,
+                     &DbleVal[0],
+                     &DbleVal[1],
+                     &DbleVal[2]) == 4) {
+                     SC[Isc].AC.ThrSteerCtrl.Kr[0] = DbleVal[0];
+                     SC[Isc].AC.ThrSteerCtrl.Kr[1] = DbleVal[1];
+                     SC[Isc].AC.ThrSteerCtrl.Kr[2] = DbleVal[2];
+                  }
+
+                  if (sscanf(line,"SC[%ld].AC.ThrSteerCtrl.Kp = %le %le %le",
+                     &Isc,
+                     &DbleVal[0],
+                     &DbleVal[1],
+                     &DbleVal[2]) == 4) {
+                     SC[Isc].AC.ThrSteerCtrl.Kp[0] = DbleVal[0];
+                     SC[Isc].AC.ThrSteerCtrl.Kp[1] = DbleVal[1];
+                     SC[Isc].AC.ThrSteerCtrl.Kp[2] = DbleVal[2];
                   }
 
                }

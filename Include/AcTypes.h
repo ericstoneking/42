@@ -174,7 +174,7 @@ struct AcAccelType {
    double Axis[3];
 
    /*~ Internal Variables ~*/
-   double Acc;
+   double Acc; /* [[m/s^2]] [~>~] */
 };
 
 struct AcEarthSensorType {

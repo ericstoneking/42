@@ -960,6 +960,26 @@ void WriteToSocket(SOCKET Socket, struct AcType *AC)
          memcpy(&Msg[MsgLen],line,LineLen);
          MsgLen += LineLen;
 
+         sprintf(line,"SC[%ld].AC.ThrSteerCtrl.Kr = %18.12le %18.12le %18.12le\n",
+            Isc,
+            AC->ThrSteerCtrl.Kr[0],
+            AC->ThrSteerCtrl.Kr[1],
+            AC->ThrSteerCtrl.Kr[2]);
+         if (AC->EchoEnabled) printf("%s",line);
+         LineLen = strlen(line);
+         memcpy(&Msg[MsgLen],line,LineLen);
+         MsgLen += LineLen;
+
+         sprintf(line,"SC[%ld].AC.ThrSteerCtrl.Kp = %18.12le %18.12le %18.12le\n",
+            Isc,
+            AC->ThrSteerCtrl.Kp[0],
+            AC->ThrSteerCtrl.Kp[1],
+            AC->ThrSteerCtrl.Kp[2]);
+         if (AC->EchoEnabled) printf("%s",line);
+         LineLen = strlen(line);
+         memcpy(&Msg[MsgLen],line,LineLen);
+         MsgLen += LineLen;
+
       }
 
       sprintf(line,"[EOF]\n\n");

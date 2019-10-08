@@ -283,5 +283,10 @@
 /* Secs from J2000 to the GPS epoch of 6 Jan 1980 */
 #define GPS_EPOCH  (-630763200.0)
 
+/* Constellation Classes */
+#define NUM_CONSTELL 88
+#define MAJOR_CONSTELL 0
+#define ZODIAC_CONSTELL 1
+#define MINOR_CONSTELL 2
 
 #endif /* __42DEFINES_H__ */

@@ -12,9 +12,6 @@
 /*    All Other Rights Reserved.                                      */
 
 
-#include <stdlib.h>
-#include <math.h>
-#include <stdio.h>
 #include "mathkit.h"
 
 /* #ifdef __cplusplus
@@ -1611,40 +1608,99 @@ double CubicSpline(double x, double X[4], double Y[4])
       return(a+u*(b+u*(c+u*d)));
 }
 /******************************************************************************/
-void Cheb3DToPosVel(long n, double Coef[20][3], double x, 
-   double Pos[3], double Vel[3])
+/* Compute Chebyshev polynomials of first kind (T) and second kind (U)        */
+void ChebyPolys(double u, long n, double T[20], double U[20]) 
 {
-      double T[20]; /* Chebyshev polynomials of first kind */
-      double U[20]; /* Chebyshev polynomials of second kind */
-      long k,i;
+      long k;
       
-      if (x < -1.0 || x > 1.0) {
-         printf("x out of range in Cheb3DToPosVel.  Bailing out.\n");
+      if (u < -1.0 || u > 1.0) {
+         printf("u out of range in ChebPolys.  Bailing out.\n");
          exit(1);
       }
       if (n > 20) {
-         printf("n out of range in Cheb3DToPosVel.  Bailing out.\n");
+         printf("n out of range in ChebPolys.  Bailing out.\n");
          exit(1);
       }
       
-      /* Polynomials */
       T[0] = 1.0;
-      T[1] = x;
+      T[1] = u;
       U[0] = 1.0;
-      U[1] = 2.0*x;
+      U[1] = 2.0*u;
       for(k=1;k<n-1;k++) {
-         T[k+1] = 2.0*x*T[k] - T[k-1];
-         U[k+1] = 2.0*x*U[k] - U[k-1];
+         T[k+1] = 2.0*u*T[k] - T[k-1];
+         U[k+1] = 2.0*u*U[k] - U[k-1];
+      }
+}
+/******************************************************************************/
+/* Using ChebyPolys, find "position" (P) and scaled velocity (dPdu)           */
+void ChebyInterp(double T[20], double U[20], double Coef[20], long n, 
+   double *P, double *dPdu)
+{
+      long k;
+      
+      if (n > 20) {
+         printf("n out of range in ChebyInterp.  Bailing out.\n");
+         exit(1);
       }
       
-      /* Position, Velocity */
-      for(i=0;i<3;i++) {
-         Pos[i] = Coef[0][i]*T[0];
-         Vel[i] = 0.0;
-         for(k=1;k<n;k++) {
-            Pos[i] += Coef[k][i]*T[k];
-            Vel[i] += Coef[k][i]*((double) k)*U[k-1];
+      *P = Coef[0]*T[0];
+      *dPdu = 0.0;
+      for(k=1;k<n;k++) {
+         *P += Coef[k]*T[k];
+         *dPdu += Coef[k]*((double) k)*U[k-1];
+      }
+}
+/******************************************************************************/
+void FindChebyCoefs(double *u, double *P, long Nu, long Nc, double Coef[20])
+{
+      long i,j,k;
+      double T[20],U[20];
+      double **AtA, *x, *Atb;
+      
+      if (Nc > 20) {
+         printf("Nc out of range in FindChebyCoefs.  Bailing out.\n");
+         exit(1);
+      }
+      
+      AtA = CreateMatrix(Nc,Nc);
+      x = (double *) calloc(Nc,sizeof(double));
+      Atb = (double *) calloc(Nc,sizeof(double));
+      
+      for(k=0;k<Nu;k++) {
+         ChebyPolys(u[k],Nc,T,U);
+         for(i=0;i<Nc;i++) {
+            for(j=0;j<Nc;j++) {
+               AtA[i][j] += T[i]*T[j];
+            }
+            Atb[i] += T[i]*P[k];
          }
+      }
+      LINSOLVE(AtA,x,Atb,Nc);
+      for(i=0;i<Nc;i++) Coef[i] = x[i];
+      for(i=Nc;i<20;i++) Coef[i] = 0.0;
+      
+      DestroyMatrix(AtA,Nc);
+      free(x);
+      free(Atb);
+      
+}
+/******************************************************************************/
+void VecToLngLat(double A[3], double *lng, double *lat)
+{
+      double B[3];
+      
+      if (MAGV(A) > 0.0) {
+         CopyUnitV(A,B);
+      
+         *lng = atan2(B[1],B[0]);
+      
+         if (fabs(B[2]) < 1.0) *lat = asin(B[2]);
+         else if (B[2] > 0.0) *lat = 2.0*atan(1.0);
+         else *lat = -2.0*atan(1.0);
+      }
+      else {
+         *lng = 0.0;
+         *lat = 0.0;
       }
 }
 /* #ifdef __cplusplus

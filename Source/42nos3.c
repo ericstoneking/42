@@ -24,7 +24,6 @@ static char ConnectionString[120] = "tcp://127.0.0.1:12001";
 static unsigned short int TelemetryPortToNOS3 = 4242;
 #define AbsoluteMaxWriteSockets 10
 static int MaxTelemetryConnections = 1;
-static int EchoTelemetry = 0;
 static unsigned short int CommandPortFromNOS3 = 4243;
 #define AbsoluteMaxReadSockets 5
 static int MaxCommandConnections = 1;
@@ -102,7 +101,7 @@ static void ReadNos3InpFile(void)
             fscanf(infile, "%u %[^\n] %[\n]", &tempu, junk, &newline);
             if (tempu < AbsoluteMaxWriteSockets) MaxTelemetryConnections = tempu;
             fscanf(infile, "%s %[^\n] %[\n]", response, junk, &newline);
-            EchoTelemetry = DecodeString(response);
+            if (DecodeString(response)) EchoEnabled = 1;
             fscanf(infile, "%u %[^\n] %[\n]", &tempu, junk, &newline);
             if (tempu < 65536) CommandPortFromNOS3 = tempu;
             fscanf(infile, "%u %[^\n] %[\n]", &tempu, junk, &newline);
@@ -202,7 +201,6 @@ void NOS3ReceiveMessageFromFSW(void)
 /* Forward declarations */
 static int InitServer(unsigned short int port);
 static int ConnectClientToSocketServer(int init_sockfd);
-static int WriteBufferToSocket(int sockfd);
 static int ReceiveBufferFromSocket(int sockfd);
 static void HandleCommand(char *line);
 
@@ -317,15 +315,19 @@ static int ConnectClientToSocketServer(int init_sockfd)
     return(sockfd);
 }
 
+void WriteToSocket(SOCKET Socket); /* Reuse from IPC so we get updates to that code for no work. */
+
 static void WriteBufferToSockets()
 {
-    int error;
+    int status = 0;
+    char *nos3eof = "";
     int i, j;
-    if (EchoTelemetry) WriteBufferToSocket(1); /* FD 1 = stdout */
+    if (EchoEnabled) WriteToSocket(1); /* FD 1 = stdout */
     for (i = 0; i < MaxTelemetryConnections; i++) {
         if (WriteSockets[i] != 0) {
-            error = WriteBufferToSocket(WriteSockets[i]);
-            if (error) {
+            WriteToSocket(WriteSockets[i]);
+            status = write(WriteSockets[i], nos3eof, strlen(nos3eof)); /* Determine if the socket was closed on the other end. */
+            if (status == -1) {
                 for (j = i; j < MaxTelemetryConnections-1; j++) {
                     WriteSockets[j] = WriteSockets[j+1];
                 }
@@ -335,66 +337,6 @@ static void WriteBufferToSockets()
             }
         }
     }
-}
-
-static int WriteBufferToSocket(int sockfd)
-{
-    struct SCType *S;
-    struct OrbitType *O;
-    struct WorldType *Wrld;
-    struct JointType *G;
-    struct WhlType *W;
-    long Isc, Ig, Iw;
-    char line[512];
-    double PosW[3];
-
-    sprintf(line,"TIME  %ld-%03ld-%02ld:%02ld:%012.9f\n", Year, doy, Hour, Minute, Second);
-    if (write(sockfd, line, strlen(line)) == -1) return errno;
-
-    for(Isc=0; Isc<Nsc; Isc++) {
-        S = &SC[Isc];
-        sprintf(line,"SC %ld\n", Isc);
-        if (write(sockfd, line, strlen(line)) == -1) return errno;
-        sprintf(line,"POSITION  %e %e %e\n", S->PosN[0], S->PosN[1], S->PosN[2]);
-        if (write(sockfd, line, strlen(line)) == -1) return errno;
-
-        O = &Orb[S->RefOrb];
-        if (O->Exists && (O->Regime == ORB_CENTRAL)) {
-            Wrld = &World[O->World];
-            if (Wrld->Exists) {
-                MxV(Wrld->CWN, S->PosN, PosW);
-                sprintf(line,"%s  %e %e %e\n", "POSITION_W", PosW[0], PosW[1], PosW[2]); /* Rotating world frame */
-                if (write(sockfd, line, strlen(line)) == -1) return errno;
-            }
-        }
-
-        sprintf(line,"VELOCITY  %e %e %e\n", S->VelN[0], S->VelN[1], S->VelN[2]);
-        if (write(sockfd, line, strlen(line)) == -1) return errno;
-        sprintf(line,"ANGVEL  %e %e %e\n", S->B[0].wn[0], S->B[0].wn[1], S->B[0].wn[2]);
-        if (write(sockfd, line, strlen(line)) == -1) return errno;
-        sprintf(line,"QBN  %e %e %e %e\n", S->B[0].qn[0], S->B[0].qn[1], S->B[0].qn[2], S->B[0].qn[3]);
-        if (write(sockfd, line, strlen(line)) == -1) return errno;
-        sprintf(line,"SUNVEC  %e %e %e\n", S->svb[0], S->svb[1], S->svb[2]);
-        if (write(sockfd, line, strlen(line)) == -1) return errno;
-        sprintf(line,"MAGVEC  %e %e %e\n", S->bvb[0], S->bvb[1], S->bvb[2]);
-        if (write(sockfd, line, strlen(line)) == -1) return errno;
-        sprintf(line,"ANGMOM  %e %e %e\n", S->Hvb[0], S->Hvb[1], S->Hvb[2]);
-        if (write(sockfd, line, strlen(line)) == -1) return errno;
-        for(Ig=0; Ig<S->Ng; Ig++) {
-            G = &S->G[Ig];
-            sprintf(line,"JOINT  %ld %e %e %e %e %e %e\n", Ig, G->Ang[0], G->Ang[1], G->Ang[2], G->Pos[0], G->Pos[1], G->Pos[2]);
-            if (write(sockfd, line, strlen(line)) == -1) return errno;
-        }
-        for(Iw=0; Iw<S->Nw; Iw++) {
-            W = &S->Whl[Iw];
-            sprintf(line,"HWHL  %ld %e\n", Iw, W->H);
-            if (write(sockfd, line, strlen(line)) == -1) return errno;
-        }
-    }
-    sprintf(line,"[EOF]\n\n");
-    if (write(sockfd, line, strlen(line)) == -1) return errno;
-
-    return 0;
 }
 
 static void ReceiveBufferFromSockets(void)

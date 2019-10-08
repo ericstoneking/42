@@ -213,6 +213,10 @@ long DecodeString(char *s)
       
       else if (!strcmp(s,"MEAN")) return EPH_MEAN;
       else if (!strcmp(s,"DE430")) return EPH_DE430;
+
+      else if (!strcmp(s,"MAJOR")) return MAJOR_CONSTELL;
+      else if (!strcmp(s,"ZODIAC")) return ZODIAC_CONSTELL;
+      else if (!strcmp(s,"MINOR")) return MINOR_CONSTELL;
       else {
          printf("Bogus input %s in DecodeString (42init.c:%d)\n",s,__LINE__);
          exit(1);
@@ -1460,7 +1464,7 @@ void InitSpacecraft(struct SCType *S)
       char junk[120],newline,response[120];
       char response1[120],response2[120],response3[120];
       double CBL[3][3],CBF[3][3];
-      long i,j,k,Ib,Ig,Iw,Im,It,Bi,Bo,Ic,Ist,Ifss;
+      long i,j,k,Ia,Ib,Ig,Iw,Im,It,Bi,Bo,Ic,Ist,Ifss;
       char RateFrame,AttFrame,AttParm;
       double wlnb[3];
       double wbn[3],CBN[3][3],qbn[4];
@@ -1484,6 +1488,7 @@ void InitSpacecraft(struct SCType *S)
       struct FssType *FSS;
       struct StarTrackerType *ST;
       struct GpsType *GPS;
+      struct AccelType *Accel;
       long OldNgeom;
 
       infile=FileOpen(InOutPath,S->FileName,"r");
@@ -1932,9 +1937,9 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%ld  %lf %lf %lf %[^\n] %[\n]",
                &CSS->Body,&CSS->Axis[0],&CSS->Axis[1],&CSS->Axis[2],junk,&newline);
             UNITV(CSS->Axis);
-            fscanf(infile,"%lf %[^\n] %[\n]",&CSS->FovAng,junk,&newline);
-            CSS->FovAng *= D2R;
-            CSS->CosFov = cos(CSS->FovAng);
+            fscanf(infile,"%lf %[^\n] %[\n]",&CSS->FovHalfAng,junk,&newline);
+            CSS->FovHalfAng *= D2R;
+            CSS->CosFov = cos(CSS->FovHalfAng);
             fscanf(infile,"%lf %[^\n] %[\n]",&CSS->Scale,junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&CSS->Quant,junk,&newline);
             fscanf(infile,"%ld %[^\n] %[\n]",&CSS->FlexNode,junk,&newline);
@@ -1965,9 +1970,9 @@ void InitSpacecraft(struct SCType *S)
             A2C(Seq,Ang1*D2R,Ang2*D2R,Ang3*D2R,FSS->CB);
             C2Q(FSS->CB,FSS->qb);
             fscanf(infile,"%lf %lf %[^\n] %[\n]",
-               &FSS->FovAng[0],&FSS->FovAng[1],junk,&newline);
+               &FSS->FovHalfAng[0],&FSS->FovHalfAng[1],junk,&newline);
             for(i=0;i<2;i++) {
-               FSS->FovAng[i] *= D2R;
+               FSS->FovHalfAng[i] *= 0.5*D2R;
             }
             fscanf(infile,"%lf %[^\n] %[\n]",&FSS->NEA,junk,&newline);
             FSS->NEA *= D2R;
@@ -1976,6 +1981,7 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%ld %[^\n] %[\n]",&FSS->FlexNode,junk,&newline);
          }
       }
+      
 /* .. Star Trackers */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nst,junk,&newline);
@@ -2000,10 +2006,10 @@ void InitSpacecraft(struct SCType *S)
             A2C(Seq,Ang1*D2R,Ang2*D2R,Ang3*D2R,ST->CB);
             C2Q(ST->CB,ST->qb);
             fscanf(infile,"%lf %lf %[^\n] %[\n]",
-               &ST->FovAng[0],&ST->FovAng[1],junk,&newline);
+               &ST->FovHalfAng[0],&ST->FovHalfAng[1],junk,&newline);
             for(i=0;i<2;i++) {
-               ST->FovAng[i] *= D2R;
-               ST->CosFov[i] = cos(ST->FovAng[i]);
+               ST->FovHalfAng[i] *= 0.5*D2R;
+               ST->CosFov[i] = cos(ST->FovHalfAng[i]);
             }
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
                &ST->SunExclAng,&ST->EarthExclAng,&ST->MoonExclAng,junk,&newline);
@@ -2020,6 +2026,7 @@ void InitSpacecraft(struct SCType *S)
                &ST->FlexNode,junk,&newline);
          }
       }
+      
 /* .. GPS Sensors */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Ngps,junk,&newline);
@@ -2044,8 +2051,52 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%lf %[^\n] %[\n]",&GPS->TimeNoise,junk,&newline);
             fscanf(infile,"%ld %[^\n] %[\n]",&GPS->FlexNode,junk,&newline);
          }
-      }  
+      }
+      
 /* .. Accelerometers */
+      fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      fscanf(infile,"%ld %[^\n] %[\n]",&S->Nacc,junk,&newline);
+      S->Accel = (struct AccelType *) calloc(S->Nacc,sizeof(struct AccelType));
+      if (S->Nacc == 0) {
+         for(i=0;i<11;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      }
+      else {
+         for(Ia=0;Ia<S->Nacc;Ia++) {
+            Accel = &S->Accel[Ia];
+            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+            fscanf(infile,"%lf %[^\n] %[\n]",&Accel->SampleTime,junk,&newline);
+            Accel->MaxCounter = (long) (Accel->SampleTime/DTSIM+0.5);
+            if (Accel->MaxCounter < 1) {
+               Accel->MaxCounter = 1;
+               Accel->SampleTime = DTSIM;
+              
+               printf("Info:  Accel[%ld].SampleTime was smaller than DTSIM.  It has been adjusted to be DTSIM.\n",Ia);
+            }
+            Accel->SampleCounter = Accel->MaxCounter;
+            fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
+               &Accel->PosB[0],&Accel->PosB[1],&Accel->PosB[2],junk,&newline);
+            fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
+               &Accel->Axis[0],&Accel->Axis[1],&Accel->Axis[2],junk,&newline);
+            UNITV(Accel->Axis);
+            fscanf(infile,"%lf %[^\n] %[\n]",&Accel->MaxAcc,junk,&newline);
+            fscanf(infile,"%lf %[^\n] %[\n]",&Accel->Scale,junk,&newline);
+            Accel->Scale = 1.0+1.0E-6*Accel->Scale;
+            fscanf(infile,"%lf %[^\n] %[\n]",&Accel->Quant,junk,&newline);
+            fscanf(infile,"%lf %[^\n] %[\n]",&Accel->SigV,junk,&newline);
+            Accel->SigV /= 60.0; /* from m/s/rt-hr to m/s/rt-sec */
+            fscanf(infile,"%lf %lf %[^\n] %[\n]",&Accel->SigU,&BiasTime,junk,&newline);
+            Accel->SigU /= sqrt(BiasTime*3600.0);
+            fscanf(infile,"%lf %[^\n] %[\n]",&Accel->SigE,junk,&newline);
+            fscanf(infile,"%lf %[^\n] %[\n]",&Accel->Bias,junk,&newline);
+            fscanf(infile,"%ld %[^\n] %[\n]",&Accel->FlexNode,junk,&newline);
+            Accel->BiasStabCoef = Accel->SigU*sqrt(Accel->SampleTime);
+            Accel->DVRWCoef = sqrt(Accel->SigV*Accel->SigV/Accel->SampleTime 
+                               + Accel->SigU*Accel->SigU*Accel->SampleTime/12.0);
+            Accel->DVNoiseCoef = Accel->SigE/sqrt(Accel->SampleTime);
+            Accel->CorrCoef = 1.0-Accel->SampleTime/(BiasTime*3600.0);
+            Accel->DV = 0.0;
+         }
+      }
 
 /* .. Initialize some Orbit and Formation variables */
       O = &Orb[S->RefOrb];
@@ -3374,7 +3425,7 @@ long LoadDE430(char DE430Path[80],double JD)
       struct Cheb3DType *Cheb;
       struct OrbitType *Eph;
       struct WorldType *W;
-      double JDavg,JDunit,x;
+      double u,dudJD,T[20],U[20],P,dPdu;
       double rh[3],vh[3];
       double EarthMoonBaryPosH[3],EarthMoonBaryVelH[3];
       double EMRAT = 81.30056907419062; /* Earth-Moon mass ratio */
@@ -3439,7 +3490,7 @@ long LoadDE430(char DE430Path[80],double JD)
          Cheb->N = N;
          for(n=0;n<N;n++) {
             for(i=0;i<3;i++) {
-               Cheb->Coef[n][i] = Block[Start + N*3*Ic + N*i+n];
+               Cheb->Coef[i][n] = Block[Start + N*3*Ic + N*i+n];
             }
          }
       }
@@ -3457,7 +3508,7 @@ long LoadDE430(char DE430Path[80],double JD)
          Cheb->N = N;
          for(n=0;n<N;n++) {
             for(i=0;i<3;i++) {
-               Cheb->Coef[n][i] = Block[Start + N*3*Ic + N*i+n];
+               Cheb->Coef[i][n] = Block[Start + N*3*Ic + N*i+n];
             }
          }
       }
@@ -3475,7 +3526,7 @@ long LoadDE430(char DE430Path[80],double JD)
          Cheb->N = N;
          for(n=0;n<N;n++) {
             for(i=0;i<3;i++) {
-               Cheb->Coef[n][i] = Block[Start + N*3*Ic + N*i+n];
+               Cheb->Coef[i][n] = Block[Start + N*3*Ic + N*i+n];
             }
          }
       }
@@ -3493,7 +3544,7 @@ long LoadDE430(char DE430Path[80],double JD)
          Cheb->N = N;
          for(n=0;n<N;n++) {
             for(i=0;i<3;i++) {
-               Cheb->Coef[n][i] = Block[Start + N*3*Ic + N*i+n];
+               Cheb->Coef[i][n] = Block[Start + N*3*Ic + N*i+n];
             }
          }
       }
@@ -3511,7 +3562,7 @@ long LoadDE430(char DE430Path[80],double JD)
          Cheb->N = N;
          for(n=0;n<N;n++) {
             for(i=0;i<3;i++) {
-               Cheb->Coef[n][i] = Block[Start + N*3*Ic + N*i+n];
+               Cheb->Coef[i][n] = Block[Start + N*3*Ic + N*i+n];
             }
          }
       }
@@ -3529,7 +3580,7 @@ long LoadDE430(char DE430Path[80],double JD)
          Cheb->N = N;
          for(n=0;n<N;n++) {
             for(i=0;i<3;i++) {
-               Cheb->Coef[n][i] = Block[Start + N*3*Ic + N*i+n];
+               Cheb->Coef[i][n] = Block[Start + N*3*Ic + N*i+n];
             }
          }
       }
@@ -3547,7 +3598,7 @@ long LoadDE430(char DE430Path[80],double JD)
          Cheb->N = N;
          for(n=0;n<N;n++) {
             for(i=0;i<3;i++) {
-               Cheb->Coef[n][i] = Block[Start + N*3*Ic + N*i+n];
+               Cheb->Coef[i][n] = Block[Start + N*3*Ic + N*i+n];
             }
          }
       }
@@ -3565,7 +3616,7 @@ long LoadDE430(char DE430Path[80],double JD)
          Cheb->N = N;
          for(n=0;n<N;n++) {
             for(i=0;i<3;i++) {
-               Cheb->Coef[n][i] = Block[Start + N*3*Ic + N*i+n];
+               Cheb->Coef[i][n] = Block[Start + N*3*Ic + N*i+n];
             }
          }
       }
@@ -3583,7 +3634,7 @@ long LoadDE430(char DE430Path[80],double JD)
          Cheb->N = N;
          for(n=0;n<N;n++) {
             for(i=0;i<3;i++) {
-               Cheb->Coef[n][i] = Block[Start + N*3*Ic + N*i+n];
+               Cheb->Coef[i][n] = Block[Start + N*3*Ic + N*i+n];
             }
          }
       }
@@ -3601,7 +3652,7 @@ long LoadDE430(char DE430Path[80],double JD)
          Cheb->N = N;
          for(n=0;n<N;n++) {
             for(i=0;i<3;i++) {
-               Cheb->Coef[n][i] = Block[Start + N*3*Ic + N*i+n];
+               Cheb->Coef[i][n] = Block[Start + N*3*Ic + N*i+n];
             }
          }
       }
@@ -3619,7 +3670,7 @@ long LoadDE430(char DE430Path[80],double JD)
          Cheb->N = N;
          for(n=0;n<N;n++) {
             for(i=0;i<3;i++) {
-               Cheb->Coef[n][i] = Block[Start + N*3*Ic + N*i+n];
+               Cheb->Coef[i][n] = Block[Start + N*3*Ic + N*i+n];
             }
          }
       }
@@ -3633,13 +3684,13 @@ long LoadDE430(char DE430Path[80],double JD)
          while(JulDay > Eph->Cheb[Ic].JD2) Ic++;
          /* Apply Chebyshev polynomials */
          Cheb = &Eph->Cheb[Ic];
-         JDavg = 0.5*(Cheb->JD1+Cheb->JD2);
-         JDunit = 0.5*(Cheb->JD2-Cheb->JD1);
-         x = (JulDay-JDavg)/JDunit;
-         Cheb3DToPosVel(Cheb->N,Cheb->Coef,x,PosJ,VelJ);
+         dudJD = 2.0/(Cheb->JD2-Cheb->JD1);
+         u = (JulDay-Cheb->JD1)*dudJD - 1.0;
+         ChebyPolys(u,Cheb->N,T,U);
          for(i=0;i<3;i++) {
-            PosJ[i] *= 1000.0;
-            VelJ[i] *= 1000.0/(JDunit*86400.0);
+            ChebyInterp(T,U,Cheb->Coef[i],Cheb->N,&P,&dPdu);
+            PosJ[i] = 1000.0*P;
+            VelJ[i] = 1000.0*dPdu*dudJD/86400.0;
          }
          QTxV(qJ2000H,PosJ,Eph->PosN);
          QTxV(qJ2000H,VelJ,Eph->VelN);
@@ -3696,6 +3747,43 @@ long LoadDE430(char DE430Path[80],double JD)
       }
 
       return(0);
+}
+/**********************************************************************/
+void LoadConstellations(void) {
+
+      FILE *infile;
+      char junk[120],newline,response[120];
+      double RA,Dec;
+      long i,j;
+      struct ConstellationType *C;
+
+      infile=FileOpen(ModelPath,"Constellations.txt","r");
+
+      for (i=0;i<89;i++) {
+         C = &Constell[i];
+         fscanf(infile,"%s %s %ld %ld\n",C->Tag,response,&C->Nstars,&C->Nlines);
+         C->Class = DecodeString(response);
+
+         C->StarVec = CreateMatrix(C->Nstars,3);
+
+         C->Star1 = (long *) calloc(C->Nlines,sizeof(long));
+         C->Star2 = (long *) calloc(C->Nlines,sizeof(long));
+         
+         for (j=0; j<C->Nstars; j++) {
+            fscanf(infile,"%lf %lf %[^\n] %[\n]",&RA,&Dec,junk,&newline);
+            RA *= D2R;
+            Dec *= D2R;
+            C->StarVec[j][0] = cos(RA)*cos(Dec);
+            C->StarVec[j][1] = sin(RA)*cos(Dec);
+            C->StarVec[j][2] = sin(Dec);
+         }
+
+         for (j=0; j<C->Nlines; j++) {
+            fscanf(infile,"%ld %ld %[^\n] %[\n]",&C->Star1[j],&C->Star2[j],junk,&newline);                  
+         }
+      }
+      
+      fclose(infile);
 }
 /**********************************************************************/
 void InitSim(int argc, char **argv)
@@ -3999,6 +4087,8 @@ void InitSim(int argc, char **argv)
       LoadTdrs();
       
       RNG = CreateRandomProcess(1);
+
+      LoadConstellations();
 }
 
 /* #ifdef __cplusplus

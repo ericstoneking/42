@@ -418,10 +418,12 @@ void TLE2Eph(const char Line1[80], const char Line2[80], double JD,
       double Epoch,AbsTime;
 
       strncpy(YearString,&Line1[18],2);
+      YearString[2] = 0;
       year = (long) atoi(YearString);
       if (year < 57) year += 2000;
       else year += 1900;
       strncpy(DOYstring,&Line1[20],12);
+      DOYstring[12] = 0;
       FloatDOY = (double) atof(DOYstring);
       DOY = (long) FloatDOY;
       FracDay = FloatDOY - ((double) DOY);
@@ -432,21 +434,27 @@ void TLE2Eph(const char Line1[80], const char Line2[80], double JD,
       AbsTime = JDToAbsTime(JD);
 
       strncpy(IncString,&Line2[8],8);
+      IncString[8] = 0;
       *i = ((double) atof(IncString))*D2R;
 
       strncpy(RAANstring,&Line2[17],9);
+      RAANstring[9] = 0;
       *RAAN = ((double) atof(RAANstring))*D2R;
 
       strncpy(EccString,&Line2[26],7);
+      EccString[7] = 0;
       *e = ((double) atof(EccString))*1.0E-7;
 
       strncpy(omgstring,&Line2[34],8);
+      omgstring[8] = 0;
       *ArgP = ((double) atof(omgstring))*D2R;
 
       strncpy(MeanAnomString,&Line2[43],8);
+      MeanAnomString[8] = 0;
       MeanAnom = ((double) atof(MeanAnomString))*D2R;
 
       strncpy(MeanMotionString,&Line2[52],11);
+      MeanMotionString[11] = 0;
       *MeanMotion = ((double) atof(MeanMotionString))*TWOPI/86400.0;
       *Period = TWOPI/(*MeanMotion);
 

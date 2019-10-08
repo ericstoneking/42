@@ -2319,7 +2319,7 @@ void DrawMap(void)
             glBindTexture(GL_TEXTURE_2D,MoonSpriteTexTag);
             for(i=0;i<3;i++) rmn[i] = -W->eph.PosN[i];
             UNITV(rmn);
-            MxV(World[W->Parent].CNH,rmn,rmh);
+            MTxV(World[W->Parent].CNH,rmn,rmh);
             MxV(W->CNH,rmh,rmn);
             MxV(W->CWN,rmn,rmw);
             Lng = atan2(rmw[1],rmw[0])*R2D;
@@ -3065,6 +3065,577 @@ void DrawOrrery(void)
       glutSwapBuffers();
 }
 /**********************************************************************/
+void DrawSphereHUD(void)
+{
+      char top[6][3] = {"+X","-X","+Y","-Y","+Z","-Z"};
+      char center[3][4][3] = {
+                            {"+Y","-Y","+Z","-Z"},
+                            {"+X","-X","+Z","-Z"},
+                            {"+X","-X","+Y","-Y"} };
+      char show[6][15] = {"Horizon","Sun","Moons","Planets",
+                          "Galactic Plane","Constellations"};
+      char vectors[6][17] = {"Magnetic Field","Angular Momentum",
+                             "Velocity","Anti-velocity",
+                             "Ecliptic North","Galactic North"};
+      char fovs[3][19] = {"Coarse Sun Sensors","Fine Sun Sensors",
+                          "Star Trackers"};
+      char frames[3][2] = {"B","N","L"};
+
+      int i,j;
+      struct WidgetType *W;
+
+/* .. Center Box */
+      W = &CenterWidget;
+      DrawWidget(W);
+
+      glRasterPos2i((W->xmin+W->xmax)/2 - 12,W->ymax-14);
+      DrawBitmapString(GLUT_BITMAP_8_BY_13,"Top");
+
+      glRasterPos2i((W->xmin+W->xmax)/2 - 24,W->ymin+38);
+      DrawBitmapString(GLUT_BITMAP_8_BY_13,"Center");
+
+      for (i=0; i<6; i++) {
+         glRasterPos2i(W->Spot[i].xmin+1,W->Spot[i].ymin+2);
+         DrawBitmapString(GLUT_BITMAP_8_BY_13,top[i]);
+      }
+
+      /* Text displayed for spots 7-10 changes based on which axis is selected */
+      if (W->Spot[0].Selected == 1 || W->Spot[1].Selected == 1) j = 0;
+      else if (W->Spot[2].Selected == 1 || W->Spot[3].Selected == 1) j = 1;
+      else if (W->Spot[4].Selected == 1 || W->Spot[5].Selected == 1) j = 2;
+
+      for (i=6; i<10; i++) {
+         glRasterPos2i(W->Spot[i].xmin+1,W->Spot[i].ymin+2);
+         DrawBitmapString(GLUT_BITMAP_8_BY_13,center[j][i-6]);
+      }
+
+/* .. Show Box */
+      W = &SphereShowWidget;
+      DrawWidget(W);
+
+      glRasterPos2i((W->xmin+W->xmax)/2 - 16,W->ymax-14);
+      DrawBitmapString(GLUT_BITMAP_8_BY_13,"Show");
+
+      for (i=0; i<6; i++) {
+         glRasterPos2i(W->Spot[i].xmin+1,W->Spot[i].ymin+2);
+         DrawBitmapString(GLUT_BITMAP_8_BY_13,show[i]);
+      }
+      
+/* .. Vectors Box */
+      W = &VectorsWidget;
+      DrawWidget(W);
+
+      glRasterPos2i((W->xmin+W->xmax)/2 - 28,W->ymax-14);
+      DrawBitmapString(GLUT_BITMAP_8_BY_13,"Vectors");
+
+      for (i=0; i<6; i++) {
+         glRasterPos2i(W->Spot[i].xmin+1,W->Spot[i].ymin+2);
+         DrawBitmapString(GLUT_BITMAP_8_BY_13,vectors[i]);
+      }
+      
+/* .. FOVs Box */
+      W = &FOVsWidget;
+      DrawWidget(W);
+
+      glRasterPos2i((W->xmin+W->xmax)/2 - 44,W->ymax-14);
+      DrawBitmapString(GLUT_BITMAP_8_BY_13,"Sensor FOVs");
+
+      for (i=0; i<3; i++) {
+         glRasterPos2i(W->Spot[i].xmin+1,W->Spot[i].ymin+2);
+         DrawBitmapString(GLUT_BITMAP_8_BY_13,fovs[i]);
+      }
+      
+/* .. Grids Box */
+      W = &GridsWidget;
+      DrawWidget(W);
+
+      glRasterPos2i(W->xmin+4,W->ymin+4);
+      DrawBitmapString(GLUT_BITMAP_8_BY_13,"Grids");
+
+      for (i=0; i<3; i++) {
+         glRasterPos2i(W->Spot[i].xmin+1,W->Spot[i].ymin+2);
+         DrawBitmapString(GLUT_BITMAP_8_BY_13,frames[i]);
+      }
+      
+/* .. Axes Box */
+      W = &AxesWidget;
+      DrawWidget(W);
+
+      glRasterPos2i(W->xmin+4,W->ymin+4);
+      DrawBitmapString(GLUT_BITMAP_8_BY_13,"Axes");
+
+      for (i=0; i<3; i++) {
+         glRasterPos2i(W->Spot[i].xmin+1,W->Spot[i].ymin+2);
+         DrawBitmapString(GLUT_BITMAP_8_BY_13,frames[i]);
+      }
+
+}
+/**********************************************************************/
+/* 24 possible cases for body axes orientation in Unit Sphere window -
+   calculate appropriate DCM                                          */
+void FindSphereWindowAxes(double C[3][3])
+{
+      struct WidgetType *W;
+      double CT[3][3];
+
+      W = &CenterWidget;
+
+      long top,center,index;
+      long i;
+
+      long SEQ[24] = {21,21,21,2 ,21,21,2 ,21,
+                      1 ,12,12,12,1 ,12,12,12,
+                      3 ,3 ,3 ,3 ,1 ,13,13,13};
+      double ang1[24] = {-90,-90,-90,-90, 90, 90, 90, 90,
+                          90, 90, 90, 90,-90,-90,-90,-90,
+                           0,180,-90, 90,180,180,180,180};
+      double ang2[24] = {-90, 90,180,  0, 90,-90,  0,180,
+                           0,180, 90,-90,  0,180, 90,-90,
+                           0,  0,  0,  0,  0,180,-90, 90};
+
+      for (i=0; i<6; i++) {
+         if (W->Spot[i].Selected == 1) {
+            top = i;
+         }
+      }
+
+      for (i=6; i<10; i++) {
+         if (W->Spot[i].Selected == 1) {
+            center = i - 6;
+         }
+      }
+
+      index = 4*top + center;
+
+      A2C(SEQ[index],ang1[index]*D2R,ang2[index]*D2R,0.0,CT);
+      MT(CT,C);
+
+}
+/**********************************************************************/
+/* Draws a constellation given a constellation struct and DCM         */
+void DrawConstellation(struct ConstellationType *C, double CVJ[3][3])
+{
+      long i,Nstars,Nlines;
+      double VecV[3];
+      double lngA,latA,lngB,latB;
+
+      Nstars = C->Nstars;
+      Nlines = C->Nlines;
+
+      glPointSize(3.0);
+      glBegin(GL_POINTS);
+      for (i=0; i<Nstars; i++) {
+         MxV(CVJ,C->StarVec[i],VecV);
+         VecToLngLat(VecV,&lngA,&latA);
+         latA *= R2D;
+         lngA *= R2D;
+         glVertex2f(lngA,latA);
+      }
+      glEnd();
+
+      glRasterPos2f(lngA,latA);
+      DrawBitmapString(GLUT_BITMAP_8_BY_13,C->Tag);
+
+      for (i=0;i<Nlines;i++) {
+         MxV(CVJ,C->StarVec[C->Star1[i]],VecV);
+         VecToLngLat(VecV,&lngA,&latA);
+         
+         MxV(CVJ,C->StarVec[C->Star2[i]],VecV);
+         VecToLngLat(VecV,&lngB,&latB);
+         
+         DrawMercatorLine(lngA,latA,lngB,latB);
+      }
+}
+/**********************************************************************/
+void DrawUnitSphere(void)
+{
+      double lat,lng;
+      long i,j,Im;
+      char label[20];
+
+
+      double CVB0[3][3]; /* DCM from Body0 frame to Viewing frame */
+      double CVB[3][3];
+      double CVL[3][3];
+      double CVN[3][3];
+      double CVH[3][3];
+      double CVG[3][3];
+      double CVS[3][3];
+      double CVJ[3][3];
+      double ZAxis[3] = {0.0,0.0,1.0};
+      double x,y;
+
+      double VecH[3],VecN[3],VecV[3];
+
+      struct SCType *S = &SC[POV.Host.SC];
+      struct WorldType *Wd = &World[Orb[S->RefOrb].World];
+      struct WidgetType *W;
+
+      GLfloat HorizonColor[4] = {0.3,0.6,0.6,1.0};
+      GLfloat ValidCSSColor[4] = {0.9,0.95,0.05,1.0};
+      GLfloat InvalidCSSColor[4] = {0.45,0.475,0.025,1.0};
+      GLfloat ValidFSSColor[4] = {0.95,0.59,0.05,1.0};
+      GLfloat InvalidFSSColor[4] = {0.48,0.3,0.025,1.0};
+      GLfloat ValidStarTrackerColor[4] = {0.05,0.95,0.95,1.0};
+      GLfloat InvalidStarTrackerColor[4] = {0.025,0.48,0.48,1.0};
+      GLfloat MagFieldColor[4] = {0.59,0.27,0.05,1.0};
+      GLfloat AngMomentumColor[4] = {0.49,0.06,0.58,1.0};
+      GLfloat VelocityColor[4] = {0.06,0.88,0.04,1.0};
+      GLfloat AntiVelColor[4] = {0.05,0.62,0.03,1.0};
+      GLfloat GalacticPlaneColor[4] = {0.5,0.5,0.5,0.5};
+      GLfloat ConstellationColor[4] = {0.48,0.69,0.95,1.0};
+      GLfloat EclipticNorthColor[4] = {0.93,0.65,0.89,1.0};
+      GLfloat GalacticNorthColor[4] = {0.68,0.5,0.75,1.0};
+
+      GLfloat MenuOutlineColor[4] = {0.2,0.2,1.0,1.0};
+      GLfloat MenuBackgroundColor[4] = {0.15,0.15,0.3,1.0};
+      
+      long MenuTop;
+      double rad;
+      double rmn[3],rmh[3];
+
+      glClear(GL_COLOR_BUFFER_BIT);
+
+      FindSphereWindowAxes(CVB0);
+      MxM(CVB0,S->B[0].CN,CVN);
+      MxMT(CVN,S->CLN,CVL);
+      MxM(CVN,Wd->CNH,CVH);
+      MxMT(CVH,CGH,CVG);
+      MxMT(CVH,World[EARTH].CNH,CVJ);
+
+/* .. Galactic plane */
+      W = &SphereShowWidget;
+
+      if (W->Spot[4].Selected) { /* Galactic plane on */
+         glColor4fv(GalacticPlaneColor);
+         glLineWidth(2);
+
+         MxV(CVG,ZAxis,VecV);
+
+         VecToLngLat(VecV,&lng,&lat);
+
+         DrawSmallCircle(lng,lat,HalfPi);
+         glLineWidth(1);
+      }
+
+/* .. Horizon (currently just an outline) */
+      W = &SphereShowWidget;
+
+      if (W->Spot[0].Selected) {
+         rad = asin(Wd->rad / MAGV(S->PosN));
+         
+         for(i=0;i<3;i++) VecN[i] = -S->PosN[i];
+         UNITV(VecN);
+         MxV(CVN,VecN,VecV);
+
+         VecToLngLat(VecV,&lng,&lat);
+
+         glColor4fv(HorizonColor);
+         glLineWidth(2);
+         DrawSmallCircle(lng,lat,rad);
+         glLineWidth(1);
+         DrawMercatorVector(lng,lat,Wd->Name);
+      }
+
+/* .. Grids */ 
+      W = &GridsWidget;
+
+      if (W->Spot[0].Selected) { /* B grid */
+         glColor4fv(BBrightColor);
+         DrawMercatorGrid(CVB0);
+      }
+      if (W->Spot[1].Selected) { /* N grid */
+         glColor4fv(NBrightColor);
+         DrawMercatorGrid(CVN);
+      }
+      if (W->Spot[2].Selected) { /* L grid */
+         glColor4fv(LBrightColor);
+         DrawMercatorGrid(CVL);
+      }
+
+/* .. Sensor FOVs */
+      W = &FOVsWidget;
+
+      /* Coarse Sun Sensors */
+      if (W->Spot[0].Selected) {
+         for (i=0; i<S->Ncss; i++) {
+            sprintf(label,"CSS%ld",i);
+
+            MxMT(CVN,S->B[S->CSS[i].Body].CN,CVB);
+            MxV(CVB,S->CSS[i].Axis,VecV);
+            VecToLngLat(VecV,&lng,&lat);
+
+            if (S->CSS[i].Valid) {
+               glColor4fv(ValidCSSColor);
+               DrawMercatorVector(lng,lat,label);
+
+               rad = acos(S->CSS[i].Illum/S->CSS[i].Scale);
+               DrawSmallCircle(lng,lat,rad);
+            }
+            else {
+               glColor4fv(InvalidCSSColor);
+               DrawMercatorVector(lng,lat,label);
+            }
+         }
+      }
+
+      /* Fine Sun Sensors */
+      if (W->Spot[1].Selected) {
+         for (i=0; i<S->Nfss; i++) {
+            sprintf(label,"FSS%ld",i);
+            
+            if (S->FSS[i].Valid) glColor4fv(ValidFSSColor);
+            else glColor4fv(InvalidFSSColor);
+            
+            MxMT(CVB0,S->FSS[i].CB,CVS);
+            DrawMercatorSquare(CVS,S->FSS[i].FovHalfAng);
+
+            MxV(CVS,ZAxis,VecV);
+            VecToLngLat(VecV,&lng,&lat);
+
+            DrawMercatorVector(lng,lat,label);
+         }
+      }
+
+      /* Star Trackers */
+      if (W->Spot[2].Selected) {
+
+         for (i=0; i<S->Nst; i++) {
+            sprintf(label,"ST%ld",i);
+            if (S->ST[i].Valid) glColor4fv(ValidStarTrackerColor);
+            else glColor4fv(InvalidStarTrackerColor);
+
+            MxMT(CVB0,S->ST[i].CB,CVS);
+            DrawMercatorSquare(CVS,S->ST[i].FovHalfAng);
+
+            MxV(CVS,ZAxis,VecV);
+            VecToLngLat(VecV,&lng,&lat);
+
+            DrawMercatorVector(lng,lat,label);
+         }
+      }
+
+/* .. Axes */
+      W = &AxesWidget;
+
+      /* B Axes */
+      if (W->Spot[0].Selected) {
+         glColor4fv(BBrightColor);
+         DrawMercatorAxes(CVB0,"B");
+      }
+      
+      /* N Axes */
+      if (W->Spot[1].Selected) {
+         glColor4fv(NBrightColor);
+         DrawMercatorAxes(CVN,"N");
+      }
+      
+      /* L Axes */
+      if (W->Spot[2].Selected) {
+         glColor4fv(LBrightColor);
+         DrawMercatorAxes(CVL,"L");
+      }
+
+/* .. Vectors */ 
+      W = &VectorsWidget;
+
+      /* Magnetic Field */
+      if (W->Spot[0].Selected) {
+         MxV(CVB0,S->bvb,VecV);
+         VecToLngLat(VecV,&lng,&lat);
+         glColor4fv(MagFieldColor);
+         DrawMercatorVector(lng,lat,"Mag");
+      }
+      /* Angular Momentum */
+      if (W->Spot[1].Selected) {
+         MxV(CVB0,S->Hvb,VecV);
+         VecToLngLat(VecV,&lng,&lat);
+         glColor4fv(AngMomentumColor);
+         DrawMercatorVector(lng,lat,"H");
+      }
+      /* Velocity */
+      if (W->Spot[2].Selected) {
+         MxV(CVN,S->VelN,VecV);
+         VecToLngLat(VecV,&lng,&lat);
+         glColor4fv(VelocityColor);
+         DrawMercatorVector(lng,lat,"V");
+      }
+      /* Anti-velocity */
+      if (W->Spot[3].Selected) {
+         MxV(CVN,S->VelN,VecV);
+         for(i=0;i<3;i++) VecV[i] = -VecV[i];
+         VecToLngLat(VecV,&lng,&lat);
+         glColor4fv(AntiVelColor);
+         DrawMercatorVector(lng,lat,"-V");
+      }
+      /* Ecliptic North */
+      if (W->Spot[4].Selected) {
+         MxV(CVH,ZAxis,VecV);
+         VecToLngLat(VecV,&lng,&lat);
+         glColor4fv(EclipticNorthColor);
+         DrawMercatorVector(lng,lat,"Ecl N");
+      }
+      /* Galactic North */
+      if (W->Spot[5].Selected) {
+         MxV(CVG,ZAxis,VecV);
+         VecToLngLat(VecV,&lng,&lat);
+         glColor4fv(GalacticNorthColor);
+         DrawMercatorVector(lng,lat,"Gal N");
+      }
+
+/* .. Sprites */
+      W = &SphereShowWidget;
+
+      /* Sun */
+      if (W->Spot[1].Selected) {
+         MxV(CVB0,S->svb,VecV);
+         VecToLngLat(VecV,&lng,&lat);
+         lng *= R2D;
+         lat *= R2D;
+         glEnable(GL_TEXTURE_2D);
+         glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+         glBindTexture(GL_TEXTURE_2D,SphereSunSpriteTexTag);
+         x=4.0;
+         y=x;
+         glBegin(GL_QUADS);
+            glTexCoord2f(0.0,1.0);
+            glVertex2f(lng-x,lat-y);
+            glTexCoord2f(1.0,1.0);
+            glVertex2f(lng+x,lat-y);
+            glTexCoord2f(1.0,0.0);
+            glVertex2f(lng+x,lat+y);
+            glTexCoord2f(0.0,0.0);
+            glVertex2f(lng-x,lat+y);
+         glEnd();
+         glDisable(GL_TEXTURE_2D);
+      }
+
+      /* Moons */
+      if (W->Spot[2].Selected) {
+         if (Wd->Nsat > 0) {
+            glEnable(GL_TEXTURE_2D);
+            glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+            glBindTexture(GL_TEXTURE_2D,SphereMoonSpriteTexTag);
+            x=4.0;
+            y=x;
+            for(Im=0;Im<Wd->Nsat;Im++) {
+               for (j=0; j<3; j++) {
+                  VecN[j] = World[Wd->Sat[Im]].eph.PosN[j] - S->PosN[j];
+               }
+               MxV(CVN,VecN,VecV);
+               VecToLngLat(VecV,&lng,&lat);
+               lng *= R2D;
+               lat *= R2D;
+               glBegin(GL_QUADS);
+                  glTexCoord2f(0.0,1.0);
+                  glVertex2f(lng-x,lat-y);
+                  glTexCoord2f(1.0,1.0);
+                  glVertex2f(lng+x,lat-y);
+                  glTexCoord2f(1.0,0.0);
+                  glVertex2f(lng+x,lat+y);
+                  glTexCoord2f(0.0,0.0);
+                  glVertex2f(lng-x,lat+y);
+               glEnd();
+            }
+            glDisable(GL_TEXTURE_2D);
+         }
+         else if (Wd->Type == MOON) { /* Draw Parent Sprite */
+            glEnable(GL_TEXTURE_2D);
+            glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+            glBindTexture(GL_TEXTURE_2D,SphereMoonSpriteTexTag);
+            for(i=0;i<3;i++) rmn[i] = -Wd->eph.PosN[i];
+            MTxV(World[Wd->Parent].CNH,rmn,rmh);
+            MxV(Wd->CNH,rmh,rmn);
+            for(i=0;i<3;i++) VecN[i] = rmn[i] - S->PosN[i];
+            MxV(CVN,VecN,VecV);
+            VecToLngLat(VecV,&lng,&lat);
+            x=4.0;
+            y=x;
+            glBegin(GL_QUADS);
+               glTexCoord2f(0.0,1.0);
+               glVertex2f(lng-x,lat-y);
+               glTexCoord2f(1.0,1.0);
+               glVertex2f(lng+x,lat-y);
+               glTexCoord2f(1.0,0.0);
+               glVertex2f(lng+x,lat+y);
+               glTexCoord2f(0.0,0.0);
+               glVertex2f(lng-x,lat+y);
+            glEnd();
+            glDisable(GL_TEXTURE_2D);
+         }
+      }
+      
+/* .. Planets */
+      W = &SphereShowWidget;
+      if (W->Spot[3].Selected) {
+         for (i=MERCURY;i<=PLUTO;i++) {
+            Wd = &World[i];
+            if (Wd->Exists && i != POV.Host.World) {
+               for (j=0; j<3; j++) {
+                  VecH[j] = Wd->PosH[j] - S->PosH[j];
+               }
+               MxV(CVH,VecH,VecV);
+               VecToLngLat(VecV,&lng,&lat);
+               glColor4fv(Wd->Color);
+               DrawMercatorVector(lng,lat,Wd->Name);
+            }
+         }
+      }
+
+/* .. Constellations */
+      W = &SphereShowWidget;
+
+      if (W->Spot[5].Selected) {
+         glColor4fv(ConstellationColor);
+         for (i=0;i<89;i++) {
+            if (ShowConstellations[Constell[i].Class]) {
+               if (Constell[i].Nstars > 0) 
+                  DrawConstellation(&Constell[i],CVJ);
+            }
+         }
+      }
+
+/* .. Menu */
+      glMatrixMode(GL_PROJECTION);
+      glPushMatrix();
+      glLoadIdentity();
+      gluOrtho2D(0,SphereWindowWidth,0,SphereWindowHeight);
+      glMatrixMode(GL_MODELVIEW);
+
+      glDisable(GL_LINE_SMOOTH);
+      glBegin(GL_QUADS);
+      glColor4fv(MenuBackgroundColor);
+
+      MenuTop = 16*(NumSphereWindowMenuLines + 2);
+      glVertex2i(0,0);
+      glVertex2i(SphereWindowWidth,0);
+      glVertex2i(SphereWindowWidth,MenuTop);
+      glVertex2i(0,MenuTop);
+
+      glEnd();
+
+      glBegin(GL_LINE_LOOP);
+      glColor4fv(MenuOutlineColor);
+
+      glVertex2i(4,2);
+      glVertex2i(508,2);
+      glVertex2i(508,MenuTop-2);
+      glVertex2i(4,MenuTop-2);
+
+      glEnd();
+
+      glLineWidth(1);
+      DrawSphereHUD();
+      glEnable(GL_LINE_SMOOTH);
+
+      glMatrixMode(GL_PROJECTION);
+      glPopMatrix();
+      glMatrixMode(GL_MODELVIEW);
+
+      glutSwapBuffers();
+
+}
+/**********************************************************************/
 void SetPovOrientation(void)
 {
       double Axis[6][3] = {{ 1.0,0.0,0.0},{0.0, 1.0,0.0},{0.0,0.0, 1.0},
@@ -3583,6 +4154,11 @@ void Idle(void)
             glutSetWindow(OrreryWindow);
             DrawOrrery();
          }
+         if (SphereWindowExists) {
+            glutSetWindow(SphereWindow);
+            DrawUnitSphere();
+         }
+
          glutPostRedisplay();
       }
       else {
@@ -3605,6 +4181,11 @@ void Idle(void)
                   glutSetWindow(OrreryWindow);
                   DrawOrrery();
                }
+               if (SphereWindowExists) {
+                  glutSetWindow(SphereWindow);
+                  DrawUnitSphere();
+               }
+
                glutPostRedisplay();
                if (CaptureCam) {
                   CamFrame++;
@@ -4218,6 +4799,170 @@ void OrreryMouseActiveMotionHandler(int x, int y)
 /**********************************************************************/
 void OrreryMousePassiveMotionHandler(int x, int y){}
 /**********************************************************************/
+void SphereMouseButtonHandler(int Button, int State, int x, int y)
+{
+      struct SpotType *S;
+      struct WidgetType *W;
+      long i,Pick;
+
+      y = SphereWindowHeight - y; /* Flip vertically */
+
+      if (Button == GLUT_LEFT_BUTTON) {
+         if (State == GLUT_DOWN) {
+
+            /* Center Widget */
+            W = &CenterWidget;
+
+            if (x >= W->xmin && x <= W->xmax && y >= W->ymin && y <= W->ymax) {
+               Pick = 100;
+               for (i=0; i<W->Nspot; i++) {
+                  S = &W->Spot[i];
+                  if (x >= S->xmin && x <= S->xmax &&
+                      y >= S->ymin && y <= S->ymax) {
+                     Pick = i;
+                  }
+               }
+
+               if (Pick != 100) {
+
+                  W->Spot[Pick].Selected = 1;
+
+                  if (Pick < 6) {
+                     for (i=0; i<6; i++) {
+                        if (i != Pick) W->Spot[i].Selected = 0;
+                     }
+                  } 
+                  else {
+                     for (i=6; i<10; i++) {
+                        if (i != Pick) W->Spot[i].Selected = 0;
+                     }
+                  }
+               }
+            }
+
+            /* Show Widget */
+            W = &SphereShowWidget;
+
+            if (x >= W->xmin && x <= W->xmax && y >= W->ymin && y <= W->ymax) {
+               Pick = 100;
+               for (i=0; i<W->Nspot; i++) {
+                  S = &W->Spot[i];
+                  if (x >= S->xmin && x <= S->xmax &&
+                      y >= S->ymin && y <= S->ymax) {
+                     Pick = i;
+                  }
+               }
+
+               if (Pick != 100) {
+               
+                  if (W->Spot[Pick].Selected == 0) {
+                     W->Spot[Pick].Selected = 1;
+                  } 
+                  else {
+                     W->Spot[Pick].Selected = 0;
+                  }
+               }
+            }
+         
+            /* Vectors Widget */
+            W = &VectorsWidget;
+
+            if (x >= W->xmin && x <= W->xmax && y >= W->ymin && y <= W->ymax) {
+               Pick = 100;
+               for (i=0; i<W->Nspot; i++) {
+                  S = &W->Spot[i];
+                  if (x >= S->xmin && x <= S->xmax &&
+                      y >= S->ymin && y <= S->ymax) {
+                     Pick = i;
+                  }
+               }
+
+               if (Pick != 100) {
+               
+                  if (W->Spot[Pick].Selected == 0) {
+                     W->Spot[Pick].Selected = 1;
+                  } 
+                  else {
+                     W->Spot[Pick].Selected = 0;
+                  }
+               }
+            }
+         
+            /* FOVs Widget */
+            W = &FOVsWidget;
+
+            if (x >= W->xmin && x <= W->xmax && y >= W->ymin && y <= W->ymax) {
+               Pick = 100;
+               for (i=0; i<W->Nspot; i++) {
+                  S = &W->Spot[i];
+                  if (x >= S->xmin && x <= S->xmax &&
+                      y >= S->ymin && y <= S->ymax) {
+                     Pick = i;
+                  }
+               }
+
+               if (Pick != 100) {
+               
+                  if (W->Spot[Pick].Selected == 0) {
+                     W->Spot[Pick].Selected = 1;
+                  } 
+                  else {
+                     W->Spot[Pick].Selected = 0;
+                  }
+               }
+            }
+
+            /* Grids Widget */
+            W = &GridsWidget;
+
+            if (x >= W->xmin && x <= W->xmax && y >= W->ymin && y <= W->ymax) {
+               Pick = 100;
+               for (i=0; i<W->Nspot; i++) {
+                  S = &W->Spot[i];
+                  if (x >= S->xmin && x <= S->xmax &&
+                      y >= S->ymin && y <= S->ymax) {
+                     Pick = i;
+                  }
+               }
+
+               if (Pick != 100) {
+               
+                  if (W->Spot[Pick].Selected == 0) {
+                     W->Spot[Pick].Selected = 1;
+                  } 
+                  else {
+                     W->Spot[Pick].Selected = 0;
+                  }
+               }
+            }
+         
+            /* Axes Widget */
+            W = &AxesWidget;
+
+            if (x >= W->xmin && x <= W->xmax && y >= W->ymin && y <= W->ymax) {
+               Pick = 100;
+               for (i=0; i<W->Nspot; i++) {
+                  S = &W->Spot[i];
+                  if (x >= S->xmin && x <= S->xmax &&
+                      y >= S->ymin && y <= S->ymax) {
+                     Pick = i;
+                  }
+               }
+
+               if (Pick != 100) {
+               
+                  if (W->Spot[Pick].Selected == 0) {
+                     W->Spot[Pick].Selected = 1;
+                  } 
+                  else {
+                     W->Spot[Pick].Selected = 0;
+                  }
+               }
+            }
+         }
+      }
+}
+/**********************************************************************/
 void JoystickHandler(unsigned int ButtonMask, int x, int y, int z)
 {
 }
@@ -4465,6 +5210,220 @@ void InitOrreryWidget(void)
       W->Spot[5].ymax = y0+60;
 }
 /**********************************************************************/
+void InitSphereWidgets(void)
+{
+      GLfloat BorderColor[4] = {0.64,0.32,0.075,1.0};
+      GLfloat TextColor[4] = {0.8,0.44,0.0,1.0};
+      GLfloat SelectedColor[4] = {1.0,1.0,1.0,0.3};
+      GLfloat UnselectedColor[4] = {1.0,1.0,1.0,0.1};
+
+      long x0,y0;
+      long i;
+      
+      long xpos[2] = {4,34};
+      long ypos[5] = {36,52,68,100,116};
+      long Xgrid[3] = {512-82,512-57,512-33};
+      long Xaxes[3] = {512-82,512-57,512-33};
+      long x,y;
+
+      long NLines = NumSphereWindowMenuLines;
+      
+      SphereShowWidget.Nspot = 6;
+      VectorsWidget.Nspot = 6;
+      FOVsWidget.Nspot = 3; /* Max of NLines - 3 */
+
+/* .. Top/Center Widget */
+      x0 = 8;
+      y0 = 4; 
+      CenterWidget.xmin = x0;
+      CenterWidget.xmax = x0 + 57;
+      CenterWidget.ymin = y0;
+      CenterWidget.ymax = y0 + 120;
+      memcpy(CenterWidget.BorderColor,BorderColor,4*sizeof(GLfloat));
+      memcpy(CenterWidget.TextColor,TextColor,4*sizeof(GLfloat));
+      memcpy(CenterWidget.SelectedColor,SelectedColor,4*sizeof(GLfloat));
+      memcpy(CenterWidget.UnselectedColor,UnselectedColor,4*sizeof(GLfloat));
+      CenterWidget.Nspot = 10;
+      CenterWidget.Spot =
+         (struct SpotType *) calloc(CenterWidget.Nspot,sizeof(struct SpotType));
+      for(i=0;i<CenterWidget.Nspot;i++) {
+         CenterWidget.Spot[i].Visible = 1;
+         CenterWidget.Spot[i].Selected = 0;
+      }
+
+      CenterWidget.Spot[4].Selected = 1;
+      CenterWidget.Spot[6].Selected = 1;
+
+      for (i=0; i<CenterWidget.Nspot; i++) {
+
+         x = x0 + xpos[i%2];
+         y = CenterWidget.ymax - ypos[i/2];
+
+         CenterWidget.Spot[i].xmin = x;
+         CenterWidget.Spot[i].xmax = x+18;
+         CenterWidget.Spot[i].ymin = y;
+         CenterWidget.Spot[i].ymax = y+13;
+      }
+
+/* .. Show Widget */
+      x0 = CenterWidget.xmax + 3;
+      y0 = 4;
+      SphereShowWidget.xmin = x0;
+      SphereShowWidget.xmax = x0 + 137;
+      SphereShowWidget.ymin = y0;
+      SphereShowWidget.ymax = 16*(NLines+2) - 4;
+      memcpy(SphereShowWidget.BorderColor,BorderColor,4*sizeof(GLfloat));
+      memcpy(SphereShowWidget.TextColor,TextColor,4*sizeof(GLfloat));
+      memcpy(SphereShowWidget.SelectedColor,SelectedColor,4*sizeof(GLfloat));
+      memcpy(SphereShowWidget.UnselectedColor,UnselectedColor,4*sizeof(GLfloat));
+
+      SphereShowWidget.Spot =
+         (struct SpotType *) calloc(SphereShowWidget.Nspot,sizeof(struct SpotType));
+      for(i=0;i<SphereShowWidget.Nspot;i++) {
+         SphereShowWidget.Spot[i].Visible = 1;
+         SphereShowWidget.Spot[i].Selected = 0;
+      }
+
+      SphereShowWidget.Spot[0].Selected = 1;
+
+      for (i=0; i<SphereShowWidget.Nspot; i++) {
+
+         x = x0+3;
+         y = SphereShowWidget.ymax - 36 - 16*i;
+
+         SphereShowWidget.Spot[i].xmin = x;
+         SphereShowWidget.Spot[i].xmax = SphereShowWidget.xmax - 3;
+         SphereShowWidget.Spot[i].ymin = y;
+         SphereShowWidget.Spot[i].ymax = y+13;
+      }
+
+/* .. Vectors Widget */
+      x0 = SphereShowWidget.xmax + 3;
+      y0 = 4;
+      VectorsWidget.xmin = x0;
+      VectorsWidget.xmax = x0 + 140;
+      VectorsWidget.ymin = y0;
+      VectorsWidget.ymax = 16*(NLines+2) - 4;
+      memcpy(VectorsWidget.BorderColor,BorderColor,4*sizeof(GLfloat));
+      memcpy(VectorsWidget.TextColor,TextColor,4*sizeof(GLfloat));
+      memcpy(VectorsWidget.SelectedColor,SelectedColor,4*sizeof(GLfloat));
+      memcpy(VectorsWidget.UnselectedColor,UnselectedColor,4*sizeof(GLfloat));
+
+      VectorsWidget.Spot =
+         (struct SpotType *) calloc(VectorsWidget.Nspot,sizeof(struct SpotType));
+      for(i=0;i<VectorsWidget.Nspot;i++) {
+         VectorsWidget.Spot[i].Visible = 1;
+         VectorsWidget.Spot[i].Selected = 0;
+      }
+
+      VectorsWidget.Spot[0].Selected = 1;
+
+      for (i=0; i<VectorsWidget.Nspot; i++) {
+
+         x = x0+3;
+         y = SphereShowWidget.ymax - 36 - 16*i;
+
+         VectorsWidget.Spot[i].xmin = x;
+         VectorsWidget.Spot[i].xmax = VectorsWidget.xmax - 3;
+         VectorsWidget.Spot[i].ymin = y;
+         VectorsWidget.Spot[i].ymax = y+13;
+      }
+
+/* .. FOVs Widget */
+      x0 = VectorsWidget.xmax + 3;
+      y0 = 52;
+      FOVsWidget.xmin = x0;
+      FOVsWidget.xmax = 512-8;
+      FOVsWidget.ymin = y0;
+      FOVsWidget.ymax = 16*(NLines+2) - 4;
+      memcpy(FOVsWidget.BorderColor,BorderColor,4*sizeof(GLfloat));
+      memcpy(FOVsWidget.TextColor,TextColor,4*sizeof(GLfloat));
+      memcpy(FOVsWidget.SelectedColor,SelectedColor,4*sizeof(GLfloat));
+      memcpy(FOVsWidget.UnselectedColor,UnselectedColor,4*sizeof(GLfloat));
+
+      FOVsWidget.Spot =
+         (struct SpotType *) calloc(FOVsWidget.Nspot,sizeof(struct SpotType));
+      for(i=0;i<FOVsWidget.Nspot;i++) {
+         FOVsWidget.Spot[i].Visible = 1;
+         FOVsWidget.Spot[i].Selected = 0;
+      }
+
+      for (i=0; i<FOVsWidget.Nspot; i++) {
+
+         x = x0+3;
+         y = SphereShowWidget.ymax - 36 - 16*i;
+
+         FOVsWidget.Spot[i].xmin = x;
+         FOVsWidget.Spot[i].xmax = FOVsWidget.xmax - 3;
+         FOVsWidget.Spot[i].ymin = y;
+         FOVsWidget.Spot[i].ymax = y+13;
+      }
+
+/* .. Grids Widget */
+      x0 = VectorsWidget.xmax + 3;
+      y0 = 28;
+      GridsWidget.xmin = x0;
+      GridsWidget.xmax = 512-8;
+      GridsWidget.ymin = y0;
+      GridsWidget.ymax = y0 + 20;
+      memcpy(GridsWidget.BorderColor,BorderColor,4*sizeof(GLfloat));
+      memcpy(GridsWidget.TextColor,TextColor,4*sizeof(GLfloat));
+      memcpy(GridsWidget.SelectedColor,SelectedColor,4*sizeof(GLfloat));
+      memcpy(GridsWidget.UnselectedColor,UnselectedColor,4*sizeof(GLfloat));
+
+      GridsWidget.Nspot = 3;
+      GridsWidget.Spot =
+         (struct SpotType *) calloc(GridsWidget.Nspot,sizeof(struct SpotType));
+      for(i=0;i<GridsWidget.Nspot;i++) {
+         GridsWidget.Spot[i].Visible = 1;
+         GridsWidget.Spot[i].Selected = 0;
+      }
+
+      for (i=0; i<3; i++) {
+         x = Xgrid[i];
+         y = y0+4;
+
+         GridsWidget.Spot[i].xmin = x;
+         GridsWidget.Spot[i].xmax = x+10;
+         GridsWidget.Spot[i].ymin = y;
+         GridsWidget.Spot[i].ymax = y+13;
+      }
+
+/* .. Axes Widget */
+      x0 = VectorsWidget.xmax + 3;
+      y0 = 4;
+      AxesWidget.xmin = x0;
+      AxesWidget.xmax = 512-8; 
+      AxesWidget.ymin = y0;
+      AxesWidget.ymax = y0 + 20;
+      memcpy(AxesWidget.BorderColor,BorderColor,4*sizeof(GLfloat));
+      memcpy(AxesWidget.TextColor,TextColor,4*sizeof(GLfloat));
+      memcpy(AxesWidget.SelectedColor,SelectedColor,4*sizeof(GLfloat));
+      memcpy(AxesWidget.UnselectedColor,UnselectedColor,4*sizeof(GLfloat));
+      
+      AxesWidget.Nspot = 3;
+      AxesWidget.Spot =
+         (struct SpotType *) calloc(AxesWidget.Nspot,sizeof(struct SpotType));
+      for(i=0;i<AxesWidget.Nspot;i++) {
+         AxesWidget.Spot[i].Visible = 1;
+         AxesWidget.Spot[i].Selected = 0;
+      }
+
+      AxesWidget.Spot[0].Selected = 1;
+      AxesWidget.Spot[2].Selected = 1;
+
+      for (i=0; i<3; i++) {
+         x = Xaxes[i];
+         y = y0+4;
+
+         AxesWidget.Spot[i].xmin = x;
+         AxesWidget.Spot[i].xmax = x+10;
+         AxesWidget.Spot[i].ymin = y;
+         AxesWidget.Spot[i].ymax = y+13;
+      }
+
+}
+/**********************************************************************/
 void CamReshapeHandler(int width, int height)
 {
       CamWidth = width;
@@ -4488,6 +5447,28 @@ void OrreryReshapeHandler(int width, int height)
       InitOrreryWidget();
       O->Radius = ((double) OrreryWidth)/(2.0*80.0)*
                                        O->Scale[O->Zoom];
+}
+/**********************************************************************/
+void SphereReshapeHandler(int width, int height)
+{      
+      double ymin;
+      
+      if (width >= 512) SphereWindowWidth = width;
+      else SphereWindowWidth = 512;
+
+      SphereWindowHeight = SphereWindowWidth/2 + 16*(NumSphereWindowMenuLines + 2);
+            
+      glutReshapeWindow(SphereWindowWidth,SphereWindowHeight);
+
+      glMatrixMode(GL_PROJECTION);
+      glLoadIdentity();
+
+      ymin = -90.0 - 16*(NumSphereWindowMenuLines + 2) * 360.0/SphereWindowWidth;
+      gluOrtho2D(180.0,-180.0,ymin,90.0);
+      glMatrixMode(GL_MODELVIEW);
+
+      
+      InitSphereWidgets();
 }
 /**********************************************************************/
 void Load3DNoise(void)
@@ -5368,6 +6349,51 @@ void InitOrreryWindow(void)
 
 }
 /*********************************************************************/
+void InitSphereWindow(void)
+{
+      double ymin;
+      glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
+
+      NumSphereWindowMenuLines = 6; 
+      /* In addition to changing this, the number of entries in each
+         widget must be changed in InitSphereWidgets, and new entries
+         are added in DrawSphereHUD                                  */
+
+      SphereWindowWidth = 512;
+      SphereWindowHeight = 256 + 16*(NumSphereWindowMenuLines + 2);
+      glutInitWindowSize(SphereWindowWidth,SphereWindowHeight);
+      SphereWindow = glutCreateWindow("42 Unit Sphere Viewer");
+      glutSetWindow(SphereWindow);
+      glutPositionWindow(CamWidth+MapWidth,30);
+
+      glutDisplayFunc(DrawUnitSphere);
+      glutIdleFunc(Idle);
+      glutKeyboardFunc(AsciiKeyHandler);
+      glutMouseFunc(SphereMouseButtonHandler);
+      glutReshapeFunc(SphereReshapeHandler);
+
+      glClearColor(0.0,0.0,0.0,1.0);
+      glPolygonMode(GL_FRONT,GL_FILL);
+
+      glMatrixMode(GL_PROJECTION);
+      glLoadIdentity();
+
+      ymin = -90.0 - 16*(NumSphereWindowMenuLines + 2) * 90.0/128.0;
+      gluOrtho2D(180.0,-180.0,ymin,90.0);
+      glMatrixMode(GL_MODELVIEW);
+
+      glEnable(GL_LINE_SMOOTH);
+      glEnable(GL_POINT_SMOOTH);
+      glEnable(GL_BLEND);
+      glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glDisable(GL_LIGHTING);
+
+      SphereSunSpriteTexTag = PpmToTexTag("./Model/","SunSpriteAlpha.ppm",4,GL_CLAMP);
+      SphereMoonSpriteTexTag = PpmToTexTag("./Model/","MoonSpriteAlpha.ppm",4,GL_CLAMP);
+
+      InitSphereWidgets();
+}
+/*********************************************************************/
 void ReadGraphicsInpFile(void)
 {
       FILE *infile;
@@ -5388,6 +6414,8 @@ void ReadGraphicsInpFile(void)
       MapWindowExists = DecodeString(response);
       fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
       OrreryWindowExists = DecodeString(response);
+      fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+      SphereWindowExists = DecodeString(response);
 /* .. POV */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
@@ -5476,6 +6504,14 @@ void ReadGraphicsInpFile(void)
             MapShowLabel[i],junk,&newline);
          MapShow[i] = DecodeString(response);
       }
+/* .. Sphere Window */
+      fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+      ShowConstellations[MAJOR_CONSTELL] = DecodeString(response);
+      fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+      ShowConstellations[ZODIAC_CONSTELL] = DecodeString(response);
+      fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+      ShowConstellations[MINOR_CONSTELL] = DecodeString(response);
 
       fclose(infile);
 
@@ -5508,7 +6544,7 @@ void LoadFOVs(void)
             exit(1);
          }
          if (FOV[i].Height >= 180.0) {
-            printf("FOV[%ld] Width >= 180 deg.  This is not allowed.  Bailing out.\n",i);
+            printf("FOV[%ld] Height >= 180 deg.  This is not allowed.  Bailing out.\n",i);
             exit(1);
          }
          FOV[i].Width *= D2R;
@@ -5787,6 +6823,9 @@ int HandoffToGui(int argc, char **argv)
       }
       if (OrreryWindowExists) {
          InitOrreryWindow();
+      }
+      if (SphereWindowExists) {
+         InitSphereWindow();
       }
 
       /* Comment out when OpenGL installation is stable */

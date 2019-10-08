@@ -20,6 +20,31 @@ void WriteToGmsec(GMSEC_ConnectionMgr ConnMgr,GMSEC_Status status)
       MsgLen += LineLen;
       if (EchoEnabled) printf("%s",line);
 
+      for(Iorb=0;Iorb<Norb;Iorb++) {
+         if (Orb[Iorb].Exists) {
+            sprintf(line,"Orb[%ld].PosN = %18.12le %18.12le %18.12le\n",
+               Iorb,
+               Orb[Iorb].PosN[0],
+               Orb[Iorb].PosN[1],
+               Orb[Iorb].PosN[2]);
+            if (EchoEnabled) printf("%s",line);
+            LineLen = strlen(line);
+            memcpy(&Msg[MsgLen],line,LineLen);
+            MsgLen += LineLen;
+
+            sprintf(line,"Orb[%ld].VelN = %18.12le %18.12le %18.12le\n",
+               Iorb,
+               Orb[Iorb].VelN[0],
+               Orb[Iorb].VelN[1],
+               Orb[Iorb].VelN[2]);
+            if (EchoEnabled) printf("%s",line);
+            LineLen = strlen(line);
+            memcpy(&Msg[MsgLen],line,LineLen);
+            MsgLen += LineLen;
+
+         }
+      }
+
       for(Isc=0;Isc<Nsc;Isc++) {
          if (SC[Isc].Exists) {
             sprintf(line,"SC[%ld].PosR = %18.12le %18.12le %18.12le\n",
@@ -283,6 +308,17 @@ void WriteToGmsec(GMSEC_ConnectionMgr ConnMgr,GMSEC_Status status)
 
             }
 
+            for(i=0;i<SC[Isc].AC.Nacc;i++) {
+               sprintf(line,"SC[%ld].AC.Accel[%ld].Acc = %18.12le\n",
+                  Isc,i,
+                  SC[Isc].AC.Accel[i].Acc);
+               if (EchoEnabled) printf("%s",line);
+               LineLen = strlen(line);
+               memcpy(&Msg[MsgLen],line,LineLen);
+               MsgLen += LineLen;
+
+            }
+
             for(i=0;i<SC[Isc].AC.Nwhl;i++) {
                sprintf(line,"SC[%ld].AC.Whl[%ld].H = %18.12le\n",
                   Isc,i,
@@ -370,31 +406,6 @@ void WriteToGmsec(GMSEC_ConnectionMgr ConnMgr,GMSEC_Status status)
                World[Iw].eph.VelN[0],
                World[Iw].eph.VelN[1],
                World[Iw].eph.VelN[2]);
-            if (EchoEnabled) printf("%s",line);
-            LineLen = strlen(line);
-            memcpy(&Msg[MsgLen],line,LineLen);
-            MsgLen += LineLen;
-
-         }
-      }
-
-      for(Iorb=0;Iorb<Norb;Iorb++) {
-         if (Orb[Iorb].Exists) {
-            sprintf(line,"Orb[%ld].PosN = %18.12le %18.12le %18.12le\n",
-               Iorb,
-               Orb[Iorb].PosN[0],
-               Orb[Iorb].PosN[1],
-               Orb[Iorb].PosN[2]);
-            if (EchoEnabled) printf("%s",line);
-            LineLen = strlen(line);
-            memcpy(&Msg[MsgLen],line,LineLen);
-            MsgLen += LineLen;
-
-            sprintf(line,"Orb[%ld].VelN = %18.12le %18.12le %18.12le\n",
-               Iorb,
-               Orb[Iorb].VelN[0],
-               Orb[Iorb].VelN[1],
-               Orb[Iorb].VelN[2]);
             if (EchoEnabled) printf("%s",line);
             LineLen = strlen(line);
             memcpy(&Msg[MsgLen],line,LineLen);
@@ -1260,6 +1271,26 @@ void WriteToGmsec(GMSEC_ConnectionMgr ConnMgr,GMSEC_Status status)
                sprintf(line,"SC[%ld].AC.CfsCtrl.Kunl = %18.12le\n",
                   Isc,
                   SC[Isc].AC.CfsCtrl.Kunl);
+               if (EchoEnabled) printf("%s",line);
+               LineLen = strlen(line);
+               memcpy(&Msg[MsgLen],line,LineLen);
+               MsgLen += LineLen;
+
+               sprintf(line,"SC[%ld].AC.ThrSteerCtrl.Kr = %18.12le %18.12le %18.12le\n",
+                  Isc,
+                  SC[Isc].AC.ThrSteerCtrl.Kr[0],
+                  SC[Isc].AC.ThrSteerCtrl.Kr[1],
+                  SC[Isc].AC.ThrSteerCtrl.Kr[2]);
+               if (EchoEnabled) printf("%s",line);
+               LineLen = strlen(line);
+               memcpy(&Msg[MsgLen],line,LineLen);
+               MsgLen += LineLen;
+
+               sprintf(line,"SC[%ld].AC.ThrSteerCtrl.Kp = %18.12le %18.12le %18.12le\n",
+                  Isc,
+                  SC[Isc].AC.ThrSteerCtrl.Kp[0],
+                  SC[Isc].AC.ThrSteerCtrl.Kp[1],
+                  SC[Isc].AC.ThrSteerCtrl.Kp[2]);
                if (EchoEnabled) printf("%s",line);
                LineLen = strlen(line);
                memcpy(&Msg[MsgLen],line,LineLen);

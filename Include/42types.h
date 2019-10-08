@@ -50,6 +50,8 @@ struct FlexNodeType {
    double *FlexFrc;  /* "Fbendy + Tbendy", B.Nf x 1 */
    double pos[3],vel[3],ang[3],angrate[3]; /* Deflection variables */
    double TotAngVel[3];
+   double TotTrnVel[3];
+   double TotTrnAcc[3];
 };
 
 struct BodyType {
@@ -257,7 +259,7 @@ struct CssType {
    long MaxCounter;
    long Body;
    double Axis[3];
-   double FovAng;
+   double FovHalfAng;
    double CosFov;
    double Scale;
    double Quant;
@@ -275,7 +277,7 @@ struct FssType {
    long MaxCounter;
    double qb[4];
    double CB[3][3];
-   double FovAng[2];
+   double FovHalfAng[2];
    double NEA;
    double Quant;
    long FlexNode;
@@ -294,7 +296,7 @@ struct StarTrackerType {
    long MaxCounter;
    double qb[4];
    double CB[3][3];
-   double FovAng[2];
+   double FovHalfAng[2];
    double CosFov[2];
    double SunExclAng;
    double CosSunExclAng;
@@ -334,11 +336,32 @@ struct GpsType {
 };
 
 struct AccelType {
-   /*~ Internal Variables ~*/
+   /* Parameters */
+   double SampleTime;
+   long SampleCounter;
+   long MaxCounter;
+   long FlexNode;
    double PosB[3];  /* Position in B[0] */
    double Axis[3]; /* Mounting matrix */
-   double acc;  /* Measured acceleration, expressed in A */
-   long FlexNode;
+   double Quant;
+   double Scale;
+   double SigV; /* DVRW m/s/rt-sec */
+   double SigU;/* Bias Stability m/s^1.5 */
+   double SigE; /* DV Readout Noise, m/s  */
+   
+   /*~ Internal Variables ~*/
+   double TrueAcc; /* the true acceleration m/s^2 */
+   double Bias; /* m/s^2 */
+   double DV; /* Change in velocity m/s */
+   double MeasAcc; /* m/s^2 */
+   double MaxAcc; /* m/s^2 max acceleration */
+   double AccError;
+
+   /* Coef */
+   double BiasStabCoef;
+   double DVRWCoef;
+   double DVNoiseCoef; 
+   double CorrCoef; /* Correlation Coef, exp(-SampleTime/BiasTime) */
 };
 
 struct JointPathTableType { /* tells if joint is in path of body*/
@@ -740,6 +763,17 @@ struct OrreryPOVType {
    double CN[3][3];
    double CH[3][3];
    double CL[3][3];
+};
+
+struct ConstellationType {
+   char Tag[4]; 
+   long Class;  /* MAJOR, ZODIAC, or MINOR */
+   long Nstars;
+   long Nlines;
+   double **StarVec;
+   /* For each line */
+   long *Star1;
+   long *Star2;
 };
 
 /*

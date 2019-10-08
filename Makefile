@@ -24,36 +24,36 @@ ifeq ($(AUTOPLATFORM),Failed)
 endif
 
 GUIFLAG = -D _USE_GUI_
-#GUIFLAG = 
+#GUIFLAG =
 
 SHADERFLAG = -D _USE_SHADERS_
-#SHADERFLAG = 
+#SHADERFLAG =
 
-#TIMEFLAG = 
+#TIMEFLAG =
 TIMEFLAG = -D _USE_SYSTEM_TIME_
 
-CFDFLAG = 
+CFDFLAG =
 #CFDFLAG = -D _ENABLE_CFD_SLOSH_
 
-FFTBFLAG = 
+FFTBFLAG =
 #FFTBFLAG = -D _ENABLE_FFTB_CODE_
 
-#GSFCFLAG = 
+#GSFCFLAG =
 GSFCFLAG = -D _USE_GSFC_WATERMARK_
 
-STANDALONEFLAG = 
+STANDALONEFLAG =
 #STANDALONEFLAG = -D _AC_STANDALONE_
 
-NOS3FSWFLAG = 
+NOS3FSWFLAG =
 #NOS3FSWFLAG = -D _ENABLE_NOS3_FSW_
 
 GMSECFLAG =
 #GMSECFLAG = -D _ENABLE_GMSEC_
 ifeq ($(strip $(GMSECFLAG)),)
-   GMSECDIR = 
-   GMSECINC = 
-   GMSECBIN = 
-   GMSECLIB = 
+   GMSECDIR =
+   GMSECINC =
+   GMSECBIN =
+   GMSECLIB =
 else
    GMSECDIR = ~/GMSEC/
    GMSECINC = -I $(GMSECDIR)include/
@@ -75,17 +75,17 @@ GSFCSRC = $(PROJDIR)/GSFC/Source/
 IPCSRC = $(SRC)IPC/
 
 #EMBEDDED = -D EMBEDDED_MATLAB
-EMBEDDED = 
+EMBEDDED =
 
 ifeq ($(42PLATFORM),__APPLE__)
    # Mac Macros
    CINC = -I /usr/include
-   EXTERNDIR = 
+   EXTERNDIR =
    GLINC = -I /System/Library/Frameworks/OpenGL.framework/Headers/ -I /System/Library/Frameworks/GLUT.framework/Headers/
    # ARCHFLAG = -arch i386
    ARCHFLAG = -arch x86_64
 
-   #SOCKETFLAG = 
+   #SOCKETFLAG =
    SOCKETFLAG = -D _ENABLE_SOCKETS_
 
    LFLAGS = -bind_at_load
@@ -98,9 +98,9 @@ endif
 ifeq ($(42PLATFORM),__linux__)
    # Linux Macros
    CINC =
-   EXTERNDIR =  
+   EXTERNDIR = 
 
-   #SOCKETFLAG = 
+   #SOCKETFLAG =
    SOCKETFLAG = -D _ENABLE_SOCKETS_
 
    ifneq ($(strip $(GUIFLAG)),)
@@ -109,13 +109,13 @@ ifeq ($(42PLATFORM),__linux__)
       GLINC = -I $(KITDIR)/include/GL/
       LIBS = -lglut -lGLU -lGL -ldl -lm
       LFLAGS = -L $(KITDIR)/GL/lib/
-      ARCHFLAG = 
+      ARCHFLAG =
    else
-      GUIOBJ = 
-      GLINC = 
+      GUIOBJ =
+      GLINC =
       LIBS = -ldl -lm
-      LFLAGS = 
-      ARCHFLAG = 
+      LFLAGS =
+      ARCHFLAG =
    endif
    ifneq ($(strip $(SOCKETFLAG)),)
       ifneq ($(strip $(NOS3FSWFLAG)),)
@@ -127,10 +127,10 @@ ifeq ($(42PLATFORM),__linux__)
 endif
 
 ifeq ($(42PLATFORM),__MSYS__)
-   CINC = 
+   CINC =
    EXTERNDIR = /c/42ExternalSupport/
 
-   #SOCKETFLAG = 
+   #SOCKETFLAG =
    SOCKETFLAG = -D _ENABLE_SOCKETS_
 
    ifneq ($(strip $(GUIFLAG)),)
@@ -142,11 +142,11 @@ ifeq ($(42PLATFORM),__MSYS__)
       GLINC = -I $(GLEW)include/GL/ -I $(GLUT)include/GL/
       ARCHFLAG = -D GLUT_NO_LIB_PRAGMA -D GLUT_NO_WARNING_DISABLE -D GLUT_DISABLE_ATEXIT_HACK
    else
-      GUIOBJ = 
-      GLINC = 
+      GUIOBJ =
+      GLINC =
       LIBS =  -lws2_32
-      LFLAGS = 
-      ARCHFLAG = 
+      LFLAGS =
+      ARCHFLAG =
    endif
    EXENAME = 42.exe
    CC = gcc
@@ -154,25 +154,25 @@ endif
 
 # If not using GUI, don't compile GUI-related files
 ifeq ($(strip $(GUIFLAG)),)
-   GUIOBJ = 
+   GUIOBJ =
 endif
 
 # If not in FFTB, don't compile FFTB-related files
 ifneq ($(strip $(FFTBFLAG)),)
    FFTBOBJ = $(OBJ)42fftb.o
 else
-   FFTBOBJ = 
+   FFTBOBJ =
 endif
 
 ifneq ($(strip $(CFDFLAG)),)
    SLOSHOBJ = $(OBJ)42CfdSlosh.o
 else
-   SLOSHOBJ = 
+   SLOSHOBJ =
 endif
 
 # If not _AC_STANDALONE_, link AcApp.c in with the rest of 42 
 ifneq ($(strip $(STANDALONEFLAG)),)
-   ACOBJ = 
+   ACOBJ =
 else
    ACOBJ = $(OBJ)AcApp.o 
 endif
@@ -184,7 +184,7 @@ ifneq ($(strip $(GMSECFLAG)),)
    SIMIPCOBJ = $(OBJ)SimWriteToFile.o $(OBJ)SimWriteToGmsec.o $(OBJ)SimWriteToSocket.o \
       $(OBJ)SimReadFromFile.o $(OBJ)SimReadFromGmsec.o $(OBJ)SimReadFromSocket.o 
 else
-   GMSECOBJ = 
+   GMSECOBJ =
    ACIPCOBJ = $(OBJ)AppReadFromFile.o \
       $(OBJ)AppWriteToSocket.o $(OBJ)AppReadFromSocket.o $(OBJ)AppWriteToFile.o 
    SIMIPCOBJ = $(OBJ)SimWriteToFile.o $(OBJ)SimWriteToSocket.o \
@@ -207,7 +207,7 @@ ACIPCOBJ = $(OBJ)AppReadFromFile.o \
 $(OBJ)AppWriteToSocket.o $(OBJ)AppReadFromSocket.o $(OBJ)AppWriteToFile.o 
 
 #ANSIFLAGS = -Wstrict-prototypes -pedantic -ansi -Werror
-ANSIFLAGS = 
+ANSIFLAGS =
 
 CFLAGS = -Wall -Wshadow -Wno-deprecated -g  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(INC) -I $(KITINC) -I $(KITSRC) $(GMSECINC) -O0 $(ARCHFLAG) $(GUIFLAG) $(SHADERFLAG) $(TIMEFLAG) $(SOCKETFLAG) $(CFDFLAG) $(FFTBFLAG) $(GSFCFLAG) $(GMSECFLAG) $(STANDALONEFLAG) $(NOS3FSWFLAG)
 
@@ -364,7 +364,7 @@ ifeq ($(42PLATFORM),_WIN32)
 else ifeq ($(42PLATFORM),_WIN64)
 	del .\Object\*.o .\$(EXENAME) .\InOut\*.42
 else
-	rm $(OBJ)*.o ./$(EXENAME) ./AcApp $(INOUT)*.42 ./Standalone/*.42 ./Demo/*.42 ./Rx/*.42 ./Tx/*.42
+	rm -f $(OBJ)*.o ./$(EXENAME) ./AcApp $(INOUT)*.42 ./Standalone/*.42 ./Demo/*.42 ./Rx/*.42 ./Tx/*.42
 endif
 
 

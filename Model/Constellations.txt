@@ -1,0 +1,1390 @@
+AND MAJOR 7 6
+    2.097    29.091   Alp 
+    9.220    33.719   Pi  
+    9.832    30.861   Del 
+   14.188    38.499   Mu  
+   17.376    47.242   Phi 
+   17.433    35.621   Bet 
+   30.975    42.330   Gam1
+ 6  5  Gam1 Bet 
+ 5  2  Bet  Del 
+ 2  0  Del  Alp 
+ 0  1  Alp  Pi  
+ 1  3  Pi   Mu  
+ 3  4  Mu   Phi 
+AQL MAJOR 10 11
+  284.906    15.068   Eps 
+  286.353    13.863   Zet 
+  286.562    -4.883   Lam 
+  291.375     3.115   Del 
+  294.180    -1.286   Iot 
+  296.565    10.613   Gam 
+  297.696     8.868   Alp 
+  298.118     1.006   Eta 
+  298.828     6.407   Bet 
+  302.826     0.821   The 
+ 8  6  Bet  Alp 
+ 6  5  Alp  Gam 
+ 5  3  Gam  Del 
+ 3  2  Del  Lam 
+ 0  1  Eps  Zet 
+ 1  3  Zet  Del 
+ 3  7  Del  Eta 
+ 7  9  Eta  The 
+ 9  4  The  Iot 
+ 4  2  Iot  Lam 
+ 2  1  Lam  Zet 
+AUR MAJOR 9 11
+   74.248    33.166   Iot 
+   75.492    43.823   Eps 
+   75.620    41.076   Zet 
+   76.629    41.234   Eta 
+   79.173    45.998   Alp 
+   81.573    28.608   Gam 
+   89.882    54.285   Del 
+   89.882    44.947   Bet 
+   89.930    37.213   The 
+ 5  0  Gam  Iot 
+ 0  3  Iot  Eta 
+ 3  4  Eta  Alp 
+ 4  7  Alp  Bet 
+ 7  8  Bet  The 
+ 8  5  The  Gam 
+ 4  6  Alp  Del 
+ 6  7  Del  Bet 
+ 4  1  Alp  Eps 
+ 1  2  Eps  Zet 
+ 2  3  Zet  Eta 
+BOO MAJOR 12 13
+  206.815    17.457   Tau 
+  208.671    18.398   Eta 
+  213.365    51.788   Kap1
+  213.915    19.183   Alp 
+  214.096    46.088   Lam 
+  216.299    51.851   The 
+  217.958    30.371   Rho 
+  218.020    38.308   Gam 
+  220.287    13.728   Zet 
+  221.247    27.075   Eps 
+  225.487    40.391   Bet 
+  228.876    33.315   Del 
+ 3  6  Alp  Rho 
+ 6  7  Rho  Gam 
+ 7 10  Gam  Bet 
+10 11  Bet  Del 
+11  9  Del  Eps 
+ 9  3  Eps  Alp 
+ 8  3  Zet  Alp 
+ 3  1  Alp  Eta 
+ 1  0  Eta  Tau 
+ 7  4  Gam  Lam 
+ 4  2  Lam  Kap1
+ 2  5  Kap1 The 
+ 5  4  The  Lam 
+CAR MAJOR 8 7
+   95.988   -52.696   Alp 
+  119.195   -52.982   Chi 
+  125.628   -59.510   Eps 
+  138.300   -69.717   Bet 
+  139.273   -59.275   Iot 
+  153.434   -70.038   Ome 
+  160.739   -64.394   The 
+  161.265   -59.684   Eta 
+ 0  3  Alp  Bet 
+ 3  5  Bet  Ome 
+ 5  6  Ome  The 
+ 6  7  The  Eta 
+ 7  4  Eta  Iot 
+ 4  2  Iot  Eps 
+ 2  1  Eps  Chi 
+CAS MAJOR 5 4
+    2.295    59.150   Bet 
+   10.127    56.537   Alp 
+   14.177    60.717   Gam 
+   21.454    60.235   Del 
+   28.599    63.670   Eps 
+ 4  3  Eps  Del 
+ 3  2  Del  Gam 
+ 2  1  Gam  Alp 
+ 1  0  Alp  Bet 
+CEN MAJOR 18 19
+  170.252   -54.491   Pi  
+  172.942   -59.442   Omi1
+  182.090   -50.722   Del 
+  182.913   -52.369   Rho 
+  187.010   -50.231   Sig 
+  190.379   -48.960   Gam 
+  204.972   -53.466   Eps 
+  207.376   -41.688   Nu  
+  208.885   -47.288   Zet 
+  209.568   -42.101   Phi 
+  209.670   -44.804   Ups1
+  210.956   -60.373   Bet 
+  211.512   -41.180   Chi 
+  211.671   -36.370   The 
+  215.139   -37.885   Psi 
+  218.877   -42.158   Eta 
+  219.900   -60.835   Alp1
+  224.790   -42.104   Kap 
+16 11  Alp1 Bet 
+11  6  Bet  Eps 
+ 6  5  Eps  Gam 
+ 5  8  Gam  Zet 
+ 8  7  Zet  Nu  
+ 7 13  Nu   The 
+13 14  The  Psi 
+14 12  Psi  Chi 
+12  9  Chi  Phi 
+ 9 10  Phi  Ups1
+ 5  4  Gam  Sig 
+ 4  2  Sig  Del 
+ 2  0  Del  Pi  
+ 4  3  Sig  Rho 
+ 3  1  Rho  Omi1
+ 9 15  Phi  Eta 
+15 17  Eta  Kap 
+10  8  Ups1 Zet 
+ 8  6  Zet  Eps 
+CEP MAJOR 10 10
+  307.395    62.994   The 
+  311.323    61.839   Eta 
+  319.645    62.586   Alp 
+  322.165    70.561   Bet 
+  325.877    58.780   Mu  
+  332.714    58.201   Zet 
+  333.758    57.044   Eps 
+  337.293    58.415   Del 
+  342.420    66.201   Iot 
+  354.837    77.632   Gam 
+ 2  3  Alp  Bet 
+ 3  9  Bet  Gam 
+ 9  8  Gam  Iot 
+ 8  7  Iot  Del 
+ 7  5  Del  Zet 
+ 5  6  Zet  Eps 
+ 6  4  Eps  Mu  
+ 4  2  Mu   Alp 
+ 2  1  Alp  Eta 
+ 1  0  Eta  The 
+CET MAJOR 13 14
+    4.857    -8.824   Iot 
+   10.898   -17.987   Bet 
+   17.147   -10.182   Eta 
+   21.006    -8.183   The 
+   26.017   -15.938   Tau 
+   27.865   -10.335   Zet 
+   34.836    -2.977   Omi 
+   37.040     8.460   Xi 2
+   39.871     0.329   Del 
+   40.825     3.236   Gam 
+   41.235    10.114   Mu  
+   44.929     8.908   Lam 
+   45.570     4.090   Alp 
+ 9  7  Gam  Xi 2
+ 7 10  Xi 2 Mu  
+10 11  Mu   Lam 
+11 12  Lam  Alp 
+12  9  Alp  Gam 
+ 9  8  Gam  Del 
+ 8  6  Del  Omi 
+ 6  5  Omi  Zet 
+ 5  4  Zet  Tau 
+ 4  1  Tau  Bet 
+ 1  0  Bet  Iot 
+ 0  2  Iot  Eta 
+ 2  3  Eta  The 
+ 3  5  The  Zet 
+CMA MAJOR 10 11
+   95.675   -17.956   Bet 
+  101.287   -16.716   Alp 
+  103.548   -12.039   The 
+  103.533   -24.184   Omi1
+  104.034   -17.054   Iot 
+  104.656   -28.972   Eps 
+  105.756   -23.833   Omi2
+  105.940   -15.633   Gam 
+  107.098   -26.393   Del 
+  111.024   -29.303   Eta 
+ 4  2  Iot  The 
+ 2  7  The  Gam 
+ 7  4  Gam  Iot 
+ 4  1  Iot  Alp 
+ 1  0  Alp  Bet 
+ 0  3  Bet  Omi1
+ 3  5  Omi1 Eps 
+ 5  8  Eps  Del 
+ 8  6  Del  Omi2
+ 6  1  Omi2 Alp 
+ 8  9  Del  Eta 
+CRB MAJOR 7 6
+  231.957    29.106   Bet 
+  233.232    31.359   The 
+  233.672    26.715   Alp 
+  235.686    26.296   Gam 
+  237.399    26.068   Del 
+  239.397    26.878   Eps 
+  240.361    29.851   Iot 
+ 1  0  The  Bet 
+ 0  2  Bet  Alp 
+ 2  3  Alp  Gam 
+ 3  4  Gam  Del 
+ 4  5  Del  Eps 
+ 5  6  Eps  Iot 
+CRT MAJOR 8 8
+  164.944   -18.299   Alp 
+  167.915   -22.826   Bet 
+  169.835   -14.779   Del 
+  171.152   -10.859   Eps 
+  171.220   -17.684   Gam 
+  174.170    -9.802   The 
+  176.191   -18.351   Zet 
+  179.004   -17.151   Eta 
+ 7  6  Eta  Zet 
+ 6  4  Zet  Gam 
+ 4  1  Gam  Bet 
+ 1  0  Bet  Alp 
+ 0  2  Alp  Del 
+ 2  3  Del  Eps 
+ 3  5  Eps  The 
+ 4  2  Gam  Del 
+CRU MAJOR 4 2
+  183.786   -58.749   Del 
+  186.650   -63.099   Alp1
+  187.791   -57.113   Gam 
+  191.930   -59.689   Bet 
+ 1  2  Alp1 Gam 
+ 3  0  Bet  Del 
+CYG MAJOR 8 7
+  291.858    52.321   Iot1
+  292.680    27.960   Bet1
+  296.244    45.131   Del 
+  299.077    35.083   Eta 
+  305.557    40.257   Gam 
+  310.358    45.280   Alp 
+  311.553    33.970   Eps 
+  318.234    30.227   Zet 
+ 1  3  Bet1 Eta 
+ 3  4  Eta  Gam 
+ 4  5  Gam  Alp 
+ 7  6  Zet  Eps 
+ 6  4  Eps  Gam 
+ 4  2  Gam  Del 
+ 2  0  Del  Iot1
+DRA MAJOR 15 15
+  172.851    69.331   Lam 
+  188.371    69.788   Kap 
+  211.097    64.376   Alp 
+  231.232    58.966   Iot 
+  240.472    58.565   The 
+  245.998    61.514   Eta 
+  257.197    65.715   Zet 
+  262.608    52.301   Bet 
+  263.044    55.184   Nu 1
+  268.382    56.873   Xi  
+  269.152    51.489   Gam 
+  275.190    71.338   Phi 
+  275.264    72.733   Chi 
+  288.139    67.662   Del 
+  297.043    70.268   Eps 
+ 9  8  Xi   Nu 1
+ 8  7  Nu 1 Bet 
+ 7 10  Bet  Gam 
+10  9  Gam  Xi  
+ 9 13  Xi   Del 
+13 11  Del  Phi 
+11  6  Phi  Zet 
+ 6  5  Zet  Eta 
+ 5  4  Eta  The 
+ 4  3  The  Iot 
+ 3  2  Iot  Alp 
+ 2  1  Alp  Kap 
+ 1  0  Kap  Lam 
+13 14  Del  Eps 
+11 12  Phi  Chi 
+ERI MAJOR 20 19
+   24.429   -57.237   Alp 
+   28.990   -51.609   Chi 
+   36.746   -47.704   Kap 
+   40.167   -39.856   Iot 
+   41.276   -18.573   Tau1
+   44.107    -8.898   Eta 
+   44.565   -40.305   The1
+   45.598   -23.624   Tau3
+   49.879   -21.758   Tau4
+   53.447   -21.633   Tau5
+   55.812    -9.763   Del 
+   56.535   -12.102   Pi  
+   58.428   -24.612   Tau8
+   59.507   -13.509   Gam 
+   59.981   -24.016   Tau9
+   62.966    -6.838   Omi1
+   68.378   -29.767   Ups1
+   69.080    -3.352   Nu  
+   71.375    -3.255   Mu  
+   76.963    -5.086   Bet 
+ 0  1  Alp  Chi 
+ 1  2  Chi  Kap 
+ 2  3  Kap  Iot 
+ 3  6  Iot  The1
+ 6 16  The1 Ups1
+16 14  Ups1 Tau9
+14 12  Tau9 Tau8
+12  9  Tau8 Tau5
+ 9  8  Tau5 Tau4
+ 8  7  Tau4 Tau3
+ 7  4  Tau3 Tau1
+ 4  5  Tau1 Eta 
+ 5 10  Eta  Del 
+10 11  Del  Pi  
+11 13  Pi   Gam 
+13 15  Gam  Omi1
+15 17  Omi1 Nu  
+17 18  Nu   Mu  
+18 19  Mu   Bet 
+HER MAJOR 20 21
+  238.169    42.452   Chi 
+  242.193    44.935   Phi 
+  244.935    46.313   Tau 
+  245.480    19.153   Gam 
+  246.354    14.033   Ome 
+  247.555    21.490   Bet 
+  248.526    42.437   Sig 
+  250.322    31.603   Zet 
+  250.724    38.922   Eta 
+  255.072    30.926   Eps 
+  258.662    14.390   Alp1
+  258.758    24.839   Del 
+  258.762    36.809   Pi  
+  260.920    37.147   Rho 
+  262.685    26.111   Lam 
+  264.866    46.006   Iot 
+  266.615    27.721   Mu  
+  269.063    37.251   The 
+  269.441    29.248   Xi  
+  271.886    28.763   Omi 
+10  5  Alp1 Bet 
+ 5  7  Bet  Zet 
+ 7  8  Zet  Eta 
+ 8 12  Eta  Pi  
+12  9  Pi   Eps 
+ 9 11  Eps  Del 
+11 10  Del  Alp1
+ 5  3  Bet  Gam 
+ 3  4  Gam  Ome 
+ 9  7  Eps  Zet 
+11 14  Del  Lam 
+14 16  Lam  Mu  
+16 18  Mu   Xi  
+18 19  Xi   Omi 
+ 8  6  Eta  Sig 
+ 6  2  Sig  Tau 
+ 2  1  Tau  Phi 
+ 1  0  Phi  Chi 
+12 13  Pi   Rho 
+13 17  Rho  The 
+17 15  The  Iot 
+HYA MAJOR 17 17
+  129.414     5.704   Del 
+  129.689     3.341   Sig 
+  130.806     3.399   Eta 
+  131.694     6.419   Eps 
+  132.108     5.838   Rho 
+  133.848     5.946   Zet 
+  138.591     2.314   The 
+  141.897    -8.659   Alp 
+  144.964    -1.143   Iot 
+  147.870   -14.847   Ups1
+  152.647   -12.354   Lam 
+  156.523   -16.836   Mu  
+  162.406   -16.194   Nu  
+  173.250   -31.858   Xi  
+  178.227   -33.908   Bet 
+  199.730   -23.172   Gam 
+  211.593   -26.683   Pi  
+ 3  4  Eps  Rho 
+ 4  2  Rho  Eta 
+ 2  1  Eta  Sig 
+ 1  0  Sig  Del 
+ 0  3  Del  Eps 
+ 3  5  Eps  Zet 
+ 5  6  Zet  The 
+ 6  8  The  Iot 
+ 8  7  Iot  Alp 
+ 7  9  Alp  Ups1
+ 9 10  Ups1 Lam 
+10 11  Lam  Mu  
+11 12  Mu   Nu  
+12 13  Nu   Xi  
+13 14  Xi   Bet 
+14 15  Bet  Gam 
+15 16  Gam  Pi  
+LYR MAJOR 6 7
+  279.235    38.784   Alp 
+  281.085    39.670   Eps1
+  281.193    37.605   Zet1
+  282.520    33.363   Bet 
+  283.432    36.972   Del1
+  284.736    32.689   Gam 
+ 0  1  Alp  Eps1
+ 1  2  Eps1 Zet1
+ 2  4  Zet1 Del1
+ 4  5  Del1 Gam 
+ 5  3  Gam  Bet 
+ 3  2  Bet  Zet1
+ 0  2  Alp  Zet1
+OPH MAJOR 14 17
+  243.586    -3.694   Del 
+  244.580    -4.693   Eps 
+  246.026   -20.038   Psi 
+  246.397   -23.447   Rho 
+  246.950    -8.372   Ups 
+  247.785   -16.613   Phi 
+  249.290   -10.567   Zet 
+  254.417     9.375   Kap 
+  257.595   -15.725   Eta 
+  260.503   -24.999   The 
+  263.734    12.560   Alp 
+  265.868     4.567   Bet 
+  266.973     2.707   Gam 
+  269.757    -9.774   Nu  
+10 11  Alp  Bet 
+11  8  Bet  Eta 
+ 8  6  Eta  Zet 
+ 6  4  Zet  Ups 
+ 4  1  Ups  Eps 
+ 1  0  Eps  Del 
+ 0 12  Del  Gam 
+12  7  Gam  Kap 
+ 7 10  Kap  Alp 
+11  8  Bet  Eta 
+ 8  9  Eta  The 
+ 7  6  Kap  Zet 
+ 6  5  Zet  Phi 
+ 5  2  Phi  Psi 
+ 2  3  Psi  Rho 
+11 12  Bet  Gam 
+12 13  Gam  Nu  
+ORI MAJOR 18 19
+   72.460     6.961   Pi 3
+   72.653     8.900   Pi 2
+   72.802     5.605   Pi 4
+   73.563     2.441   Pi 5
+   74.093    13.514   Omi2
+   74.637     1.714   Pi 6
+   78.635    -8.202   Bet 
+   81.119    -2.397   Eta 
+   81.283     6.350   Gam 
+   83.002     0.284   Del 
+   83.785     9.934   Lam 
+   84.053    -1.202   Eps 
+   84.687    -2.600   Sig 
+   86.939    -9.670   Kap 
+   88.595    20.276   Chi1
+   88.793     7.407   Alp 
+   90.596     9.648   Mu  
+   91.893    14.768   Nu  
+ 6  7  Bet  Eta 
+ 7  9  Eta  Del 
+ 9  8  Del  Gam 
+ 8 10  Gam  Lam 
+10 15  Lam  Alp 
+15 12  Alp  Sig 
+12 13  Sig  Kap 
+13  6  Kap  Bet 
+12 11  Sig  Eps 
+11  9  Eps  Del 
+15 16  Alp  Mu  
+16 17  Mu   Nu  
+17 14  Nu   Chi1
+ 8  0  Gam  Pi 3
+ 4  1  Omi2 Pi 2
+ 1  0  Pi 2 Pi 3
+ 0  2  Pi 3 Pi 4
+ 2  3  Pi 4 Pi 5
+ 3  5  Pi 5 Pi 6
+PEG MAJOR 13 13
+    2.097    29.091   Del 
+    3.309    15.184   Gam 
+  326.047     9.875   Eps 
+  326.161    25.645   Kap 
+  331.753    25.345   Iot 
+  332.307    33.172   Pi 1
+  332.550     6.198   The 
+  340.365    10.831   Zet 
+  340.750    30.221   Eta 
+  341.633    23.566   Lam 
+  342.501    24.602   Mu  
+  345.944    28.083   Bet 
+  346.190    15.205   Alp 
+ 0 11  Del  Bet 
+11 12  Bet  Alp 
+12  1  Alp  Gam 
+ 1  0  Gam  Del 
+12  7  Alp  Zet 
+ 7  6  Zet  The 
+ 6  2  The  Eps 
+11  8  Bet  Eta 
+ 8  5  Eta  Pi 1
+11 10  Bet  Mu  
+10  9  Mu   Lam 
+ 9  4  Lam  Iot 
+ 4  3  Iot  Kap 
+PER MAJOR 17 18
+   25.915    50.689   Phi 
+   41.050    49.228   The 
+   42.674    55.896   Eta 
+   43.565    52.763   Tau 
+   46.199    53.506   Gam 
+   46.294    38.840   Rho 
+   47.042    40.956   Bet 
+   47.267    49.613   Iot 
+   47.374    44.857   Kap 
+   51.081    49.861   Alp 
+   54.123    48.193   Psi 
+   56.080    32.288   Omi 
+   58.533    31.884   Zet 
+   59.463    40.010   Eps 
+   59.741    35.791   Xi  
+   61.646    50.351   Lam 
+   63.725    48.409   Mu  
+ 5  6  Rho  Bet 
+ 6  8  Bet  Kap 
+ 8  7  Kap  Iot 
+ 7  3  Iot  Tau 
+ 3  2  Tau  Eta 
+ 2  4  Eta  Gam 
+ 4  9  Gam  Alp 
+ 9 10  Alp  Psi 
+10 13  Psi  Eps 
+13 14  Eps  Xi  
+14 12  Xi   Zet 
+12 11  Zet  Omi 
+13  6  Eps  Bet 
+ 9  7  Alp  Iot 
+ 7  1  Iot  The 
+ 1  0  The  Phi 
+10 16  Psi  Mu  
+16 15  Mu   Lam 
+SER MAJOR 9 9
+  233.700    10.538   Del 
+  235.388    19.670   Iot 
+  236.067     6.426   Alp 
+  236.547    15.422   Bet 
+  237.185    18.142   Kap 
+  237.405    -3.430   Mu  
+  237.573     2.196   Ome 
+  237.704     4.478   Eps 
+  239.113    15.662   Gam 
+ 5  6  Mu   Ome 
+ 6  7  Ome  Eps 
+ 7  2  Eps  Alp 
+ 2  0  Alp  Del 
+ 0  3  Del  Bet 
+ 3  1  Bet  Iot 
+ 1  4  Iot  Kap 
+ 4  8  Kap  Gam 
+ 8  3  Gam  Bet 
+UMA MAJOR 18 19
+  127.566    60.718   Omi 
+  135.906    47.157   Kap 
+  137.730    63.514   Tau 
+  143.214    51.677   The 
+  147.747    59.039   Ups 
+  154.274    42.914   Lam 
+  155.582    41.499   Mu  
+  165.460    56.382   Bet 
+  165.932    61.751   Alp 
+  167.416    44.499   Psi 
+  169.545    31.529   Xi  
+  169.620    33.094   Nu  
+  176.512    47.779   Chi 
+  178.458    53.695   Gam 
+  183.857    57.033   Del 
+  193.507    55.960   Eps 
+  200.981    54.925   Zet 
+  206.885    49.313   Eta 
+17 16  Eta  Zet 
+16 15  Zet  Eps 
+15 14  Eps  Del 
+14 13  Del  Gam 
+13  7  Gam  Bet 
+ 7  8  Bet  Alp 
+14  8  Del  Alp 
+ 8  2  Alp  Tau 
+ 2  0  Tau  Omi 
+ 0  4  Omi  Ups 
+ 4  7  Ups  Bet 
+ 4  3  Ups  The 
+ 3  1  The  Kap 
+13 12  Gam  Chi 
+12  9  Chi  Psi 
+ 9  6  Psi  Mu  
+ 6  5  Mu   Lam 
+12 11  Chi  Nu  
+11 10  Nu   Xi  
+UMI MAJOR 7 7
+   37.953    89.264   Alp 
+  222.676    74.156   Bet 
+  230.182    71.834   Gam 
+  236.015    77.794   Zet 
+  244.376    75.755   Eta 
+  251.492    82.037   Eps 
+  263.054    86.586   Del 
+ 0  6  Alp  Del 
+ 6  5  Del  Eps 
+ 5  3  Eps  Zet 
+ 3  4  Zet  Eta 
+ 4  2  Eta  Gam 
+ 2  1  Gam  Bet 
+ 1  3  Bet  Zet 
+VEL MAJOR 7 7
+  122.372   -47.346   Gam1
+  131.176   -54.708   Del 
+  136.999   -43.432   Lam 
+  140.528   -55.011   Kap 
+  142.675   -40.467   Psi 
+  149.216   -54.568   Phi 
+  161.693   -49.420   Mu  
+ 1  0  Del  Gam1
+ 0  2  Gam1 Lam 
+ 2  4  Lam  Psi 
+ 4  6  Psi  Mu  
+ 6  5  Mu   Phi 
+ 5  3  Phi  Kap 
+ 3  1  Kap  Del 
+AQR ZODIAC 15 16
+  311.919    -9.496   Eps 
+  313.163    -8.983   Mu  
+  322.890    -5.571   Bet 
+  331.446     0.320   Alp 
+  331.609   -13.870   Iot 
+  334.208    -7.783   The 
+  335.414    -1.387   Gam 
+  336.319     1.378   Pi  
+  337.207     0.020   Zet1
+  338.839     0.117   Eta 
+  341.928   -14.056   Tau1
+  343.154    -7.580   Lam 
+  343.663   -15.821   Del 
+  348.581    -6.049   Phi 
+  349.476    -9.182   Psi2
+12 14  Del  Psi2
+14 13  Psi2 Phi 
+13 11  Phi  Lam 
+11 10  Lam  Tau1
+10 12  Tau1 Del 
+11  5  Lam  The 
+ 5  3  The  Alp 
+ 3  2  Alp  Bet 
+ 2  1  Bet  Mu  
+ 1  0  Mu   Eps 
+ 3  7  Alp  Pi  
+ 7  8  Pi   Zet1
+ 8  6  Zet1 Gam 
+ 6  3  Gam  Alp 
+ 8  9  Zet1 Eta 
+ 2  4  Bet  Iot 
+ARI ZODIAC 3 2
+   28.382    19.296   Gam1
+   28.660    20.808   Bet 
+   31.793    23.462   Alp 
+ 0  1  Gam1 Bet 
+ 1  2  Bet  Alp 
+CAP ZODIAC 10 10
+  304.412   -12.508   Alp1
+  305.253   -14.781   Bet 
+  307.469   -18.587   Omi 
+  311.524   -25.271   Psi 
+  312.955   -26.919   Ome 
+  316.487   -17.233   The 
+  321.667   -22.411   Zet 
+  324.270   -19.466   Eps 
+  325.023   -16.662   Gam 
+  326.760   -16.127   Del 
+ 0  5  Alp1 The 
+ 5  8  The  Gam 
+ 8  9  Gam  Del 
+ 9  7  Del  Eps 
+ 7  6  Eps  Zet 
+ 6  4  Zet  Ome 
+ 4  3  Ome  Psi 
+ 3  2  Psi  Omi 
+ 2  1  Omi  Bet 
+ 1  0  Bet  Alp1
+CNC ZODIAC 5 4
+  124.129     9.186   Bet 
+  130.821    21.469   Gam 
+  131.171    18.154   Del 
+  131.667    28.765   Iot 
+  134.622    11.858   Alp 
+ 4  2  Alp  Del 
+ 2  1  Del  Gam 
+ 1  3  Gam  Iot 
+ 2  0  Del  Bet 
+GEM ZODIAC 15 14
+   95.740    22.514   Mu  
+   97.241    20.212   Nu  
+   99.428    16.399   Gam 
+  100.983    25.131   Eps 
+  101.323    12.896   Xi  
+  103.197    33.961   The 
+  106.027    20.570   Zet 
+  107.785    30.245   Tau 
+  109.523    16.540   Lam 
+  110.031    21.982   Del 
+  111.432    27.798   Iot 
+  113.650    31.889   Alp 
+  113.980    26.896   Ups 
+  116.112    24.398   Kap 
+  116.329    28.026   Bet 
+11  7  Alp  Tau 
+ 7  3  Tau  Eps 
+ 3  1  Eps  Nu  
+ 3  0  Eps  Mu  
+14 12  Bet  Ups 
+12  9  Ups  Del 
+ 9  6  Del  Zet 
+ 6  2  Zet  Gam 
+ 9  8  Del  Lam 
+ 8  4  Lam  Xi  
+13 12  Kap  Ups 
+12 10  Ups  Iot 
+10  7  Iot  Tau 
+ 7  5  Tau  The 
+LEO ZODIAC 11 11
+  146.463    23.774   Eps 
+  148.191    26.007   Mu  
+  151.833    16.763   Eta 
+  152.093    11.967   Alp 
+  154.173    23.417   Zet 
+  154.993    19.842   Gam1
+  168.527    20.524   Del 
+  168.560    15.429   The 
+  170.284     6.029   Sig 
+  170.981    10.529   Iot 
+  177.265    14.572   Bet 
+ 0  1  Eps  Mu  
+ 1  4  Mu   Zet 
+ 4  5  Zet  Gam1
+ 5  2  Gam1 Eta 
+ 2  3  Eta  Alp 
+ 5  6  Gam1 Del 
+ 6 10  Del  Bet 
+ 6  7  Del  The 
+ 7  2  The  Eta 
+ 7  9  The  Iot 
+ 9  8  Iot  Sig 
+LIB ZODIAC 6 6
+  222.672   -15.997   Alp1
+  226.018   -25.282   Sig 
+  229.252    -9.383   Bet 
+  233.882   -14.789   Gam 
+  234.256   -28.135   Ups 
+  234.664   -29.778   Tau 
+ 1  0  Sig  Alp1
+ 0  2  Alp1 Bet 
+ 2  3  Bet  Gam 
+ 3  4  Gam  Ups 
+ 4  5  Ups  Tau 
+ 3  0  Gam  Alp1
+PSC ZODIAC 16 17
+   12.171     7.585   Del 
+   15.736     7.890   Eps 
+   17.915    30.090   Tau 
+   18.437    24.584   Phi 
+   19.867    27.264   Ups 
+   22.546     6.144   Mu  
+   22.871    15.346   Eta 
+   25.358     5.488   Nu  
+   26.348     9.158   Omi 
+   30.512     2.764   Alp 
+  349.291     3.282   Gam 
+  351.733     1.256   Kap 
+  351.992     6.379   The 
+  354.987     5.626   Iot 
+  355.512     1.780   Lam 
+  359.828     6.863   Ome 
+13 14  Iot  Lam 
+14 11  Lam  Kap 
+11 10  Kap  Gam 
+10 12  Gam  The 
+12 13  The  Iot 
+13 15  Iot  Ome 
+15  0  Ome  Del 
+ 0  1  Del  Eps 
+ 1  5  Eps  Mu  
+ 5  7  Mu   Nu  
+ 7  9  Nu   Alp 
+ 9  8  Alp  Omi 
+ 8  6  Omi  Eta 
+ 6  3  Eta  Phi 
+ 3  2  Phi  Tau 
+ 2  4  Tau  Ups 
+ 4  3  Ups  Phi 
+SCO ZODIAC 14 13
+  239.713   -26.114   Pi  
+  240.083   -22.622   Del 
+  241.359   -19.806   Bet1
+  245.297   -25.593   Sig 
+  247.352   -26.432   Alp 
+  248.971   -28.216   Tau 
+  252.541   -34.293   Eps 
+  252.967   -38.048   Mu 1
+  253.499   -42.362   Zet1
+  258.038   -43.239   Eta 
+  263.402   -37.104   Lam 
+  264.330   -42.998   The 
+  265.622   -39.030   Kap 
+  266.896   -40.127   Iot1
+ 2  1  Bet1 Del 
+ 1  0  Del  Pi  
+ 1  3  Del  Sig 
+ 3  4  Sig  Alp 
+ 4  5  Alp  Tau 
+ 5  6  Tau  Eps 
+ 6  7  Eps  Mu 1
+ 7  8  Mu 1 Zet1
+ 8  9  Zet1 Eta 
+ 9 11  Eta  The 
+11 13  The  Iot1
+13 12  Iot1 Kap 
+12 10  Kap  Lam 
+SGR ZODIAC 8 11
+  271.255   -29.580   Gam1
+  275.249   -29.828   Del 
+  276.043   -34.385   Eps 
+  276.992   -25.422   Lam 
+  281.414   -26.991   Phi 
+  283.816   -26.297   Sig 
+  285.653   -29.880   Zet 
+  286.735   -27.671   Tau 
+ 2  0  Eps  Gam1
+ 0  1  Gam1 Del 
+ 1  3  Del  Lam 
+ 3  4  Lam  Phi 
+ 4  5  Phi  Sig 
+ 5  7  Sig  Tau 
+ 7  6  Tau  Zet 
+ 6  2  Zet  Eps 
+ 2  1  Eps  Del 
+ 1  4  Del  Phi 
+ 4  6  Phi  Zet 
+TAU ZODIAC 8 7
+   51.792     9.733   Xi  
+   60.170    12.490   Lam 
+   64.948    15.627   Gam 
+   65.734    17.542   Del1
+   66.372    17.928   Del3
+   67.154    19.180   Eps 
+   67.144    15.962   The1
+   68.980    16.509   Alp 
+ 7  6  Alp  The1
+ 6  2  The1 Gam 
+ 2  1  Gam  Lam 
+ 1  0  Lam  Xi  
+ 5  4  Eps  Del3
+ 4  3  Del3 Del1
+ 3  2  Del1 Gam 
+VIR ZODIAC 13 13
+  176.465     6.529   Nu  
+  177.674     1.765   Bet 
+  181.302     8.733   Omi 
+  184.977     0.667   Eta 
+  190.415    -1.449   Gam 
+  193.901     3.398   Del 
+  195.544    10.959   Eps 
+  197.488    -5.539   The 
+  201.298   -11.161   Alp 
+  203.673     0.596   Zet 
+  210.412     1.544   Tau 
+  214.004    -6.001   Iot 
+  220.765    -5.658   Mu  
+ 8  7  Alp  The 
+ 7  4  The  Gam 
+ 4  3  Gam  Eta 
+ 3  1  Eta  Bet 
+ 1  0  Bet  Nu  
+ 0  2  Nu   Omi 
+ 2  3  Omi  Eta 
+ 4  5  Gam  Del 
+ 5  6  Del  Eps 
+ 4  9  Gam  Zet 
+ 9 10  Zet  Tau 
+ 9 11  Zet  Iot 
+11 12  Iot  Mu  
+ANT MINOR 3 2
+  142.311   -35.951   Eps 
+  156.788   -31.068   Alp 
+  164.180   -37.138   Iot 
+ 2  1  Iot  Alp 
+ 1  0  Alp  Eps 
+APS MINOR 4 3
+  221.965   -79.045   Alp 
+  245.087   -78.696   Del1
+  248.363   -78.897   Gam 
+  250.769   -77.518   Bet 
+ 0  1  Alp  Del1
+ 1  3  Del1 Bet 
+ 3  2  Bet  Gam 
+ARA MINOR 7 6
+  252.446   -59.041   Eta 
+  254.655   -55.990   Zet 
+  254.896   -53.161   Eps1
+  261.325   -55.530   Bet 
+  261.348   -56.377   Gam 
+  262.775   -60.684   Del 
+  262.960   -49.876   Alp 
+ 3  6  Bet  Alp 
+ 6  2  Alp  Eps1
+ 2  1  Eps1 Zet 
+ 1  0  Zet  Eta 
+ 0  5  Eta  Del 
+ 5  4  Del  Gam 
+CAE MINOR 4 3
+   67.709   -44.954   Del 
+   70.140   -41.864   Alp 
+   70.515   -37.144   Bet 
+   76.102   -35.483   Gam1
+ 0  1  Del  Alp 
+ 1  2  Alp  Bet 
+ 2  3  Bet  Gam1
+CAM MINOR 3 2
+   57.590    71.332   Gam 
+   73.512    66.343   Alp 
+   75.855    60.442   Bet 
+ 2  1  Bet  Alp 
+ 1  0  Alp  Gam 
+CHA MINOR 5 5
+  124.632   -76.920   Alp 
+  158.867   -78.608   Gam 
+  161.315   -80.470   Del1
+  179.905   -78.222   Eps 
+  184.586   -79.312   Bet 
+ 0  1  Alp  Gam 
+ 1  3  Gam  Eps 
+ 3  4  Eps  Bet 
+ 4  2  Bet  Del1
+ 2  1  Del1 Gam 
+CIR MINOR 4 3
+  220.627   -64.975   Alp 
+  224.183   -62.781   The 
+  229.378   -58.801   Bet 
+  230.845   -59.321   Gam 
+ 3  0  Gam  Alp 
+ 0  1  Alp  The 
+ 1  2  The  Bet 
+CMI MINOR 2 1
+  111.787     8.289   Bet 
+  114.825     5.225   Alp 
+ 1  0  Alp  Bet 
+COL MINOR 6 5
+   82.803   -35.471   Eps 
+   84.912   -34.074   Alp 
+   87.740   -35.768   Bet 
+   89.384   -35.283   Gam 
+   89.787   -42.815   Eta 
+   95.528   -33.436   Del 
+ 0  1  Eps  Alp 
+ 1  2  Alp  Bet 
+ 2  3  Bet  Gam 
+ 3  5  Gam  Del 
+ 2  4  Bet  Eta 
+COM MINOR 3 2
+  186.735    28.268   Gam 
+  197.497    17.529   Alp 
+  197.968    27.878   Bet 
+ 1  2  Alp  Bet 
+ 2  0  Bet  Gam 
+CRA MINOR 5 4
+  278.376   -42.312   The 
+  286.605   -37.063   Gam 
+  287.087   -40.497   Del 
+  287.368   -37.904   Alp 
+  287.507   -39.341   Bet 
+ 0  2  The  Del 
+ 2  4  Del  Bet 
+ 4  3  Bet  Alp 
+ 3  1  Alp  Gam 
+CRV MINOR 5 5
+  182.103   -24.729   Alp 
+  182.531   -22.620   Eps 
+  183.952   -17.542   Gam 
+  187.466   -16.516   Del 
+  188.597   -23.397   Bet 
+ 0  1  Alp  Eps 
+ 1  2  Eps  Gam 
+ 2  3  Gam  Del 
+ 3  4  Del  Bet 
+ 4  1  Bet  Eps 
+CVN MINOR 2 1
+  188.435    41.357   Bet 
+  194.002    38.315   Alp1
+ 1  0  Alp1 Bet 
+DEL MINOR 5 5
+  308.303    11.303   Eps 
+  309.388    14.595   Bet 
+  309.910    15.912   Alp 
+  310.865    15.074   Del 
+  311.661    16.124   Gam1
+ 0  1  Eps  Bet 
+ 1  2  Bet  Alp 
+ 2  4  Alp  Gam1
+ 4  3  Gam1 Del 
+ 3  1  Del  Bet 
+DOR MINOR 5 5
+   64.007   -51.487   Gam 
+   68.499   -55.045   Alp 
+   76.378   -57.473   Zet 
+   83.406   -62.490   Bet 
+   86.193   -65.736   Del 
+ 0  1  Gam  Alp 
+ 1  2  Alp  Zet 
+ 2  3  Zet  Bet 
+ 3  1  Bet  Alp 
+ 3  4  Bet  Del 
+EQU MINOR 3 2
+  317.585    10.132   Gam 
+  318.620    10.007   Del 
+  318.956     5.248   Alp 
+ 2  1  Alp  Del 
+ 1  0  Del  Gam 
+FOR MINOR 3 2
+   31.122   -29.297   Nu  
+   42.272   -32.406   Bet 
+   48.018   -28.987   Alp 
+ 2  1  Alp  Bet 
+ 1  0  Bet  Nu  
+GRU MINOR 8 8
+  328.482   -37.365   Gam 
+  331.529   -39.543   Lam 
+  332.058   -46.961   Alp 
+  333.904   -41.347   Mu 1
+  337.318   -43.496   Del1
+  340.667   -46.885   Bet 
+  342.139   -51.317   Eps 
+  345.220   -52.754   Zet 
+ 0  1  Gam  Lam 
+ 1  3  Lam  Mu 1
+ 3  4  Mu 1 Del1
+ 4  5  Del1 Bet 
+ 5  6  Bet  Eps 
+ 6  7  Eps  Zet 
+ 4  2  Del1 Alp 
+ 2  5  Alp  Bet 
+HOR MINOR 6 5
+   39.352   -52.543   Eta 
+   40.165   -54.550   Zet 
+   40.640   -50.800   Iot 
+   44.699   -64.071   Bet 
+   45.903   -59.738   Mu  
+   63.500   -42.294   Alp 
+ 3  4  Bet  Mu  
+ 4  1  Mu   Zet 
+ 1  0  Zet  Eta 
+ 0  2  Eta  Iot 
+ 2  5  Iot  Alp 
+HYI MINOR 3 3
+    6.438   -77.254   Bet 
+   29.692   -61.570   Alp 
+   56.810   -74.239   Gam 
+ 1  0  Alp  Bet 
+ 0  2  Bet  Gam 
+ 2  1  Gam  Alp 
+IND MINOR 4 4
+  309.392   -47.291   Alp 
+  313.703   -58.454   Bet 
+  319.967   -53.450   The 
+  329.480   -54.993   Del 
+ 0  1  Alp  Bet 
+ 1  3  Bet  Del 
+ 3  2  Del  The 
+ 2  0  The  Alp 
+LAC MINOR 2 1
+  335.890    52.229   Bet 
+  337.823    50.283   Alp 
+ 1  0  Alp  Bet 
+LEP MINOR 11 12
+   76.365   -22.371   Eps 
+   78.233   -16.206   Mu  
+   78.308   -12.941   Kap 
+   79.894   -13.177   Lam 
+   82.061   -20.759   Bet 
+   83.183   -17.822   Alp 
+   86.116   -22.448   Gam 
+   86.739   -14.822   Zet 
+   87.830   -20.879   Del 
+   89.101   -14.168   Eta 
+   91.539   -14.935   The 
+ 5  4  Alp  Bet 
+ 4  6  Bet  Gam 
+ 6  8  Gam  Del 
+ 8 10  Del  The 
+10  9  The  Eta 
+ 9  7  Eta  Zet 
+ 7  5  Zet  Alp 
+ 5  1  Alp  Mu  
+ 1  0  Mu   Eps 
+ 0  4  Eps  Bet 
+ 1  2  Mu   Kap 
+ 1  3  Mu   Lam 
+LMI MINOR 0 0
+LUP MINOR 9 10
+  220.482   -47.388   Alp 
+  224.633   -43.134   Bet 
+  228.071   -52.099   Zet 
+  230.343   -40.647   Del 
+  230.452   -36.261   Phi1
+  230.670   -44.689   Eps 
+  233.785   -41.167   Gam 
+  237.740   -33.627   Chi 
+  240.030   -38.397   Eta 
+ 0  2  Alp  Zet 
+ 2  8  Zet  Eta 
+ 8  7  Eta  Chi 
+ 7  4  Chi  Phi1
+ 4  8  Phi1 Eta 
+ 8  6  Eta  Gam 
+ 6  5  Gam  Eps 
+ 5  2  Eps  Zet 
+ 6  3  Gam  Del 
+ 3  1  Del  Bet 
+LYN MINOR 0 0
+MEN MINOR 0 0
+MIC MINOR 0 0
+MON MINOR 5 4
+   93.714    -6.275   Gam 
+   97.204    -7.033   Bet 
+  107.966     0.493   Del 
+  115.312    -9.551   Alp 
+  122.148    -2.984   Zet 
+ 3  4  Alp  Zet 
+ 4  2  Zet  Del 
+ 2  1  Del  Bet 
+ 1  0  Bet  Gam 
+MUS MINOR 6 6
+  176.402   -66.729   Lam 
+  184.392   -67.961   Eps 
+  188.117   -72.133   Gam 
+  189.296   -69.136   Alp 
+  191.570   -68.108   Bet 
+  195.568   -71.549   Del 
+ 3  4  Alp  Bet 
+ 4  5  Bet  Del 
+ 5  2  Del  Gam 
+ 2  3  Gam  Alp 
+ 3  1  Alp  Eps 
+ 1  0  Eps  Lam 
+NOR MINOR 4 4
+  240.804   -49.230   Eta 
+  241.622   -45.173   Del 
+  244.960   -50.156   Gam2
+  246.796   -47.555   Eps 
+ 1  0  Del  Eta 
+ 0  2  Eta  Gam2
+ 2  3  Gam2 Eps 
+ 3  1  Eps  Del 
+OCT MINOR 3 3
+  216.729   -83.668   Del 
+  325.369   -77.390   Nu  
+  341.514   -81.382   Bet 
+ 0  2  Del  Bet 
+ 2  1  Bet  Nu  
+ 1  0  Nu   Del 
+PAV MINOR 10 11
+  266.433   -64.724   Eta 
+  272.145   -63.668   Pi  
+  275.807   -61.494   Xi  
+  280.759   -71.428   Zet 
+  283.054   -62.188   Lam 
+  284.237   -67.234   Kap 
+  300.148   -72.911   Eps 
+  302.182   -66.182   Del 
+  306.412   -56.735   Alp 
+  321.611   -65.366   Gam 
+ 8  9  Alp  Gam 
+ 9  7  Gam  Del 
+ 7  8  Del  Alp 
+ 7  5  Del  Kap 
+ 5  1  Kap  Pi  
+ 1  2  Pi   Xi  
+ 2  4  Xi   Lam 
+ 4  7  Lam  Del 
+ 7  6  Del  Eps 
+ 7  3  Del  Zet 
+ 1  0  Pi   Eta 
+PHE MINOR 7 8
+    2.353   -45.748   Eps 
+    6.571   -42.306   Alp 
+   16.521   -46.719   Bet 
+   17.096   -55.246   Zet 
+   18.796   -45.531   Nu  
+   22.091   -43.318   Gam 
+   22.813   -49.073   Del 
+ 1  0  Alp  Eps 
+ 0  2  Eps  Bet 
+ 2  1  Bet  Alp 
+ 2  3  Bet  Zet 
+ 3  6  Zet  Del 
+ 6  5  Del  Gam 
+ 5  4  Gam  Nu  
+ 4  2  Nu   Bet 
+PIC MINOR 3 2
+   86.821   -51.066   Bet 
+   87.457   -56.167   Gam 
+  102.048   -61.941   Alp 
+ 2  1  Alp  Gam 
+ 1  0  Gam  Bet 
+PSA MINOR 8 9
+  326.237   -33.026   Iot 
+  326.934   -30.898   The 
+  332.096   -32.989   Mu  
+  337.876   -32.346   Bet 
+  340.164   -27.044   Eps 
+  343.132   -32.876   Gam 
+  343.987   -32.540   Del 
+  344.413   -29.622   Alp 
+ 7  4  Alp  Eps 
+ 4  2  Eps  Mu  
+ 2  1  Mu   The 
+ 1  0  The  Iot 
+ 0  2  Iot  Mu  
+ 2  3  Mu   Bet 
+ 3  5  Bet  Gam 
+ 5  6  Gam  Del 
+ 6  7  Del  Alp 
+PUP MINOR 5 4
+   99.440   -43.196   Nu  
+  109.286   -37.097   Pi  
+  117.324   -24.860   Xi  
+  120.896   -40.003   Zet 
+  121.886   -24.304   Rho 
+ 0  1  Nu   Pi  
+ 1  2  Pi   Xi  
+ 2  4  Xi   Rho 
+ 4  3  Rho  Zet 
+PYX MINOR 3 2
+  130.026   -35.308   Bet 
+  130.898   -33.186   Alp 
+  132.633   -27.710   Gam 
+ 2  1  Gam  Alp 
+ 1  0  Alp  Bet 
+RET MINOR 5 5
+   56.050   -64.807   Bet 
+   59.686   -61.400   Del 
+   60.326   -61.079   Iot 
+   63.606   -62.474   Alp 
+   64.120   -59.302   Eps 
+ 3  0  Alp  Bet 
+ 0  1  Bet  Del 
+ 1  2  Del  Iot 
+ 2  4  Iot  Eps 
+ 4  3  Eps  Alp 
+SCL MINOR 4 3
+   14.652   -29.358   Alp 
+  349.706   -32.532   Gam 
+  353.243   -37.818   Bet 
+  357.232   -28.130   Del 
+ 0  3  Alp  Del 
+ 3  1  Del  Gam 
+ 1  2  Gam  Bet 
+SCT MINOR 5 4
+  277.300   -14.566   Gam 
+  278.802    -8.244   Alp 
+  280.568    -9.052   Del 
+  280.880    -8.275   Eps 
+  281.794    -4.748   Bet 
+ 1  4  Alp  Bet 
+ 4  3  Bet  Eps 
+ 3  2  Eps  Del 
+ 2  0  Del  Gam 
+SEX MINOR 4 3
+  148.127    -8.105   Gam 
+  151.985     0.372   Alp 
+  157.370    -2.739   Del 
+  157.573     0.637   Bet 
+ 2  3  Del  Bet 
+ 3  1  Bet  Alp 
+ 1  0  Alp  Gam 
+SGE MINOR 4 3
+  295.024    18.014   Alp 
+  295.262    17.476   Bet 
+  296.847    18.534   Del 
+  299.689    19.492   Gam 
+ 3  2  Gam  Del 
+ 2  0  Del  Alp 
+ 2  1  Del  Bet 
+TEL MINOR 3 2
+  272.807   -45.954   Eps 
+  276.743   -45.968   Alp 
+  277.208   -49.071   Zet 
+ 0  1  Eps  Alp 
+ 1  2  Alp  Zet 
+TRA MINOR 4 4
+  229.727   -68.679   Gam 
+  234.180   -66.317   Eps 
+  238.785   -63.431   Bet 
+  252.166   -69.028   Alp 
+ 3  2  Alp  Bet 
+ 2  1  Bet  Eps 
+ 1  0  Eps  Gam 
+ 0  3  Gam  Alp 
+TRI MINOR 3 3
+   28.270    29.579   Alp 
+   32.386    34.987   Bet 
+   34.329    33.847   Gam 
+ 0  2  Alp  Gam 
+ 2  1  Gam  Bet 
+ 1  0  Bet  Alp 
+TUC MINOR 6 6
+    5.018   -64.875   Zet 
+    7.886   -62.958   Bet1
+  334.625   -60.260   Alp 
+  336.833   -64.966   Del 
+  349.358   -58.236   Gam 
+  359.979   -65.577   Eps 
+ 2  4  Alp  Gam 
+ 4  1  Gam  Bet1
+ 1  0  Bet1 Zet 
+ 0  5  Zet  Eps 
+ 5  3  Eps  Del 
+ 3  2  Del  Alp 
+VOL MINOR 5 6
+  107.176   -70.497   Gam1
+  109.207   -67.957   Del 
+  121.982   -68.617   Eps 
+  126.434   -66.137   Bet 
+  135.612   -66.396   Alp 
+ 2  3  Eps  Bet 
+ 3  4  Bet  Alp 
+ 4  2  Alp  Eps 
+ 2  1  Eps  Del 
+ 1  0  Del  Gam1
+ 0  2  Gam1 Eps 
+VUL MINOR 0 0
+MOI MINOR 13 13
+  118.808    53.098   Alp 
+  119.808    53.098   Bet 
+  120.492    50.279   Gam 
+  120.150    50.189   Del 
+  122.759    44.631   Eps 
+  121.494    44.028   Zet 
+  122.308    41.098   Eta 
+  121.028    41.098   The 
+  121.349    40.416   Iot 
+  121.349    39.644   Kap 
+  118.487    39.644   Lam 
+  118.487    40.416   Mu  
+  118.808    41.098   Nu  
+ 0  1  Alp  Bet 
+ 1  2  Bet  Gam 
+ 2  3  Gam  Del 
+ 3  4  Del  Eps 
+ 4  5  Eps  Zet 
+ 5  6  Zet  Eta 
+ 6  7  Eta  The 
+ 7  8  The  Iot 
+ 8  9  Iot  Kap 
+ 9 10  Kap  Lam 
+10 11  Lam  Mu  
+11 12  Mu   Nu  
+12  0  Nu   Alp 

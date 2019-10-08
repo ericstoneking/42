@@ -516,7 +516,7 @@ void Ephemerides(void)
       long i,j,Ip,Im,Iw,Imb,Ir,Isc;
       long Ic;
       struct Cheb3DType *C;
-      double x,JDavg,JDunit;
+      double u,dudJD,T[20],U[20],P,dPdu;
       long Iorb;
       double EMRAT = 81.30056907419062; /* Earth-Moon mass ratio */
       double PosJ[3],VelJ[3];
@@ -584,13 +584,13 @@ void Ephemerides(void)
             while(JulDay > Eph->Cheb[Ic].JD2) Ic++;
             /* Apply Chebyshev polynomials */
             C = &Eph->Cheb[Ic];
-            JDavg = 0.5*(C->JD1+C->JD2);
-            JDunit = 0.5*(C->JD2-C->JD1);
-            x = (JulDay-JDavg)/JDunit;
-            Cheb3DToPosVel(C->N,C->Coef,x,PosJ,VelJ);
+            dudJD = 2.0/(C->JD2-C->JD1);
+            u = (JulDay-C->JD1)*dudJD - 1.0;
+            ChebyPolys(u,C->N,T,U);
             for(i=0;i<3;i++) {
-               PosJ[i] *= 1000.0;
-               VelJ[i] *= 1000.0/(JDunit*86400.0);
+               ChebyInterp(T,U,C->Coef[i],C->N,&P,&dPdu);
+               PosJ[i] = 1000.0*P;
+               VelJ[i] = 1000.0*dPdu*dudJD/86400.0;
             }
             QTxV(qJ2000H,PosJ,Eph->PosN);
             QTxV(qJ2000H,VelJ,Eph->VelN);
