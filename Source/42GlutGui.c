@@ -34,12 +34,12 @@ void DrawWorldAsBackdrop(struct WorldType *W,double PosN[3],double svn[3])
       GLfloat LightPos[4] = {0.0,0.0,0.0,0.0};
       GLfloat CWEarray[9];
       long i,j;
-      
+
       A = &W->Atmo;
-      
+
       glPushMatrix();
       glLoadIdentity();
-      
+
       /* Transform and scale into Eye frame */
       MxV(POV.CN,svn,sve);
       for(i=0;i<3;i++) LightPos[i] = sve[i];
@@ -49,17 +49,17 @@ void DrawWorldAsBackdrop(struct WorldType *W,double PosN[3],double svn[3])
       MxMT(W->CWN,POV.CN,CWE);
       WorldDist = CopyUnitV(PosE,UnitWorldVecE);
       for(i=0;i<3;i++) UnitWorldVecE[i] = -UnitWorldVecE[i];
-      
+
       if (WorldDist > W->rad) {
          CosWorldAng = sqrt(1.0-W->rad*W->rad/(WorldDist*WorldDist));
       }
       else CosWorldAng = 0.0;
-      
+
       if (WorldDist > A->rad) {
          CosAtmoAng = sqrt(1.0-A->rad*A->rad/(WorldDist*WorldDist));
       }
       else CosAtmoAng = -1.0;
-      
+
       if (WorldDist > W->RingOuter) {
          CosRingAng = sqrt(1.0-W->RingOuter*W->RingOuter/(WorldDist*WorldDist));
       }
@@ -78,7 +78,7 @@ void DrawWorldAsBackdrop(struct WorldType *W,double PosN[3],double svn[3])
 
       UniLoc = glGetUniformLocation(WorldShaderProgram,"HasAtmo");
       glUniform1i(UniLoc,A->Exists);
-      
+
       UniLoc = glGetUniformLocation(WorldShaderProgram,"Br");
       glUniform3f(UniLoc,A->RayScat[0],A->RayScat[1],A->RayScat[2]);
 
@@ -99,38 +99,38 @@ void DrawWorldAsBackdrop(struct WorldType *W,double PosN[3],double svn[3])
 
       UniLoc = glGetUniformLocation(WorldShaderProgram,"CosWorldAng");
       glUniform1f(UniLoc,CosWorldAng);
-      
+
       UniLoc = glGetUniformLocation(WorldShaderProgram,"CosAtmoAng");
       glUniform1f(UniLoc,CosAtmoAng);
-      
+
       UniLoc = glGetUniformLocation(WorldShaderProgram,"CosRingAng");
       glUniform1f(UniLoc,CosRingAng);
-      
+
       UniLoc = glGetUniformLocation(WorldShaderProgram,"WorldRad");
       glUniform1f(UniLoc,W->rad);
-      
+
       UniLoc = glGetUniformLocation(WorldShaderProgram,"PosEyeW");
       glUniform3f(UniLoc,PosW[0],PosW[1],PosW[2]);
-      
+
       UniLoc = glGetUniformLocation(WorldShaderProgram,"MagPosEye");
       glUniform1f(UniLoc,MAGV(PosW));
-      
+
       UniLoc = glGetUniformLocation(WorldShaderProgram,"CWE");
       for(i=0;i<3;i++) {
          for(j=0;j<3;j++) CWEarray[3*i+j] = CWE[i][j];
       }
       glUniformMatrix3fv(UniLoc,1,1,CWEarray);
-      
+
       UniLoc = glGetUniformLocation(WorldShaderProgram,"HasRing");
       glUniform1i(UniLoc,W->HasRing);
-      
+
       glBegin(GL_QUADS);
          glVertex3d(-POV.Width,-POV.Height,-1.0);
          glVertex3d( POV.Width,-POV.Height,-1.0);
          glVertex3d( POV.Width, POV.Height,-1.0);
          glVertex3d(-POV.Width, POV.Height,-1.0);
       glEnd();
-      
+
       glUseProgram(0);
 
       glPopMatrix();
@@ -143,20 +143,20 @@ void DrawSunAsBackdrop(void)
       double UnitSunVecE[3],SunDist;
       double CosSunAng,CosCoronaAng;
       long i;
-      
+
       glPushMatrix();
       glLoadIdentity();
-      
+
       /* Transform and scale into Eye frame */
       for(i=0;i<3;i++) svh[i] = -POV.PosH[i];
       SunDist = UNITV(svh);
       MxV(POV.CH,svh,UnitSunVecE);
-      
+
       RadRatio = World[0].rad/SunDist;
       RadRatio2 = RadRatio*RadRatio;
       CosSunAng = sqrt(1.0-RadRatio2);
       CosCoronaAng = sqrt(1.0-16.0*RadRatio2);
-      
+
       glUseProgram(SunShaderProgram);
 
       UniLoc = glGetUniformLocation(SunShaderProgram,"UnitSunVecE");
@@ -164,17 +164,17 @@ void DrawSunAsBackdrop(void)
 
       UniLoc = glGetUniformLocation(SunShaderProgram,"CosSunAng");
       glUniform1f(UniLoc,CosSunAng);
-      
+
       UniLoc = glGetUniformLocation(SunShaderProgram,"CosCoronaAng");
       glUniform1f(UniLoc,CosCoronaAng);
-      
+
       glBegin(GL_QUADS);
          glVertex3d(-POV.Width,-POV.Height,-1.0);
          glVertex3d( POV.Width,-POV.Height,-1.0);
          glVertex3d( POV.Width, POV.Height,-1.0);
          glVertex3d(-POV.Width, POV.Height,-1.0);
       glEnd();
-      
+
       glUseProgram(0);
 
       glPopMatrix();
@@ -1079,7 +1079,7 @@ void DrawFarScene(void)
       /*if (CamShow[PULSAR_SOURCES]) DrawPulsars(LoS,BuckyPf,PulsarList);*/
 
       glClear(GL_DEPTH_BUFFER_BIT);
-      
+
 
 /* .. Find depth, visibility for each world */
       VisCoef = 0.5*CamHeight/POV.SinFov;
@@ -5974,7 +5974,7 @@ void LoadCamShaders(void)
       glUniform1f(UniLoc,1.0);
       UniLoc = glGetUniformLocation(SunShaderProgram,"CosCoronaAng");
       glUniform1f(UniLoc,1.0);
-      
+
       glUseProgram(WorldShaderProgram);
       UniLoc = glGetUniformLocation(WorldShaderProgram,"MapTexture");
       glUniform1i(UniLoc,0);
@@ -5993,7 +5993,7 @@ void LoadCamShaders(void)
       UniLoc = glGetUniformLocation(WorldShaderProgram,"CosAtmoAng");
       glUniform1f(UniLoc,0.0);
       UniLoc = glGetUniformLocation(WorldShaderProgram,"WorldRad");
-      glUniform1f(UniLoc,0.0);      
+      glUniform1f(UniLoc,0.0);
       UniLoc = glGetUniformLocation(WorldShaderProgram,"PosEyeW");
       glUniform3f(UniLoc,0.0,0.0,0.0);
       UniLoc = glGetUniformLocation(WorldShaderProgram,"MagPosEye");
