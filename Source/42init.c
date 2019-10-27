@@ -2381,6 +2381,7 @@ void LoadPlanets(void)
       double PoleRA[10] = {0.0,281.008,272.758,0.0,317.683,268.057,40.587,257.313,299.333,133.046};
       double PoleDec[10] = {90.0,61.45,67.16,0.0,52.8865,64.496,83.537,-15.175,42.95,-6.145};
       double CNJ[3][3];
+      double PriMerAngJ2000[10] = {0.0,329.71,160.26,190.16,176.868,284.95,38.90,203.81,253.18,236.77};
       /* Magnetic Field Dipole Strength, Wb-m */
       double DipoleMoment[10] = {0.0,0.0,0.0,7.943E15,0.0,
                                  0.0,0.0,0.0,0.0,0.0};
@@ -2441,6 +2442,7 @@ void LoadPlanets(void)
          World[i].J2 = J2[i];
          World[i].rad=Rad[i];
          World[i].w=W[i];
+         World[i].PriMerAngJ2000 = PriMerAngJ2000[i]*D2R;
          World[i].Parent = SOL;
          World[i].eph.World = SOL;
          World[i].eph.mu = World[SOL].mu;
@@ -2532,7 +2534,7 @@ void LoadPlanets(void)
             Eph2RV(Eph->mu,Eph->SLR,Eph->ecc,Eph->inc,Eph->RAAN,Eph->ArgP,
                    AbsTime-Eph->tp,Eph->PosN,Eph->VelN,&Eph->anom);
             for(j=0;j<3;j++) World[i].PosH[j] = Eph->PosN[j];
-            World[i].PriMerAng = fmod(World[i].w*AbsTime,TwoPi);
+            World[i].PriMerAng = fmod(World[i].PriMerAngJ2000+World[i].w*AbsTime,TwoPi);
             SimpRot(Zaxis,World[i].PriMerAng,World[i].CWN);
             C2Q(World[i].CWN,World[i].qwn);
          }

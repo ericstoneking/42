@@ -216,12 +216,20 @@ void Report(void)
                PosW[0],PosW[1],PosW[2]);
             fprintf(VelWfile,"%18.12le %18.12le %18.12le ",
                VelW[0],VelW[1],VelW[2]);
-            MxV(Rgn[Orb[SC[0].RefOrb].Region].CN,SC[0].PosR,PosR);
-            MxV(Rgn[Orb[SC[0].RefOrb].Region].CN,SC[0].VelR,VelR);
-            fprintf(PosRfile,"%le %le %le\n",
-               PosR[0],PosR[1],PosR[2]);
-            fprintf(VelRfile,"%le %le %le\n",
-               VelR[0],VelR[1],VelR[2]);
+            if (Orb[SC[0].RefOrb].Regime == ORB_FLIGHT) {
+               MxV(Rgn[Orb[SC[0].RefOrb].Region].CN,SC[0].PosR,PosR);
+               MxV(Rgn[Orb[SC[0].RefOrb].Region].CN,SC[0].VelR,VelR);
+               fprintf(PosRfile,"%le %le %le\n",
+                  PosR[0],PosR[1],PosR[2]);
+               fprintf(VelRfile,"%le %le %le\n",
+                  VelR[0],VelR[1],VelR[2]);
+            }
+            else {
+               fprintf(PosRfile,"%le %le %le\n",
+                  SC[0].PosR[0],SC[0].PosR[1],SC[0].PosR[2]);
+               fprintf(VelRfile,"%le %le %le\n",
+                  SC[0].VelR[0],SC[0].VelR[1],SC[0].VelR[2]);
+            }
             fprintf(qbnfile,"%le %le %le %le\n",
                SC[0].B[0].qn[0],SC[0].B[0].qn[1],SC[0].B[0].qn[2],SC[0].B[0].qn[3]);
             fprintf(wbnfile,"%le %le %le\n",

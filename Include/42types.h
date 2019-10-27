@@ -627,6 +627,7 @@ struct WorldType {
    double J2; /* Gravitation oblateness parameter */
    double rad; /* Radius */
    double w; /* Spin Rate */
+   double PriMerAngJ2000; /* Prime Meridian Angle at J2000 epoch, rad */
    double RadOfInfluence; /* Radius of Sphere of Influence */
    double DipoleMoment;  /* Magnetic Field Dipole Moment, Wb-m */
    double DipoleAxis[3]; /* Magnetic Field Dipole Axis */

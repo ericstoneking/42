@@ -2,10 +2,10 @@
 Simple generic S/C            !  Description
 "S/C"                         !  Label
 GenScSpriteAlpha.ppm          !  Sprite File Name
-PROTOTYPE_FSW                 !  Flight Software Identifier
+PASSIVE_FSW                 !  Flight Software Identifier
 0.2                           !  FSW Sample Time, sec
 ************************* Orbit Parameters ****************************
-ENCKE                         !  Orbit Prop FIXED, EULER_HILL, ENCKE, or COWELL
+FIXED                         !  Orbit Prop FIXED, EULER_HILL, ENCKE, or COWELL
 CM                            !  Pos of CM or ORIGIN, wrt F
 0.0  0.0  0.0                 !  Pos wrt Formation (m), expressed in F
 0.0  0.0  0.0                 !  Vel wrt Formation (m/s), expressed in F
@@ -103,7 +103,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 1.0E-6                        ! Noise, Tesla RMS
 1                             ! Flex Node Index
 *********************** Coarse Sun Sensor *******************************
-0                             ! Number of Coarse Sun Sensors
+8                             ! Number of Coarse Sun Sensors
 ============================== CSS 0 ====================================
 0.1                           ! Sample Time,sec
 0    1.0  1.0  1.0            ! Body, Axis expressed in Body Frame
@@ -111,8 +111,57 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 1.0                           ! Scale Factor
 0.001                         ! Quantization
 0                             ! Flex Node Index
+============================== CSS 1 ====================================
+0.1                           ! Sample Time,sec
+0   -1.0  1.0  1.0            ! Body, Axis expressed in Body Frame
+90.0                          ! Half-cone Angle, deg
+1.0                           ! Scale Factor
+0.001                         ! Quantization
+0                             ! Flex Node Index
+============================== CSS 2 ====================================
+0.1                           ! Sample Time,sec
+0    1.0 -1.0  1.0            ! Body, Axis expressed in Body Frame
+90.0                          ! Half-cone Angle, deg
+1.0                           ! Scale Factor
+0.001                         ! Quantization
+0                             ! Flex Node Index
+============================== CSS 3 ====================================
+0.1                           ! Sample Time,sec
+0   -1.0 -1.0  1.0            ! Body, Axis expressed in Body Frame
+90.0                          ! Half-cone Angle, deg
+1.0                           ! Scale Factor
+0.001                         ! Quantization
+0                             ! Flex Node Index
+============================== CSS 4 ====================================
+0.1                           ! Sample Time,sec
+0    1.0  1.0 -1.0            ! Body, Axis expressed in Body Frame
+90.0                          ! Half-cone Angle, deg
+1.0                           ! Scale Factor
+0.001                         ! Quantization
+0                             ! Flex Node Index
+============================== CSS 5 ====================================
+0.1                           ! Sample Time,sec
+0   -1.0  1.0 -1.0            ! Body, Axis expressed in Body Frame
+90.0                          ! Half-cone Angle, deg
+1.0                           ! Scale Factor
+0.001                         ! Quantization
+0                             ! Flex Node Index
+============================== CSS 6 ====================================
+0.1                           ! Sample Time,sec
+0    1.0 -1.0 -1.0            ! Body, Axis expressed in Body Frame
+90.0                          ! Half-cone Angle, deg
+1.0                           ! Scale Factor
+0.001                         ! Quantization
+0                             ! Flex Node Index
+============================== CSS 7 ====================================
+0.1                           ! Sample Time,sec
+0   -1.0 -1.0 -1.0            ! Body, Axis expressed in Body Frame
+90.0                          ! Half-cone Angle, deg
+1.0                           ! Scale Factor
+0.001                         ! Quantization
+0                             ! Flex Node Index
 ************************* Fine Sun Sensor *******************************
-0                             ! Number of Fine Sun Sensors
+1                             ! Number of Fine Sun Sensors
 =============================== FSS 0 ===================================
 0.2                           ! Sample Time,sec
 70.0  0.0  0.0  231           ! Mounting Angles (deg), Seq in Body
@@ -121,7 +170,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.5                           ! Quantization, deg
 0                             ! Flex Node Index
 ************************** Star Tracker *********************************
-0                             ! Number of Star Trackers
+1                             ! Number of Star Trackers
 =============================== ST 0 ====================================
 0.25                          ! Sample Time,sec
 -90.0  90.0  00.0  321        ! Mounting Angles (deg), Seq in Body

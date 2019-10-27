@@ -137,12 +137,21 @@ SOCKET InitSocketServer(int Port, int AllowBlocking)
       int flags;
       socklen_t clilen;
       struct sockaddr_in Server, Client;
+      int opt = 1;
 
       init_sockfd = socket(AF_INET,SOCK_STREAM,0);
       if (init_sockfd < 0) {
          printf("Error opening server socket.\n");
          exit(1);
       }
+      
+      /* Allowing reuse while in TIME_WAIT might make port available */
+      /* more quickly after a socket has been broken */
+      if (setsockopt(init_sockfd,SOL_SOCKET,SO_REUSEADDR,&opt,sizeof(opt)) == -1) {
+        printf("Error setting socket option.\n");
+        exit(1);
+      }
+      
       memset((char *) &Server,0,sizeof(Server));
       Server.sin_family = AF_INET;
       Server.sin_addr.s_addr = INADDR_ANY;

@@ -444,11 +444,11 @@ void SplineToPosVel(struct OrbitType *O)
 /**********************************************************************/
 void OrbitMotion(void)
 {
-      /* static long RectCtr = 0; */
       long Iorb;
       struct OrbitType *O;
 
 #if 0
+      static long RectCtr = 0;
       RectCtr++;
       if (RectCtr > 100) {
          RectCtr = 0;
@@ -547,7 +547,7 @@ void Ephemerides(void)
                   W->PosH[j] = Eph->PosN[j];
                   W->VelH[j] = Eph->VelN[j];
                }
-               W->PriMerAng = fmod(W->w*AbsTime,TwoPi);
+               W->PriMerAng = fmod(W->PriMerAngJ2000+W->w*AbsTime,TwoPi);
                SimpRot(ZAxis,W->PriMerAng,W->CWN);
             }
          }
