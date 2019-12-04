@@ -268,10 +268,12 @@
 #define IPC_OFF 0
 #define IPC_TX 1
 #define IPC_RX 2
-#define IPC_WRITEFILE 3
-#define IPC_READFILE 4
-#define IPC_SPIRENT 5
-#define IPC_FFTB 6
+#define IPC_TXRX 3
+#define IPC_ACS 4
+#define IPC_WRITEFILE 5
+#define IPC_READFILE 6
+#define IPC_SPIRENT 7
+#define IPC_FFTB 8
 
 /* Socket Roles for InterProcess Comm */
 #define IPC_SERVER 0

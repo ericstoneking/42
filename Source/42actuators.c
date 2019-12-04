@@ -100,8 +100,13 @@ void GimbalModel(long DOF,double Rate[3],double Ang[3],
          AngErr = fmod(Ang[i] - AngCmd[i],TwoPi);
          if (AngErr > Pi) AngErr -= TwoPi;
          if (AngErr < -Pi) AngErr += TwoPi;
-         DesiredRate = Limit(RateCmd[i] - AngGain[i]/RateGain[i]*AngErr,
-                             -MaxRate[i],MaxRate[i]);
+         if (RateGain[i] != 0.0) {
+            DesiredRate = Limit(RateCmd[i] - AngGain[i]/RateGain[i]*AngErr,
+                                -MaxRate[i],MaxRate[i]);
+         }
+         else {
+            DesiredRate = Limit(RateCmd[i],-MaxRate[i],MaxRate[i]);
+         }
          Trq[i] = Limit(-RateGain[i]*(Rate[i]-DesiredRate),
                         -MaxTrq[i],MaxTrq[i]);
       }

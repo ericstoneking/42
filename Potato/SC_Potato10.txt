@@ -359,11 +359,11 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.1                           ! Sample Time,sec
 0.5  1.0  1.5                 ! Position in B[0] (m)
 1.0  0.0  0.0                 ! Axis expressed in Body Frame
-0.0                           ! Scale Factor Error
+1.0                           ! Max Acceleration (m/s^2)
+0.0                           ! Scale Factor Error, ppm
 0.05                          ! Quantization, m/s^2
-0.0                           ! Random Walk (units?)
-0.0                           ! Bias Stability (m/s^2/hr?)
+0.0                           ! DV Random Walk (m/s/rt-hr)
+0.0 1.0                       ! Bias Stability (m/s^2) over timespan (hr)
 0.0                           ! DV Noise, m/s
 0.5                           ! Initial Bias (m/s^2)
 0                             ! Flex Node Index
-

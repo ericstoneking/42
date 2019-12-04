@@ -45,7 +45,9 @@ void VxMT (double V[3], double M[3][3], double W[3]);
 void MTxV (double M[3][3], double V[3], double W[3]);
 void SxV(double S, double V[3], double W[3]);
 void SxM(double S, double A[3][3], double B[3][3]);
-void MINV(double A[3][3], double B[3][3]);
+void MINV4(double A[4][4], double B[4][4]);
+void MINV3(double A[3][3], double B[3][3]);
+void MINV2(double A[2][2], double B[2][2]);
 void PINV4x3(double A[4][3], double Aplus[3][4]);
 void MT(double A[3][3], double B[3][3]);
 double VoV(double A[3], double B[3]);
@@ -84,6 +86,7 @@ void MxVG(double **M, double *v, double *w, long n, long m);
 void SxMG(double s, double **A, double **B,
           long N, long M);
 void MINVG(double **A, double **AI, long N);
+void FastMINV6(double A[6][6], double AI[6][6], long N);
 void PINVG(double **A, double **Ai, long n, long m);
 double **CreateMatrix(long n, long m);
 void DestroyMatrix(double **A, long n);

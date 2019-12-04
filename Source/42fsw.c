@@ -15,8 +15,8 @@
 #include "42.h"
 
 void AcFsw(struct AcType *AC);
-void WriteToSocket(SOCKET Socket);
-void ReadFromSocket(SOCKET Socket);
+void WriteToSocket(SOCKET Socket, char **Prefix, long Nprefix, long EchoEnabled);
+void ReadFromSocket(SOCKET Socket, long EchoEnabled);
 
 
 /* #ifdef __cplusplus
@@ -1684,23 +1684,20 @@ void AdHocFSW(struct SCType *S)
 void FlightSoftWare(struct SCType *S)
 {
       static long First = 1;
-      long InitSocket;
       #ifdef _AC_STANDALONE_
-      static SOCKET AcSocket[2];
-      int AcPort = 10101;
-      long i;
+      struct IpcType *I;
+      long Iipc;
       #endif
       
       if (S->InitAC) {
          S->InitAC = 0;
          InitAC(S);
-         InitSocket = 1;
       }
-      else InitSocket = 0;
       
       S->FswSampleCounter++;
       if (S->FswSampleCounter >= S->FswMaxCounter) {
          S->FswSampleCounter = 0;
+         
          switch(S->FswTag){
             case PASSIVE_FSW:
                break;
@@ -1730,23 +1727,27 @@ void FlightSoftWare(struct SCType *S)
                break;
             case CFS_FSW:
                #ifdef _AC_STANDALONE_
-                  if (InitSocket) {
-                     AcSocket[S->AC.ID] = InitSocketServer(AcPort+S->AC.ID,TRUE);
-                     
-                     S->AC.ParmLoadEnabled = 1;
-                     S->AC.ParmDumpEnabled = 1;
-                     S->AC.EchoEnabled = 1;
+               for(Iipc=0;Iipc<Nipc;Iipc++) {
+                  I = &IPC[Iipc];
+                  if (I->Mode == IPC_ACS && I->AcsID == S->AC.ID) {
+                     if (I->Init) {
+                        I->Init = 0;
+                        S->AC.ParmLoadEnabled = 1;
+                        S->AC.ParmDumpEnabled = 1;
+                        S->AC.EchoEnabled = 1;
 
-                     WriteToSocket(AcSocket[S->AC.ID]);
-                     ReadFromSocket(AcSocket[S->AC.ID]);
+                        WriteToSocket(I->Socket,I->Prefix,I->Nprefix,I->EchoEnabled);
+                        ReadFromSocket(I->Socket,I->EchoEnabled);
 
-                     S->AC.ParmLoadEnabled = 0;
-                     S->AC.ParmDumpEnabled = 0;
+                        S->AC.ParmLoadEnabled = 0;
+                        S->AC.ParmDumpEnabled = 0;
+                     }
+                     else {
+                        WriteToSocket(I->Socket,I->Prefix,I->Nprefix,I->EchoEnabled);
+                        ReadFromSocket(I->Socket,I->EchoEnabled);
+                     }
                   }
-                  else {
-                     WriteToSocket(AcSocket[S->AC.ID]);
-                     ReadFromSocket(AcSocket[S->AC.ID]);
-                  }
+               }
                #else
                   AcFsw(&S->AC);
                #endif

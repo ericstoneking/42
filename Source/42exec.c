@@ -221,8 +221,9 @@ void ZeroFrcTrq(void)
 {
       struct SCType *S;
       struct BodyType *B;
+      struct JointType *G;
       struct FlexNodeType *FN;
-      long Isc,Ib,In;
+      long Isc,Ib,Ig,In;
 
       for(Isc=0;Isc<Nsc;Isc++) {
          S = &SC[Isc];
@@ -237,6 +238,15 @@ void ZeroFrcTrq(void)
             B->Trq[0] = 0.0;
             B->Trq[1] = 0.0;
             B->Trq[2] = 0.0;
+         }
+         for(Ig=0;Ig<S->Ng;Ig++) {
+            G = &S->G[Ig];
+            G->Frc[0] = 0.0;
+            G->Frc[1] = 0.0;
+            G->Frc[2] = 0.0;
+            G->Trq[0] = 0.0;
+            G->Trq[1] = 0.0;
+            G->Trq[2] = 0.0;
          }
          if (S->FlexActive) {
             for(Ib=0;Ib<S->Nb;Ib++) {
@@ -343,13 +353,19 @@ int exec(int argc,char **argv)
       long Isc;
       long Done = 0;
 
-      DynRunTime = 0.0;
+      MapTime = 0.0;
+      JointTime = 0.0;
+      PathTime = 0.0;
+      PVelTime = 0.0;
+      FrcTrqTime = 0.0;
+      AssembleTime = 0.0;
+      LockTime = 0.0;
+      SolveTime = 0.0;
 
       InitSim(argc,argv);
       for (Isc=0;Isc<Nsc;Isc++) {
          if (SC[Isc].Exists) {
             InitSpacecraft(&SC[Isc]);
-            InitAC(&SC[Isc]);
          }
       }
       CmdInterpreter();
@@ -370,7 +386,14 @@ int exec(int argc,char **argv)
          }
       #endif
 
-      printf("\n\nDynamics Run Time = %lf sec\n",DynRunTime);
+      //printf("\n\nMap Time = %lf sec\n",MapTime);
+      //printf("Joint Partial Time = %lf sec\n",JointTime);
+      //printf("Path Time = %lf sec\n",PathTime);
+      //printf("PVel Time = %lf sec\n",PVelTime);
+      //printf("FrcTrq Time = %lf sec\n",FrcTrqTime);
+      //printf("Assemble Time = %lf sec\n",AssembleTime);
+      //printf("Lock Time = %lf sec\n",LockTime);
+      //printf("Solve Time = %lf sec\n",SolveTime);
       return(0);
 }
 

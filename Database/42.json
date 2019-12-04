@@ -3569,6 +3569,16 @@
                "Packet Role":   "PRM"
             },
             {
+               "Variable Name":  "PriMerAngJ2000",
+               "Description":  "Prime Meridian Angle at J2000 epoch, rad",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
                "Variable Name":  "RadOfInfluence",
                "Description":  "Radius of Sphere of Influence",
                "Units":  "None",
@@ -3923,6 +3933,13 @@
       },
       {
          "Table Name": "ConstellationType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "IpcType",
          "Table Type": "Structure",
          "Table Data": [
 

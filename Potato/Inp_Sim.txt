@@ -10,7 +10,7 @@ Inp_Cmd.txt                     !  Command Script File Name
 TRUE   Orb_LEO.txt              !  Input file name for Orb 0
 *****************************  Spacecraft  *****************************
 1                               !  Number of Spacecraft
-TRUE  0 SC_Potato20.txt          !  Existence, RefOrb, Input file for SC 0
+TRUE  0 SC_Potato15.txt          !  Existence, RefOrb, Input file for SC 0
 ***************************** Environment  *****************************
 05 21 2019                      !  Date (Month, Day, Year)
 12 00 00.00                     !  Greenwich Mean Time (Hr,Min,Sec)
@@ -27,7 +27,7 @@ FALSE   FALSE                   !  Aerodynamic Forces & Torques (Shadows)
 FALSE                           !  Gravity Gradient Torques
 FALSE   FALSE                   !  Solar Pressure Forces & Torques (Shadows)
 FALSE                           !  Gravity Perturbation Forces
-FALSE                           !  Passive Joint Forces & Torques
+FALSE                            !  Passive Joint Forces & Torques
 FALSE                           !  Thruster Plume Forces & Torques
 FALSE                           !  RWA Imbalance Forces and Torques
 FALSE                           !  Contact Forces and Torques

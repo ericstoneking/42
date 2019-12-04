@@ -64,8 +64,6 @@ EXTERN double Pi, TwoPi, HalfPi, SqrtTwo, SqrtHalf, D2R, R2D;
 
 /* Simulation Control */
 EXTERN long TimeMode; /* FAST_TIME, REAL_TIME, EXTERNAL_SYNCH, NOS3_TIME */
-EXTERN long IpcMode; /* IPC_OFF, IPC_TX, IPC_RX */
-EXTERN long SocketRole; /* IPC_SERVER or IPC_CLIENT */
 EXTERN double SimTime,STOPTIME,DTSIM,DTOUT,DTOUTGL;
 EXTERN long OutFlag,GLOutFlag,GLEnable,CleanUpFlag;
 
@@ -149,15 +147,18 @@ EXTERN struct RegionType *Rgn;
 EXTERN long ExecuteCFDStep;
 EXTERN long EndCFD;
 
-EXTERN SOCKET TxSocket,RxSocket;
-EXTERN long EchoEnabled;
+/* Inter-Process Comm */
+EXTERN long Nipc;
+EXTERN struct IpcType *IPC;
 
 /* Master Random Process */
 EXTERN struct RandomProcessType *RNG;
 
-EXTERN double DynRunTime;
+EXTERN double MapTime,JointTime,PathTime,PVelTime,FrcTrqTime;
+EXTERN double AssembleTime,LockTime,SolveTime;
 
 EXTERN struct ConstellationType Constell[89];
+
 
 long SimStep(void);
 void Ephemerides(void);

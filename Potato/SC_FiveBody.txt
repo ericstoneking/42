@@ -16,7 +16,7 @@ NAN                           ! Ang Vel wrt [NL], Att [QA] wrt [NLF]
 0.0    0.0    0.0    213      ! Angles (deg) & Euler Sequence
 ***************************  Dynamics Flags  ***************************
 DYN_JOINT                     ! Rotation STEADY, KIN_JOINT, or DYN_JOINT
-FALSE                         ! Passive Joint Forces and Torques Enabled
+TRUE                          ! Passive Joint Forces and Torques Enabled
 FALSE                         ! Compute Constraint Forces and Torques
 REFPT_CM                      ! Mass Props referenced to REFPT_CM or REFPT_JOINT
 FALSE                         ! Flex Active
@@ -25,7 +25,7 @@ FALSE                         ! Include 2nd Order Flex Terms
 ************************************************************************
 ************************* Body Parameters ******************************
 ************************************************************************
-3                             ! Number of Bodies
+5                             ! Number of Bodies
 ================================ Body 0 ================================
 100.0                         ! Mass
 100.0  200.0  300.0           ! Moments of Inertia (kg-m^2)
@@ -50,46 +50,98 @@ NONE                          ! Flex File Name
 0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
 Potato.obj                    ! Geometry Input File Name
 NONE                          ! Flex File Name
+================================ Body 2 ================================
+100.0                         ! Mass
+100.0  200.0  300.0           ! Moments of Inertia (kg-m^2)
+0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
+0.0  0.0  0.0                 ! Location of mass center, m
+0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
+Potato.obj                    ! Geometry Input File Name
+NONE                          ! Flex File Name
+================================ Body 3 ================================
+100.0                         ! Mass
+100.0  200.0  300.0           ! Moments of Inertia (kg-m^2)
+0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
+0.0  0.0  0.0                 ! Location of mass center, m
+0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
+Potato.obj                    ! Geometry Input File Name
+NONE                          ! Flex File Name
 ************************************************************************
 *************************** Joint Parameters ***************************
 ************************************************************************
          (Number of Joints is Number of Bodies minus one)
 ============================== Joint 0 ================================
 0 1                           ! Inner, outer body indices
-3   123   SPHERICAL           ! RotDOF, Seq, GIMBAL or SPHERICAL
-0   123                       ! TrnDOF, Seq
+2   123   GIMBAL              ! RotDOF, Seq, GIMBAL or SPHERICAL
+1   312                       ! TrnDOF, Seq
 FALSE  FALSE  FALSE           ! RotDOF Locked
 FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0    0.0    0.0             ! Initial Angles [deg]
-0.0    0.5    0.0             ! Initial Rates, deg/sec
+0.0    0.0    0.0             ! Initial Rates, deg/sec
 0.0    0.0    0.0             ! Initial Displacements [m]
 0.0    0.0    0.0             ! Initial Displacement Rates, m/sec
-0.0   0.0  0.0  312           ! Bi to Gi Static Angles [deg] & Seq
+90.0  0.0  0.0  213           ! Bi to Gi Static Angles [deg] & Seq
 0.0   0.0  0.0  312           ! Go to Bo Static Angles [deg] & Seq
-0.0   0.0  0.75                ! Position wrt inner body origin, m
-0.0   0.0 -0.75                ! Position wrt outer body origin, m
-0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
-0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
-0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
-0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
+0.5   0.0  0.0                ! Position wrt inner body origin, m
+0.0   0.0 -0.75               ! Position wrt outer body origin, m
+1.0   1.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
+2.0   2.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
+0.1   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
+0.5   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 1 ================================
-1 2                           ! Inner, outer body indices
-3   123   SPHERICAL           ! RotDOF, Seq, GIMBAL or SPHERICAL
+0 2                           ! Inner, outer body indices
+1   123   GIMBAL              ! RotDOF, Seq, GIMBAL or SPHERICAL
+1   312                       ! TrnDOF, Seq
+FALSE  FALSE  FALSE           ! RotDOF Locked
+FALSE  FALSE  FALSE           ! TrnDOF Locked
+0.0    0.0    0.0             ! Initial Angles [deg]
+0.0    0.0    0.0             ! Initial Rates, deg/sec
+0.0    0.0    0.0             ! Initial Displacements [m]
+0.0    0.0    0.0             ! Initial Displacement Rates, m/sec
+0.0   0.0  0.0  312           ! Bi to Gi Static Angles [deg] & Seq
+0.0   0.0  0.0  312           ! Go to Bo Static Angles [deg] & Seq
+0.0   0.0  0.75               ! Position wrt inner body origin, m
+0.0   0.0 -0.75               ! Position wrt outer body origin, m
+1.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
+2.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
+0.1   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
+0.5   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
+============================== Joint 2 ================================
+2 3                           ! Inner, outer body indices
+3   123   GIMBAL              ! RotDOF, Seq, GIMBAL or SPHERICAL
 0   123                       ! TrnDOF, Seq
 FALSE  FALSE  FALSE           ! RotDOF Locked
 FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0    0.0    0.0             ! Initial Angles [deg]
-0.0    0.5    0.0             ! Initial Rates, deg/sec
+0.0    0.0    0.0             ! Initial Rates, deg/sec
 0.0    0.0    0.0             ! Initial Displacements [m]
 0.0    0.0    0.0             ! Initial Displacement Rates, m/sec
 0.0   0.0  0.0  312           ! Bi to Gi Static Angles [deg] & Seq
 0.0   0.0  0.0  312           ! Go to Bo Static Angles [deg] & Seq
 0.0   0.0  0.75                ! Position wrt inner body origin, m
 0.0   0.0 -0.75                ! Position wrt outer body origin, m
-0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
-0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
-0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
-0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
+1.0   1.0  1.0                ! Rot Passive Spring Coefficients (Nm/rad)
+2.0   2.0  2.0                ! Rot Passive Damping Coefficients (Nms/rad)
+0.1   0.1  0.1                ! Trn Passive Spring Coefficients (N/m)
+0.5   0.5  0.5                ! Trn Passive Damping Coefficients (Ns/m)
+============================== Joint 3 ================================
+2 4                           ! Inner, outer body indices
+3   123   GIMBAL              ! RotDOF, Seq, GIMBAL or SPHERICAL
+0   123                       ! TrnDOF, Seq
+FALSE  FALSE  FALSE           ! RotDOF Locked
+FALSE  FALSE  FALSE           ! TrnDOF Locked
+0.0    0.0    0.0             ! Initial Angles [deg]
+0.0    0.0    0.0             ! Initial Rates, deg/sec
+0.0    0.0    0.0             ! Initial Displacements [m]
+0.0    0.0    0.0             ! Initial Displacement Rates, m/sec
+90.0   0.0  0.0  123          ! Bi to Gi Static Angles [deg] & Seq
+0.0   0.0  0.0  312           ! Go to Bo Static Angles [deg] & Seq
+0.0   0.5  0.0                ! Position wrt inner body origin, m
+0.0   0.0 -0.75               ! Position wrt outer body origin, m
+1.0   1.0  1.0                ! Rot Passive Spring Coefficients (Nm/rad)
+2.0   2.0  2.0                ! Rot Passive Damping Coefficients (Nms/rad)
+0.1   0.1  0.1                ! Trn Passive Spring Coefficients (N/m)
+0.5   0.5  0.5                ! Trn Passive Damping Coefficients (Ns/m)
 *************************** Wheel Parameters ***************************
 0                             ! Number of wheels
 =============================  Wheel 0  ================================

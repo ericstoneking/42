@@ -153,9 +153,44 @@ void SxM(double S, double A[3][3], double B[3][3])
       B[2][1] = S*A[2][1];
       B[2][2] = S*A[2][2];
 }
-/**********************************************************************/
-/*  Inverse of a 3x3 Matrix                                           */
-void MINV(double A[3][3], double B[3][3])
+/******************************************************************************/
+/* Inverse of a 4x4 Matrix                                                    */
+void MINV4(double A[4][4],double B[4][4])
+{
+      double DET = 0.0;
+      long r,s,i,j,k,x,y,z;
+      
+      for(r=0;r<4;r++) {
+         for(s=0;s<4;s++) {
+            i = (r+1)%4;
+            j = (r+2)%4;
+            k = (r+3)%4;
+            x = (s+1)%4;
+            y = (s+2)%4;
+            z = (s+3)%4;
+            B[s][r] =  A[i][x]*(A[j][y]*A[k][z]-A[j][z]*A[k][y])
+                      +A[i][y]*(A[j][z]*A[k][x]-A[j][x]*A[k][z])
+                      +A[i][z]*(A[j][x]*A[k][y]-A[j][y]*A[k][x]);
+            if ((r+s)%2 == 1) B[s][r] = -B[s][r];
+         }
+      }
+      for(r=0;r<4;r++) DET += A[0][r]*B[r][0];
+
+      if (DET == 0.0) {
+         printf("Attempted inversion of singular matrix in MINV4.  Bailing out.\n");
+         exit(1);
+      }
+      else {
+         for(r=0;r<4;r++) {
+            for(s=0;s<4;s++) {
+               B[r][s] /= DET;
+            }
+         }
+      }
+}
+/******************************************************************************/
+/*  Inverse of a 3x3 Matrix                                                   */
+void MINV3(double A[3][3], double B[3][3])
 {
       double DET;
 
@@ -164,19 +199,39 @@ void MINV(double A[3][3], double B[3][3])
          -A[2][1]*A[1][2]*A[0][0]-A[2][2]*A[1][0]*A[0][1];
 
       if (DET == 0.0) {
-         printf("Attempted inversion of singular matrix in MINV.  Bailing out.\n");
+         printf("Attempted inversion of singular matrix in MINV3.  Bailing out.\n");
          exit(1);
       }
-
-      B[0][0]=(A[1][1]*A[2][2]-A[2][1]*A[1][2])/DET;
-      B[0][1]=(A[2][1]*A[0][2]-A[0][1]*A[2][2])/DET;
-      B[0][2]=(A[0][1]*A[1][2]-A[1][1]*A[0][2])/DET;
-      B[1][0]=(A[2][0]*A[1][2]-A[1][0]*A[2][2])/DET;
-      B[1][1]=(A[0][0]*A[2][2]-A[2][0]*A[0][2])/DET;
-      B[1][2]=(A[1][0]*A[0][2]-A[0][0]*A[1][2])/DET;
-      B[2][0]=(A[1][0]*A[2][1]-A[2][0]*A[1][1])/DET;
-      B[2][1]=(A[2][0]*A[0][1]-A[0][0]*A[2][1])/DET;
-      B[2][2]=(A[0][0]*A[1][1]-A[1][0]*A[0][1])/DET;
+      else {
+         B[0][0]=(A[1][1]*A[2][2]-A[2][1]*A[1][2])/DET;
+         B[0][1]=(A[2][1]*A[0][2]-A[0][1]*A[2][2])/DET;
+         B[0][2]=(A[0][1]*A[1][2]-A[1][1]*A[0][2])/DET;
+         B[1][0]=(A[2][0]*A[1][2]-A[1][0]*A[2][2])/DET;
+         B[1][1]=(A[0][0]*A[2][2]-A[2][0]*A[0][2])/DET;
+         B[1][2]=(A[1][0]*A[0][2]-A[0][0]*A[1][2])/DET;
+         B[2][0]=(A[1][0]*A[2][1]-A[2][0]*A[1][1])/DET;
+         B[2][1]=(A[2][0]*A[0][1]-A[0][0]*A[2][1])/DET;
+         B[2][2]=(A[0][0]*A[1][1]-A[1][0]*A[0][1])/DET;
+      }
+}
+/******************************************************************************/
+/*  Inverse of a 2x2 Matrix                                                   */
+void MINV2(double A[2][2], double B[2][2])
+{
+      double DET;
+      
+      DET = A[0][0]*A[1][1] - A[1][0]*A[0][1];
+      
+      if (DET == 0.0) {
+         printf("Attempted inversion of singular matrix in MINV2.  Bailing out.\n");
+         exit(1);
+      }
+      else {
+         B[0][0]= A[1][1]/DET;
+         B[0][1]=-A[0][1]/DET;
+         B[1][0]=-A[1][0]/DET;
+         B[1][1]= A[0][0]/DET;
+      }
 }
 /**********************************************************************/
 /*  Pseudo-inverse of a 4x3 matrix                                    */
@@ -203,7 +258,7 @@ void PINV4x3(double A[4][3], double Aplus[3][4])
       AtA[2][2]=A[0][2]*A[0][2]+A[1][2]*A[1][2]
                +A[2][2]*A[2][2]+A[3][2]*A[3][2];
 
-      MINV(AtA,AtAi);
+      MINV3(AtA,AtAi);
 
       Aplus[0][0]=AtAi[0][0]*A[0][0]+AtAi[0][1]*A[0][1]+AtAi[0][2]*A[0][2];
       Aplus[0][1]=AtAi[0][0]*A[1][0]+AtAi[0][1]*A[1][1]+AtAi[0][2]*A[1][2];
@@ -796,6 +851,68 @@ void MINVG(double **A, double **AI, long N)
       DestroyMatrix(M,N);
       free(TA);
       free(TB);
+}
+/******************************************************************************/
+/* For Order-N dynamics, we need to invert matrices of size 1 <= N <= 6       */
+/* This specialized function avoids mallocs to save time                      */
+void FastMINV6(double A[6][6], double AI[6][6], long N)
+{
+      long I,J,ROW;
+      long IPIVOT = 0;
+      double M[6][6];
+      double PIVOT,K,TA[6],TB[6];
+
+
+      for(I=0;I<N;I++){
+         for(J=0;J<N;J++){
+            M[I][J] = A[I][J];
+            AI[I][J] = 0.0;
+         }
+         AI[I][I] = 1.0;
+      }
+
+      for(ROW=0;ROW<N;ROW++){
+         PIVOT = M[ROW][ROW];
+         IPIVOT = ROW;
+         for(I=ROW+1;I<N;I++){
+            if (fabs(M[I][ROW]) > fabs(PIVOT)){
+               PIVOT = M[I][ROW];
+               IPIVOT = I;
+            }
+         }
+         if (PIVOT == 0.0){
+            printf("Matrix is singular in FastMINV6\n");
+            exit(1);
+         }
+
+         for(J=0;J<N;J++){
+            TA[J] = M[IPIVOT][J];
+            TB[J] = AI[IPIVOT][J];
+            M[IPIVOT][J] = M[ROW][J];
+            AI[IPIVOT][J] = AI[ROW][J];
+            M[ROW][J] = TA[J] / PIVOT;
+            AI[ROW][J] = TB[J] / PIVOT;
+         }
+         for(I=ROW+1;I<N;I++){
+            K = M[I][ROW];
+            for(J=0;J<N;J++){
+               M[I][J] = M[I][J] - K * M[ROW][J];
+               AI[I][J] = AI[I][J] - K * AI[ROW][J];
+            }
+         }
+      }
+
+/*    M is now upper diagonal */
+
+      for(ROW=N-1;ROW>0;ROW--){
+         for(I=0;I<ROW;I++){
+            K = M[I][ROW];
+            for(J=0;J<N;J++){
+               M[I][J] = M[I][J] - K * M[ROW][J];
+               AI[I][J] = AI[I][J] - K * AI[ROW][J];
+            }
+         }
+      }
 }
 /**********************************************************************/
 /*  Find the pseudo-inverse of an n-by-m matrix A                     */

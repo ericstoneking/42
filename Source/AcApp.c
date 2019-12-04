@@ -150,7 +150,7 @@ void GyroProcessing(struct AcType *AC)
          b[0] = AC->Gyro[0].Rate;
          b[1] = AC->Gyro[1].Rate;
          b[2] = 0.0;
-         MINV(A,Ai);
+         MINV3(A,Ai);
          MxV(Ai,b,AC->wbn);
       }
       else if (AC->Ngyro > 2) {
@@ -164,7 +164,7 @@ void GyroProcessing(struct AcType *AC)
                }
             }
          }
-         MINV(AtA,AtAi);
+         MINV3(AtA,AtAi);
          MxV(AtAi,Atb,AC->wbn);
       }
 }
@@ -196,7 +196,7 @@ void MagnetometerProcessing(struct AcType *AC)
          b[0] = AC->MAG[0].Field;
          b[1] = AC->MAG[1].Field;
          b[2] = 0.0;
-         MINV(A,Ai);
+         MINV3(A,Ai);
          MxV(Ai,b,AC->bvb);
       }
       else if (AC->Nmag > 2) {
@@ -210,7 +210,7 @@ void MagnetometerProcessing(struct AcType *AC)
                }
             }
          }
-         MINV(AtA,AtAi);
+         MINV3(AtA,AtAi);
          MxV(AtAi,Atb,AC->bvb);
       }
 }
@@ -253,7 +253,7 @@ void CssProcessing(struct AcType *AC)
          }
          if (Nvalid > 2) {
             AC->SunValid = TRUE;
-            MINV(AtA,AtAi);
+            MINV3(AtA,AtAi);
             MxV(AtAi,Atb,AC->svb);
             UNITV(AC->svb);
          }
@@ -488,11 +488,11 @@ int main(int argc, char **argv)
       struct AcType AC;
       SOCKET Socket;
       char hostname[20] = "localhost";
-      int Port = 10101;
+      int Port = 10001;
       
       if (argc > 1) {
          AC.ID = atoi(argv[1]);
-         Port = 10101 + AC.ID;
+         Port = 10001 + AC.ID;
       }
       
       AllocateAC(&AC);

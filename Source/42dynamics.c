@@ -20,6 +20,8 @@
 ** #endif
 */
 
+double tic, toc;
+
 /**********************************************************************/
 void PassiveJointFrcTrq(double *u, double *x, struct SCType *S)
 {
@@ -503,7 +505,7 @@ void FindBodyPathDCMs(struct SCType *S)
       }
 }
 /**********************************************************************/
-/* Could probably be optimized */
+/* TODO:  Could probably be optimized */
 void FindPathVectors(struct SCType *S)
 {
       struct DynType *D;
@@ -1525,6 +1527,160 @@ void FindFlexFrc(struct SCType *S)
       }
 }
 /**********************************************************************/
+void OrderNSolveEOM(struct SCType *S)
+{
+      struct DynType *D;
+      struct JointType *G,*Ga;
+      double **M,*F;
+      double *udot;
+      double Mp[6][6],Mi[6][6],RowFact[6][6];
+      long Ib,Ig,Np,Na,Ns,ip,ia,iv,i,j,k;
+
+      D = &S->Dyn;
+      M = D->COEF; /* Generalized Mass matrix */
+      F = D->RHS;  /* Generalized Force vector */
+      udot = D->ActiveState; 
+      
+      Ns = D->Ns - D->Nf; 
+      
+      iv = Ns-3;
+
+/* .. Triangularize-in-place */
+      /* Joints */
+      for(Ig=S->Ng-1;Ig>=0;Ig--) {
+         G = &S->G[Ig];
+         Np = G->ActiveRotDOF + G->ActiveTrnDOF;
+         if (Np > 0) {
+            ip = G->ActiveRotu0;
+            for(i=0;i<Np;i++) {
+               for(j=0;j<Np;j++) Mp[i][j] = M[ip+i][ip+j];
+            }
+            FastMINV6(Mp,Mi,Np);
+            /* For each ancestral joint, row ops to put zeros above/below G */
+            Ib = G->Bin;
+            while (Ib > 0) {
+               Ga = &S->G[S->B[Ib].Gin];
+               Na = Ga->ActiveRotDOF + Ga->ActiveTrnDOF;
+               ia = Ga->ActiveRotu0;
+               for(i=0;i<Na;i++) {
+                  for(j=0;j<Np;j++) {
+                     RowFact[i][j] = 0.0;
+                     for(k=0;k<Np;k++) RowFact[i][j] += M[ia+i][ip+k]*Mi[k][j];
+                  }
+               }
+               for(i=0;i<Na;i++) {
+                  for(j=0;j<Ns;j++) {
+                     for(k=0;k<Np;k++) M[ia+i][j] -= RowFact[i][k]*M[ip+k][j];
+                  }
+                  for(k=0;k<Np;k++) F[ia+i] -= RowFact[i][k]*F[ip+k];
+               }
+               Ib = Ga->Bin;
+            }
+            /* For B[0].wn, row ops */
+            for(i=0;i<3;i++) {
+               for(j=0;j<Np;j++) {
+                  RowFact[i][j] = 0.0;
+                  for(k=0;k<Np;k++) RowFact[i][j] += M[i][ip+k]*Mi[k][j];
+               }
+            }
+            for(i=0;i<3;i++) {
+               for(j=0;j<Ns;j++) {
+                  for(k=0;k<Np;k++) M[i][j] -= RowFact[i][k]*M[ip+k][j];
+               }
+               for(k=0;k<Np;k++) F[i] -= RowFact[i][k]*F[ip+k];
+            }
+            /* For B[0].vn, row ops */
+            for(i=0;i<3;i++) {
+               for(j=0;j<Np;j++) {
+                  RowFact[i][j] = 0.0;
+                  for(k=0;k<Np;k++) RowFact[i][j] += M[iv+i][ip+k]*Mi[k][j];
+               }
+            }
+            for(i=0;i<3;i++) {
+               for(j=0;j<Ns;j++) {
+                  for(k=0;k<Np;k++) M[iv+i][j] -= RowFact[i][k]*M[ip+k][j];
+               }
+               for(k=0;k<Np;k++) F[iv+i] -= RowFact[i][k]*F[ip+k];
+            }
+         }
+      }
+      /* B[0].wn */
+      for(i=0;i<3;i++) {
+         for(j=0;j<3;j++) Mp[i][j] = M[i][j];
+      }
+      FastMINV6(Mp,Mi,3);
+      for(i=0;i<3;i++) {
+         for(j=0;j<3;j++) {
+            RowFact[i][j] = 0.0;
+            for(k=0;k<3;k++) RowFact[i][j] += M[iv+i][k]*Mi[k][j];
+         }
+      }
+      for(i=0;i<3;i++) {
+         for(j=0;j<Ns;j++) {
+            for(k=0;k<3;k++) M[iv+i][j] -= RowFact[i][k]*M[k][j];
+         }
+         for(k=0;k<3;k++) F[iv+i] -= RowFact[i][k]*F[k];
+      }
+
+/* .. Forward Substitution */
+      /* B[0].vn (Np = 3) */
+      for(i=0;i<3;i++) {
+         for(j=0;j<3;j++) Mp[i][j] = M[iv+i][iv+j];
+      }
+      FastMINV6(Mp,Mi,3);
+      for(i=0;i<3;i++) {
+         udot[iv+i] = 0.0;
+         for(j=0;j<3;j++) udot[iv+i] += Mi[i][j]*F[iv+j];
+      }
+      /* B[0].wn  (ip = 0, Np = 3) */
+      for(i=0;i<3;i++) {
+         for(j=0;j<3;j++) Mp[i][j] = M[i][j];
+      }
+      FastMINV6(Mp,Mi,3);
+      for(i=0;i<3;i++) {
+         for(j=0;j<3;j++) F[i] -= M[i][iv+j]*udot[iv+j];
+      }
+      for(i=0;i<3;i++) {
+         udot[i] = 0.0;
+         for(j=0;j<3;j++) udot[i] += Mi[i][j]*F[j];
+      }
+      /* Joints */
+      for(Ig=0;Ig<S->Ng;Ig++) {
+         G = &S->G[Ig];
+         Np = G->ActiveRotDOF + G->ActiveTrnDOF;
+         if (Np > 0) {
+            ip = G->ActiveRotu0;
+            for(i=0;i<Np;i++) {
+               for(j=0;j<Np;j++) Mp[i][j] = M[ip+i][ip+j];
+            }
+            FastMINV6(Mp,Mi,Np);
+            /* Subtract wn, vn udots from F */
+            for(i=0;i<Np;i++) {
+               for(j=0;j<3;j++) F[ip+i] -= M[ip+i][j]*udot[j] + M[ip+i][iv+j]*udot[iv+j];
+            }
+            /* For each ancestral joint, subtract udot contributions */
+            Ib = G->Bin;
+            while (Ib > 0) {
+               Ga = &S->G[S->B[Ib].Gin];
+               Na = Ga->ActiveRotDOF + Ga->ActiveTrnDOF;
+               ia = Ga->ActiveRotu0;
+               for(i=0;i<Np;i++) {
+                  for(j=0;j<Na;j++) F[ip+i] -= M[ip+i][ia+j]*udot[ia+j];
+               }
+               Ib = Ga->Bin;
+            }
+            /* udot[ip] = Mi*F[ip] */
+            for(i=0;i<Np;i++) {
+               udot[ip+i] = 0.0;
+               for(j=0;j<Np;j++) udot[ip+i] += Mi[i][j]*F[ip+j];
+            }
+         }
+      }
+
+/* TODO: Flex states */
+
+}
+/**********************************************************************/
 void EchoPVel(struct SCType *S)
 {
       FILE *outfile;
@@ -1655,7 +1811,16 @@ void EchoEOM(double **COEF, double *State, double *RHS,long Ns)
       for(i=0;i<Ns;i++) fprintf(outfile,"%24.16le\n",RHS[i]);
       fclose(outfile);
 }
+/**********************************************************************/
+void EchoUdot(double *State, long Ns)
+{
+      FILE *outfile;
+      long i;
 
+      outfile = FileOpen(InOutPath,"udot.42","w");
+      for(i=0;i<Ns;i++) fprintf(outfile,"%24.16le\n",State[i]);
+      fclose(outfile);
+}
 /********************************************************************/
 void EchoRemAcc(struct SCType *S)
 {
@@ -1726,25 +1891,36 @@ void KaneNBodyEOM(double *u, double *x, double *h,
          }
       }
 
+      tic = usec();
       MapStateVectorToBodyStates(u,x,uf,xf,S);
+      toc = usec();
+      MapTime += 1.0E-6*(toc-tic);
+
 
       /* Joint Partials */
+      tic = usec();
       for(Ig=0;Ig<S->Ng;Ig++) {
          G = &S->G[Ig];
          JointPartials(FALSE,G->IsSpherical,G->RotSeq,G->TrnSeq,
             G->Ang,G->AngRate,G->Gamma,G->Gs,G->Gds,
             G->PosRate,G->Delta,G->Ds,G->Dds);
       }
+      toc = usec();
+      JointTime += 1.0E-6*(toc-tic);
 
+      tic = usec();
       FindBodyPathDCMs(S);
 
       /* Path vectors, beta and rho */
       FindPathVectors(S);
+      toc = usec();
+      PathTime += 1.0E-6*(toc-tic);
 
       /* Find Peta, cplusPeta, HplusQeta, CnbP for each body */
       FindFlexTerms(S);
 
       /* Partial Angular Velocity Matrix (PAngVel) and I*PAngVel */
+      tic = usec();
       FindPAngVel(S);
       /* Partial Velocity Matrix (PVel) and m*PVel */
       FindPVel(S);
@@ -1763,8 +1939,11 @@ void KaneNBodyEOM(double *u, double *x, double *h,
             FindPCPVelf(S);
          }
       }
+      toc = usec();
+      PVelTime += 1.0E-6*(toc-tic);
 
       /* Remainder Accelerations, AlphaR and AccR */
+      tic = usec();
       FindAlphaR(S);
       FindAccR(S);
 
@@ -1827,8 +2006,11 @@ void KaneNBodyEOM(double *u, double *x, double *h,
             D->BodyFrc[3*G->Bout+i] += FrcBoN[i];
          }
       }
+      toc = usec();
+      FrcTrqTime += 1.0E-6*(toc-tic);
 
       /* Assemble COEF and RHS */
+      tic = usec();
       Nk = 3*S->Nb;
       for(i=0;i<D->Nu;i++) {
          /* Upper Left of COEF */
@@ -1880,13 +2062,16 @@ void KaneNBodyEOM(double *u, double *x, double *h,
             }
          }
       }
+      toc = usec();
+      AssembleTime += 1.0E-6*(toc-tic);
 
 /* .. Eliminate locked DOF */
+      tic = usec();
       if (D->SomeJointsLocked) {
          N = D->Nu + D->Nf;
          /* Eliminate Rows */
          for(i=0;i<D->Ns;i++) {
-            ii = D->DynStateIdx[i];
+            ii = D->ActiveStateIdx[i];
             for(j=0;j<N;j++) {
                D->COEF[i][j] = D->COEF[ii][j];
             }
@@ -1894,28 +2079,35 @@ void KaneNBodyEOM(double *u, double *x, double *h,
          }
          /* Eliminate Columns */
          for(j=0;j<D->Ns;j++) {
-            jj = D->DynStateIdx[j];
+            jj = D->ActiveStateIdx[j];
             for(i=0;i<D->Ns;i++) {
                D->COEF[i][j] = D->COEF[i][jj];
             }
          }
       }
+      toc = usec();
+      LockTime += 1.0E-6*(toc-tic);
 
 /* .. Solve EOM */
+      tic = usec();
       /* EchoPVel(S); */
       /* EchoRemAcc(S); */
-      /* EchoEOM(D->COEF,D->DynState,D->RHS,D->Ns); */
-      LINSOLVE(D->COEF,D->DynState,D->RHS,D->Ns);
+      //EchoEOM(D->COEF,D->ActiveState,D->RHS,D->Ns); 
+      LINSOLVE(D->COEF,D->ActiveState,D->RHS,D->Ns);
+      //OrderNSolveEOM(S);
+      //EchoUdot(D->ActiveState,D->Ns);
+      toc = usec();
+      SolveTime += 1.0E-6*(toc - tic);
 
 /* .. Map out result */
       if(D->SomeJointsLocked) {
          N = D->Ns - D->Nf;
-         for(i=0;i<N;i++) udot[D->DynStateIdx[i]] = D->DynState[i];
-         for(i=0;i<D->Nf;i++) ufdot[i] = D->DynState[N+i];
+         for(i=0;i<N;i++) udot[D->ActiveStateIdx[i]] = D->ActiveState[i];
+         for(i=0;i<D->Nf;i++) ufdot[i] = D->ActiveState[N+i];
       }
       else {
-         for(i=0;i<D->Nu;i++) udot[i] = D->DynState[i];
-         for(i=0;i<D->Nf;i++) ufdot[i] = D->DynState[D->Nu+i];
+         for(i=0;i<D->Nu;i++) udot[i] = D->ActiveState[i];
+         for(i=0;i<D->Nf;i++) ufdot[i] = D->ActiveState[D->Nu+i];
       }
 
 /* .. Kinematics */
@@ -2264,14 +2456,17 @@ void KaneNBodyRK4(struct SCType *S)
       /* State vector initialized in InitKaneNBody() */
 
 /* .. Check for Locked Joint DOFs */
-      for(i=0;i<3;i++) D->DynStateIdx[i] = i;  /* Body 0 angular DOF never locked */
+      for(i=0;i<3;i++) D->ActiveStateIdx[i] = i;  /* Body 0 angular DOF never locked */
       D->Ns = 3;
       iu = 3;
       for(Ig=0;Ig<S->Ng;Ig++) {
          G = &S->G[Ig];
+         G->ActiveRotu0 = D->Ns;
+         G->ActiveRotDOF = 0;
          for(i=0;i<G->RotDOF;i++) {
             if (!G->RotLocked[i]) {
-               D->DynStateIdx[D->Ns] = iu;
+               G->ActiveRotDOF++;
+               D->ActiveStateIdx[D->Ns] = iu;
                D->Ns++;
             }
             else {
@@ -2279,9 +2474,12 @@ void KaneNBodyRK4(struct SCType *S)
             }
             iu++;
          }
+         G->ActiveTrnu0 = D->Ns;
+         G->ActiveTrnDOF = 0;
          for(i=0;i<G->TrnDOF;i++) {
             if (!G->TrnLocked[i]) {
-               D->DynStateIdx[D->Ns] = iu;
+               G->ActiveTrnDOF++;
+               D->ActiveStateIdx[D->Ns] = iu;
                D->Ns++;
             }
             else {
@@ -2291,7 +2489,7 @@ void KaneNBodyRK4(struct SCType *S)
          }
       }
       for(i=0;i<3;i++) {  /* Body 0 translational DOF never locked */
-         D->DynStateIdx[D->Ns] = iu;
+         D->ActiveStateIdx[D->Ns] = iu;
          D->Ns++;
          iu++;
       }
@@ -2486,7 +2684,7 @@ void OneBodyEOM(double *u, double *x, double *h,
       Trq[2] = B->Trq[2]-wxH[2]+WhlTorq[2];
 
 /* .. Rigid Body EOM */
-      MINV(B->I,Iinv);
+      MINV3(B->I,Iinv);
       MxV(Iinv,Trq,udot);
 
 /* .. Wheel-body interaction  */
@@ -2754,7 +2952,7 @@ void KinJointNBodyRK4(struct SCType *S)
       for(i=0;i<4;i++) u[3+i] = S->B[0].qn[i];
       for(i=0;i<Nw;i++) u[7+i] = S->Whl[i].H;
 
-      MINV(S->I,Iinv);
+      MINV3(S->I,Iinv);
 
 /* .. 4th order Runge Kutta */
       OneBodyEOM(u, m1, Iinv, S);
@@ -3279,7 +3477,6 @@ void PartitionForces(struct SCType *S)
 void Dynamics(struct SCType *S)
 {
       struct OrbitType *O;
-      double tic, toc;
 
       O = &Orb[S->RefOrb];
 
@@ -3293,15 +3490,12 @@ void Dynamics(struct SCType *S)
          **   break;
          */
          default :
-            tic = usec();
             if (S->Nb > 1) {
                KaneNBodyRK4(S);
             }
             else {
                OneBodyRK4(S);
             }
-            toc = usec();
-            DynRunTime += 1.0E-6*(toc - tic);
       }
 
       switch(O->Regime) {

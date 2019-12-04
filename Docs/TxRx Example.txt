@@ -1,0 +1,13 @@
+The Tx and Rx folders are sim cases that give an example of using 42 on either end of a socket interface.  
+
+1)  Open two terminal windows, and cd both of them to the folder with the 42 executable.
+
+2)  In one terminal, run "42 Tx".  It will start up a socket server and wait, listening.
+
+3)  In the other terminal, run "42 Rx".  After some initialization, you'll see the usual 42 graphics, and a lot of socket traffic echoed to the terminals.
+
+In this example, "42 Tx" is acting as the "sim engine", and "42 Rx" is acting as a remote display.  Tx runs its sim in the usual way, and sends state data over the socket to Rx.  The graphics front end is disabled in the Tx input files, so it isn't generating a display on its own.  The Rx instance receives the state data from the socket, overwrites its own state data, and proceeds.  The graphics front end for Rx is enabled, so the graphics windows are displayed in the usual way.
+
+You can run both processes on the same machine (as you probably just did), but you can reconfigure (using Inp_IPC.txt) so that Tx and Rx can be run on different machines on a common network.  One application would be running multiple displays from a single "engine".  Replace the sim engine with a telemetry data point server (beyond the scope of this tutorial...) and you can use 42 as a graphical situational awareness tool fed by real spacecraft telemetry.  Set the socket to be nonblocking, and 42 will freewheel when telemetry isn't available.
+
+This example used a basic socket interface and text messages.  See "Docs/Using GMSEC.txt" if you want to use the GMSEC message bus architecture.  See "Using Standalone AcApp" for an example using sockets to communicate with an independent ACS app.

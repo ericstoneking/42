@@ -1471,7 +1471,7 @@ double CMGLaw4x1DOF(double Tcmd[3], double Axis[4][3], double Gim[4][3],
                          AW[i][2]*A[j][2]+AW[i][3]*A[j][3] + V[i][j];
          }
       }
-      MINV(Den,InvDen);
+      MINV3(Den,InvDen);
 
       /* Asharp = (AW)^T*inv(Den) */
       for(i=0;i<4;i++) {

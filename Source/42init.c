@@ -204,8 +204,11 @@ long DecodeString(char *s)
       else if (!strcmp(s,"USER_DEFINED")) return USER_DEFINED;
       else if (!strcmp(s,"TX")) return IPC_TX;
       else if (!strcmp(s,"RX")) return IPC_RX;
+      else if (!strcmp(s,"TXRX")) return IPC_TXRX;
+      else if (!strcmp(s,"ACS")) return IPC_ACS;
       else if (!strcmp(s,"WRITEFILE")) return IPC_WRITEFILE;
       else if (!strcmp(s,"READFILE")) return IPC_READFILE;
+      else if (!strcmp(s,"SPIRENT")) return IPC_SPIRENT;
       else if (!strcmp(s,"FFTB")) return IPC_FFTB;
       else if (!strcmp(s,"SERVER")) return IPC_SERVER;
       else if (!strcmp(s,"CLIENT")) return IPC_CLIENT;
@@ -2231,8 +2234,8 @@ void InitSpacecraft(struct SCType *S)
       InitRigidDyn(S);
       InitFlexModes(S);
 
-      D->DynState = (double *) calloc(D->Nu+D->Nf,sizeof(double));
-      D->DynStateIdx = (long *) calloc(D->Nu+D->Nf,sizeof(long));
+      D->ActiveState = (double *) calloc(D->Nu+D->Nf,sizeof(double));
+      D->ActiveStateIdx = (long *) calloc(D->Nu+D->Nf,sizeof(long));
       D->COEF = CreateMatrix(D->Nu+D->Nf,D->Nu+D->Nf);
       D->RHS = (double *) calloc(D->Nu+D->Nf,sizeof(double));
 
@@ -2256,6 +2259,8 @@ void InitSpacecraft(struct SCType *S)
       UpdateScBoundingBox(S);
 
       S->EnvTrq.First = 1;
+      
+      InitAC(S);
 }
 /*********************************************************************/
 void LoadTdrs(void)

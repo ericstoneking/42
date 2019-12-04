@@ -245,8 +245,15 @@ void Report(void)
             fprintf(RPYfile,"%lf %lf %lf\n",Roll*R2D,Pitch*R2D,Yaw*R2D);
             for(i=0;i<SC[0].Nw;i++) fprintf(Hwhlfile,"%lf ",SC[0].Whl[i].H);
             fprintf(Hwhlfile,"\n");
-            fprintf(MTBfile,"%lf %lf %lf\n",SC[0].MTB[0].M,SC[0].MTB[1].M,SC[0].MTB[2].M);
-            fprintf(AccFile,"%le %le\n",SC[0].Accel[0].TrueAcc, SC[0].Accel[0].MeasAcc);
+            if (SC[0].Nmtb > 0) {
+               for(i=0;i<SC[0].Nmtb;i++) fprintf(MTBfile,"%lf ",SC[0].MTB[i].M);
+               fprintf(MTBfile,"\n");
+            }
+            if (SC[0].Nacc > 0) {
+               for(i=0;i<SC[0].Nacc;i++) 
+                  fprintf(AccFile,"%le %le ",SC[0].Accel[i].TrueAcc,SC[0].Accel[i].MeasAcc);
+               fprintf(AccFile,"\n");
+            }
             
             //MagReport();
             //GyroReport();

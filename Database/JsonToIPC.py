@@ -35,26 +35,26 @@ def WriteProlog():
       
       if Pipe == "Socket":
          if Prog == "Sim":
-            outfile.write("void WriteToSocket(SOCKET Socket)\n")
+            outfile.write("void WriteToSocket(SOCKET Socket,  char **Prefix, long Nprefix, long EchoEnabled)\n")
          else:
             outfile.write("void WriteToSocket(SOCKET Socket, struct AcType *AC)\n")
          #endif
       elif Pipe == "Gmsec":
          if Prog == "Sim":
-            outfile.write("void WriteToGmsec(GMSEC_ConnectionMgr ConnMgr,GMSEC_Status status)\n")
+            outfile.write("void WriteToGmsec(GMSEC_ConnectionMgr ConnMgr,GMSEC_Status status,  char **Prefix, long Nprefix, long EchoEnabled)\n")
          else:
-            outfile.write("void WriteToGmsec(GMSEC_ConnectionMgr ConnMgr,GMSEC_Status status,struct AcType *AC)\n")
+            outfile.write("void WriteToGmsec(GMSEC_ConnectionMgr ConnMgr,GMSEC_Status status, struct AcType *AC)\n")
          #endif
       elif Pipe == "File":
          if Prog == "Sim":
-            outfile.write("void WriteToFile(FILE *StateFile)\n")
+            outfile.write("void WriteToFile(FILE *StateFile, char **Prefix, long Nprefix, long EchoEnabled)\n")
          else:
             outfile.write("void WriteToFile(FILE *StateFile, struct AcType *AC)\n")
          #endif
       #endif
       
       outfile.write("{\n\n")
-      outfile.write("      long Isc,Iorb,Iw,i;\n")
+      outfile.write("      long Isc,Iorb,Iw,Ipfx,i;\n")
       
       if Pipe == "Socket":
          outfile.write("      int Success;\n")
@@ -69,6 +69,7 @@ def WriteProlog():
          outfile.write("      long MsgLen = 0;\n")
          outfile.write("      long LineLen;\n")
       #endif
+      outfile.write("      long PfxLen;\n")
       outfile.write("      char line[512];\n\n")
 
       if Prog == "App":
@@ -90,6 +91,8 @@ def WriteProlog():
             outfile.write("      fprintf(StateFile,\"%s\",line);\n")
          #endif
          outfile.write("      if ("+EchoString+") printf(\"%s\",line);\n\n")
+         outfile.write("      for(Ipfx=0;Ipfx<Nprefix;Ipfx++) {\n")
+         outfile.write("         PfxLen = strlen(Prefix[Ipfx]);\n\n")
       #endif
       
  
@@ -117,18 +120,18 @@ def ReadProlog():
       
       if Pipe == "Socket":
          if Prog == "Sim":
-            outfile.write("void ReadFromSocket(SOCKET Socket)\n")
+            outfile.write("void ReadFromSocket(SOCKET Socket, long EchoEnabled)\n")
          else:
             outfile.write("void ReadFromSocket(SOCKET Socket, struct AcType *AC)\n")
          #endif
       elif Pipe == "Gmsec":
          if Prog == "Sim":
-            outfile.write("void ReadFromGmsec(GMSEC_ConnectionMgr ConnMgr,GMSEC_Status status)\n")
+            outfile.write("void ReadFromGmsec(GMSEC_ConnectionMgr ConnMgr,GMSEC_Status status, long EchoEnabled)\n")
          else:
             outfile.write("void ReadFromGmsec(GMSEC_ConnectionMgr ConnMgr,GMSEC_Status status,struct AcType *AC)\n")
       elif Pipe == "File":
          if Prog == "Sim":
-            outfile.write("void ReadFromFile(FILE *StateFile)\n")
+            outfile.write("void ReadFromFile(FILE *StateFile, long EchoEnabled)\n")
          else:
             outfile.write("void ReadFromFile(FILE *StateFile, struct AcType *AC)\n")
          #endif
@@ -214,6 +217,10 @@ def ReadProlog():
 def WriteEpilog():
 
       global Prog, Verb, Pipe, outfile, EchoString
+      
+      if Prog == "Sim":
+         outfile.write("      }\n\n")
+      #endif
 
       outfile.write("      sprintf(line,\"[EOF]\\n\\n\");\n")
       outfile.write("      if ("+EchoString+") printf(\"%s\",line);\n\n")
@@ -359,17 +366,42 @@ def WriteCodeBlock(Indent,FmtPrefix,ArrayIdx,ArgPrefix,VarString,IdxLen,Ni,Nj,St
       line += ");\n"
 
       outfile.write(line)
-      outfile.write("   "+Indent+"if ("+EchoString+") printf(\"%s\",line);\n")
-      if Pipe == "Socket":
-         outfile.write("   "+Indent+"LineLen = strlen(line);\n")
-         outfile.write("   "+Indent+"memcpy(&Msg[MsgLen],line,LineLen);\n")
-         outfile.write("   "+Indent+"MsgLen += LineLen;\n\n")
-      elif Pipe == "Gmsec":
-         outfile.write("   "+Indent+"LineLen = strlen(line);\n")
-         outfile.write("   "+Indent+"memcpy(&Msg[MsgLen],line,LineLen);\n")
-         outfile.write("   "+Indent+"MsgLen += LineLen;\n\n")
-      elif Pipe == "File":
-         outfile.write("   "+Indent+"fprintf(StateFile,\"%s\",line);\n\n")
+      if Prog == "Sim":
+         if Pipe == "Socket":
+            outfile.write("   "+Indent+"if (!strncmp(line,Prefix[Ipfx],PfxLen)) {\n")
+            outfile.write("   "+Indent+"   LineLen = strlen(line);\n")
+            outfile.write("   "+Indent+"   memcpy(&Msg[MsgLen],line,LineLen);\n")
+            outfile.write("   "+Indent+"   MsgLen += LineLen;\n")
+            outfile.write("   "+Indent+"   if ("+EchoString+") printf(\"%s\",line);\n")
+            outfile.write("   "+Indent+"}\n\n")
+         elif Pipe == "Gmsec":
+            outfile.write("   "+Indent+"if (!strncmp(line,Prefix[Ipfx],PfxLen)) {\n")
+            outfile.write("   "+Indent+"   LineLen = strlen(line);\n")
+            outfile.write("   "+Indent+"   memcpy(&Msg[MsgLen],line,LineLen);\n")
+            outfile.write("   "+Indent+"   MsgLen += LineLen;\n\n")
+            outfile.write("   "+Indent+"   if ("+EchoString+") printf(\"%s\",line);\n")
+            outfile.write("   "+Indent+"}\n\n")
+         elif Pipe == "File":
+            outfile.write("   "+Indent+"if (!strncmp(line,Prefix[Ipfx],PfxLen)) {\n")
+            outfile.write("   "+Indent+"   fprintf(StateFile,\"%s\",line);\n")
+            outfile.write("   "+Indent+"   if ("+EchoString+") printf(\"%s\",line);\n")
+            outfile.write("   "+Indent+"}\n\n")
+         #endif
+      else:
+         if Pipe == "Socket":
+            outfile.write("   "+Indent+"LineLen = strlen(line);\n")
+            outfile.write("   "+Indent+"memcpy(&Msg[MsgLen],line,LineLen);\n")
+            outfile.write("   "+Indent+"MsgLen += LineLen;\n")
+            outfile.write("   "+Indent+"if ("+EchoString+") printf(\"%s\",line);\n\n")
+         elif Pipe == "Gmsec":
+            outfile.write("   "+Indent+"LineLen = strlen(line);\n")
+            outfile.write("   "+Indent+"memcpy(&Msg[MsgLen],line,LineLen);\n")
+            outfile.write("   "+Indent+"MsgLen += LineLen;\n\n")
+            outfile.write("   "+Indent+"if ("+EchoString+") printf(\"%s\",line);\n\n")
+         elif Pipe == "File":
+            outfile.write("   "+Indent+"fprintf(StateFile,\"%s\",line);\n")
+            outfile.write("   "+Indent+"if ("+EchoString+") printf(\"%s\",line);\n\n")
+         #endif
       #endif
 
 ########################################################################
@@ -631,7 +663,7 @@ def main():
                      StructList = StructDict["Table Definition"] 
                      for Struct in StructList:
 
-                        Indent = "      "
+                        Indent = "         "
             
                         if Prog == "Sim":
                   
@@ -677,7 +709,7 @@ def main():
                            if Struct["Table Name"] == "AcType":
                               if ParmPass == 1:
                                  if Verb == "WriteTo":
-                                    Indent = "      "
+                                    Indent = "         "
                                     outfile.write(Indent+"for(Isc=0;Isc<Nsc;Isc++) {\n")
                                     outfile.write(Indent+"   if (SC[Isc].Exists) {\n")
                                     outfile.write(Indent+"      if (SC[Isc].AC.ParmLoadEnabled) {\n")

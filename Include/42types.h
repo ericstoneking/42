@@ -123,12 +123,12 @@ struct JointType {
    long RotLocked[3];     /* Set TRUE if individual DOF is to be locked in place */
    long TrnSeq;           /* Translational joint sequence */
    long TrnLocked[3];
-   double Pos[3];           /* translational kinematic state variables */
-   double PosRate[3];           /* translational dynamic state variables */
+   double Pos[3];         /* translational kinematic state variables */
+   double PosRate[3];     /* translational dynamic state variables */
    double xb[3];          /* translational displacement in the Bi frame */
    double xn[3];          /* translational displacement in the N frame */
    double Ang[3];         /* Joint Euler angles */
-   double AngRate[3];        /* Euler angle rates about gim axes */
+   double AngRate[3];     /* Euler angle rates about gim axes */
    double AngCmd[3];      /* Euler angle commands, for kinematic joints */
    double RateCmd[3];     /* Euler angle rate commands, for kinematic joints */
    double RotSpringCoef[3];  /* For passive joint torques */
@@ -146,16 +146,20 @@ struct JointType {
    double COI[3][3];      /* DCM from inner body to outer body, (incl flex) */
    double Trq[3];         /* Exerted on Bout, components along gimbal axes */
    double Frc[3];         /* Force exerted on Bout, components along translational axes */
-   double Gamma[3][3];        /* w = Gamma*sigma */
-   double Delta[3][3];        /* v = Delta*s -- matrix of joint partials for translational joints */
+   double Gamma[3][3];    /* w = Gamma*sigma */
+   double Delta[3][3];    /* v = Delta*s -- matrix of joint partials for translational joints */
    double Gs[3];          /* Gamma*sigma */
    double Gds[3];         /* Gammadot*sigma */
    double Ds[3];          /* Delta*s */
    double Dds[3];         /* Deltadot*s */
-   long Rotu0;              /* Index of first Rot element in u */
-   long Rotx0;              /* Index of first Rot element in x */
-   long Trnu0;              /* Index of first Trn element in u */
-   long Trnx0;              /* Index of first Trn element in x */
+   long Rotu0;            /* Index of first Rot element in u */
+   long Rotx0;            /* Index of first Rot element in x */
+   long Trnu0;            /* Index of first Trn element in u */
+   long Trnx0;            /* Index of first Trn element in x */
+   long ActiveRotu0;         /* Index in DynStateIdx of first unlocked Rot DOF in DynState */
+   long ActiveTrnu0;         /* Index in DynStateIdx of first unlocked Trn DOF in DynState */
+   long ActiveRotDOF;        /* Number of unlocked RotDOF */
+   long ActiveTrnDOF;        /* Number of unlocked TrnDOF */
    /* For Flex */
    double **PSIi;         /* Translation Mode Shapes, 3 x Bi.Nf */
    double **THETAi;       /* Rotational Mode Shapes, 3 x Bi.Nf */
@@ -393,8 +397,8 @@ struct DynType {
    double *RHS;    /* (Nu+Nf) x 1 */
    long SomeJointsLocked; /* 1 if any DOFs are locked */
    long Ns;  /* Number of active states (joint + flex), <= (Nu+Nf) */
-   double *DynState; /* u and uf concatenated, (Nu+Nf) x 1 */
-   long *DynStateIdx;  /* Keeps track of active states, (Nu+Nf) x 1 */
+   double *ActiveState; /* u and uf concatenated, (Nu+Nf) x 1 */
+   long *ActiveStateIdx;  /* Keeps track of active states, (Nu+Nf) x 1 */
    double *u,*uu,*du,*udot;  /* Nu  (Dynamic States) */
    double *x,*xx,*dx,*xdot;  /* Nx  (Kinematic States) */
    double *h,*hh,*dh,*hdot;  /* Nw  (Wheel Momentum States) */
@@ -775,6 +779,21 @@ struct ConstellationType {
    /* For each line */
    long *Star1;
    long *Star2;
+};
+
+struct IpcType {
+   long Init;
+   long Mode; /* OFF, TX, RX, TXRX, ACS, WRITEFILE, READFILE */
+   long SocketRole; /* SERVER, CLIENT, GMSEC_CLIENT */
+   long AcsID;  /* AC.ID for ACS mode */
+   char HostName[40];
+   long Port;
+   long AllowBlocking;
+   long EchoEnabled;
+   SOCKET Socket;
+   FILE *File;
+   long Nprefix;
+   char **Prefix;
 };
 
 /*
