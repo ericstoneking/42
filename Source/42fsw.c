@@ -1752,17 +1752,6 @@ void FlightSoftWare(struct SCType *S)
                   AcFsw(&S->AC);
                #endif
                break;
-            case NOS3_FSW:
-               #if defined(_ENABLE_NOS3_FSW_) && defined(_ENABLE_SOCKETS_) && defined(__linux__)
-                  NOS3SendMessageToFSW();
-                  NOS3ReceiveMessageFromFSW();
-               #else
-                  if (First) {
-                     First = 0;
-                     printf("WARNING:  Must be on Linux and must enable _ENABLE_NOS3_FSW_ to use NOS3_FSW\n");
-                  }
-               #endif
-               break;
          }
       }
 }

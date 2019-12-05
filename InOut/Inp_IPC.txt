@@ -24,7 +24,7 @@ FALSE                                   ! Echo to stdout
 "SC[0].AC"                              ! Prefix 0
 **********************************  IPC 2   *****************************
 OFF                                     ! IPC Mode (OFF,TX,RX,TXRX,ACS,WRITEFILE,READFILE)
-0                                       ! AC.ID for ACS mode
+1                                       ! AC.ID for ACS mode
 "State02.42"                            ! File name for WRITE or READ
 CLIENT                                  ! Socket Role (SERVER,CLIENT,GMSEC_CLIENT)
 localhost     10003                     ! Server Host Name, Port 
