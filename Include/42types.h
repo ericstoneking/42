@@ -336,7 +336,8 @@ struct GpsType {
    double VelN[3];
    double PosW[3];
    double VelW[3];
-   double Lng,Lat,Alt;
+   double Lng,Lat,Alt; /* Geocentric */
+   double WgsLng,WgsLat,WgsAlt; /* Geodetic, WGS-84 */
 };
 
 struct AccelType {

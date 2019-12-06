@@ -1683,7 +1683,6 @@ void AdHocFSW(struct SCType *S)
 /**********************************************************************/
 void FlightSoftWare(struct SCType *S)
 {
-      static long First = 1;
       #ifdef _AC_STANDALONE_
       struct IpcType *I;
       long Iipc;

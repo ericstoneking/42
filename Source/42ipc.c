@@ -67,7 +67,7 @@ void InitInterProcessComm(void)
          I->Prefix = (char **) calloc(I->Nprefix,sizeof(char *));
          for(Ipx=0;Ipx<I->Nprefix;Ipx++) {
             fscanf(infile,"\"%[^\"]\" %[^\n] %[\n]",Prefix,junk,&newline);
-            I->Prefix[Ipx] = (char *) calloc(strlen(Prefix),sizeof(char));
+            I->Prefix[Ipx] = (char *) calloc(strlen(Prefix)+1,sizeof(char));
             strcpy(I->Prefix[Ipx],Prefix);
          }
          

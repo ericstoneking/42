@@ -163,9 +163,12 @@ struct AcGpsType {
    double VelN[3]; /* [[m/s]] [~>~] */
    double PosW[3]; /* [[m]] [~>~] */
    double VelW[3]; /* [[m/s]] [~>~] */
-   double Lng; /* [[rad]] [~>~] */
-   double Lat; /* [[rad]] [~>~] */
-   double Alt; /* [[m]] [~>~] */
+   double Lng; /* Geocentric [[rad]] [~>~] */
+   double Lat; /* Geocentric [[rad]] [~>~] */
+   double Alt; /* Geocentric [[m]] [~>~] */
+   double WgsLng; /* Geodetic, WGS-84 [[rad]] [~>~] */
+   double WgsLat; /* Geodetic, WGS-84 [[rad]] [~>~] */
+   double WgsAlt; /* Geodetic, WGS-84 [[m]] [~>~] */
 };
 
 struct AcAccelType {

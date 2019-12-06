@@ -395,6 +395,7 @@ void GpsModel(struct SCType *S)
                GPS->Lng = atan2(GPS->PosW[1],GPS->PosW[0]);
                GPS->Lat = asin(GPS->PosW[2]/MagPosW);
                GPS->Alt = MagPosW - World[EARTH].rad;
+               ECEFToWGS84(GPS->PosW,&GPS->WgsLat,&GPS->WgsLng,&GPS->WgsAlt);
                
                S->AC.GPS[Ig].Valid = GPS->Valid;
                S->AC.GPS[Ig].Rollover = GPS->Rollover;
@@ -410,6 +411,9 @@ void GpsModel(struct SCType *S)
                S->AC.GPS[Ig].Lng = GPS->Lng;
                S->AC.GPS[Ig].Lat = GPS->Lat;
                S->AC.GPS[Ig].Alt = GPS->Alt;
+               S->AC.GPS[Ig].WgsLng = GPS->WgsLng;
+               S->AC.GPS[Ig].WgsLat = GPS->WgsLat;
+               S->AC.GPS[Ig].WgsAlt = GPS->WgsAlt;
                
             }
          }

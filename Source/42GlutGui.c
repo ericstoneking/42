@@ -1100,9 +1100,9 @@ void DrawFarScene(void)
          else {
             magr = MAGV(rh[Iw]);
             PixRad = VisCoef*World[Iw].rad/magr;
-            if (PixRad < 1.0E-3)
+            if (PixRad < 1.0E-2)
                World[Iw].Visibility = WORLD_IS_TOO_SMALL_TO_SEE;
-            else if (PixRad < 1.0)
+            else if (PixRad < 4.0)
                World[Iw].Visibility = WORLD_IS_POINT_SIZED;
             else {
                World[Iw].Visibility = WORLD_SHOWS_DISK;
@@ -1129,26 +1129,32 @@ void DrawFarScene(void)
          }
       }
 
-      //glEnable(GL_LIGHTING);
-      //glLightModelfv(GL_LIGHT_MODEL_AMBIENT,DistantAmbientLightColor);
-      //glLightfv(GL_LIGHT0,GL_DIFFUSE,DistantDiffuseLightColor);
-      //glLightfv(GL_LIGHT0,GL_SPECULAR,SpecularLightColor);
-
+      glPointSize(4.0);
       for(i=0;i<Nw;i++) {
          Iw = WorldOrder[i];
          W = &World[Iw];
          for(j=0;j<3;j++) rh[Iw][j] = POV.PosH[j]-W->PosH[j];
-         if (Iw == 0) {
+         if (W->Visibility == WORLD_IS_SUN) {
             DrawSunAsBackdrop();
          }
          else if (W->Visibility == WORLD_IS_POINT_SIZED) {
+            CopyUnitV(rh[Iw],r);
+            r[0] *= -2.0;
+            r[1] *= -2.0;
+            r[2] *= -2.0;
+            glDisable(GL_LIGHTING);
+            glColor4fv(W->Color);
+            glBegin(GL_POINTS);
+               glVertex3dv(r);
+            glEnd();
+            glEnable(GL_LIGHTING);
          }
          else if (W->Visibility == WORLD_SHOWS_DISK) {
             for(j=0;j<3;j++) svh[j] = -W->PosH[j];
             UNITV(svh);
             if (W->GeomTag == 0) { /* World is sphere */
-               MxV(W->CNH,rh[Iw],PosN);
-               MxV(W->CNH,svh,svn);
+               MxV(World[POV.Host.World].CNH,rh[Iw],PosN);
+               MxV(World[POV.Host.World].CNH,svh,svn);
                DrawWorldAsBackdrop(W,PosN,svn);
             }
             else {
@@ -1172,6 +1178,8 @@ void DrawFarScene(void)
          }
       }
 
+      glPointSize(1.0);
+      glColor4fv(Black);
       glClear(GL_DEPTH_BUFFER_BIT);
 
       glMatrixMode(GL_PROJECTION);
