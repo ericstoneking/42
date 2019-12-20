@@ -218,7 +218,7 @@ CFLAGS = -Wall -Wshadow -Wno-deprecated -g  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(I
 	$(CC) $(LFLAGS) $(GMSECBIN) -o $(EXENAME) $(42OBJ) $(GUIOBJ) $(FFTBOBJ) $(SLOSHOBJ) $(KITOBJ) $(ACOBJ) $(GMSECOBJ) $(SIMIPCOBJ) $(LIBS) $(GMSECLIB)
 
 AcApp : $(OBJ)AcApp.o $(ACKITOBJ) $(ACIPCOBJ) $(GMSECOBJ)
-	$(CC) $(LFLAGS) -o AcApp $(OBJ)AcApp.o $(ACKITOBJ) $(ACIPCOBJ) $(GMSECOBJ)
+	$(CC) $(LFLAGS) -o AcApp $(OBJ)AcApp.o $(ACKITOBJ) $(ACIPCOBJ) $(GMSECOBJ) -lm
 
 ####################  Rules to compile objects  ###########################
 
