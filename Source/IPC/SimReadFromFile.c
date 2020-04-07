@@ -28,209 +28,209 @@ void ReadFromFile(FILE *StateFile, long EchoEnabled)
             &Year,&doy,&Hour,&Minute,&Second) == 5)
             RequestTimeRefresh = 1;
 
-            if (sscanf(line,"Orb[%ld].PosN = %le %le %le",
-               &Iorb,
-               &DbleVal[0],
-               &DbleVal[1],
-               &DbleVal[2]) == 4) {
-               Orb[Iorb].PosN[0] = DbleVal[0];
-               Orb[Iorb].PosN[1] = DbleVal[1];
-               Orb[Iorb].PosN[2] = DbleVal[2];
-            }
+         if (sscanf(line,"Orb[%ld].PosN = %le %le %le",
+            &Iorb,
+            &DbleVal[0],
+            &DbleVal[1],
+            &DbleVal[2]) == 4) {
+            Orb[Iorb].PosN[0] = DbleVal[0];
+            Orb[Iorb].PosN[1] = DbleVal[1];
+            Orb[Iorb].PosN[2] = DbleVal[2];
+         }
 
-            if (sscanf(line,"Orb[%ld].VelN = %le %le %le",
-               &Iorb,
-               &DbleVal[0],
-               &DbleVal[1],
-               &DbleVal[2]) == 4) {
-               Orb[Iorb].VelN[0] = DbleVal[0];
-               Orb[Iorb].VelN[1] = DbleVal[1];
-               Orb[Iorb].VelN[2] = DbleVal[2];
-            }
+         if (sscanf(line,"Orb[%ld].VelN = %le %le %le",
+            &Iorb,
+            &DbleVal[0],
+            &DbleVal[1],
+            &DbleVal[2]) == 4) {
+            Orb[Iorb].VelN[0] = DbleVal[0];
+            Orb[Iorb].VelN[1] = DbleVal[1];
+            Orb[Iorb].VelN[2] = DbleVal[2];
+         }
 
-            if (sscanf(line,"SC[%ld].PosR = %le %le %le",
-               &Isc,
-               &DbleVal[0],
-               &DbleVal[1],
-               &DbleVal[2]) == 4) {
-               SC[Isc].PosR[0] = DbleVal[0];
-               SC[Isc].PosR[1] = DbleVal[1];
-               SC[Isc].PosR[2] = DbleVal[2];
-               SC[Isc].RequestStateRefresh = 1;
-            }
+         if (sscanf(line,"SC[%ld].PosR = %le %le %le",
+            &Isc,
+            &DbleVal[0],
+            &DbleVal[1],
+            &DbleVal[2]) == 4) {
+            SC[Isc].PosR[0] = DbleVal[0];
+            SC[Isc].PosR[1] = DbleVal[1];
+            SC[Isc].PosR[2] = DbleVal[2];
+            SC[Isc].RequestStateRefresh = 1;
+         }
 
-            if (sscanf(line,"SC[%ld].VelR = %le %le %le",
-               &Isc,
-               &DbleVal[0],
-               &DbleVal[1],
-               &DbleVal[2]) == 4) {
-               SC[Isc].VelR[0] = DbleVal[0];
-               SC[Isc].VelR[1] = DbleVal[1];
-               SC[Isc].VelR[2] = DbleVal[2];
-               SC[Isc].RequestStateRefresh = 1;
-            }
+         if (sscanf(line,"SC[%ld].VelR = %le %le %le",
+            &Isc,
+            &DbleVal[0],
+            &DbleVal[1],
+            &DbleVal[2]) == 4) {
+            SC[Isc].VelR[0] = DbleVal[0];
+            SC[Isc].VelR[1] = DbleVal[1];
+            SC[Isc].VelR[2] = DbleVal[2];
+            SC[Isc].RequestStateRefresh = 1;
+         }
 
-            if (sscanf(line,"SC[%ld].svb = %le %le %le",
-               &Isc,
-               &DbleVal[0],
-               &DbleVal[1],
-               &DbleVal[2]) == 4) {
-               SC[Isc].svb[0] = DbleVal[0];
-               SC[Isc].svb[1] = DbleVal[1];
-               SC[Isc].svb[2] = DbleVal[2];
-               SC[Isc].RequestStateRefresh = 1;
-            }
+         if (sscanf(line,"SC[%ld].svb = %le %le %le",
+            &Isc,
+            &DbleVal[0],
+            &DbleVal[1],
+            &DbleVal[2]) == 4) {
+            SC[Isc].svb[0] = DbleVal[0];
+            SC[Isc].svb[1] = DbleVal[1];
+            SC[Isc].svb[2] = DbleVal[2];
+            SC[Isc].RequestStateRefresh = 1;
+         }
 
-            if (sscanf(line,"SC[%ld].bvb = %le %le %le",
-               &Isc,
-               &DbleVal[0],
-               &DbleVal[1],
-               &DbleVal[2]) == 4) {
-               SC[Isc].bvb[0] = DbleVal[0];
-               SC[Isc].bvb[1] = DbleVal[1];
-               SC[Isc].bvb[2] = DbleVal[2];
-               SC[Isc].RequestStateRefresh = 1;
-            }
+         if (sscanf(line,"SC[%ld].bvb = %le %le %le",
+            &Isc,
+            &DbleVal[0],
+            &DbleVal[1],
+            &DbleVal[2]) == 4) {
+            SC[Isc].bvb[0] = DbleVal[0];
+            SC[Isc].bvb[1] = DbleVal[1];
+            SC[Isc].bvb[2] = DbleVal[2];
+            SC[Isc].RequestStateRefresh = 1;
+         }
 
-            if (sscanf(line,"SC[%ld].Hvb = %le %le %le",
-               &Isc,
-               &DbleVal[0],
-               &DbleVal[1],
-               &DbleVal[2]) == 4) {
-               SC[Isc].Hvb[0] = DbleVal[0];
-               SC[Isc].Hvb[1] = DbleVal[1];
-               SC[Isc].Hvb[2] = DbleVal[2];
-               SC[Isc].RequestStateRefresh = 1;
-            }
+         if (sscanf(line,"SC[%ld].Hvb = %le %le %le",
+            &Isc,
+            &DbleVal[0],
+            &DbleVal[1],
+            &DbleVal[2]) == 4) {
+            SC[Isc].Hvb[0] = DbleVal[0];
+            SC[Isc].Hvb[1] = DbleVal[1];
+            SC[Isc].Hvb[2] = DbleVal[2];
+            SC[Isc].RequestStateRefresh = 1;
+         }
 
-            if (sscanf(line,"SC[%ld].AC.svb = %le %le %le",
-               &Isc,
-               &DbleVal[0],
-               &DbleVal[1],
-               &DbleVal[2]) == 4) {
-               SC[Isc].AC.svb[0] = DbleVal[0];
-               SC[Isc].AC.svb[1] = DbleVal[1];
-               SC[Isc].AC.svb[2] = DbleVal[2];
-            }
+         if (sscanf(line,"SC[%ld].AC.svb = %le %le %le",
+            &Isc,
+            &DbleVal[0],
+            &DbleVal[1],
+            &DbleVal[2]) == 4) {
+            SC[Isc].AC.svb[0] = DbleVal[0];
+            SC[Isc].AC.svb[1] = DbleVal[1];
+            SC[Isc].AC.svb[2] = DbleVal[2];
+         }
 
-            if (sscanf(line,"SC[%ld].AC.bvb = %le %le %le",
-               &Isc,
-               &DbleVal[0],
-               &DbleVal[1],
-               &DbleVal[2]) == 4) {
-               SC[Isc].AC.bvb[0] = DbleVal[0];
-               SC[Isc].AC.bvb[1] = DbleVal[1];
-               SC[Isc].AC.bvb[2] = DbleVal[2];
-            }
+         if (sscanf(line,"SC[%ld].AC.bvb = %le %le %le",
+            &Isc,
+            &DbleVal[0],
+            &DbleVal[1],
+            &DbleVal[2]) == 4) {
+            SC[Isc].AC.bvb[0] = DbleVal[0];
+            SC[Isc].AC.bvb[1] = DbleVal[1];
+            SC[Isc].AC.bvb[2] = DbleVal[2];
+         }
 
-            if (sscanf(line,"SC[%ld].AC.Hvb = %le %le %le",
-               &Isc,
-               &DbleVal[0],
-               &DbleVal[1],
-               &DbleVal[2]) == 4) {
-               SC[Isc].AC.Hvb[0] = DbleVal[0];
-               SC[Isc].AC.Hvb[1] = DbleVal[1];
-               SC[Isc].AC.Hvb[2] = DbleVal[2];
-            }
+         if (sscanf(line,"SC[%ld].AC.Hvb = %le %le %le",
+            &Isc,
+            &DbleVal[0],
+            &DbleVal[1],
+            &DbleVal[2]) == 4) {
+            SC[Isc].AC.Hvb[0] = DbleVal[0];
+            SC[Isc].AC.Hvb[1] = DbleVal[1];
+            SC[Isc].AC.Hvb[2] = DbleVal[2];
+         }
 
-            if (sscanf(line,"SC[%ld].AC.G[%ld].Cmd.Ang = %le %le %le",
-               &Isc,&i,
-               &DbleVal[0],
-               &DbleVal[1],
-               &DbleVal[2]) == 5) {
-               SC[Isc].AC.G[i].Cmd.Ang[0] = DbleVal[0];
-               SC[Isc].AC.G[i].Cmd.Ang[1] = DbleVal[1];
-               SC[Isc].AC.G[i].Cmd.Ang[2] = DbleVal[2];
-            }
+         if (sscanf(line,"SC[%ld].AC.G[%ld].Cmd.Ang = %le %le %le",
+            &Isc,&i,
+            &DbleVal[0],
+            &DbleVal[1],
+            &DbleVal[2]) == 5) {
+            SC[Isc].AC.G[i].Cmd.Ang[0] = DbleVal[0];
+            SC[Isc].AC.G[i].Cmd.Ang[1] = DbleVal[1];
+            SC[Isc].AC.G[i].Cmd.Ang[2] = DbleVal[2];
+         }
 
-            if (sscanf(line,"SC[%ld].AC.Whl[%ld].Tcmd = %le",
-               &Isc,&i,
-               &DbleVal[0]) == 3) {
-               SC[Isc].AC.Whl[i].Tcmd = DbleVal[0];
-            }
+         if (sscanf(line,"SC[%ld].AC.Whl[%ld].Tcmd = %le",
+            &Isc,&i,
+            &DbleVal[0]) == 3) {
+            SC[Isc].AC.Whl[i].Tcmd = DbleVal[0];
+         }
 
-            if (sscanf(line,"SC[%ld].AC.MTB[%ld].Mcmd = %le",
-               &Isc,&i,
-               &DbleVal[0]) == 3) {
-               SC[Isc].AC.MTB[i].Mcmd = DbleVal[0];
-            }
+         if (sscanf(line,"SC[%ld].AC.MTB[%ld].Mcmd = %le",
+            &Isc,&i,
+            &DbleVal[0]) == 3) {
+            SC[Isc].AC.MTB[i].Mcmd = DbleVal[0];
+         }
 
-            if (sscanf(line,"SC[%ld].AC.Thr[%ld].PulseWidthCmd = %le",
-               &Isc,&i,
-               &DbleVal[0]) == 3) {
-               SC[Isc].AC.Thr[i].PulseWidthCmd = DbleVal[0];
-            }
+         if (sscanf(line,"SC[%ld].AC.Thr[%ld].PulseWidthCmd = %le",
+            &Isc,&i,
+            &DbleVal[0]) == 3) {
+            SC[Isc].AC.Thr[i].PulseWidthCmd = DbleVal[0];
+         }
 
-            if (sscanf(line,"SC[%ld].AC.Cmd.Ang = %le %le %le",
-               &Isc,
-               &DbleVal[0],
-               &DbleVal[1],
-               &DbleVal[2]) == 4) {
-               SC[Isc].AC.Cmd.Ang[0] = DbleVal[0];
-               SC[Isc].AC.Cmd.Ang[1] = DbleVal[1];
-               SC[Isc].AC.Cmd.Ang[2] = DbleVal[2];
-            }
+         if (sscanf(line,"SC[%ld].AC.Cmd.Ang = %le %le %le",
+            &Isc,
+            &DbleVal[0],
+            &DbleVal[1],
+            &DbleVal[2]) == 4) {
+            SC[Isc].AC.Cmd.Ang[0] = DbleVal[0];
+            SC[Isc].AC.Cmd.Ang[1] = DbleVal[1];
+            SC[Isc].AC.Cmd.Ang[2] = DbleVal[2];
+         }
 
-            if (sscanf(line,"SC[%ld].B[%ld].wn = %le %le %le",
-               &Isc,&i,
-               &DbleVal[0],
-               &DbleVal[1],
-               &DbleVal[2]) == 5) {
-               SC[Isc].B[i].wn[0] = DbleVal[0];
-               SC[Isc].B[i].wn[1] = DbleVal[1];
-               SC[Isc].B[i].wn[2] = DbleVal[2];
-               SC[Isc].RequestStateRefresh = 1;
-            }
+         if (sscanf(line,"SC[%ld].B[%ld].wn = %le %le %le",
+            &Isc,&i,
+            &DbleVal[0],
+            &DbleVal[1],
+            &DbleVal[2]) == 5) {
+            SC[Isc].B[i].wn[0] = DbleVal[0];
+            SC[Isc].B[i].wn[1] = DbleVal[1];
+            SC[Isc].B[i].wn[2] = DbleVal[2];
+            SC[Isc].RequestStateRefresh = 1;
+         }
 
-            if (sscanf(line,"SC[%ld].B[%ld].qn = %le %le %le %le",
-               &Isc,&i,
-               &DbleVal[0],
-               &DbleVal[1],
-               &DbleVal[2],
-               &DbleVal[3]) == 6) {
-               SC[Isc].B[i].qn[0] = DbleVal[0];
-               SC[Isc].B[i].qn[1] = DbleVal[1];
-               SC[Isc].B[i].qn[2] = DbleVal[2];
-               SC[Isc].B[i].qn[3] = DbleVal[3];
-               SC[Isc].RequestStateRefresh = 1;
-            }
+         if (sscanf(line,"SC[%ld].B[%ld].qn = %le %le %le %le",
+            &Isc,&i,
+            &DbleVal[0],
+            &DbleVal[1],
+            &DbleVal[2],
+            &DbleVal[3]) == 6) {
+            SC[Isc].B[i].qn[0] = DbleVal[0];
+            SC[Isc].B[i].qn[1] = DbleVal[1];
+            SC[Isc].B[i].qn[2] = DbleVal[2];
+            SC[Isc].B[i].qn[3] = DbleVal[3];
+            SC[Isc].RequestStateRefresh = 1;
+         }
 
-            if (sscanf(line,"SC[%ld].Whl[%ld].H = %le",
-               &Isc,&i,
-               &DbleVal[0]) == 3) {
-               SC[Isc].Whl[i].H = DbleVal[0];
-               SC[Isc].RequestStateRefresh = 1;
-            }
+         if (sscanf(line,"SC[%ld].Whl[%ld].H = %le",
+            &Isc,&i,
+            &DbleVal[0]) == 3) {
+            SC[Isc].Whl[i].H = DbleVal[0];
+            SC[Isc].RequestStateRefresh = 1;
+         }
 
-            if (sscanf(line,"World[%ld].PosH = %le %le %le",
-               &Iw,
-               &DbleVal[0],
-               &DbleVal[1],
-               &DbleVal[2]) == 4) {
-               World[Iw].PosH[0] = DbleVal[0];
-               World[Iw].PosH[1] = DbleVal[1];
-               World[Iw].PosH[2] = DbleVal[2];
-            }
+         if (sscanf(line,"World[%ld].PosH = %le %le %le",
+            &Iw,
+            &DbleVal[0],
+            &DbleVal[1],
+            &DbleVal[2]) == 4) {
+            World[Iw].PosH[0] = DbleVal[0];
+            World[Iw].PosH[1] = DbleVal[1];
+            World[Iw].PosH[2] = DbleVal[2];
+         }
 
-            if (sscanf(line,"World[%ld].eph.PosN = %le %le %le",
-               &Iw,
-               &DbleVal[0],
-               &DbleVal[1],
-               &DbleVal[2]) == 4) {
-               World[Iw].eph.PosN[0] = DbleVal[0];
-               World[Iw].eph.PosN[1] = DbleVal[1];
-               World[Iw].eph.PosN[2] = DbleVal[2];
-            }
+         if (sscanf(line,"World[%ld].eph.PosN = %le %le %le",
+            &Iw,
+            &DbleVal[0],
+            &DbleVal[1],
+            &DbleVal[2]) == 4) {
+            World[Iw].eph.PosN[0] = DbleVal[0];
+            World[Iw].eph.PosN[1] = DbleVal[1];
+            World[Iw].eph.PosN[2] = DbleVal[2];
+         }
 
-            if (sscanf(line,"World[%ld].eph.VelN = %le %le %le",
-               &Iw,
-               &DbleVal[0],
-               &DbleVal[1],
-               &DbleVal[2]) == 4) {
-               World[Iw].eph.VelN[0] = DbleVal[0];
-               World[Iw].eph.VelN[1] = DbleVal[1];
-               World[Iw].eph.VelN[2] = DbleVal[2];
-            }
+         if (sscanf(line,"World[%ld].eph.VelN = %le %le %le",
+            &Iw,
+            &DbleVal[0],
+            &DbleVal[1],
+            &DbleVal[2]) == 4) {
+            World[Iw].eph.VelN[0] = DbleVal[0];
+            World[Iw].eph.VelN[1] = DbleVal[1];
+            World[Iw].eph.VelN[2] = DbleVal[2];
+         }
 
          for(Isc=0;Isc<Nsc;Isc++) {
             if (SC[Isc].Exists) {
