@@ -2046,8 +2046,8 @@ void DrawClock(void)
       GLfloat Black[4] = {0.0,0.0,0.0,1.0};
       float ClockColor[4] = {0.8,0.8,0.5,1.0};
       char s[80];
-      char TlmLabel[80] = "   Tlm Time: ";
-      char SysLabel[80] = "System Time: ";
+      char TlmLabel[20] = "   Tlm Time: ";
+      char SysLabel[20] = "System Time: ";
 
       glBlendFunc (GL_SRC_ALPHA, GL_ONE);
       glEnable(GL_BLEND);
