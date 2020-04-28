@@ -19,12 +19,14 @@ void ReadFromCmd(void)
       double DbleVal[30];
       long LongVal[30];
 
-      /* Placeholder */
+
+
          if (EchoEnabled) printf("%s",line);
 
          if (sscanf(line,"TIME %ld-%ld-%ld:%ld:%lf\n",
-            &Year,&doy,&Hour,&Minute,&Second) == 5)
+            &Year,&doy,&Hour,&Minute,&Second) == 5) {
             RequestTimeRefresh = 1;
+         }
 
             if (sscanf(line,"Orb[%ld].PosN = %le %le %le",
                &Iorb,
@@ -1082,7 +1084,7 @@ void ReadFromCmd(void)
             Done = 1;
             sprintf(line,"[EOF] reached\n");
          }
-      }
+      
 
       if (RequestTimeRefresh) {
          /* Update AbsTime, SimTime, etc */

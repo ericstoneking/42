@@ -748,6 +748,7 @@ void InitAC(struct SCType *S)
 
       AC = &S->AC;
 
+      S->InitAC = 0;
       AC->Init = 1;
       
       AC->ID = S->ID;
@@ -1687,12 +1688,7 @@ void FlightSoftWare(struct SCType *S)
       struct IpcType *I;
       long Iipc;
       #endif
-      
-      if (S->InitAC) {
-         S->InitAC = 0;
-         InitAC(S);
-      }
-      
+            
       S->FswSampleCounter++;
       if (S->FswSampleCounter >= S->FswMaxCounter) {
          S->FswSampleCounter = 0;

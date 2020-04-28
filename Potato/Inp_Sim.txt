@@ -1,7 +1,7 @@
 <<<<<<<<<<<<<<<<<  42: The Mostly Harmless Simulator  >>>>>>>>>>>>>>>>>
 ************************** Simulation Control **************************
 FAST                            !  Time Mode (FAST, REAL, EXTERNAL, or NOS3)
-10000.0   0.1                   !  Sim Duration, Step Size [sec]
+10000.0   0.1                    !  Sim Duration, Step Size [sec]
 1.0                             !  File Output Interval [sec]
 FALSE                           !  Graphics Front End?
 Inp_Cmd.txt                     !  Command Script File Name
@@ -10,7 +10,7 @@ Inp_Cmd.txt                     !  Command Script File Name
 TRUE   Orb_LEO.txt              !  Input file name for Orb 0
 *****************************  Spacecraft  *****************************
 1                               !  Number of Spacecraft
-TRUE  0 SC_Potato15.txt          !  Existence, RefOrb, Input file for SC 0
+TRUE  0 SC_Potato2.txt          !  Existence, RefOrb, Input file for SC 0
 ***************************** Environment  *****************************
 05 21 2019                      !  Date (Month, Day, Year)
 12 00 00.00                     !  Greenwich Mean Time (Hr,Min,Sec)

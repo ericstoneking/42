@@ -1111,7 +1111,7 @@
             },
             {
                "Variable Name":  "Lng",
-               "Description":  "",
+               "Description":  "Geocentric",
                "Units":  "rad",
                "Data Type":  "double",
                "Sim Read/Write":   "WRITE",
@@ -1121,7 +1121,7 @@
             },
             {
                "Variable Name":  "Lat",
-               "Description":  "",
+               "Description":  "Geocentric",
                "Units":  "rad",
                "Data Type":  "double",
                "Sim Read/Write":   "WRITE",
@@ -1131,7 +1131,37 @@
             },
             {
                "Variable Name":  "Alt",
-               "Description":  "",
+               "Description":  "Geocentric",
+               "Units":  "m",
+               "Data Type":  "double",
+               "Sim Read/Write":   "WRITE",
+               "App Read/Write":   "READ",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "WgsLng",
+               "Description":  "Geodetic, WGS-84",
+               "Units":  "rad",
+               "Data Type":  "double",
+               "Sim Read/Write":   "WRITE",
+               "App Read/Write":   "READ",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "WgsLat",
+               "Description":  "Geodetic, WGS-84",
+               "Units":  "rad",
+               "Data Type":  "double",
+               "Sim Read/Write":   "WRITE",
+               "App Read/Write":   "READ",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "WgsAlt",
+               "Description":  "Geodetic, WGS-84",
                "Units":  "m",
                "Data Type":  "double",
                "Sim Read/Write":   "WRITE",

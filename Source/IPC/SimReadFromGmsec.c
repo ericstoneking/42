@@ -45,8 +45,9 @@ void ReadFromGmsec(GMSEC_ConnectionMgr ConnMgr,GMSEC_Status status, long EchoEna
          if (EchoEnabled) printf("%s",line);
 
          if (sscanf(line,"TIME %ld-%ld-%ld:%ld:%lf\n",
-            &Year,&doy,&Hour,&Minute,&Second) == 5)
+            &Year,&doy,&Hour,&Minute,&Second) == 5) {
             RequestTimeRefresh = 1;
+         }
 
             if (sscanf(line,"Orb[%ld].PosN = %le %le %le",
                &Iorb,

@@ -315,9 +315,7 @@ long SimStep(void)
       /* Update SC Bounding Boxes occasionally */
       ManageBoundingBoxes();
 
-      #ifdef _ENABLE_SOCKETS_
-         InterProcessComm(); /* Send and receive from external processes */
-      #endif
+      InterProcessComm(); /* Send and receive from external processes */
       Ephemerides(); /* Sun, Moon, Planets, Spacecraft, Useful Auxiliary Frames */
       ZeroFrcTrq();
       for(Isc=0;Isc<Nsc;Isc++) {
@@ -360,6 +358,8 @@ int exec(int argc,char **argv)
       FrcTrqTime = 0.0;
       AssembleTime = 0.0;
       LockTime = 0.0;
+      TriangleTime = 0.0;
+      SubstTime = 0.0;
       SolveTime = 0.0;
 
       InitSim(argc,argv);
@@ -369,9 +369,7 @@ int exec(int argc,char **argv)
          }
       }
       CmdInterpreter();
-      #ifdef _ENABLE_SOCKETS_
-         InitInterProcessComm();
-      #endif
+      InitInterProcessComm();
       #ifdef _USE_GUI_
          if (GLEnable) HandoffToGui(argc,argv);
          else {
@@ -393,6 +391,8 @@ int exec(int argc,char **argv)
       //printf("FrcTrq Time = %lf sec\n",FrcTrqTime);
       //printf("Assemble Time = %lf sec\n",AssembleTime);
       //printf("Lock Time = %lf sec\n",LockTime);
+      //printf("Triangularize Time = %lf sec\n",TriangleTime);
+      //printf("Fwd Substitution Time = %lf sec\n",SubstTime);
       //printf("Solve Time = %lf sec\n",SolveTime);
       return(0);
 }

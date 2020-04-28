@@ -85,9 +85,6 @@ ifeq ($(42PLATFORM),__APPLE__)
    # ARCHFLAG = -arch i386
    ARCHFLAG = -arch x86_64
 
-   #SOCKETFLAG =
-   SOCKETFLAG = -D _ENABLE_SOCKETS_
-
    LFLAGS = -bind_at_load
    LIBS = -framework System -framework Carbon -framework OpenGL -framework GLUT 
    GUIOBJ = $(OBJ)42GlutGui.o $(OBJ)glkit.o 
@@ -99,9 +96,6 @@ ifeq ($(42PLATFORM),__linux__)
    # Linux Macros
    CINC =
    EXTERNDIR = 
-
-   #SOCKETFLAG =
-   SOCKETFLAG = -D _ENABLE_SOCKETS_
 
    ifneq ($(strip $(GUIFLAG)),)
       GUIOBJ = $(OBJ)42GlutGui.o $(OBJ)glkit.o 
@@ -117,10 +111,8 @@ ifeq ($(42PLATFORM),__linux__)
       LFLAGS =
       ARCHFLAG =
    endif
-   ifneq ($(strip $(SOCKETFLAG)),)
-      ifneq ($(strip $(NOS3FSWFLAG)),)
-         LIBS += -lpthread
-      endif
+   ifneq ($(strip $(NOS3FSWFLAG)),)
+      LIBS += -lpthread
    endif
    EXENAME = 42
    CC = gcc
@@ -129,9 +121,6 @@ endif
 ifeq ($(42PLATFORM),__MSYS__)
    CINC =
    EXTERNDIR = /c/42ExternalSupport/
-
-   #SOCKETFLAG =
-   SOCKETFLAG = -D _ENABLE_SOCKETS_
 
    ifneq ($(strip $(GUIFLAG)),)
       GLEW = $(EXTERNDIR)GLEW/
@@ -209,7 +198,7 @@ $(OBJ)AppWriteToSocket.o $(OBJ)AppReadFromSocket.o $(OBJ)AppWriteToFile.o
 #ANSIFLAGS = -Wstrict-prototypes -pedantic -ansi -Werror
 ANSIFLAGS =
 
-CFLAGS = -Wall -Wshadow -Wno-deprecated -g  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(INC) -I $(KITINC) -I $(KITSRC) $(GMSECINC) -O0 $(ARCHFLAG) $(GUIFLAG) $(SHADERFLAG) $(TIMEFLAG) $(SOCKETFLAG) $(CFDFLAG) $(FFTBFLAG) $(GSFCFLAG) $(GMSECFLAG) $(STANDALONEFLAG) $(NOS3FSWFLAG)
+CFLAGS = -Wall -Wshadow -Wno-deprecated -g  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(INC) -I $(KITINC) -I $(KITSRC) $(GMSECINC) -O0 $(ARCHFLAG) $(GUIFLAG) $(SHADERFLAG) $(TIMEFLAG) $(CFDFLAG) $(FFTBFLAG) $(GSFCFLAG) $(GMSECFLAG) $(STANDALONEFLAG) $(NOS3FSWFLAG)
 
 
 ##########################  Rules to link 42  #############################
@@ -218,7 +207,7 @@ CFLAGS = -Wall -Wshadow -Wno-deprecated -g  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(I
 	$(CC) $(LFLAGS) $(GMSECBIN) -o $(EXENAME) $(42OBJ) $(GUIOBJ) $(FFTBOBJ) $(SLOSHOBJ) $(KITOBJ) $(ACOBJ) $(GMSECOBJ) $(SIMIPCOBJ) $(LIBS) $(GMSECLIB)
 
 AcApp : $(OBJ)AcApp.o $(ACKITOBJ) $(ACIPCOBJ) $(GMSECOBJ)
-	$(CC) $(LFLAGS) -o AcApp $(OBJ)AcApp.o $(ACKITOBJ) $(ACIPCOBJ) $(GMSECOBJ)
+	$(CC) $(LFLAGS) -o AcApp $(OBJ)AcApp.o $(ACKITOBJ) $(ACIPCOBJ) $(GMSECOBJ) $(LIBS)
 
 ####################  Rules to compile objects  ###########################
 

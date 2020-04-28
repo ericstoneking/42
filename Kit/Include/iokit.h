@@ -29,28 +29,25 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
-#ifdef _ENABLE_SOCKETS_
-   #ifdef _WIN32
-      #include <winsock2.h>
-   #else
-      #include <sys/socket.h>
-      #include <netinet/in.h>
-      #include <netdb.h>
-      /* Finesse winsock SOCKET datatype */
-      #define SOCKET int
-   #endif
-   /* #include <sys/un.h> */
+#ifdef _WIN32
+   #include <winsock2.h>
+#else
+   #include <sys/socket.h>
+   #include <netinet/in.h>
+   #include <netinet/tcp.h>
+   #include <netdb.h>
+   /* Finesse winsock SOCKET datatype */
+   #define SOCKET int
 #endif
+/* #include <sys/un.h> */
 
 FILE *FileOpen(const char *Path, const char *File, const char *CtrlCode);
 void ByteSwapDouble(double *A);
 int FileToString(const char *file_name, char **result_string,
                  size_t *string_len);
 
-#ifdef _ENABLE_SOCKETS_
 SOCKET InitSocketServer(int Port, int AllowBlocking);
 SOCKET InitSocketClient(const char *hostname, int Port, int AllowBlocking);
-#endif
 
 /*
 ** #ifdef __cplusplus

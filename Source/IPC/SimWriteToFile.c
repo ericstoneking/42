@@ -307,6 +307,30 @@ void WriteToFile(FILE *StateFile, char **Prefix, long Nprefix, long EchoEnabled)
                      if (EchoEnabled) printf("%s",line);
                   }
 
+                  sprintf(line,"SC[%ld].AC.GPS[%ld].WgsLng = %18.12le\n",
+                     Isc,i,
+                     SC[Isc].AC.GPS[i].WgsLng);
+                  if (!strncmp(line,Prefix[Ipfx],PfxLen)) {
+                     fprintf(StateFile,"%s",line);
+                     if (EchoEnabled) printf("%s",line);
+                  }
+
+                  sprintf(line,"SC[%ld].AC.GPS[%ld].WgsLat = %18.12le\n",
+                     Isc,i,
+                     SC[Isc].AC.GPS[i].WgsLat);
+                  if (!strncmp(line,Prefix[Ipfx],PfxLen)) {
+                     fprintf(StateFile,"%s",line);
+                     if (EchoEnabled) printf("%s",line);
+                  }
+
+                  sprintf(line,"SC[%ld].AC.GPS[%ld].WgsAlt = %18.12le\n",
+                     Isc,i,
+                     SC[Isc].AC.GPS[i].WgsAlt);
+                  if (!strncmp(line,Prefix[Ipfx],PfxLen)) {
+                     fprintf(StateFile,"%s",line);
+                     if (EchoEnabled) printf("%s",line);
+                  }
+
                }
 
                for(i=0;i<SC[Isc].AC.Nacc;i++) {

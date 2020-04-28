@@ -60,7 +60,7 @@ EXTERN char ModelPath[80];
 EXTERN char CmdFileName[80];
 
 /* Math Basics */
-EXTERN double Pi, TwoPi, HalfPi, SqrtTwo, SqrtHalf, D2R, R2D;
+EXTERN double Pi, TwoPi, HalfPi, SqrtTwo, SqrtHalf, D2R, R2D, GoldenRatio;
 
 /* Simulation Control */
 EXTERN long TimeMode; /* FAST_TIME, REAL_TIME, EXTERNAL_SYNCH, NOS3_TIME */
@@ -155,7 +155,7 @@ EXTERN struct IpcType *IPC;
 EXTERN struct RandomProcessType *RNG;
 
 EXTERN double MapTime,JointTime,PathTime,PVelTime,FrcTrqTime;
-EXTERN double AssembleTime,LockTime,SolveTime;
+EXTERN double AssembleTime,LockTime,TriangleTime,SubstTime,SolveTime;
 
 EXTERN struct ConstellationType Constell[89];
 
@@ -220,10 +220,8 @@ void NOS3Time(long *year, long *day_of_year, long *month, long *day,
 void NOS3SendMessageToFSW(void);
 void NOS3ReceiveMessageFromFSW(void);
                    
-#ifdef _ENABLE_SOCKETS_
-   void InterProcessComm(void);
-   void InitInterProcessComm(void);
-#endif
+void InterProcessComm(void);
+void InitInterProcessComm(void);
 
 #undef EXTERN
 
