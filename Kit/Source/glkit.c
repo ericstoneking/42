@@ -2381,6 +2381,7 @@ void DrawVector(double v[3], const char Label[8], const char Units[8],
          glBitmap(0,0,0,0,4,-5,0);
          glBitmap(7,3,0,-11.0,0.0,0.0,GlyphVec);
       }
+      glColor4f(0.0,0.0,0.0,1.0);
       glEnable(GL_LIGHTING);
 }
 /*********************************************************************/

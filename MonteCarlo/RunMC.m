@@ -6,7 +6,7 @@
       %rand('seed',1);  % For reproducible runs, set seed
       BasePath = './Baseline';
       Nrun = 20;
-      MaxCore = 8;
+      MaxCore = 6;
 
       Nbatch = ceil(Nrun/MaxCore);
 
@@ -25,13 +25,17 @@
             system(['rm -rf ',RunPath]);
             system(['cp -r ',BasePath,' ',RunPath]);
             BatchPath = [BatchPath,' ',RunPath];
+            
+            % Make sure graphics front end is FALSE.
+            s = sprintf('FALSE                           !  Graphics Front End?\n');
+            OverwriteLineInFile([RunPath,'/Inp_Sim.txt'],6,s);
 
-            % Modify Input Files
+            % Modify Input Files as desired
             EulAng = 20*(2*rand(3,1)-1);
             s = sprintf(...
                '%8.2f  %8.2f   %8.2f    213      ! Angles (deg) & Euler Sequence\n',...
                EulAng(1),EulAng(2),EulAng(3));
-            OverwriteLineInFile([RunPath,'/SC_Simple.txt'],15,s);
+            OverwriteLineInFile([RunPath,'/SC_Simple.txt'],16,s);
 
          end
 
@@ -59,23 +63,25 @@
             end
 
             % Save only selected *.42 files
-            %SaveList = {'time','wbn'};
-            %Nsave = length(SaveList);
-            %for Isave = 1:Nsave,
-            %   system(['mv ',RunPath,'/',SaveList{Isave},'.42 ',RunPath,'/',SaveList{Isave},'.tmp']);
-            %end
+            SaveList = {'time','wbn'};
+            Nsave = length(SaveList);
+            for Isave = 1:Nsave,
+               system(['mv ',RunPath,'/',SaveList{Isave},'.42 ',RunPath,'/',SaveList{Isave},'.tmp']);
+            end
             system(['rm ',RunPath,'/*.42']);
-            %for Isave = 1:Nsave,
-            %   system(['mv ',RunPath,'/',SaveList{Isave},'.tmp ',RunPath,'/',SaveList{Isave},'.42']);
-            %end
+            for Isave = 1:Nsave,
+               system(['mv ',RunPath,'/',SaveList{Isave},'.tmp ',RunPath,'/',SaveList{Isave},'.42']);
+            end
 
             % Delete unaltered *.txt files
+            system(['rm ',RunPath,'/Flex_Simple.txt']);
             system(['rm ',RunPath,'/Inp_Cmd.txt']);
             system(['rm ',RunPath,'/Inp_FOV.txt']);
             system(['rm ',RunPath,'/Inp_Graphics.txt']);
             system(['rm ',RunPath,'/Inp_IPC.txt']);
+            system(['rm ',RunPath,'/Inp_NOS3.txt']);
             system(['rm ',RunPath,'/Inp_Region.txt']);
-            system(['rm ',RunPath,'/Inp_Sim.txt']);
+            %system(['rm ',RunPath,'/Inp_Sim.txt']);
             system(['rm ',RunPath,'/Inp_TDRS.txt']);
             system(['rm ',RunPath,'/Orb_LEO.txt']);
             %system(['rm ',RunPath,'/SC_Simple.txt']);
@@ -95,4 +101,3 @@
 % ... Cleanup
       more on
       rmpath('../Utilities');
-

@@ -511,7 +511,7 @@ void FindPathVectors(struct SCType *S)
       struct DynType *D;
       struct JointType *G;
       double rin[3],rout[3];
-      long Ig,Jg,i,Bi,Bo;
+      long Ig,Jg,Ia,i,Bi,Bo;
 
       D = &S->Dyn;
 
@@ -524,6 +524,7 @@ void FindPathVectors(struct SCType *S)
          for(i=0;i<3;i++) {
             S->B[Bo].beta[i] = S->B[Bi].beta[i] + rout[i] - rin[i];
          }
+         #if 0
          for(Jg=0;Jg<Ig;Jg++) {
             if (D->JointPathTable[Bo][Jg].InPath) {
                for(i=0;i<3;i++)
@@ -531,6 +532,14 @@ void FindPathVectors(struct SCType *S)
                   D->JointPathTable[Bi][Jg].rho[i] + rout[i] - rin[i];
             }
          }
+         #else
+         for(Ia=0;Ia<G->Nanc;Ia++) {
+            Jg = G->Anc[Ia];
+            for(i=0;i<3;i++)
+               D->JointPathTable[Bo][Jg].rho[i] =
+               D->JointPathTable[Bi][Jg].rho[i] + rout[i] - rin[i];
+         }
+         #endif
          for(i=0;i<3;i++) D->JointPathTable[Bo][Ig].rho[i] = rout[i];
       }
 }
@@ -1527,14 +1536,16 @@ void FindFlexFrc(struct SCType *S)
       }
 }
 /**********************************************************************/
+#if 1
 void OrderNSolveEOM(struct SCType *S)
 {
       struct DynType *D;
-      struct JointType *G,*Ga;
+      struct JointType *G,*Gi,*Gj;
       double **M,*F;
       double *udot;
-      double Mp[6][6],Mi[6][6],RowFact[6][6];
-      long Ib,Ig,Np,Na,Ns,ip,ia,iv,i,j,k;
+      double Mg[6][6],Mw[6][6],Mv[6][6],Mi[6][6],RowFact[6][6];
+      long Ig,Ia,Ja,Ng,Ni,Nj,Ns,ug,ui,uj,uv,i,j,k;
+      double loctic,loctoc;
 
       D = &S->Dyn;
       M = D->COEF; /* Generalized Mass matrix */
@@ -1543,102 +1554,144 @@ void OrderNSolveEOM(struct SCType *S)
       
       Ns = D->Ns - D->Nf; 
       
-      iv = Ns-3;
+      uv = Ns-3;
 
 /* .. Triangularize-in-place */
       /* Joints */
+      loctic = usec();
       for(Ig=S->Ng-1;Ig>=0;Ig--) {
          G = &S->G[Ig];
-         Np = G->ActiveRotDOF + G->ActiveTrnDOF;
-         if (Np > 0) {
-            ip = G->ActiveRotu0;
-            for(i=0;i<Np;i++) {
-               for(j=0;j<Np;j++) Mp[i][j] = M[ip+i][ip+j];
+         Ng = G->ActiveRotDOF + G->ActiveTrnDOF;
+         if (Ng > 0) {
+            ug = G->ActiveRotu0;
+            for(i=0;i<Ng;i++) {
+               for(j=0;j<Ng;j++) Mg[i][j] = M[ug+i][ug+j];
             }
-            FastMINV6(Mp,Mi,Np);
+            FastMINV6(Mg,Mi,Ng);
             /* For each ancestral joint, row ops to put zeros above/below G */
-            Ib = G->Bin;
-            while (Ib > 0) {
-               Ga = &S->G[S->B[Ib].Gin];
-               Na = Ga->ActiveRotDOF + Ga->ActiveTrnDOF;
-               ia = Ga->ActiveRotu0;
-               for(i=0;i<Na;i++) {
-                  for(j=0;j<Np;j++) {
+            for(Ia=0;Ia<G->Nanc;Ia++) {
+               Gi = &S->G[G->Anc[Ia]];
+               Ni = Gi->ActiveRotDOF + Gi->ActiveTrnDOF;
+               ui = Gi->ActiveRotu0;
+            
+               for(i=0;i<Ni;i++) {
+                  for(j=0;j<Ng;j++) {
                      RowFact[i][j] = 0.0;
-                     for(k=0;k<Np;k++) RowFact[i][j] += M[ia+i][ip+k]*Mi[k][j];
+                     for(k=0;k<Ng;k++) RowFact[i][j] += M[ui+i][ug+k]*Mi[k][j];
                   }
                }
-               for(i=0;i<Na;i++) {
-                  for(j=0;j<Ns;j++) {
-                     for(k=0;k<Np;k++) M[ia+i][j] -= RowFact[i][k]*M[ip+k][j];
+               for(Ja=0;Ja<G->Nanc;Ja++) {
+                  Gj = &S->G[G->Anc[Ja]];
+                  Nj = Gj->ActiveRotDOF + Gj->ActiveTrnDOF;
+                  uj = Gj->ActiveRotu0;
+                  for(i=0;i<Ni;i++) {
+                     for(j=0;j<Nj;j++) {
+                        for(k=0;k<Ng;k++) M[ui+i][uj+j] -= RowFact[i][k]*M[ug+k][uj+j];
+                     }
                   }
-                  for(k=0;k<Np;k++) F[ia+i] -= RowFact[i][k]*F[ip+k];
                }
-               Ib = Ga->Bin;
+               for(i=0;i<3;i++) {
+                  for(j=0;j<3;j++) {
+                     for(k=0;k<Ng;k++) {
+                        M[ui+i][   j] -= RowFact[i][k]*M[ug+k][   j];
+                        M[ui+i][uv+j] -= RowFact[i][k]*M[ug+k][uv+j];
+                     }
+                  }
+                  for(k=0;k<Ng;k++) F[ui+i] -= RowFact[i][k]*F[ug+k];
+               }
             }
-            /* For B[0].wn, row ops */
+            /* Now do the same for the wn row */
             for(i=0;i<3;i++) {
-               for(j=0;j<Np;j++) {
+               for(j=0;j<Ng;j++) {
                   RowFact[i][j] = 0.0;
-                  for(k=0;k<Np;k++) RowFact[i][j] += M[i][ip+k]*Mi[k][j];
+                  for(k=0;k<Ng;k++) RowFact[i][j] += M[i][ug+k]*Mi[k][j];
+               }
+            }
+            for(Ja=0;Ja<G->Nanc;Ja++) {
+               Gj = &S->G[G->Anc[Ja]];
+               Nj = Gj->ActiveRotDOF + Gj->ActiveTrnDOF;
+               uj = Gj->ActiveRotu0;
+               for(i=0;i<3;i++) {
+                  for(j=0;j<Nj;j++) {
+                     for(k=0;k<Ng;k++) M[i][uj+j] -= RowFact[i][k]*M[ug+k][uj+j];
+                  }
                }
             }
             for(i=0;i<3;i++) {
-               for(j=0;j<Ns;j++) {
-                  for(k=0;k<Np;k++) M[i][j] -= RowFact[i][k]*M[ip+k][j];
+               for(j=0;j<3;j++) {
+                  for(k=0;k<Ng;k++) {
+                     M[i][   j] -= RowFact[i][k]*M[ug+k][   j];
+                     M[i][uv+j] -= RowFact[i][k]*M[ug+k][uv+j];
+                  }
                }
-               for(k=0;k<Np;k++) F[i] -= RowFact[i][k]*F[ip+k];
+               for(k=0;k<Ng;k++) F[i] -= RowFact[i][k]*F[ug+k];
             }
-            /* For B[0].vn, row ops */
+             /* Now do the same for the vn row */
             for(i=0;i<3;i++) {
-               for(j=0;j<Np;j++) {
+               for(j=0;j<Ng;j++) {
                   RowFact[i][j] = 0.0;
-                  for(k=0;k<Np;k++) RowFact[i][j] += M[iv+i][ip+k]*Mi[k][j];
+                  for(k=0;k<Ng;k++) RowFact[i][j] += M[uv+i][ug+k]*Mi[k][j];
+               }
+            }
+            for(Ja=0;Ja<G->Nanc;Ja++) {
+               Gj = &S->G[G->Anc[Ja]];
+               Nj = Gj->ActiveRotDOF + Gj->ActiveTrnDOF;
+               uj = Gj->ActiveRotu0;
+               for(i=0;i<3;i++) {
+                  for(j=0;j<Nj;j++) {
+                     for(k=0;k<Ng;k++) M[uv+i][uj+j] -= RowFact[i][k]*M[ug+k][uj+j];
+                  }
                }
             }
             for(i=0;i<3;i++) {
-               for(j=0;j<Ns;j++) {
-                  for(k=0;k<Np;k++) M[iv+i][j] -= RowFact[i][k]*M[ip+k][j];
+               for(j=0;j<3;j++) {
+                  for(k=0;k<Ng;k++) {
+                     M[uv+i][   j] -= RowFact[i][k]*M[ug+k][   j];
+                     M[uv+i][uv+j] -= RowFact[i][k]*M[ug+k][uv+j];
+                  }
                }
-               for(k=0;k<Np;k++) F[iv+i] -= RowFact[i][k]*F[ip+k];
+               for(k=0;k<Ng;k++) F[uv+i] -= RowFact[i][k]*F[ug+k];
             }
-         }
+        }
       }
       /* B[0].wn */
       for(i=0;i<3;i++) {
-         for(j=0;j<3;j++) Mp[i][j] = M[i][j];
+         for(j=0;j<3;j++) Mw[i][j] = M[i][j];
       }
-      FastMINV6(Mp,Mi,3);
+      FastMINV6(Mw,Mi,3);
       for(i=0;i<3;i++) {
          for(j=0;j<3;j++) {
             RowFact[i][j] = 0.0;
-            for(k=0;k<3;k++) RowFact[i][j] += M[iv+i][k]*Mi[k][j];
+            for(k=0;k<3;k++) RowFact[i][j] += M[uv+i][k]*Mi[k][j];
          }
       }
       for(i=0;i<3;i++) {
-         for(j=0;j<Ns;j++) {
-            for(k=0;k<3;k++) M[iv+i][j] -= RowFact[i][k]*M[k][j];
+         for(j=0;j<3;j++) { 
+            for(k=0;k<3;k++) M[uv+i][uv+j] -= RowFact[i][k]*M[k][uv+j];
          }
-         for(k=0;k<3;k++) F[iv+i] -= RowFact[i][k]*F[k];
+         for(k=0;k<3;k++) F[uv+i] -= RowFact[i][k]*F[k];
       }
+      loctoc = usec();
+      TriangleTime += 1.0E-6*(loctoc-loctic);
 
 /* .. Forward Substitution */
-      /* B[0].vn (Np = 3) */
+      loctic = usec();
+      /* B[0].vn (N = 3) */
       for(i=0;i<3;i++) {
-         for(j=0;j<3;j++) Mp[i][j] = M[iv+i][iv+j];
+         for(j=0;j<3;j++) Mv[i][j] = M[uv+i][uv+j];
       }
-      FastMINV6(Mp,Mi,3);
+      FastMINV6(Mv,Mi,3);
       for(i=0;i<3;i++) {
-         udot[iv+i] = 0.0;
-         for(j=0;j<3;j++) udot[iv+i] += Mi[i][j]*F[iv+j];
+         udot[uv+i] = 0.0;
+         for(j=0;j<3;j++) udot[uv+i] += Mi[i][j]*F[uv+j];
       }
-      /* B[0].wn  (ip = 0, Np = 3) */
+      /* B[0].wn  (N = 3) */
       for(i=0;i<3;i++) {
-         for(j=0;j<3;j++) Mp[i][j] = M[i][j];
+         for(j=0;j<3;j++) Mw[i][j] = M[i][j];
       }
-      FastMINV6(Mp,Mi,3);
+      FastMINV6(Mw,Mi,3);
       for(i=0;i<3;i++) {
-         for(j=0;j<3;j++) F[i] -= M[i][iv+j]*udot[iv+j];
+         for(j=0;j<3;j++) F[i] -= M[i][uv+j]*udot[uv+j];
       }
       for(i=0;i<3;i++) {
          udot[i] = 0.0;
@@ -1647,39 +1700,40 @@ void OrderNSolveEOM(struct SCType *S)
       /* Joints */
       for(Ig=0;Ig<S->Ng;Ig++) {
          G = &S->G[Ig];
-         Np = G->ActiveRotDOF + G->ActiveTrnDOF;
-         if (Np > 0) {
-            ip = G->ActiveRotu0;
-            for(i=0;i<Np;i++) {
-               for(j=0;j<Np;j++) Mp[i][j] = M[ip+i][ip+j];
+         Ng = G->ActiveRotDOF + G->ActiveTrnDOF;
+         if (Ng > 0) {
+            ug = G->ActiveRotu0;
+            for(i=0;i<Ng;i++) {
+               for(j=0;j<Ng;j++) Mg[i][j] = M[ug+i][ug+j];
             }
-            FastMINV6(Mp,Mi,Np);
+            FastMINV6(Mg,Mi,Ng);
             /* Subtract wn, vn udots from F */
-            for(i=0;i<Np;i++) {
-               for(j=0;j<3;j++) F[ip+i] -= M[ip+i][j]*udot[j] + M[ip+i][iv+j]*udot[iv+j];
+            for(i=0;i<Ng;i++) {
+               for(j=0;j<3;j++) F[ug+i] -= M[ug+i][j]*udot[j] + M[ug+i][uv+j]*udot[uv+j];
             }
             /* For each ancestral joint, subtract udot contributions */
-            Ib = G->Bin;
-            while (Ib > 0) {
-               Ga = &S->G[S->B[Ib].Gin];
-               Na = Ga->ActiveRotDOF + Ga->ActiveTrnDOF;
-               ia = Ga->ActiveRotu0;
-               for(i=0;i<Np;i++) {
-                  for(j=0;j<Na;j++) F[ip+i] -= M[ip+i][ia+j]*udot[ia+j];
+            for(Ia=0;Ia<G->Nanc;Ia++) {
+               Gj = &S->G[G->Anc[Ia]];
+               Nj = Gj->ActiveRotDOF + Gj->ActiveTrnDOF;
+               uj = Gj->ActiveRotu0;
+               for(i=0;i<Ng;i++) {
+                  for(j=0;j<Nj;j++) F[ug+i] -= M[ug+i][uj+j]*udot[uj+j];
                }
-               Ib = Ga->Bin;
             }
-            /* udot[ip] = Mi*F[ip] */
-            for(i=0;i<Np;i++) {
-               udot[ip+i] = 0.0;
-               for(j=0;j<Np;j++) udot[ip+i] += Mi[i][j]*F[ip+j];
+            /* udot[ug] = Mi*F[ug] */
+            for(i=0;i<Ng;i++) {
+               udot[ug+i] = 0.0;
+               for(j=0;j<Ng;j++) udot[ug+i] += Mi[i][j]*F[ug+j];
             }
          }
       }
+      loctoc = usec();
+      SubstTime += 1.0E-6*(loctoc-loctic);
 
 /* TODO: Flex states */
 
 }
+#endif
 /**********************************************************************/
 void EchoPVel(struct SCType *S)
 {
@@ -1814,12 +1868,17 @@ void EchoEOM(double **COEF, double *State, double *RHS,long Ns)
 /**********************************************************************/
 void EchoUdot(double *State, long Ns)
 {
-      FILE *outfile;
+      static FILE *outfile;
       long i;
-
-      outfile = FileOpen(InOutPath,"udot.42","w");
-      for(i=0;i<Ns;i++) fprintf(outfile,"%24.16le\n",State[i]);
-      fclose(outfile);
+      static long First = 1;
+      
+      if (First) {
+         First = 0;
+         outfile = FileOpen(InOutPath,"udot.42","w");
+      }   
+      
+      for(i=0;i<Ns;i++) fprintf(outfile,"%24.16le ",State[i]);
+      fprintf(outfile,"\n");
 }
 /********************************************************************/
 void EchoRemAcc(struct SCType *S)
@@ -1881,6 +1940,7 @@ void KaneNBodyEOM(double *u, double *x, double *h,
       double FrcBiN[3], FrcBoN[3];
       double rxFi[3],rxFo[3];
       D = &S->Dyn;
+      static long First = 1;
 
 /* .. Dynamics */
 
@@ -2092,7 +2152,10 @@ void KaneNBodyEOM(double *u, double *x, double *h,
       tic = usec();
       /* EchoPVel(S); */
       /* EchoRemAcc(S); */
-      //EchoEOM(D->COEF,D->ActiveState,D->RHS,D->Ns); 
+      //if (First) {
+      //   First = 0;
+      //   EchoEOM(D->COEF,D->ActiveState,D->RHS,D->Ns); 
+      //}
       LINSOLVE(D->COEF,D->ActiveState,D->RHS,D->Ns);
       //OrderNSolveEOM(S);
       //EchoUdot(D->ActiveState,D->Ns);

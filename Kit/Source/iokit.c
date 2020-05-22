@@ -80,7 +80,6 @@ int FileToString(const char *file_name, char **result_string,
       *string_len = file_len;
       return 0;
 }
-#ifdef _ENABLE_SOCKETS_
 /**********************************************************************/
 SOCKET InitSocketServer(int Port, int AllowBlocking)
 {
@@ -129,7 +128,7 @@ SOCKET InitSocketServer(int Port, int AllowBlocking)
          /*fcntl(sockfd,F_SETFL, flags|O_NONBLOCK);*/
          ioctlsocket(sockfd,FIONBIO,&Blocking);
       }
-
+      
       return(sockfd);
 #else
 
@@ -138,6 +137,7 @@ SOCKET InitSocketServer(int Port, int AllowBlocking)
       socklen_t clilen;
       struct sockaddr_in Server, Client;
       int opt = 1;
+      int DisableNagle = 1;
 
       init_sockfd = socket(AF_INET,SOCK_STREAM,0);
       if (init_sockfd < 0) {
@@ -176,6 +176,10 @@ SOCKET InitSocketServer(int Port, int AllowBlocking)
          flags = fcntl(sockfd, F_GETFL, 0);
          fcntl(sockfd,F_SETFL, flags|O_NONBLOCK);
       }
+
+      /* Allow TCP to send small packets (look up Nagle's algorithm) */
+      /* Depending on your message sizes, this may or may not improve performance */
+      setsockopt(sockfd,IPPROTO_TCP,TCP_NODELAY,&DisableNagle,sizeof(DisableNagle));
 
       return(sockfd);
 #endif
@@ -232,6 +236,7 @@ SOCKET InitSocketClient(const char *hostname, int Port,int AllowBlocking)
       int flags;
       struct sockaddr_in Server;
       struct hostent *Host;
+      int DisableNagle = 1;
 
       sockfd = socket(AF_INET,SOCK_STREAM,0);
       if (sockfd < 0) {
@@ -261,10 +266,13 @@ SOCKET InitSocketClient(const char *hostname, int Port,int AllowBlocking)
          fcntl(sockfd,F_SETFL, flags|O_NONBLOCK);
       }
 
+      /* Allow TCP to send small packets (look up Nagle's algorithm) */
+      /* Depending on your message sizes, this may or may not improve performance */
+      setsockopt(sockfd,IPPROTO_TCP,TCP_NODELAY,&DisableNagle,sizeof(DisableNagle));
+
       return(sockfd);
 #endif /* _WIN32 */
 }
-#endif /* _ENABLE_SOCKETS_ */
 
 /* #ifdef __cplusplus
 ** }

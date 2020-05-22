@@ -6,7 +6,7 @@
 #include "42.h"
 
 /**********************************************************************/
-void WriteToSocket(SOCKET Socket, char **Prefix, long Nprefix, long EchoEnabled)
+void WriteToSocket(SOCKET Socket,  char **Prefix, long Nprefix, long EchoEnabled)
 {
 
       long Isc,Iorb,Iw,Ipfx,i;
@@ -365,6 +365,36 @@ void WriteToSocket(SOCKET Socket, char **Prefix, long Nprefix, long EchoEnabled)
                   sprintf(line,"SC[%ld].AC.GPS[%ld].Alt = %18.12le\n",
                      Isc,i,
                      SC[Isc].AC.GPS[i].Alt);
+                  if (!strncmp(line,Prefix[Ipfx],PfxLen)) {
+                     LineLen = strlen(line);
+                     memcpy(&Msg[MsgLen],line,LineLen);
+                     MsgLen += LineLen;
+                     if (EchoEnabled) printf("%s",line);
+                  }
+
+                  sprintf(line,"SC[%ld].AC.GPS[%ld].WgsLng = %18.12le\n",
+                     Isc,i,
+                     SC[Isc].AC.GPS[i].WgsLng);
+                  if (!strncmp(line,Prefix[Ipfx],PfxLen)) {
+                     LineLen = strlen(line);
+                     memcpy(&Msg[MsgLen],line,LineLen);
+                     MsgLen += LineLen;
+                     if (EchoEnabled) printf("%s",line);
+                  }
+
+                  sprintf(line,"SC[%ld].AC.GPS[%ld].WgsLat = %18.12le\n",
+                     Isc,i,
+                     SC[Isc].AC.GPS[i].WgsLat);
+                  if (!strncmp(line,Prefix[Ipfx],PfxLen)) {
+                     LineLen = strlen(line);
+                     memcpy(&Msg[MsgLen],line,LineLen);
+                     MsgLen += LineLen;
+                     if (EchoEnabled) printf("%s",line);
+                  }
+
+                  sprintf(line,"SC[%ld].AC.GPS[%ld].WgsAlt = %18.12le\n",
+                     Isc,i,
+                     SC[Isc].AC.GPS[i].WgsAlt);
                   if (!strncmp(line,Prefix[Ipfx],PfxLen)) {
                      LineLen = strlen(line);
                      memcpy(&Msg[MsgLen],line,LineLen);

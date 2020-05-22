@@ -811,7 +811,7 @@ void LoadOctree(struct GeomType *G)
       }
 }
 /*********************************************************************/
-/* Point and Axis have already been transformed into Geom frame      */
+/* Point and DirVec have already been transformed into Geom frame      */
 long OCProjectRayOntoGeom(double Point[3],double DirVec[3],
    struct GeomType *G,double ProjPoint[3],long *ClosestPoly)
 {

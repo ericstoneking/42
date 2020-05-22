@@ -21,12 +21,14 @@ void ReadFromCmd(void)
 
       long Year,doy,Month,Day,Hour,Minute;
       double Second;
-      /* Placeholder */
+
+
          if (AC->EchoEnabled) printf("%s",line);
 
          if (sscanf(line,"TIME %ld-%ld-%ld:%ld:%lf\n",
-            &Year,&doy,&Hour,&Minute,&Second) == 5)
+            &Year,&doy,&Hour,&Minute,&Second) == 5) {
             RequestTimeRefresh = 1;
+         }
 
          if (sscanf(line,"SC[%ld].AC.ParmLoadEnabled = %ld",
             &Isc,
@@ -229,6 +231,30 @@ void ReadFromCmd(void)
             &DbleVal[0]) == 3) {
             if (Isc == AC->ID) {
                AC->GPS[i].Alt = DbleVal[0];
+            }
+         }
+
+         if (sscanf(line,"SC[%ld].AC.GPS[%ld].WgsLng = %le",
+            &Isc,&i,
+            &DbleVal[0]) == 3) {
+            if (Isc == AC->ID) {
+               AC->GPS[i].WgsLng = DbleVal[0];
+            }
+         }
+
+         if (sscanf(line,"SC[%ld].AC.GPS[%ld].WgsLat = %le",
+            &Isc,&i,
+            &DbleVal[0]) == 3) {
+            if (Isc == AC->ID) {
+               AC->GPS[i].WgsLat = DbleVal[0];
+            }
+         }
+
+         if (sscanf(line,"SC[%ld].AC.GPS[%ld].WgsAlt = %le",
+            &Isc,&i,
+            &DbleVal[0]) == 3) {
+            if (Isc == AC->ID) {
+               AC->GPS[i].WgsAlt = DbleVal[0];
             }
          }
 
@@ -1228,7 +1254,7 @@ void ReadFromCmd(void)
             Done = 1;
             sprintf(line,"[EOF] reached\n");
          }
-      }
+      
 
       if (RequestTimeRefresh) {
          /* Update AC->Time */

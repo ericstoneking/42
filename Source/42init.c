@@ -822,7 +822,7 @@ void InitOrbit(struct OrbitType *O)
 /**********************************************************************/
 void InitRigidDyn(struct SCType *S)
 {
-      long i,j,Ig,Jb,Ibody,Ib,u0,x0,c0,Nu,Nx;
+      long i,j,Ig,Ia,Jg,Jb,Ibody,Ib,u0,x0,c0,Nu,Nx;
       struct JointType *G;
       struct DynType *D;
       FILE *outfile;
@@ -877,6 +877,27 @@ void InitRigidDyn(struct SCType *S)
             Ib = S->G[Ig].Bin;
          }
          D->BodyPathTable[Ibody][0].InPath = 1;
+      }
+      
+      /* Find ancestor joint list for each joint */
+      for(Ig=0;Ig<S->Ng;Ig++) {
+         G = &S->G[Ig];
+         Ib = S->G[Ig].Bin;
+         G->Nanc = 0;
+         while(Ib > 0) {
+            G->Nanc++;
+            Jg = S->B[Ib].Gin;
+            Ib = S->G[Jg].Bin;
+         }
+         G->Anc = (long *) calloc(G->Nanc,sizeof(long));
+         Ib = S->G[Ig].Bin;
+         Ia = 0;
+         while(Ib > 0) {
+            Jg = S->B[Ib].Gin;
+            G->Anc[Ia] = Jg;
+            Ib = S->G[Jg].Bin;
+            Ia++;
+         }
       }
 
       /* Determine sizes of state vectors */
@@ -3817,6 +3838,7 @@ void InitSim(int argc, char **argv)
       SqrtHalf = sqrt(0.5);
       R2D = 180.0/Pi;
       D2R = Pi/180.0;
+      GoldenRatio = (1.0+sqrt(5.0))/2.0;
 
       sprintf(InOutPath,"./InOut/");
       sprintf(ModelPath,"./Model/");

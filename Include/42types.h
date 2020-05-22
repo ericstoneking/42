@@ -115,6 +115,8 @@ struct JointType {
    long TrnDOF;           /* 0,1,2,3 */
    long Bin;              /* Index of inner body */
    long Bout;             /* Index of outer body */
+   long Nanc;             /* Number of "ancestor" joints: joints between this one and B[0] */
+   long *Anc;             /* Indices of ancestor joints */
    double RigidRin[3];    /* Position wrt inner body ref pt (rigid) */
    double RigidRout[3];   /* Position wrt outer body ref pt (rigid) */
    double rin[3];         /* Position wrt inner body ref pt (incl flex & TrnDOF) */

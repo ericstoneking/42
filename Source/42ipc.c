@@ -116,6 +116,28 @@ void InitInterProcessComm(void)
             }
 
          }
+         else if (I->Mode == IPC_TXRX) {
+            if (I->SocketRole == IPC_SERVER) {
+               I->Socket = InitSocketServer(I->Port,I->AllowBlocking);
+            }
+            else if (I->SocketRole == IPC_CLIENT) {
+               I->Socket = InitSocketClient(I->HostName,I->Port,I->AllowBlocking);
+            }
+            #ifdef _ENABLE_GMSEC_
+            else if (I->SocketRole == IPC_GMSEC_CLIENT) {
+               status = statusCreate();
+               cfg = configCreate();
+               ConnMgr = ConnectToMBServer(I->HostName,I->Port,status,cfg);
+               connectionManagerSubscribe(ConnMgr,"GMSEC.42.TXRX.>",status);
+               CheckGmsecStatus(status);
+            }
+            #endif
+            else {
+               printf("Oops.  Unknown SocketRole %ld for IPC[%ld] in InitInterProcessComm.  Bailing out.\n",I->SocketRole,Iipc);
+               exit(1);
+            }
+
+         }
          else if (I->Mode == IPC_ACS) {
             I->Socket = InitSocketServer(I->Port,I->AllowBlocking);
          }
@@ -156,6 +178,18 @@ void InterProcessComm(void)
             }
             #ifdef _ENABLE_GMSEC_
             else {
+               ReadFromGmsec(ConnMgr,status,I->EchoEnabled);
+            }
+            #endif
+         }
+         else if (I->Mode == IPC_TXRX) {
+            if (I->SocketRole != IPC_GMSEC_CLIENT) {
+               WriteToSocket(I->Socket,I->Prefix,I->Nprefix,I->EchoEnabled);
+               ReadFromSocket(I->Socket,I->EchoEnabled);
+            }
+            #ifdef _ENABLE_GMSEC_
+            else {
+               WriteToGmsec(ConnMgr,status,I->Prefix,I->Nprefix,I->EchoEnabled);
                ReadFromGmsec(ConnMgr,status,I->EchoEnabled);
             }
             #endif

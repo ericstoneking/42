@@ -123,6 +123,7 @@ void Report(void)
       static FILE *PosWfile,*VelWfile;
       static FILE *PosRfile,*VelRfile;
       static FILE *Hvnfile,*KEfile;
+      static FILE *svnfile,*svbfile;
       static FILE *RPYfile;
       static FILE *Hwhlfile;
       static FILE *MTBfile;
@@ -173,6 +174,8 @@ void Report(void)
          qbnfile = FileOpen(InOutPath,"qbn.42","w");
          wbnfile = FileOpen(InOutPath,"wbn.42","w");
          Hvnfile = FileOpen(InOutPath,"Hvn.42","w");
+         svnfile = FileOpen(InOutPath,"svn.42","w");
+         svbfile = FileOpen(InOutPath,"svb.42","w");
          KEfile = FileOpen(InOutPath,"KE.42","w");
          ProjAreaFile = FileOpen(InOutPath,"ProjArea.42","w");
          RPYfile = FileOpen(InOutPath,"RPY.42","w");
@@ -236,6 +239,10 @@ void Report(void)
                SC[0].B[0].wn[0],SC[0].B[0].wn[1],SC[0].B[0].wn[2]);
             fprintf(Hvnfile,"%18.12le %18.12le %18.12le\n",
                SC[0].Hvn[0],SC[0].Hvn[1],SC[0].Hvn[2]);
+            fprintf(svnfile,"%18.12le %18.12le %18.12le\n",
+               SC[0].svn[0],SC[0].svn[1],SC[0].svn[2]);
+            fprintf(svbfile,"%18.12le %18.12le %18.12le\n",
+               SC[0].svb[0],SC[0].svb[1],SC[0].svb[2]);
             fprintf(KEfile,"%18.12le\n",FindTotalKineticEnergy(&SC[0]));
             //fprintf(ProjAreaFile,"%18.12le %18.12le\n",
             //   FindTotalProjectedArea(&SC[0],ZAxis),

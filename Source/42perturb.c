@@ -1095,11 +1095,8 @@ void Perturbations(struct SCType *S)
 /* .. CFD Slosh Forces and Torques */
       #ifdef _ENABLE_CFD_SLOSH_
          if (SloshActive)
-            #ifdef _ENABLE_SOCKETS_
-               CfdSlosh(S);
-            #else
-               FakeCfdSlosh(S);
-            #endif
+            CfdSlosh(S);
+            /* FakeCfdSlosh(S); */
       #endif
 
 /* .. Find Momentum Accumulation for Actuator Sizing */

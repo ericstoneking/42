@@ -204,14 +204,15 @@ def ReadProlog():
          outfile.write("      while(!Done) {\n")
          outfile.write("         fgets(line,511,StateFile);\n")
       elif Pipe == "Cmd":
-         outfile.write("      /* Placeholder */\n")
+         outfile.write("\n\n")
       #endif   
                  
       outfile.write("         if ("+EchoString+") printf(\"%s\",line);\n\n")
 
       outfile.write("         if (sscanf(line,\"TIME %ld-%ld-%ld:%ld:%lf\\n\",\n")
-      outfile.write("            &Year,&doy,&Hour,&Minute,&Second) == 5)\n")
-      outfile.write("            RequestTimeRefresh = 1;\n\n")
+      outfile.write("            &Year,&doy,&Hour,&Minute,&Second) == 5) {\n")
+      outfile.write("            RequestTimeRefresh = 1;\n")
+      outfile.write("         }\n\n")
 
 ########################################################################
 def WriteEpilog():
@@ -274,7 +275,8 @@ def ReadEpilog():
       elif Pipe == "File":
          outfile.write("      }\n\n")
       elif Pipe == "Cmd":
-         outfile.write("      }\n\n")
+         outfile.write("      \n\n")
+         #outfile.write("      }\n\n")
       #endif
       
 ########################################################################
