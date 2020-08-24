@@ -3996,9 +3996,10 @@ void InitSim(int argc, char **argv)
             &Matl,&Nmatl,Geom,&Ngeom,&JunkTag,FALSE);
 
 /* .. Time */
-      #if defined _USE_SYTEM_TIME_
+      #if defined _USE_SYSTEM_TIME_
          if (TimeMode == EXTERNAL_TIME) {
-            RealSystemTime(&Year,&doy,&Month,&Day,&Hour,&Minute,&Second);
+            printf("Initializing with external time\n");
+            RealSystemTime(&Year,&doy,&Month,&Day,&Hour,&Minute,&Second,DTSIM);
          }
       #endif
       AbsTime0 = DateToAbsTime(Year,Month,Day,Hour,Minute,Second);
