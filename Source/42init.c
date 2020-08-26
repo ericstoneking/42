@@ -4112,7 +4112,8 @@ void InitSim(int argc, char **argv)
       for(Iorb=0;Iorb<Norb;Iorb++) {
          if (Orb[Iorb].Exists) InitOrbit(&Orb[Iorb]);
       }
-
+      // propagate orbits to current time
+      OrbitMotion();
       LoadTdrs();
       
       RNG = CreateRandomProcess(1);
