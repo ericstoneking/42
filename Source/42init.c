@@ -4000,6 +4000,11 @@ void InitSim(int argc, char **argv)
          if (TimeMode == EXTERNAL_TIME) {
             printf("Initializing with external time\n");
             RealSystemTime(&Year,&doy,&Month,&Day,&Hour,&Minute,&Second,DTSIM);
+
+            /* Assume External Time is UTC.  Convert to TT for AbsTime */
+            AtomicTime = DateToAbsTime(Year,Month,Day,Hour,Minute,Second+LeapSec);
+            AbsTime = AtomicTime + 32.184;
+            AbsTimeToDate(AbsTime,&Year,&Month,&Day,&Hour,&Minute,&Second,DTSIM);
          }
       #endif
       AbsTime0 = DateToAbsTime(Year,Month,Day,Hour,Minute,Second);
