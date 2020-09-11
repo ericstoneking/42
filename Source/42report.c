@@ -215,9 +215,9 @@ void Report(void)
                SC[0].VelN[0],SC[0].VelN[1],SC[0].VelN[2]);
             MxV(World[EARTH].CWN,SC[0].PosN,PosW);
             MxV(World[EARTH].CWN,SC[0].VelN,VelW);
-            fprintf(PosWfile,"%18.12le %18.12le %18.12le ",
+            fprintf(PosWfile,"%18.12le %18.12le %18.12le\n",
                PosW[0],PosW[1],PosW[2]);
-            fprintf(VelWfile,"%18.12le %18.12le %18.12le ",
+            fprintf(VelWfile,"%18.12le %18.12le %18.12le\n",
                VelW[0],VelW[1],VelW[2]);
             if (Orb[SC[0].RefOrb].Regime == ORB_FLIGHT) {
                MxV(Rgn[Orb[SC[0].RefOrb].Region].CN,SC[0].PosR,PosR);
