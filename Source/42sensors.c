@@ -252,8 +252,8 @@ void FssModel(struct SCType *S)
             }
             else {
                MxV(FSS->CB,S->svb,svs);
-               SunAng[0] = asin(svs[0]);
-               SunAng[1] = asin(svs[1]);
+               SunAng[0] = atan2(svs[0],svs[2]);
+               SunAng[1] = atan2(svs[1],svs[2]);
                if (fabs(SunAng[0]) < FSS->FovHalfAng[0] && 
                    fabs(SunAng[1]) < FSS->FovHalfAng[1] &&
                    svs[2] > 0.0) {
@@ -498,7 +498,7 @@ void Sensors(struct SCType *S)
 
       /* GPS Receiver (or ephem model) */
       if (S->Ngps == 0) {
-         AC->Time = AbsTime;
+         AC->Time = DynTime;
          for(i=0;i<3;i++) {
             AC->PosN[i] = S->PosN[i];
             AC->VelN[i] = S->VelN[i];

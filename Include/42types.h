@@ -14,6 +14,7 @@
 
 #include "geomkit.h"
 #include "orbkit.h"
+#include "sigkit.h"
 #include "AcTypes.h"
 
 #ifndef __42TYPES_H__
@@ -24,6 +25,7 @@
 ** namespace _42 {
 ** #endif
 */
+
 
 struct SphereHarmType {
    /*~ Internal Variables ~*/
@@ -125,12 +127,12 @@ struct JointType {
    long RotLocked[3];     /* Set TRUE if individual DOF is to be locked in place */
    long TrnSeq;           /* Translational joint sequence */
    long TrnLocked[3];
-   double Pos[3];         /* translational kinematic state variables */
-   double PosRate[3];     /* translational dynamic state variables */
+   double Pos[3];         /* translational kinematic state variables [~=~] */
+   double PosRate[3];     /* translational dynamic state variables [~=~] */
    double xb[3];          /* translational displacement in the Bi frame */
    double xn[3];          /* translational displacement in the N frame */
-   double Ang[3];         /* Joint Euler angles */
-   double AngRate[3];     /* Euler angle rates about gim axes */
+   double Ang[3];         /* Joint Euler angles [~=~] */
+   double AngRate[3];     /* Euler angle rates about gim axes [~=~] */
    double AngCmd[3];      /* Euler angle commands, for kinematic joints */
    double RateCmd[3];     /* Euler angle rate commands, for kinematic joints */
    double RotSpringCoef[3];  /* For passive joint torques */
@@ -194,6 +196,7 @@ struct WhlType {
    double ang; /* Spin angle, rad */
    double Ks;  /* Static imbalance coefficient, [kg-m] */
    double Kd;  /* Dynamic imbalance coefficient, [kg-m^2] */
+   struct DelayType *Delay; /* For injecting delay into control loops */
 };
 
 struct MTBType {
@@ -203,6 +206,7 @@ struct MTBType {
    double Mmax;
    double Trq[3]; /* Exerted on Body 0, expressed in B[0] frame */
    long FlexNode;
+   struct DelayType *Delay; /* For injecting delay into control loops */
 };
 
 struct ThrType {
@@ -215,6 +219,7 @@ struct ThrType {
    double Frc[3]; /* Force exerted */
    double Trq[3]; /* Torque exerted */
    long FlexNode;
+   struct DelayType *Delay; /* For injecting delay into control loops */
 };
 
 struct GyroType {
@@ -516,6 +521,11 @@ struct SCType {
    struct BoundingBoxType BBox;
    /* See ReadStatesFromSocket */
    long RequestStateRefresh;
+   
+   /* For stability analysis */
+   long GainAndDelayActive;
+   double LoopGain; /* [[None]] */
+   double LoopDelay; /* [[sec]] */
    
    /*~ Structures ~*/
    struct AcType AC;

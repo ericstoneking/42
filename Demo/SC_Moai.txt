@@ -11,9 +11,9 @@ CM                            !  Pos of CM or ORIGIN, wrt F
 -0.005    0.0  -0.0025        !  Vel wrt Formation (m/s), expressed in F
 *************************** Initial Attitude ***************************
 LAL                           ! Ang Vel wrt [NL], Att [QA] wrt [NLF]
-0.5    0.0    -0.15             ! Ang Vel (deg/sec)
+0.5    0.5    -0.5             ! Ang Vel (deg/sec)
 0.0    0.0    0.0    1.0      ! Quaternion
-135.0  45.0    0.0    321      ! Angles (deg) & Euler Sequence
+165.0  90.0    70.0    321      ! Angles (deg) & Euler Sequence
 ***************************  Dynamics Flags  ***************************
 DYN_JOINT                     ! Rotation STEADY, KIN_JOINT, or DYN_JOINT
 FALSE                         ! Passive Joint Forces and Torques Enabled

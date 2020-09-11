@@ -19,6 +19,8 @@ void ReadFromFile(FILE *StateFile, long EchoEnabled)
       double DbleVal[30];
       long LongVal[30];
 
+      long Year,doy,Hour,Minute;
+      double Second;
       Done = 0;
       while(!Done) {
          fgets(line,511,StateFile);
@@ -193,6 +195,50 @@ void ReadFromFile(FILE *StateFile, long EchoEnabled)
                SC[Isc].B[i].qn[1] = DbleVal[1];
                SC[Isc].B[i].qn[2] = DbleVal[2];
                SC[Isc].B[i].qn[3] = DbleVal[3];
+               SC[Isc].RequestStateRefresh = 1;
+            }
+
+            if (sscanf(line,"SC[%ld].G[%ld].Pos = %le %le %le",
+               &Isc,&i,
+               &DbleVal[0],
+               &DbleVal[1],
+               &DbleVal[2]) == 5) {
+               SC[Isc].G[i].Pos[0] = DbleVal[0];
+               SC[Isc].G[i].Pos[1] = DbleVal[1];
+               SC[Isc].G[i].Pos[2] = DbleVal[2];
+               SC[Isc].RequestStateRefresh = 1;
+            }
+
+            if (sscanf(line,"SC[%ld].G[%ld].PosRate = %le %le %le",
+               &Isc,&i,
+               &DbleVal[0],
+               &DbleVal[1],
+               &DbleVal[2]) == 5) {
+               SC[Isc].G[i].PosRate[0] = DbleVal[0];
+               SC[Isc].G[i].PosRate[1] = DbleVal[1];
+               SC[Isc].G[i].PosRate[2] = DbleVal[2];
+               SC[Isc].RequestStateRefresh = 1;
+            }
+
+            if (sscanf(line,"SC[%ld].G[%ld].Ang = %le %le %le",
+               &Isc,&i,
+               &DbleVal[0],
+               &DbleVal[1],
+               &DbleVal[2]) == 5) {
+               SC[Isc].G[i].Ang[0] = DbleVal[0];
+               SC[Isc].G[i].Ang[1] = DbleVal[1];
+               SC[Isc].G[i].Ang[2] = DbleVal[2];
+               SC[Isc].RequestStateRefresh = 1;
+            }
+
+            if (sscanf(line,"SC[%ld].G[%ld].AngRate = %le %le %le",
+               &Isc,&i,
+               &DbleVal[0],
+               &DbleVal[1],
+               &DbleVal[2]) == 5) {
+               SC[Isc].G[i].AngRate[0] = DbleVal[0];
+               SC[Isc].G[i].AngRate[1] = DbleVal[1];
+               SC[Isc].G[i].AngRate[2] = DbleVal[2];
                SC[Isc].RequestStateRefresh = 1;
             }
 
@@ -1040,12 +1086,23 @@ void ReadFromFile(FILE *StateFile, long EchoEnabled)
       }
 
       if (RequestTimeRefresh) {
-         /* Update AbsTime, SimTime, etc */
-         DOY2MD(Year,doy,&Month,&Day);
-         AbsTime = DateToAbsTime(Year,Month,Day,Hour,Minute,Second);
-         JulDay = AbsTimeToJD(AbsTime);
-         JDToGpsTime(JulDay,&GpsRollover,&GpsWeek,&GpsSecond);
-         SimTime = AbsTime-AbsTime0;
+         /* Update time variables */
+         UTC.Year = Year;
+         UTC.doy = doy;
+         UTC.Hour = Hour;
+         UTC.Minute = Minute;
+         UTC.Second = Second;
+         DOY2MD(UTC.Year,UTC.doy,&UTC.Month,&UTC.Day);
+         CivilTime = DateToTime(UTC.Year,UTC.Month,UTC.Day,UTC.Hour,UTC.Minute,UTC.Second);
+         AtomicTime = CivilTime + LeapSec;
+         DynTime = AtomicTime + 32.184;
+         TT.JulDay = TimeToJD(DynTime);
+         TimeToDate(DynTime,&TT.Year,&TT.Month,&TT.Day,
+            &TT.Hour,&TT.Minute,&TT.Second,DTSIM);
+         TT.doy = MD2DOY(TT.Year,TT.Month,TT.Day);
+         UTC.JulDay = TimeToJD(CivilTime);
+         JDToGpsTime(TT.JulDay,&GpsRollover,&GpsWeek,&GpsSecond);
+         SimTime = DynTime-DynTime0;
       }
 
 
@@ -1058,7 +1115,7 @@ void ReadFromFile(FILE *StateFile, long EchoEnabled)
             if (S->Exists) {
                /* Update  RefOrb */
                O = &Orb[S->RefOrb];
-               O->Epoch = AbsTime;
+               O->Epoch = DynTime;
                for(i=0;i<3;i++) {
                   S->PosN[i] = O->PosN[i] + S->PosR[i];
                   S->VelN[i] = O->VelN[i] + S->VelR[i];

@@ -116,7 +116,7 @@ void GyroReport(void)
 /*********************************************************************/
 void Report(void)
 {
-      static FILE *timefile,*AbsTimeFile;
+      static FILE *timefile,*DynTimeFile;
       static FILE **xfile, **ufile, **xffile, **uffile;
       static FILE **ConstraintFile;
       static FILE *PosNfile,*VelNfile,*qbnfile,*wbnfile;
@@ -140,7 +140,7 @@ void Report(void)
       if (First) {
          First = FALSE;
          timefile = FileOpen(InOutPath,"time.42","w");
-         AbsTimeFile = FileOpen(InOutPath,"AbsTime.42","w");
+         DynTimeFile = FileOpen(InOutPath,"DynTime.42","w");
 
          ufile = (FILE **) calloc(Nsc,sizeof(FILE *));
          xfile = (FILE **) calloc(Nsc,sizeof(FILE *));
@@ -149,18 +149,18 @@ void Report(void)
          ConstraintFile = (FILE **) calloc(Nsc,sizeof(FILE *));
          for(Isc=0;Isc<Nsc;Isc++) {
             if (SC[Isc].Exists) {
-               sprintf(s,"u%02li.42",Isc);
+               sprintf(s,"u%02ld.42",Isc);
                ufile[Isc] = FileOpen(InOutPath,s,"w");
-               sprintf(s,"x%02li.42",Isc);
+               sprintf(s,"x%02ld.42",Isc);
                xfile[Isc] = FileOpen(InOutPath,s,"w");
                if (SC[Isc].FlexActive) {
-                  sprintf(s,"uf%02li.42",Isc);
+                  sprintf(s,"uf%02ld.42",Isc);
                   uffile[Isc] = FileOpen(InOutPath,s,"w");
-                  sprintf(s,"xf%02li.42",Isc);
+                  sprintf(s,"xf%02ld.42",Isc);
                   xffile[Isc] = FileOpen(InOutPath,s,"w");
                }
                if (SC[Isc].ConstraintsRequested) {
-                  sprintf(s,"Constraint%02li.42",Isc);
+                  sprintf(s,"Constraint%02ld.42",Isc);
                   ConstraintFile[Isc] = FileOpen(InOutPath,s,"w");
                }
             }
@@ -186,7 +186,7 @@ void Report(void)
 
       if (OutFlag) {
          fprintf(timefile,"%lf\n",SimTime);
-         fprintf(AbsTimeFile,"%lf\n",AbsTime);
+         fprintf(DynTimeFile,"%lf\n",DynTime);
          for(Isc=0;Isc<Nsc;Isc++) {
             if (SC[Isc].Exists) {
                D = &SC[Isc].Dyn;

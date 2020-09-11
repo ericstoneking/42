@@ -24,6 +24,9 @@ EOF
 %lf SC[%ld].G[%ld].TrnLocked[%ld] %s
 %lf Impart Impulsive Delta-V of [%lf %lf %lf] m/s in Frame %c to Orb[%ld]
    %c can be N or L
+%lf SC[%ld].LoopGain = %lf
+%lf SC[%ld].LoopDelay = %lf
+%lf SC[%ld].GainAndDelayActive = %s
 
 # GUI-related commands
 %lf POV.Host.SC %ld

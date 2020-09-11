@@ -14,7 +14,7 @@ void WriteToFile(FILE *StateFile, char **Prefix, long Nprefix, long EchoEnabled)
       char line[512];
 
       sprintf(line,"TIME %ld-%03ld-%02ld:%02ld:%012.9lf\n",
-         Year,doy,Hour,Minute,Second);
+         UTC.Year,UTC.doy,UTC.Hour,UTC.Minute,UTC.Second);
       fprintf(StateFile,"%s",line);
       if (EchoEnabled) printf("%s",line);
 
@@ -372,6 +372,49 @@ void WriteToFile(FILE *StateFile, char **Prefix, long Nprefix, long EchoEnabled)
                      SC[Isc].B[i].qn[1],
                      SC[Isc].B[i].qn[2],
                      SC[Isc].B[i].qn[3]);
+                  if (!strncmp(line,Prefix[Ipfx],PfxLen)) {
+                     fprintf(StateFile,"%s",line);
+                     if (EchoEnabled) printf("%s",line);
+                  }
+
+               }
+
+               for(i=0;i<SC[Isc].Ng;i++) {
+                  sprintf(line,"SC[%ld].G[%ld].Pos = %18.12le %18.12le %18.12le\n",
+                     Isc,i,
+                     SC[Isc].G[i].Pos[0],
+                     SC[Isc].G[i].Pos[1],
+                     SC[Isc].G[i].Pos[2]);
+                  if (!strncmp(line,Prefix[Ipfx],PfxLen)) {
+                     fprintf(StateFile,"%s",line);
+                     if (EchoEnabled) printf("%s",line);
+                  }
+
+                  sprintf(line,"SC[%ld].G[%ld].PosRate = %18.12le %18.12le %18.12le\n",
+                     Isc,i,
+                     SC[Isc].G[i].PosRate[0],
+                     SC[Isc].G[i].PosRate[1],
+                     SC[Isc].G[i].PosRate[2]);
+                  if (!strncmp(line,Prefix[Ipfx],PfxLen)) {
+                     fprintf(StateFile,"%s",line);
+                     if (EchoEnabled) printf("%s",line);
+                  }
+
+                  sprintf(line,"SC[%ld].G[%ld].Ang = %18.12le %18.12le %18.12le\n",
+                     Isc,i,
+                     SC[Isc].G[i].Ang[0],
+                     SC[Isc].G[i].Ang[1],
+                     SC[Isc].G[i].Ang[2]);
+                  if (!strncmp(line,Prefix[Ipfx],PfxLen)) {
+                     fprintf(StateFile,"%s",line);
+                     if (EchoEnabled) printf("%s",line);
+                  }
+
+                  sprintf(line,"SC[%ld].G[%ld].AngRate = %18.12le %18.12le %18.12le\n",
+                     Isc,i,
+                     SC[Isc].G[i].AngRate[0],
+                     SC[Isc].G[i].AngRate[1],
+                     SC[Isc].G[i].AngRate[2]);
                   if (!strncmp(line,Prefix[Ipfx],PfxLen)) {
                      fprintf(StateFile,"%s",line);
                      if (EchoEnabled) printf("%s",line);

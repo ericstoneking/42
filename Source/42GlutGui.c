@@ -700,15 +700,15 @@ void DrawCamHUD(void)
       glEnd();
 
       glColor4fv(ClockColor);
-      sprintf(s,"Time = % 7.2f",SimTime);
-      glRasterPos2i(30,20);
+      sprintf(s,"Sim Time = % 8.2f",SimTime);
+      glRasterPos2i(10,20);
       DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
 
-      sprintf(s,"%2li %s %4li",Day,mon[Month-1],Year);
+      sprintf(s,"%2ld %s %4ld",UTC.Day,mon[UTC.Month-1],UTC.Year);
       glRasterPos2i(40,35);
       DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
 
-      sprintf(s,"GMT %03li-%02li:%02li:%05.2f",doy,Hour,Minute,Second);
+      sprintf(s,"UTC %03ld-%02ld:%02ld:%05.2lf",UTC.doy,UTC.Hour,UTC.Minute,UTC.Second);
       glRasterPos2i(10,50);
       DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
 
@@ -2060,12 +2060,12 @@ void DrawClock(void)
       glMaterialfv(GL_FRONT,GL_EMISSION,ClockColor);
 
       if (MapShow[MAP_TLM_CLOCK]) {
-         sprintf(s,"%s %04li-%03li-%02li:%02li:%02li",TlmLabel,
-            Year,doy,Hour,Minute,(long) Second);
+         sprintf(s,"%s %04ld-%03ld-%02ld:%02ld:%02ld",TlmLabel,
+            UTC.Year,UTC.doy,UTC.Hour,UTC.Minute,(long) UTC.Second);
       }
       else {
-         sprintf(s,"%s %04li-%03li-%02li:%02li:%02li",SysLabel,
-            Year,doy,Hour,Minute,(long) Second);
+         sprintf(s,"%s %04ld-%03ld-%02ld:%02ld:%02ld",SysLabel,
+            UTC.Year,UTC.doy,UTC.Hour,UTC.Minute,(long) UTC.Second);
       }
       glRasterPos2i(MapWidth-8*strlen(s),15);
       DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
@@ -2084,8 +2084,8 @@ void DrawCredits(void)
       static double OldJD = 0;
       static long Toggle = 1;
 
-      if (JulDay-OldJD > 60.0/86400.0) {
-         OldJD = JulDay;
+      if (TT.JulDay-OldJD > 60.0/86400.0) {
+         OldJD = TT.JulDay;
          if (Toggle) Toggle = 0;
          else Toggle = 1;
       }
@@ -2405,7 +2405,7 @@ void DrawMap(void)
                glLineWidth(1.0);
                Eph = &Orb[SC[Isc].RefOrb];
                Eph2RV(Eph->mu,Eph->SLR,Eph->ecc,Eph->inc,Eph->RAAN,Eph->ArgP,
-                  AbsTime-3600.0-Eph->tp,rn,vn,&anom);
+                  DynTime-3600.0-Eph->tp,rn,vn,&anom);
                SimpRot(Zaxis,-3600.0*W->w,CEW);
                MxM(CEW,W->CWN,CEN);
                MxV(CEN,rn,re);
@@ -2415,7 +2415,7 @@ void DrawMap(void)
                for(k=-60;k<61;k++) {
                   dt = ((double) k)*60.0;
                   Eph2RV(Eph->mu,Eph->SLR,Eph->ecc,Eph->inc,Eph->RAAN,Eph->ArgP,
-                     AbsTime+dt-Eph->tp,rn,vn,&anom);
+                     DynTime+dt-Eph->tp,rn,vn,&anom);
                   SimpRot(Zaxis,W->w*dt,CEW);
                   MxM(CEW,W->CWN,CEN);
                   MxV(CEN,rn,re);
@@ -2489,7 +2489,7 @@ void DrawMap(void)
          glLineWidth(1.0);
          Eph = &Orb[POV.Host.RefOrb];
          Eph2RV(Eph->mu,Eph->SLR,Eph->ecc,Eph->inc,Eph->RAAN,Eph->ArgP,
-            AbsTime-3600.0-Eph->tp,rn,vn,&anom);
+            DynTime-3600.0-Eph->tp,rn,vn,&anom);
          SimpRot(Zaxis,-3600.0*W->w,CEW);
          MxM(CEW,W->CWN,CEN);
          MxV(CEN,rn,re);
@@ -2499,7 +2499,7 @@ void DrawMap(void)
          for(k=-60;k<61;k++) {
             dt = ((double) k)*60.0;
             Eph2RV(Eph->mu,Eph->SLR,Eph->ecc,Eph->inc,Eph->RAAN,Eph->ArgP,
-               AbsTime+dt-Eph->tp,rn,vn,&anom);
+               DynTime+dt-Eph->tp,rn,vn,&anom);
             SimpRot(Zaxis,W->w*dt,CEW);
             MxM(CEW,W->CWN,CEN);
             MxV(CEN,rn,re);
@@ -2719,8 +2719,8 @@ void DrawOrrery(void)
                glColor3fv(WorldOrbitColor);
                glBegin(GL_LINE_LOOP);
                   dt = 0.01*E->Period;
-                  t1 = AbsTime-E->tp - 0.5*E->Period;
-                  t2 = AbsTime-E->tp + 0.5*E->Period;
+                  t1 = DynTime-E->tp - 0.5*E->Period;
+                  t2 = DynTime-E->tp + 0.5*E->Period;
                   for(t=t1;t<t2;t+=dt) {
                      Eph2RV(E->mu,E->SLR,E->ecc,E->inc,E->RAAN,E->ArgP,
                         t,r,v,&anom);
@@ -2997,8 +2997,8 @@ void DrawOrrery(void)
                   glBegin(GL_LINE_STRIP);
                      Period = TwoPi/LP->w1;
                      dt = 0.002*Period;
-                     t1 = AbsTime - 0.5*Period;
-                     t2 = AbsTime + 0.5*Period;
+                     t1 = DynTime - 0.5*Period;
+                     t2 = DynTime + 0.5*Period;
                      ta = t1+Period/6.0;
                      tc = t1+Period/2.0;
                      te = t1+5.0/6.0*Period;
@@ -3685,6 +3685,7 @@ void SetPovOrientation(void)
 /*********************************************************************/
 void SetupViewVolume(int width, int height)
 {
+      glutReshapeWindow(width,height);
       glViewport(0,0,width,height);
 
       POV.AR = ((double) width)/((double) height);
@@ -5443,6 +5444,7 @@ void MapReshapeHandler(int width, int height)
 {
       MapWidth = width;
       MapHeight = height;
+      glutReshapeWindow(width,height);
 }
 /**********************************************************************/
 void OrreryReshapeHandler(int width, int height)
@@ -5451,6 +5453,7 @@ void OrreryReshapeHandler(int width, int height)
       O = &Orrery;
       OrreryWidth = width;
       OrreryHeight = height;
+      glutReshapeWindow(width,height);
       glViewport(0,0,width,height);
       InitOrreryWidget();
       O->Radius = ((double) OrreryWidth)/(2.0*80.0)*

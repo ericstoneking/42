@@ -19,8 +19,9 @@ void ReadFromFile(FILE *StateFile, struct AcType *AC)
       double DbleVal[30];
       long LongVal[30];
 
-      long Year,doy,Month,Day,Hour,Minute;
+      long Year,doy,Hour,Minute;
       double Second;
+      long Month,Day;
       Done = 0;
       while(!Done) {
          fgets(line,511,StateFile);
@@ -1260,7 +1261,7 @@ void ReadFromFile(FILE *StateFile, struct AcType *AC)
       if (RequestTimeRefresh) {
          /* Update AC->Time */
          DOY2MD(Year,doy,&Month,&Day);
-         AC->Time = DateToAbsTime(Year,Month,Day,Hour,Minute,Second);
+         AC->Time = DateToTime(Year,Month,Day,Hour,Minute,Second);
       }
 
 }

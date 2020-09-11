@@ -81,69 +81,109 @@ long AdvanceTime(void)
       static long First = 1;
 
       /* Advance time to next Timestep */
-      #if defined _USE_SYSTEM_TIME_
-         switch (TimeMode) {
-            case FAST_TIME :
-               SimTime += DTSIM;
-               itime = (long) ((SimTime+0.5*DTSIM)/(DTSIM));
-               SimTime = ((double) itime)*DTSIM;
-               AbsTime = AbsTime0 + SimTime;
-               break;
-            case REAL_TIME :
-               //while(CurrTick == PrevTick) {
-               //   CurrTick = (long) (1.0E-6*usec()/DTSIM);
-               //}
-               //PrevTick = CurrTick;
-               usleep(1.0E6*DTSIM);
-               SimTime += DTSIM;
-               itime = (long) ((SimTime+0.5*DTSIM)/(DTSIM));
-               SimTime = ((double) itime)*DTSIM;
-               AbsTime = AbsTime0 + SimTime;
-               break;
-            case EXTERNAL_TIME :
-               while(CurrTick == PrevTick) {
-                  CurrTick = (long) (1.0E-6*usec()/DTSIM);
-               }
-               PrevTick = CurrTick;
-               SimTime += DTSIM;
-               itime = (long) ((SimTime+0.5*DTSIM)/(DTSIM));
-               SimTime = ((double) itime)*DTSIM;
-               RealSystemTime(&Year,&doy,&Month,&Day,&Hour,&Minute,&Second,DTSIM);
-               AtomicTime = DateToAbsTime(Year,Month,Day,Hour,Minute,Second+LeapSec);
-               AbsTime = AtomicTime + 32.184;
-               JulDay = AbsTimeToJD(AbsTime);
-               JDToGpsTime(JulDay,&GpsRollover,&GpsWeek,&GpsSecond);
-               AbsTime0 = AbsTime - SimTime;
-               break;
-            case NOS3_TIME :
-               if (First) {
-                  First = 0;
-                  double JD = YMDHMS2JD(Year, Month, Day, Hour, Minute, Second);
-                  AbsTime0 = JDToAbsTime(JD);
-               }
-               usleep(1.0E6*DTSIM);
-               NOS3Time(&Year,&doy,&Month,&Day,&Hour,&Minute,&Second);
-               AtomicTime = DateToAbsTime(Year,Month,Day,Hour,Minute,Second+LeapSec);
-               AbsTime = AtomicTime + 32.184;
-               JulDay = AbsTimeToJD(AbsTime);
-               JDToGpsTime(JulDay,&GpsRollover,&GpsWeek,&GpsSecond);
-               SimTime = AbsTime - AbsTime0;
-               break;
-            /* case SSUP_TIME:
-            **   RealSystemTime(&Year,&doy,&Month,&Day,&Hour,&Minute,&Second);
-            **   AtomicTime = DateToAbsTime(Year,Month,Day,Hour,Minute,Second+LeapSec);
-            **   AbsTime = AtomicTime + 32.184;
-            **   JulDay = AbsTimeToJD(AbsTime);
-            **   SimTime = AbsTime - AbsTime0;
-            **   break;
-            */
-         }
-      #else
-         SimTime += DTSIM;
-         itime = (long) ((SimTime+0.5*DTSIM)/(DTSIM));
-         SimTime = ((double) itime)*DTSIM;
-         AbsTime = AbsTime0 + SimTime;
-      #endif
+      switch (TimeMode) {
+         case FAST_TIME :
+            SimTime += DTSIM;
+            itime = (long) ((SimTime+0.5*DTSIM)/(DTSIM));
+            SimTime = ((double) itime)*DTSIM;
+            DynTime = DynTime0 + SimTime;
+            
+            AtomicTime = DynTime - 32.184; /* TAI */
+            CivilTime = AtomicTime - LeapSec; /* UTC "clock" time */
+            GpsTime = AtomicTime - 19.0;
+            
+            TT.JulDay = TimeToJD(DynTime);
+            TimeToDate(DynTime,&TT.Year,&TT.Month,&TT.Day,
+               &TT.Hour,&TT.Minute,&TT.Second,DTSIM);
+            TT.doy = MD2DOY(TT.Year,TT.Month,TT.Day);
+            
+            UTC.JulDay = TimeToJD(CivilTime);
+            TimeToDate(CivilTime,&UTC.Year,&UTC.Month,&UTC.Day,
+               &UTC.Hour,&UTC.Minute,&UTC.Second,DTSIM);
+            UTC.doy = MD2DOY(UTC.Year,UTC.Month,UTC.Day);
+
+            JDToGpsTime(TT.JulDay,&GpsRollover,&GpsWeek,&GpsSecond);
+
+            break;
+         case REAL_TIME :
+            usleep(1.0E6*DTSIM);
+            SimTime += DTSIM;
+            itime = (long) ((SimTime+0.5*DTSIM)/(DTSIM));
+            SimTime = ((double) itime)*DTSIM;
+            DynTime = DynTime0 + SimTime;
+            
+            AtomicTime = DynTime - 32.184; /* TAI */
+            CivilTime = AtomicTime - LeapSec; /* UTC "clock" time */
+            GpsTime = AtomicTime - 19.0;
+            
+            TT.JulDay = TimeToJD(DynTime);
+            TimeToDate(DynTime,&TT.Year,&TT.Month,&TT.Day,
+               &TT.Hour,&TT.Minute,&TT.Second,DTSIM);
+            TT.doy = MD2DOY(TT.Year,TT.Month,TT.Day);
+            
+            UTC.JulDay = TimeToJD(CivilTime);
+            TimeToDate(CivilTime,&UTC.Year,&UTC.Month,&UTC.Day,
+               &UTC.Hour,&UTC.Minute,&UTC.Second,DTSIM);
+            UTC.doy = MD2DOY(UTC.Year,UTC.Month,UTC.Day);
+            
+            JDToGpsTime(TT.JulDay,&GpsRollover,&GpsWeek,&GpsSecond);
+            
+            break;
+         case EXTERNAL_TIME :
+            while(CurrTick == PrevTick) {
+               CurrTick = (long) (1.0E-6*usec()/DTSIM);
+            }
+            PrevTick = CurrTick;
+            SimTime += DTSIM;
+            itime = (long) ((SimTime+0.5*DTSIM)/(DTSIM));
+            SimTime = ((double) itime)*DTSIM;
+            
+            RealSystemTime(&UTC.Year,&UTC.doy,&UTC.Month,&UTC.Day,
+               &UTC.Hour,&UTC.Minute,&UTC.Second,DTSIM);
+            CivilTime = DateToTime(UTC.Year,UTC.Month,UTC.Day,
+               UTC.Hour,UTC.Minute,UTC.Second);
+            AtomicTime = CivilTime + LeapSec;
+            DynTime = AtomicTime + 32.184;
+                           
+            TT.JulDay = TimeToJD(DynTime);
+            TimeToDate(DynTime,&TT.Year,&TT.Month,&TT.Day,
+               &TT.Hour,&TT.Minute,&TT.Second,DTSIM);
+            TT.doy = MD2DOY(TT.Year,TT.Month,TT.Day);
+                           
+            UTC.JulDay = TimeToJD(CivilTime);
+            UTC.doy = MD2DOY(UTC.Year,UTC.Month,UTC.Day);
+
+            JDToGpsTime(TT.JulDay,&GpsRollover,&GpsWeek,&GpsSecond);
+            DynTime0 = DynTime - SimTime;
+            
+            break;
+         case NOS3_TIME :
+            if (First) {
+               First = 0;
+               double JD = DateToJD(TT.Year, TT.Month, TT.Day, 
+                  TT.Hour, TT.Minute, TT.Second);
+               DynTime0 = JDToTime(JD);
+            }
+            usleep(1.0E6*DTSIM);
+            NOS3Time(&UTC.Year,&UTC.doy,&UTC.Month,&UTC.Day,
+               &UTC.Hour,&UTC.Minute,&UTC.Second);
+            CivilTime = DateToTime(UTC.Year,UTC.Month,UTC.Day,
+               UTC.Hour,UTC.Minute,UTC.Second);
+            AtomicTime = CivilTime + LeapSec;
+            DynTime = AtomicTime + 32.184;
+                           
+            TT.JulDay = TimeToJD(DynTime);
+            TimeToDate(DynTime,&TT.Year,&TT.Month,&TT.Day,
+               &TT.Hour,&TT.Minute,&TT.Second,DTSIM);
+            TT.doy = MD2DOY(TT.Year,TT.Month,TT.Day);
+                           
+            UTC.JulDay = TimeToJD(CivilTime);
+            UTC.doy = MD2DOY(UTC.Year,UTC.Month,UTC.Day);
+
+            JDToGpsTime(TT.JulDay,&GpsRollover,&GpsWeek,&GpsSecond);
+            SimTime = DynTime - DynTime0;
+            break;
+      }
 
       /* Check for end of run */
       if (SimTime > STOPTIME) Done = 1;
@@ -333,14 +373,12 @@ long SimStep(void)
 
       /* Exit when Stoptime is reached */
       if (SimComplete) {
-         #if defined _USE_SYSTEM_TIME_
-            if (TimeMode == FAST_TIME) {
-               RealRunTime(&TotalRunTime,DTSIM);
-               printf("     Total Run Time = %9.2lf sec\n", TotalRunTime);
-               printf("     Sim Speed = %8.2lf x Real\n",
-                  STOPTIME/TotalRunTime);
-            }
-         #endif
+         if (TimeMode == FAST_TIME) {
+            RealRunTime(&TotalRunTime,DTSIM);
+            printf("     Total Run Time = %9.2lf sec\n", TotalRunTime);
+            printf("     Sim Speed = %8.2lf x Real\n",
+               STOPTIME/TotalRunTime);
+         }
       }
       return(SimComplete);
 

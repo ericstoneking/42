@@ -78,7 +78,7 @@ def WriteProlog():
       
       if Prog == "Sim":
          outfile.write("      sprintf(line,\"TIME %ld-%03ld-%02ld:%02ld:%012.9lf\\n\",\n")
-         outfile.write("         Year,doy,Hour,Minute,Second);\n")
+         outfile.write("         UTC.Year,UTC.doy,UTC.Hour,UTC.Minute,UTC.Second);\n")
          if Pipe == "Socket":
             outfile.write("      LineLen = strlen(line);\n")
             outfile.write("      memcpy(&Msg[MsgLen],line,LineLen);\n")
@@ -161,10 +161,11 @@ def ReadProlog():
       #endif
       outfile.write("      double DbleVal[30];\n")
       outfile.write("      long LongVal[30];\n\n")
+      outfile.write("      long Year,doy,Hour,Minute;\n")
+      outfile.write("      double Second;\n")
       if Prog == "App":
-         outfile.write("      long Year,doy,Month,Day,Hour,Minute;\n")
-         outfile.write("      double Second;\n")
-      #endif
+         outfile.write("      long Month,Day;\n")
+      #endif   
       
       if Pipe == "Socket":
          outfile.write("      long MsgLen;\n\n")
@@ -286,18 +287,29 @@ def TimeRefreshCode():
       
       if Prog == "Sim":
          outfile.write("      if (RequestTimeRefresh) {\n")
-         outfile.write("         /* Update AbsTime, SimTime, etc */\n")
-         outfile.write("         DOY2MD(Year,doy,&Month,&Day);\n")
-         outfile.write("         AbsTime = DateToAbsTime(Year,Month,Day,Hour,Minute,Second);\n")
-         outfile.write("         JulDay = AbsTimeToJD(AbsTime);\n")
-         outfile.write("         JDToGpsTime(JulDay,&GpsRollover,&GpsWeek,&GpsSecond);\n")
-         outfile.write("         SimTime = AbsTime-AbsTime0;\n")
+         outfile.write("         /* Update time variables */\n")
+         outfile.write("         UTC.Year = Year;\n")
+         outfile.write("         UTC.doy = doy;\n")
+         outfile.write("         UTC.Hour = Hour;\n")
+         outfile.write("         UTC.Minute = Minute;\n")
+         outfile.write("         UTC.Second = Second;\n")
+         outfile.write("         DOY2MD(UTC.Year,UTC.doy,&UTC.Month,&UTC.Day);\n")
+         outfile.write("         CivilTime = DateToTime(UTC.Year,UTC.Month,UTC.Day,UTC.Hour,UTC.Minute,UTC.Second);\n")
+         outfile.write("         AtomicTime = CivilTime + LeapSec;\n")
+         outfile.write("         DynTime = AtomicTime + 32.184;\n")
+         outfile.write("         TT.JulDay = TimeToJD(DynTime);\n")
+         outfile.write("         TimeToDate(DynTime,&TT.Year,&TT.Month,&TT.Day,\n")
+         outfile.write("            &TT.Hour,&TT.Minute,&TT.Second,DTSIM);\n")
+         outfile.write("         TT.doy = MD2DOY(TT.Year,TT.Month,TT.Day);\n")
+         outfile.write("         UTC.JulDay = TimeToJD(CivilTime);\n")
+         outfile.write("         JDToGpsTime(TT.JulDay,&GpsRollover,&GpsWeek,&GpsSecond);\n")
+         outfile.write("         SimTime = DynTime-DynTime0;\n")
          outfile.write("      }\n\n")
       else:
          outfile.write("      if (RequestTimeRefresh) {\n")
          outfile.write("         /* Update AC->Time */\n")
          outfile.write("         DOY2MD(Year,doy,&Month,&Day);\n")
-         outfile.write("         AC->Time = DateToAbsTime(Year,Month,Day,Hour,Minute,Second);\n")
+         outfile.write("         AC->Time = DateToTime(Year,Month,Day,Hour,Minute,Second);\n")
          outfile.write("      }\n\n")
       #endif
             
@@ -315,7 +327,7 @@ def StateRefreshCode():
       outfile.write("            if (S->Exists) {\n")
       outfile.write("               /* Update  RefOrb */\n")
       outfile.write("               O = &Orb[S->RefOrb];\n")
-      outfile.write("               O->Epoch = AbsTime;\n")
+      outfile.write("               O->Epoch = DynTime;\n")
       outfile.write("               for(i=0;i<3;i++) {\n")
       outfile.write("                  S->PosN[i] = O->PosN[i] + S->PosR[i];\n")
       outfile.write("                  S->VelN[i] = O->VelN[i] + S->VelR[i];\n")

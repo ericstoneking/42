@@ -1,5 +1,7 @@
 42 Chore List
 
+Sync initial time when EXTERNAL_TIME is active.  Ref git issue #33.
+
 Implement SPLINE orbit for CENTRAL?
 
 Two-sigma low atmo as well as two-sigma high.  Turn if-else-if ladder into table lookup.

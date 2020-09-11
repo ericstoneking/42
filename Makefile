@@ -29,9 +29,6 @@ GUIFLAG = -D _USE_GUI_
 SHADERFLAG = -D _USE_SHADERS_
 #SHADERFLAG =
 
-#TIMEFLAG =
-TIMEFLAG = -D _USE_SYSTEM_TIME_
-
 CFDFLAG =
 #CFDFLAG = -D _ENABLE_CFD_SLOSH_
 
@@ -198,7 +195,7 @@ $(OBJ)AppWriteToSocket.o $(OBJ)AppReadFromSocket.o $(OBJ)AppWriteToFile.o
 #ANSIFLAGS = -Wstrict-prototypes -pedantic -ansi -Werror
 ANSIFLAGS =
 
-CFLAGS = -Wall -Wshadow -Wno-deprecated -g  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(INC) -I $(KITINC) -I $(KITSRC) $(GMSECINC) -O0 $(ARCHFLAG) $(GUIFLAG) $(SHADERFLAG) $(TIMEFLAG) $(CFDFLAG) $(FFTBFLAG) $(GSFCFLAG) $(GMSECFLAG) $(STANDALONEFLAG) $(NOS3FSWFLAG)
+CFLAGS = -Wall -Wshadow -Wno-deprecated -g  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(INC) -I $(KITINC) -I $(KITSRC) $(GMSECINC) -O0 $(ARCHFLAG) $(GUIFLAG) $(SHADERFLAG) $(CFDFLAG) $(FFTBFLAG) $(GSFCFLAG) $(GMSECFLAG) $(STANDALONEFLAG) $(NOS3FSWFLAG)
 
 
 ##########################  Rules to link 42  #############################

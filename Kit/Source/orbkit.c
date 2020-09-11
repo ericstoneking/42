@@ -415,7 +415,7 @@ void TLE2Eph(const char Line1[80], const char Line2[80], double JD,
       char MeanMotionString[12];
       long year,DOY,Month,Day;
       double FloatDOY,FracDay,MeanAnom,JDepoch;
-      double Epoch,AbsTime;
+      double Epoch,DynTime;
 
       strncpy(YearString,&Line1[18],2);
       YearString[2] = 0;
@@ -428,10 +428,10 @@ void TLE2Eph(const char Line1[80], const char Line2[80], double JD,
       DOY = (long) FloatDOY;
       FracDay = FloatDOY - ((double) DOY);
       DOY2MD(year,DOY,&Month,&Day);
-      JDepoch = YMDHMS2JD(year,Month,Day,0,0,0.0);
+      JDepoch = DateToJD(year,Month,Day,0,0,0.0);
       JDepoch += FracDay;
-      Epoch = JDToAbsTime(JDepoch);
-      AbsTime = JDToAbsTime(JD);
+      Epoch = JDToTime(JDepoch);
+      DynTime = JDToTime(JD);
 
       strncpy(IncString,&Line2[8],8);
       IncString[8] = 0;
@@ -460,15 +460,15 @@ void TLE2Eph(const char Line1[80], const char Line2[80], double JD,
 
       /* Time of Periapsis passage given in seconds since J2000 */
       *tp = Epoch - MeanAnom/(*MeanMotion);
-      while ((*tp-AbsTime) < -(*Period)) *tp += *Period;
-      while ((*tp-AbsTime) >   *Period ) *tp -= *Period;
+      while ((*tp-DynTime) < -(*Period)) *tp += *Period;
+      while ((*tp-DynTime) >   *Period ) *tp -= *Period;
 
       *SMA = pow(mu/(*MeanMotion)/(*MeanMotion),1.0/3.0);
       *alpha = 1.0/(*SMA);
       *SLR = (*SMA)*(1.0-(*e)*(*e));
       *rmin = *SLR/(1.0 + *e);
 
-      *th = TrueAnomaly(mu, *SLR, *e, AbsTime-(*tp));
+      *th = TrueAnomaly(mu, *SLR, *e, DynTime-(*tp));
 
 #undef TWOPI
 #undef D2R
@@ -2502,7 +2502,7 @@ void PlanTwoImpulseRendezvous(double mu, double r1e[3], double v1e[3],
 /*                will arrive.                                        */
 /*  Two iterations gives < mm accuracy for GEO-LEO distances.         */
 /*  Will need more iterations for interplanetary-scale applications.  */
-void FindLightLagOffsets(double AbsTime, struct OrbitType *Observer,
+void FindLightLagOffsets(double DynTime, struct OrbitType *Observer,
    struct OrbitType *Target, double PastPos[3], double FuturePos[3])
 {
 #define SPEED_OF_LIGHT 299792458.0
@@ -2514,23 +2514,23 @@ void FindLightLagOffsets(double AbsTime, struct OrbitType *Observer,
       for(i=0;i<3;i++) RelPos[i] = Target->PosN[i] - Observer->PosN[i];
       dt = MAGV(RelPos)/SPEED_OF_LIGHT;
       Eph2RV(Target->mu,Target->SLR,Target->ecc,Target->inc,Target->RAAN,
-         Target->ArgP,AbsTime-dt-Target->tp,PastPos,Vel,&anom);
+         Target->ArgP,DynTime-dt-Target->tp,PastPos,Vel,&anom);
 
       for(i=0;i<3;i++) RelPos[i] = PastPos[i] - Observer->PosN[i];
       dt = MAGV(RelPos)/SPEED_OF_LIGHT;
       Eph2RV(Target->mu,Target->SLR,Target->ecc,Target->inc,Target->RAAN,
-         Target->ArgP,AbsTime-dt-Target->tp,PastPos,Vel,&anom);
+         Target->ArgP,DynTime-dt-Target->tp,PastPos,Vel,&anom);
 
 /* .. Future */
       for(i=0;i<3;i++) RelPos[i] = Target->PosN[i] - Observer->PosN[i];
       dt = MAGV(RelPos)/SPEED_OF_LIGHT;
       Eph2RV(Target->mu,Target->SLR,Target->ecc,Target->inc,Target->RAAN,
-         Target->ArgP,AbsTime+dt-Target->tp,PastPos,Vel,&anom);
+         Target->ArgP,DynTime+dt-Target->tp,PastPos,Vel,&anom);
 
       for(i=0;i<3;i++) RelPos[i] = PastPos[i] - Observer->PosN[i];
       dt = MAGV(RelPos)/SPEED_OF_LIGHT;
       Eph2RV(Target->mu,Target->SLR,Target->ecc,Target->inc,Target->RAAN,
-         Target->ArgP,AbsTime+dt-Target->tp,PastPos,Vel,&anom);
+         Target->ArgP,DynTime+dt-Target->tp,PastPos,Vel,&anom);
 
 #undef SPEED_OF_LIGHT
 }

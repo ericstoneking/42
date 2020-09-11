@@ -1,7 +1,7 @@
 <<<<<<<<<<<<<<<<<  42: The Mostly Harmless Simulator  >>>>>>>>>>>>>>>>>
 ************************** Simulation Control **************************
 FAST                            !  Time Mode (FAST, REAL, or EXTERNAL)
-6000.0   0.01                   !  Sim Duration, Step Size [sec]
+2000.0   0.01                   !  Sim Duration, Step Size [sec]
 1.0                             !  File Output Interval [sec]
 TRUE                            !  Graphics Front End?
 Inp_Cmd.txt                     !  Command Script File Name
@@ -13,9 +13,9 @@ TRUE   Orb_LEO.txt              !  Input file name for Orb 0
 TRUE  0 SC_CfsSat0.txt          !  Existence, RefOrb, Input file for SC 0
 TRUE  0 SC_CfsSat1.txt          !  Existence, RefOrb, Input file for SC 1
 ***************************** Environment  *****************************
-03 21 2016                      !  Date (Month, Day, Year)
-12 00 00.00                     !  Greenwich Mean Time (Hr,Min,Sec)
-0.0                             !  Time Offset (sec)
+03 21 2016                      !  Date (UTC) (Month, Day, Year)
+12 00 00.00                     !  Time (UTC) (Hr,Min,Sec)
+0.0                             !  Leap Seconds (sec)
 USER_DEFINED                    !  Model Date Interpolation for Solar Flux and AP values?(TWOSIGMA_KP, NOMINAL or USER_DEFINED)
 230.0                           !  If USER_DEFINED, enter desired F10.7 value
 100.0                           !  If USER_DEFINED, enter desired AP value

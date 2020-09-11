@@ -20,30 +20,34 @@
 */
 
 /**********************************************************************/
-/* AbsTime is elapsed seconds since J2000 epoch                       */
-double AbsTimeToJD(double AbsTime)
+/*  This function is agnostic to the TT-to-UTC offset.  You get out   */
+/*  what you put in.                                                  */
+double TimeToJD(double SecSinceJ2000)
 {
-      return(AbsTime/86400.0 + 2451545.0);
+      return(SecSinceJ2000/86400.0 + 2451545.0);
 }
 /**********************************************************************/
-/* AbsTime is elapsed seconds since J2000 epoch                       */
-double JDToAbsTime(double JD)
+/* Time is elapsed seconds since J2000 epoch                          */
+/*  This function is agnostic to the TT-to-UTC offset.  You get out   */
+/*  what you put in.                                                  */
+double JDToTime(double JD)
 {
       return((JD-2451545.0)*86400.0);
 }
 /**********************************************************************/
 /*  Convert Year, Month, Day, Hour, Minute and Second to              */
-/*  "Absolute Time", i.e. seconds elapsed since J2000 epoch.          */
-/*  J2000 = 2451545.0 TT  =  01 Jan 2000 12:00:00.00 TT               */
+/*  "Time", i.e. seconds elapsed since J2000 epoch.                   */
 /*  Year, Month, Day assumed in Gregorian calendar. (Not true < 1582) */
 /*  Ref. Jean Meeus, 'Astronomical Algorithms', QB51.3.E43M42, 1991.  */
+/*  This function is agnostic to the TT-to-UTC offset.  You get out   */
+/*  what you put in.                                                  */
 
-double DateToAbsTime(long Year, long Month, long Day, long Hour,
-   long Minute, double Second)
+double DateToTime(long Year, long Month, long Day,
+               long Hour, long Minute, double Second)
 {
       long A,B;
       double Days;
-
+      
       if (Month < 3) {
          Year--;
          Month+=12;
@@ -66,8 +70,9 @@ double DateToAbsTime(long Year, long Month, long Day, long Hour,
 /*  Valid for any positive JD.                                        */
 /*  Year, Month, Day assumed in Gregorian calendar. (Not true < 1582) */
 /*  Ref. Jean Meeus, 'Astronomical Algorithms', QB51.3.E43M42, 1991.  */
-
-double YMDHMS2JD(long Year, long Month, long Day,
+/*  This function is agnostic to the TT-to-UTC offset.  You get out   */
+/*  what you put in.                                                  */
+double DateToJD(long Year, long Month, long Day,
                long Hour, long Minute, double Second)
 {
       long A,B;
@@ -93,8 +98,9 @@ double YMDHMS2JD(long Year, long Month, long Day,
 /**********************************************************************/
 /*   Convert Julian Day to Year, Month, Day, Hour, Minute, and Second */
 /*   Ref. Jean Meeus, 'Astronomical Algorithms', QB51.3.E43M42, 1991. */
-
-void JD2YMDHMS(double JD,long *Year, long *Month, long *Day,
+/*  This function is agnostic to the TT-to-UTC offset.  You get out   */
+/*  what you put in.                                                  */
+void JDToDate(double JD,long *Year, long *Month, long *Day,
                          long *Hour, long *Minute, double *Second)
 {
       double Z,F,A,B,C,D,E,alpha;
@@ -139,18 +145,19 @@ void JD2YMDHMS(double JD,long *Year, long *Month, long *Day,
 
 }
 /**********************************************************************/
-/*   Convert AbsTime to Year, Month, Day, Hour, Minute, and Second    */
-/*   AbsTime is seconds since J2000 epoch (01 Jan 2000 12:00:00.0)    */
+/*   Convert Time to Year, Month, Day, Hour, Minute, and Second       */
+/*   Time is seconds since J2000 epoch (01 Jan 2000 12:00:00.0)       */
 /*   Outputs are rounded to LSB to avoid loss of precision            */
 /*   Ref. Jean Meeus, 'Astronomical Algorithms', QB51.3.E43M42, 1991. */
-
-void AbsTimeToDate(double AbsTime, long *Year, long *Month, long *Day,
+/*   This function is agnostic to the TT-to-UTC offset.  You get out  */
+/*   what you put in.                                                 */
+void TimeToDate(double Time, long *Year, long *Month, long *Day,
                   long *Hour, long *Minute, double *Second, double LSB)
 {
       double Z,F,A,B,C,D,E,alpha;
       double FD,JD;
 
-      JD = AbsTime/86400.0 + 2451545.0;
+      JD = Time/86400.0 + 2451545.0;
 
       Z= floor(JD+0.5);
       F=(JD+0.5)-Z;
@@ -180,7 +187,7 @@ void AbsTimeToDate(double AbsTime, long *Year, long *Month, long *Day,
          *Year = (long) (C - 4715.0);
       }
 
-      FD = AbsTime-43200.0+0.5*LSB;
+      FD = Time-43200.0+0.5*LSB;
       FD = FD - ((long) (FD/86400.0))*86400.0;
       if (FD < 0.0) FD += 86400.0;
 
@@ -198,6 +205,8 @@ void AbsTimeToDate(double AbsTime, long *Year, long *Month, long *Day,
 /**********************************************************************/
 /*  Find Day of Year, given Month, Day                                */
 /*  Ref. Jean Meeus, 'Astronomical Algorithms', QB51.3.E43M42, 1991.  */
+/*   This function is agnostic to the TT-to-UTC offset.  You get out  */
+/*   what you put in.                                                 */
 long MD2DOY(long Year, long Month, long Day)
 {
       long K;
@@ -214,7 +223,8 @@ long MD2DOY(long Year, long Month, long Day)
 /**********************************************************************/
 /*  Find Month, Day, given Day of Year                                */
 /*  Ref. Jean Meeus, 'Astronomical Algorithms', QB51.3.E43M42, 1991.  */
-
+/*   This function is agnostic to the TT-to-UTC offset.  You get out  */
+/*   what you put in.                                                 */
 void DOY2MD(long Year, long DayOfYear, long *Month, long *Day)
 {
       long K;
@@ -240,7 +250,7 @@ void DOY2MD(long Year, long DayOfYear, long *Month, long *Day)
 /*  Find Greenwich Mean Sidereal Time (GMST)                          */
 /*  Ref. Jean Meeus, 'Astronomical Algorithms', QB51.3.E43M42, 1991.  */
 /*  GMST is output in units of days.                                  */
-
+/*  This function requires JD in TT                                   */
 double JD2GMST(double JD)
 {
       double T,JD0,GMST0,GMST;
@@ -266,6 +276,7 @@ double JD2GMST(double JD)
 /* GPS Epoch is 6 Jan 1980 00:00:00.0 which is JD = 2444244.5         */
 /* GPS Time is expressed in weeks and seconds                         */
 /* GPS Time rolls over every 1024 weeks                               */
+/* This function yields JD in TT                                      */
 double GpsTimeToJD(long GpsRollover, long GpsWeek, double GpsSecond)
 {
       double DaysSinceWeek,DaysSinceRollover,DaysSinceEpoch,JD;
@@ -281,6 +292,7 @@ double GpsTimeToJD(long GpsRollover, long GpsWeek, double GpsSecond)
 /* GPS Epoch is 6 Jan 1980 00:00:00.0 which is JD = 2444244.5         */
 /* GPS Time is expressed in weeks and seconds                         */
 /* GPS Time rolls over every 1024 weeks                               */
+/* This function requires JD in TT                                    */
 void JDToGpsTime(double JD, long *GpsRollover, long *GpsWeek, double *GpsSecond)
 {
       double DaysSinceEpoch, DaysSinceRollover, DaysSinceWeek;
@@ -293,41 +305,56 @@ void JDToGpsTime(double JD, long *GpsRollover, long *GpsWeek, double *GpsSecond)
       *GpsSecond = DaysSinceWeek*86400.0;
 }
 
-#if defined _USE_SYSTEM_TIME_
 /**********************************************************************/
 /* This function returns the number of microseconds since the Unix    */
 /* epoch, 00:00:00.0 Jan 1 1970.  Typically used as a tick/tock       */
 /* duration measurement.                                              */
 double usec(void)
 {
+#if defined(_WIN32)
 
-#if (defined(__APPLE__) || defined(__linux__))
+      static LARGE_INTEGER SysFreq;
+      LARGE_INTEGER SysCtr;
+      static long First = 1;
+
+      if (First) {
+         First = 0;
+         QueryPerformanceFrequency(&SysFreq);
+      }
+
+      QueryPerformanceCounter(&SysCtr);
+      return((1.0E6*((double) SysCtr.QuadPart)) / ((double) SysFreq.QuadPart));
+
+#elif (defined(__APPLE__) || defined(__linux__))
       struct timeval now;
 
       gettimeofday(&now,NULL);
       return(1.0E6*now.tv_sec+now.tv_usec);
 #else
+      #error "This OS not supported by usec function"
+      printf("This OS not supported by usec function.  Bailing out.\n");
+      exit(1);
       return(0.0);
 #endif
-
 }
 /**********************************************************************/
 /* Get time from operating system, and convert to compatible format.  */
+/* TODO:  Is this date returned in TT or UTC?                         */
 void RealSystemTime(long *Year, long *DOY, long *Month, long *Day,
                    long *Hour, long *Minute, double *Second, double DT)
 {
 #if (defined(__APPLE__) || defined(__linux__))
       struct timeval now;
-      double UnixTime,AbsTime;
+      double UnixTime,Time;
 
       /* Unix Time is since 00:00:00.0 Jan 1 1970 */
       gettimeofday(&now,NULL);
       UnixTime = now.tv_sec + 1.0E-6*now.tv_usec;
 
-      /* AbsTime is since J2000 */
-      AbsTime = UnixTime - 946728000.0;
+      /* Time is since J2000 */
+      Time = UnixTime - 946728000.0;
 
-      AbsTimeToDate(AbsTime,Year,Month,Day,Hour,Minute,Second,DT);
+      TimeToDate(Time,Year,Month,Day,Hour,Minute,Second,DT);
       *DOY = MD2DOY(*Year,*Month,*Day);
 #endif
 }
@@ -364,11 +391,11 @@ double RealRunTime(double *RealTimeDT, double LSB)
       if (First) {
          First = 0;
          RealSystemTime(&Year,&DOY,&Month,&Day,&Hour,&Minute,&Second,LSB);
-         OldSysTime = DateToAbsTime(Year,Month,Day,Hour,Minute,Second);
+         OldSysTime = DateToTime(Year,Month,Day,Hour,Minute,Second);
       }
 
       RealSystemTime(&Year,&DOY,&Month,&Day,&Hour,&Minute,&Second,LSB);
-      SysTime = DateToAbsTime(Year,Month,Day,Hour,Minute,Second);
+      SysTime = DateToTime(Year,Month,Day,Hour,Minute,Second);
       *RealTimeDT = SysTime-OldSysTime;
       OldSysTime = SysTime;
 #else
@@ -383,7 +410,6 @@ double RealRunTime(double *RealTimeDT, double LSB)
 
       return(RunTime);
 }
-#endif /* USE_SYSTEM_TIME */
 
 /* #ifdef __cplusplus
 ** }

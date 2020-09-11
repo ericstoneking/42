@@ -23,8 +23,9 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
       double DbleVal[30];
       long LongVal[30];
 
-      long Year,doy,Month,Day,Hour,Minute;
+      long Year,doy,Hour,Minute;
       double Second;
+      long Month,Day;
       long MsgLen;
 
       memset(Msg,'\0',16384);
@@ -1286,7 +1287,7 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
       if (RequestTimeRefresh) {
          /* Update AC->Time */
          DOY2MD(Year,doy,&Month,&Day);
-         AC->Time = DateToAbsTime(Year,Month,Day,Hour,Minute,Second);
+         AC->Time = DateToTime(Year,Month,Day,Hour,Minute,Second);
       }
 
 }

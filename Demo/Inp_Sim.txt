@@ -30,9 +30,9 @@ TRUE  5 SC_Cubesat6U.txt        !  Existence, RefOrb, Input file for SC  9
 TRUE  6 SC_CMG.txt              !  Existence, RefOrb, Input file for SC 10
 TRUE  7 SC_ThrDemo.txt          !  Existence, RefOrb, Input file for SC 11
 ***************************** Environment  *****************************
-09 29 2016                      !  Date (Month, Day, Year)
-10 16 00.00                     !  Greenwich Mean Time (Hr,Min,Sec)
-0.0                             !  Time Offset (sec)
+09 29 2016                      !  Date (UTC) (Month, Day, Year)
+10 16 00.00                     !  Time (UTC) (Hr,Min,Sec)
+37.0                            !  Leap Seconds (sec)
 USER_DEFINED                    !  Model Date Interpolation for Solar Flux and AP values?(TWOSIGMA_KP, NOMINAL or USER_DEFINED)
 230.0                           !  If USER_DEFINED, enter desired F10.7 value
 100.0                           !  If USER_DEFINED, enter desired AP value

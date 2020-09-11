@@ -59,9 +59,9 @@ void NOS3Time(long *year, long *day_of_year, long *month, long *day, long *hour,
         InitializeTimeNode();
     }
     ticks = NE_bus_get_time(Bus);
-    abs_time = AbsTime0 + (ticks * DTSIM);
-    jd = AbsTimeToJD(abs_time);
-    JD2YMDHMS(jd, year, month, day, hour, minute, second);
+    abs_time = DynTime0 + (ticks * DTSIM);
+    jd = TimeToJD(abs_time);
+    JDToDate(jd, year, month, day, hour, minute, second);
     *day_of_year = MD2DOY(*year, *month, *day);
 #else
 #error "Unknown operating system in NOS3Time.  Fix that!"

@@ -1026,7 +1026,7 @@ void EnvTrq(struct SCType *S)
 
       if (E->First) {
          E->First = 0;
-         sprintf(envfilename,"EnvTrq%02li.42",S->ID);
+         sprintf(envfilename,"EnvTrq%02ld.42",S->ID);
          E->envfile = FileOpen(InOutPath,envfilename,"w");
       }
 

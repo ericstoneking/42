@@ -569,6 +569,10 @@ void FindPAngVel(struct SCType *S)
                for(k=0;k<3;k++) {
                   CGo[i][j] += G->CTrqBo[k][i]*G->Gamma[k][j];
                }
+            }
+         }
+         for(i=0;i<3;i++) {
+            for(j=0;j<G->RotDOF;j++) {
                D->PAngVel[i0+i][j0+j] = CGo[i][j];
                D->IPAngVel[i0+i][j0+j] = 0.0;
                for(k=0;k<3;k++) {
@@ -656,11 +660,15 @@ void FindPVel(struct SCType *S)
             j0 = G->Trnu0;
             MTxMT(S->B[G->Bin].CN,G->CGiBi,CNG);
             for(i=0;i<3;i++) {
+               for(j=0;j<3;j++) CD[i][j] = 0.0;
                for(j=0;j<G->TrnDOF;j++) {
-                  CD[i][j] = 0.0;
                   for(k=0;k<3;k++) {
                      CD[i][j] += CNG[i][k]*G->Delta[k][j];
                   }
+               }
+            }
+            for(i=0;i<3;i++) {
+               for(j=0;j<G->TrnDOF;j++) {
                   D->PVel[i0+i][j0+j] = CD[i][j];
                   D->mPVel[i0+i][j0+j] = m*CD[i][j];
                }
@@ -706,7 +714,7 @@ void FindPAngVelf(struct SCType *S)
             for(j=0;j<Bib->Nf;j++) {
                D->IPAngVelf[i0+i][j0+j] = 0.0;
                for(k=0;k<3;k++)
-               D->IPAngVelf[i0+i][j0+j] += Bib->I[i][k]*D->PAngVelf[i0+k][j0+j];
+                  D->IPAngVelf[i0+i][j0+j] += Bib->I[i][k]*D->PAngVelf[i0+k][j0+j];
             }
          }
          Jb = Gi->Bin;

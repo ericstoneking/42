@@ -969,6 +969,7 @@ void InitAC(struct SCType *S)
       AC->qbn[3] = 1.0;
       AC->svb[0] = 1.0;
       AC->bvb[0] = 1.0E-4;
+      
 }
 /**********************************************************************/
 /* The effective inertia for a gimbal is assumed to be the moment of  */
@@ -1017,6 +1018,25 @@ void FindAppendageInertia(long Ig, struct SCType *S,double Iapp[3])
             for(k=0;k<3;k++) Iapp[k] += IBoG[k][k];
          }
       }
+}
+/**********************************************************************/
+void ApplyLoopGainAndDelays(struct SCType *S)
+{
+      struct AcType *AC;
+      long Iw,Im,It;
+
+      AC = &S->AC;
+      
+      for(Iw=0;Iw<AC->Nwhl;Iw++) {
+         AC->Whl[Iw].Tcmd = Delay(S->Whl[Iw].Delay,S->LoopGain*AC->Whl[Iw].Tcmd);
+      }
+      for(Im=0;Im<AC->Nmtb;Im++) {
+         AC->MTB[Im].Mcmd = Delay(S->MTB[Im].Delay,S->LoopGain*AC->MTB[Im].Mcmd);
+      }
+      for(It=0;It<AC->Nthr;It++) {
+         AC->Thr[It].PulseWidthCmd = Delay(S->Thr[It].Delay,S->LoopGain*AC->Thr[It].PulseWidthCmd);
+      }
+         
 }
 /**********************************************************************/
 /*  This simple control law is suitable for rapid prototyping.        */
@@ -1588,7 +1608,7 @@ void CfsFSW(struct AcType *AC)
 
       if (C->Init) {
          C->Init = 0;
-         for(i=0;i<3;i++) FindPDGains(AC->MOI[i][i],0.1,0.7,&C->Kr[i],&C->Kp[i]);
+         for(i=0;i<3;i++) FindPDGains(AC->MOI[i][i],0.1*TwoPi,0.7,&C->Kr[i],&C->Kp[i]);
          C->Kunl = 1.0E6;
          FindPDGains(100.0,0.2,1.0,&G->AngRateGain[0],&G->AngGain[0]);
          G->MaxAngRate[0] = 1.0*D2R;
@@ -1748,6 +1768,9 @@ void FlightSoftWare(struct SCType *S)
                #endif
                break;
          }
+      }
+      if (S->GainAndDelayActive) {
+         ApplyLoopGainAndDelays(S);
       }
 }
 

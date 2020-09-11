@@ -19,8 +19,9 @@ void ReadFromCmd(void)
       double DbleVal[30];
       long LongVal[30];
 
-      long Year,doy,Month,Day,Hour,Minute;
+      long Year,doy,Hour,Minute;
       double Second;
+      long Month,Day;
 
 
          if (AC->EchoEnabled) printf("%s",line);
@@ -1259,7 +1260,7 @@ void ReadFromCmd(void)
       if (RequestTimeRefresh) {
          /* Update AC->Time */
          DOY2MD(Year,doy,&Month,&Day);
-         AC->Time = DateToAbsTime(Year,Month,Day,Hour,Minute,Second);
+         AC->Time = DateToTime(Year,Month,Day,Hour,Minute,Second);
       }
 
 }

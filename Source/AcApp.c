@@ -278,17 +278,19 @@ void CssProcessing(struct AcType *AC)
 void FssProcessing(struct AcType *AC)
 {
       struct AcFssType *FSS;
+      double tanx,tany,z;
       long Ifss,i;
       
       for(Ifss=0;Ifss<AC->Nfss;Ifss++) {
          FSS = &AC->FSS[Ifss];
          if (FSS->Valid) {
             AC->SunValid = 1;
-            FSS->SunVecS[0] = sin(FSS->SunAng[0]);
-            FSS->SunVecS[1] = sin(FSS->SunAng[1]);
-            FSS->SunVecS[2] = 
-               sqrt(1.0 - FSS->SunVecS[0]*FSS->SunVecS[0]
-                        - FSS->SunVecS[1]*FSS->SunVecS[1]);
+            tanx = tan(FSS->SunAng[0]);
+            tany = tan(FSS->SunAng[1]);
+            z = 1.0/sqrt(1.0+tanx*tanx+tany*tany);            
+            FSS->SunVecS[0] = z*tanx;
+            FSS->SunVecS[1] = z*tany;
+            FSS->SunVecS[2] = z;
             MTxV(FSS->CB,FSS->SunVecS,FSS->SunVecB);
             for(i=0;i<3;i++) AC->svb[i] = FSS->SunVecB[i];
          }

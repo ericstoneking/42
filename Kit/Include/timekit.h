@@ -16,16 +16,14 @@
 #define __TIMEKIT_H__
 
 #include <math.h>
-#if defined _USE_SYSTEM_TIME_
-   #if defined(_WIN32)
-      #include <Windows.h>
-   #elif defined(__APPLE__)
+#if defined(_WIN32)
+   #include <Windows.h>
+#elif defined(__APPLE__)
 /*      #include <CoreServices/Timer.h> */ /* For Microseconds high-precision timer */
-   #endif
-   #include <time.h>
-   #ifndef _WIN32
-      #include <sys/time.h>
-   #endif
+#endif
+#include <time.h>
+#ifndef _WIN32
+   #include <sys/time.h>
 #endif
 
 /* #ifdef __cplusplus
@@ -33,21 +31,30 @@
 ** #endif
 */
 
-double AbsTimeToJD(double AbsTime);
-double JDToAbsTime(double JD);
-double DateToAbsTime(long Year, long Month, long Day, long Hour,
-   long Minute, double Second);
-double YMDHMS2JD(long Year, long Month, long Day,
-               long Hour, long Minute, double Second);
-void JD2YMDHMS(double JD,long *Year, long *Month, long *Day,
-                         long *Hour, long *Minute, double *Second);
-void AbsTimeToDate(double AbsTime, long *Year, long *Month, long *Day,
-                  long *Hour, long *Minute, double *Second, double LSB);
+struct DateType {
+   double JulDay;
+   long Year;
+   long Month;
+   long Day;
+   long doy;
+   long Hour;
+   long Minute;
+   double Second;
+};
+
+double TimeToJD(double Time);
+double JDToTime(double JD);
+double DateToTime(long Year, long Month, long Day, 
+   long Hour, long Minute, double Second);
+double DateToJD(long Year, long Month, long Day,
+   long Hour, long Minute, double Second);
+void JDToDate(double JD,long *Year, long *Month, long *Day,
+   long *Hour, long *Minute, double *Second);
+void TimeToDate(double Time, long *Year, long *Month, long *Day,
+   long *Hour, long *Minute, double *Second, double LSB);
 long MD2DOY(long Year, long Month, long Day);
 void DOY2MD(long Year, long DayOfYear, long *Month, long *Day);
 double JD2GMST(double JD);
-void DAY2HMS(double *DAY, double *HOUR, double *MINUTE, double *SECOND,
-             double DTSIM);
 double GpsTimeToJD(long GpsRollover, long GpsWeek, double GpsSecond);
 void JDToGpsTime(double JD, long *GpsRollover, long *GpsWeek, double *GpsSecond);
 double usec(void);

@@ -13,7 +13,7 @@ CM                            !  Pos of CM or ORIGIN, wrt F
 LAL                           ! Ang Vel wrt [NL], Att [QA] wrt [NLF]
 0.0    0.0    0.0             ! Ang Vel (deg/sec)
 0.0    0.0    0.0    1.0      ! Quaternion
-0.0    0.0    0.0    213      ! Angles (deg) & Euler Sequence
+1.0    1.0    1.0    213      ! Angles (deg) & Euler Sequence
 ***************************  Dynamics Flags  ***************************
 DYN_JOINT                     ! Rotation STEADY, KIN_JOINT, or DYN_JOINT
 FALSE                         ! Passive Joint Forces and Torques Enabled

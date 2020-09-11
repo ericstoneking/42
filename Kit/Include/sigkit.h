@@ -43,6 +43,12 @@ struct FilterType {
    double ymin;
 };
 
+struct DelayType {
+   long N;
+   double *CircBuffer;
+   long Idx;
+};
+
 struct RandomProcessType *CreateRandomProcess(long Seed);
 void DestroyRandomProcess(struct RandomProcessType *RP);
 double UniformRandom(struct RandomProcessType *RP);
@@ -69,6 +75,9 @@ double FirstOrderLowpassFilter(struct FilterType *F, double x);
 double FirstOrderHighpassFilter(struct FilterType *F, double x);
 double SecondOrderLowpassFilter(struct FilterType *F, double x);
 double SecondOrderHighpassFilter(struct FilterType *F, double x);
+struct DelayType *CreateDelay(double DelayTime, double DT);
+struct DelayType *ResizeDelay(struct DelayType *OldD, double DelayTime, double DT);
+double Delay(struct DelayType *D, double x);
 
 /*
 ** #ifdef __cplusplus

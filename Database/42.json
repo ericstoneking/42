@@ -2557,7 +2557,50 @@
          "Table Name": "JointType",
          "Table Type": "Structure",
          "Table Data": [
-
+            {
+               "Variable Name":  "Pos",
+               "Description":  "translational kinematic state variables",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "PosRate",
+               "Description":  "translational dynamic state variables",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "Ang",
+               "Description":  "Joint Euler angles",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "AngRate",
+               "Description":  "Euler angle rates about gim axes",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            }
          ]
       },
       {

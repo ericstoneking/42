@@ -1,6 +1,7 @@
 HOW TO INSTALL UBUNTU on Windows 10
 
 [Editor's Note:  This procedure is contributed by Eloy Pieto Panadero (see contact info at the end).  New with Windows 10, Windows supports an ubuntu shell.  It's about time, IMHO.  Thanks to Eloy for seizing on this new capability and writing down the steps for us.  ETS]
+[[Additional notes from another user's experience.  LWS]]
 
 We are going to use ubuntu bash on windows
 
@@ -20,7 +21,7 @@ Try to open the "Windows PowerShell(Admin)" and type "bash" if don't work, downl
 
 [Edit:  If you're reading this, you already know where and how to get 42.  ETS]
 
-Install Xming on windows
+Install Xming on windows [[Found Xming/XLaunch on SourceForge.net  LWS]]
 
 (Restart computer)
 
@@ -46,12 +47,16 @@ in to set your default display.  ETS]
 & sudo apt update
 & sudo apt-get install vim-gtk
 & sudo apt install gcc
+& sudo apt install g++ [[if needed.  LWS]]
 & DISPLAY=:1 gvim #check that opens a xming display window
 & sudo apt-cache search glut
 & sudo apt-get install freeglut3-dev
+& sudo apt install make [[LWS]]
 & cd 42 #use the route where 42 folder is install
 & make
 & DISPLAY=:1 ./42 #execute the 42
+
+[[Note: I'm not certain how I did it, but I don't have to use the DISPLAY=:1 before "./42" anymore to run 42 -LWS]]
 
 [I add this line to my .profile:
    export PATH=.:$PATH

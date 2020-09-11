@@ -170,7 +170,7 @@ struct OrbitType {
    double CLN[3][3]; /* For ZERO, L = N.  For FLIGHT, L = ENU.  For CENTRAL, L = LVLH.  For THREE_BODY, L = XYZ */
    double wln[3]; /* Expressed in N */
    /* Fit spline to data file */
-   double NodeAbsTime[4];
+   double NodeDynTime[4]; /* Sec since J2000 (TT) */
    double NodePos[4][3];
    double NodeVel[4][3];
    /* Chebyshev Coefficients */
@@ -246,7 +246,7 @@ double RendezvousCostFunction(double *InVec, double *AuxVec);
 void PlanTwoImpulseRendezvous(double mu, double r1e[3], double v1e[3],
    double r2e[3], double v2e[3], double *t1, double *t2,
    double DV1[3], double DV2[3]);
-void FindLightLagOffsets(double AbsTime, struct OrbitType *Observer,
+void FindLightLagOffsets(double DynTime, struct OrbitType *Observer,
    struct OrbitType *Target, double PastPos[3], double FuturePos[3]);
 void FindJ2DriftParms(double mu, double J2, double Rw, struct OrbitType *O);
 

@@ -514,7 +514,56 @@ double SecondOrderHighpassFilter(struct FilterType *F, double x)
 
       return(F->y[0]);
 }
-
+/**********************************************************************/
+struct DelayType *CreateDelay(double DelayTime, double DT)
+{
+      struct DelayType *D;
+      
+      D = (struct DelayType *) calloc(1,sizeof(struct DelayType));
+      
+      D->N = ((long) (DelayTime/DT+0.5));
+      
+      D->CircBuffer = (double *) calloc(D->N,sizeof(double));
+      
+      D->Idx = 0;
+      
+      return(D);
+}
+/**********************************************************************/
+struct DelayType *ResizeDelay(struct DelayType *OldD, double DelayTime, double DT)
+{
+      struct DelayType *D;
+      long N,i;
+      
+      N = ((long) (DelayTime/DT+0.5));
+      
+      if (N == OldD->N) return(OldD);
+      
+      D = CreateDelay(DelayTime,DT);
+      N = (OldD->N > D->N ? D->N : OldD->N);
+      for(i=0;i<N;i++) {
+         D->CircBuffer[i] = OldD->CircBuffer[i];
+      }
+      D->Idx = OldD->Idx % D->N;
+      
+      return(D);
+}
+/**********************************************************************/
+double Delay(struct DelayType *D, double x)
+{
+      double y; 
+      
+      if (D->N == 0) {
+         y = x;
+      }
+      else {      
+         y = D->CircBuffer[D->Idx];      
+         D->CircBuffer[D->Idx] = x;
+         D->Idx = (D->Idx + 1) % D->N;
+      }
+      
+      return(y);
+}
 /* #ifdef __cplusplus
 ** }
 ** #endif
