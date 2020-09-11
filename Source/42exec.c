@@ -386,7 +386,6 @@ long SimStep(void)
 /**********************************************************************/
 int exec(int argc,char **argv)
 {
-      long Isc;
       long Done = 0;
 
       MapTime = 0.0;
@@ -401,11 +400,6 @@ int exec(int argc,char **argv)
       SolveTime = 0.0;
 
       InitSim(argc,argv);
-      for (Isc=0;Isc<Nsc;Isc++) {
-         if (SC[Isc].Exists) {
-            InitSpacecraft(&SC[Isc]);
-         }
-      }
       CmdInterpreter();
       InitInterProcessComm();
       #ifdef _USE_GUI_
