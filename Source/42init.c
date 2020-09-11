@@ -4130,6 +4130,7 @@ void InitSim(int argc, char **argv)
          if (Orb[Iorb].Exists) InitOrbit(&Orb[Iorb]);
       }
       OrbitMotion();
+      SetOrbitLocalFrames();
       for (Isc=0;Isc<Nsc;Isc++) {
          if (SC[Isc].Exists) {
             InitSpacecraft(&SC[Isc]);
