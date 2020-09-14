@@ -444,8 +444,9 @@ void SplineToPosVel(struct OrbitType *O)
 /**********************************************************************/
 void OrbitMotion(void)
 {
-      long Iorb;
+      long Iorb,i,j;
       struct OrbitType *O;
+      struct RegionType *R;
 
 #if 0
       static long RectCtr = 0;
@@ -495,6 +496,46 @@ void OrbitMotion(void)
                }
             }
             /* Else is ORB_ZERO or ORB_FLIGHT, and no action required */
+            
+            /* Update CLN */
+            switch (O->Regime) {
+               case ORB_ZERO :
+                  /* L is aligned with N, wln is zero */
+                  for(i=0;i<3;i++) {
+                     for(j=0;j<3;j++) O->CLN[i][j] = 0.0;
+                     O->CLN[i][i] = 1.0;
+                     O->wln[i] = 0.0;
+                  }
+                  break;
+               case ORB_FLIGHT :
+                  /* L is East-North-Up */
+                  R = &Rgn[O->Region];
+                  for(i=0;i<3;i++) {
+                     O->PosN[i] = R->PosN[i];
+                     O->VelN[i] = R->VelN[i];
+                  }
+                  FindENU(O->PosN,World[O->World].w,O->CLN,O->wln);
+                  break;
+               case ORB_CENTRAL :
+                  /* L is LVLH */
+                  FindCLN(O->PosN,O->VelN,O->CLN,O->wln);
+                  break;
+               case ORB_THREE_BODY :
+                  /* L is Rotating Frame XYZ? */
+                  FindCLN(O->PosN,O->VelN,O->CLN,O->wln);
+                  break;
+               default :
+                  printf("Unknown Orbit Regime in Ephemerides.  Bailing out.\n");
+                  exit(1);
+            }
+            
+            /* Update Formation Frame */
+            if (Frm[Iorb].FixedInFrame == 'L') {
+               MxM(Frm[Iorb].CL,O->CLN,Frm[Iorb].CN);
+            }
+            else {
+               MxMT(Frm[Iorb].CN,O->CLN,Frm[Iorb].CL);
+            }
          }
       }
 }
@@ -517,7 +558,6 @@ void Ephemerides(void)
       long Ic;
       struct Cheb3DType *C;
       double u,dudJD,T[20],U[20],P,dPdu;
-      long Iorb;
       double EMRAT = 81.30056907419062; /* Earth-Moon mass ratio */
       double PosJ[3],VelJ[3];
       double qJ2000H[4] = {-0.203123038887,  0.0,  0.0,  0.979153221449};
@@ -693,50 +733,6 @@ void Ephemerides(void)
          MxM(R->CW,W->CWN,R->CN);
       }
 
-/* .. Local Vertical frame tied to Reference Orbit */
-      for(Iorb=0;Iorb<Norb;Iorb++){
-         if (Orb[Iorb].Exists) {
-            O = &Orb[Iorb];
-            switch (O->Regime) {
-               case ORB_ZERO :
-                  /* L is aligned with N, wln is zero */
-                  for(i=0;i<3;i++) {
-                     for(j=0;j<3;j++) O->CLN[i][j] = 0.0;
-                     O->CLN[i][i] = 1.0;
-                     O->wln[i] = 0.0;
-                  }
-                  break;
-               case ORB_FLIGHT :
-                  /* L is East-North-Up */
-                  R = &Rgn[O->Region];
-                  for(i=0;i<3;i++) {
-                     O->PosN[i] = R->PosN[i];
-                     O->VelN[i] = R->VelN[i];
-                  }
-                  FindENU(O->PosN,World[O->World].w,O->CLN,O->wln);
-                  break;
-               case ORB_CENTRAL :
-                  /* L is LVLH */
-                  FindCLN(O->PosN,O->VelN,O->CLN,O->wln);
-                  break;
-               case ORB_THREE_BODY :
-                  /* L is Rotating Frame XYZ? */
-                  FindCLN(O->PosN,O->VelN,O->CLN,O->wln);
-                  break;
-               default :
-                  printf("Unknown Orbit Regime in Ephemerides.  Bailing out.\n");
-                  exit(1);
-            }
-            /* Update Formation Frame */
-            if (Frm[Iorb].FixedInFrame == 'L') {
-               MxM(Frm[Iorb].CL,O->CLN,Frm[Iorb].CN);
-            }
-            else {
-               MxMT(Frm[Iorb].CN,O->CLN,Frm[Iorb].CL);
-            }
-         }
-      }
-
 /* .. TDRS Spacecraft */
       TDRSPosVel(World[EARTH].PriMerAng,DynTime,ptn,vtn);
       for(i=0;i<10;i++) {
@@ -749,7 +745,6 @@ void Ephemerides(void)
          Tdrs[i].lat = asin(ptw[2]);
          Tdrs[i].lng = atan2(ptw[1],ptw[0]);
       }
-
 
 /* .. SC */
       for(Isc=0;Isc<Nsc;Isc++){
