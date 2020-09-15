@@ -316,10 +316,10 @@ long SimStep(void)
       if (First) {
          First = 0;
          SimTime = 0.0;
-         #if defined _USE_SYSTEM_TIME_
-            /* First call just initializes timer */
-            RealRunTime(&TotalRunTime,DTSIM);
-         #endif
+
+         /* First call just initializes timer */
+         RealRunTime(&TotalRunTime,DTSIM);
+
          ManageFlags();
 
          Ephemerides(); /* Sun, Moon, Planets, Spacecraft, Useful Auxiliary Frames */
