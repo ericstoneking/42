@@ -3455,7 +3455,7 @@ long LoadDE430(char DE430Path[80],double JD)
       double Block[1020];
       long BlockNum,NumEntries;
       long FoundBlock;
-      char line[511];
+      char line[512];
       double JD1,JD2;
       long i,n,Ic,Iw;
       long Nseg,Start,N;
