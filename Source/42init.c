@@ -212,7 +212,7 @@ long DecodeString(char *s)
       else if (!strcmp(s,"SERVER")) return IPC_SERVER;
       else if (!strcmp(s,"CLIENT")) return IPC_CLIENT;
       else if (!strcmp(s,"GMSEC_CLIENT")) return IPC_GMSEC_CLIENT;
-      
+
       else if (!strcmp(s,"MEAN")) return EPH_MEAN;
       else if (!strcmp(s,"DE430")) return EPH_DE430;
 
@@ -878,7 +878,7 @@ void InitRigidDyn(struct SCType *S)
          }
          D->BodyPathTable[Ibody][0].InPath = 1;
       }
-      
+
       /* Find ancestor joint list for each joint */
       for(Ig=0;Ig<S->Ng;Ig++) {
          G = &S->G[Ig];
@@ -1897,16 +1897,16 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%lf %[^\n] %[\n]",&Gyro->Bias,junk,&newline);
             Gyro->Bias *= D2R/3600.0;
             fscanf(infile,"%ld %[^\n] %[\n]",&Gyro->FlexNode,junk,&newline);
-            
+
             Gyro->BiasStabCoef = Gyro->SigU*sqrt(Gyro->SampleTime);
-            Gyro->ARWCoef = sqrt(Gyro->SigV*Gyro->SigV/Gyro->SampleTime 
+            Gyro->ARWCoef = sqrt(Gyro->SigV*Gyro->SigV/Gyro->SampleTime
                                + Gyro->SigU*Gyro->SigU*Gyro->SampleTime/12.0);
             Gyro->AngNoiseCoef = Gyro->SigE/sqrt(Gyro->SampleTime);
             Gyro->CorrCoef = 1.0-Gyro->SampleTime/(BiasTime*3600.0);
             Gyro->Angle = 0.0;
          }
       }
-      
+
 /* .. Magnetometer Parameters */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nmag,junk,&newline);
@@ -1937,7 +1937,7 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%ld %[^\n] %[\n]",&MAG->FlexNode,junk,&newline);
          }
       }
-      
+
 /* .. Coarse Sun Sensors */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Ncss,junk,&newline);
@@ -2004,7 +2004,7 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%ld %[^\n] %[\n]",&FSS->FlexNode,junk,&newline);
          }
       }
-      
+
 /* .. Star Trackers */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nst,junk,&newline);
@@ -2049,7 +2049,7 @@ void InitSpacecraft(struct SCType *S)
                &ST->FlexNode,junk,&newline);
          }
       }
-      
+
 /* .. GPS Sensors */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Ngps,junk,&newline);
@@ -2075,7 +2075,7 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%ld %[^\n] %[\n]",&GPS->FlexNode,junk,&newline);
          }
       }
-      
+
 /* .. Accelerometers */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nacc,junk,&newline);
@@ -2092,7 +2092,7 @@ void InitSpacecraft(struct SCType *S)
             if (Accel->MaxCounter < 1) {
                Accel->MaxCounter = 1;
                Accel->SampleTime = DTSIM;
-              
+
                printf("Info:  Accel[%ld].SampleTime was smaller than DTSIM.  It has been adjusted to be DTSIM.\n",Ia);
             }
             Accel->SampleCounter = Accel->MaxCounter;
@@ -2113,7 +2113,7 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%lf %[^\n] %[\n]",&Accel->Bias,junk,&newline);
             fscanf(infile,"%ld %[^\n] %[\n]",&Accel->FlexNode,junk,&newline);
             Accel->BiasStabCoef = Accel->SigU*sqrt(Accel->SampleTime);
-            Accel->DVRWCoef = sqrt(Accel->SigV*Accel->SigV/Accel->SampleTime 
+            Accel->DVRWCoef = sqrt(Accel->SigV*Accel->SigV/Accel->SampleTime
                                + Accel->SigU*Accel->SigU*Accel->SampleTime/12.0);
             Accel->DVNoiseCoef = Accel->SigE/sqrt(Accel->SampleTime);
             Accel->CorrCoef = 1.0-Accel->SampleTime/(BiasTime*3600.0);
@@ -2279,9 +2279,9 @@ void InitSpacecraft(struct SCType *S)
       UpdateScBoundingBox(S);
 
       S->EnvTrq.First = 1;
-      
+
       InitAC(S);
-      
+
 /* .. Loop Gain and Delays allow verification of stability margins in the time domain */
       /* Created by commands */
       S->GainAndDelayActive = FALSE;
@@ -3466,7 +3466,7 @@ long LoadDE430(char DE430Path[80],double JD)
       double rh[3],vh[3];
       double EarthMoonBaryPosH[3],EarthMoonBaryVelH[3];
       double EMRAT = 81.30056907419062; /* Earth-Moon mass ratio */
-      double ZAxis[3] = {0.0,0.0,1.0}; 
+      double ZAxis[3] = {0.0,0.0,1.0};
       double PosJ[3],VelJ[3];
       double qJ2000H[4] = {-0.203123038887,  0.0,  0.0,  0.979153221449};
 
@@ -3504,14 +3504,14 @@ long LoadDE430(char DE430Path[80],double JD)
             }
          }
       }
-      
-/* .. Load block */ 
+
+/* .. Load block */
       for(i=1;i<340;i++) {
          fgets(line,512,infile);
          sscanf(line,"%lf %lf %lf",&Block[3*i],&Block[3*i+1],&Block[3*i+2]);
       }
       fclose(infile);
-            
+
 /* .. Distribute to Worlds [Starting Entry (1-based), Order, Number of Segments] */
       /* Mercury [3 14 4] */
       Iw = MERCURY;
@@ -3773,7 +3773,7 @@ long LoadDE430(char DE430Path[80],double JD)
       MxV(World[EARTH].CNH,vh,World[LUNA].eph.VelN);
       World[LUNA].PriMerAng = LunaPriMerAng(TT.JulDay);
       SimpRot(ZAxis,World[LUNA].PriMerAng,World[LUNA].CWN);
-      
+
       for(Iw=MERCURY;Iw<=LUNA;Iw++) {
          Eph = &World[Iw].eph;
          RV2Eph(DynTime,Eph->mu,Eph->PosN,Eph->VelN,
@@ -3805,7 +3805,7 @@ void LoadConstellations(void) {
 
          C->Star1 = (long *) calloc(C->Nlines,sizeof(long));
          C->Star2 = (long *) calloc(C->Nlines,sizeof(long));
-         
+
          for (j=0; j<C->Nstars; j++) {
             fscanf(infile,"%lf %lf %[^\n] %[\n]",&RA,&Dec,junk,&newline);
             RA *= D2R;
@@ -3816,10 +3816,10 @@ void LoadConstellations(void) {
          }
 
          for (j=0; j<C->Nlines; j++) {
-            fscanf(infile,"%ld %ld %[^\n] %[\n]",&C->Star1[j],&C->Star2[j],junk,&newline);                  
+            fscanf(infile,"%ld %ld %[^\n] %[\n]",&C->Star1[j],&C->Star2[j],junk,&newline);
          }
       }
-      
+
       fclose(infile);
 }
 /**********************************************************************/
@@ -4010,7 +4010,7 @@ void InitSim(int argc, char **argv)
          printf("Initializing with External Time\n");
          RealSystemTime(&UTC.Year,&UTC.doy,&UTC.Month,&UTC.Day,
             &UTC.Hour,&UTC.Minute,&UTC.Second,DTSIM);
-      }         
+      }
       CivilTime = DateToTime(UTC.Year,UTC.Month,UTC.Day,
          UTC.Hour,UTC.Minute,UTC.Second);
       AtomicTime = CivilTime + LeapSec;
@@ -4022,10 +4022,10 @@ void InitSim(int argc, char **argv)
       TimeToDate(DynTime,&TT.Year,&TT.Month,&TT.Day,
          &TT.Hour,&TT.Minute,&TT.Second,DTSIM);
       TT.doy = MD2DOY(TT.Year,TT.Month,TT.Day);
-      
+
       UTC.JulDay = TimeToJD(CivilTime);
       UTC.doy = MD2DOY(UTC.Year,UTC.Month,UTC.Day);
-      
+
       JDToGpsTime(TT.JulDay,&GpsRollover,&GpsWeek,&GpsSecond);
 
 /* .. Load Sun and Planets */
@@ -4137,7 +4137,7 @@ void InitSim(int argc, char **argv)
       }
 
       LoadTdrs();
-      
+
       RNG = CreateRandomProcess(1);
 
       LoadConstellations();
