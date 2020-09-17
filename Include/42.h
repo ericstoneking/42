@@ -161,7 +161,7 @@ EXTERN struct ConstellationType Constell[89];
 
 long SimStep(void);
 void Ephemerides(void);
-void OrbitMotion(void);
+void OrbitMotion(double Time);
 void Environment(struct SCType *S);
 void Perturbations(struct SCType *S);
 void Sensors(struct SCType *S);

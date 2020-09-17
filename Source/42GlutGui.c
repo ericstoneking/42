@@ -23,7 +23,7 @@
 ** #endif
 */
 
-/**********************************************************************/
+/*******************************************************************************/
 void DrawWorldAsBackdrop(struct WorldType *W,double PosN[3],double svn[3])
 {
       struct AtmoType *A;
@@ -34,12 +34,12 @@ void DrawWorldAsBackdrop(struct WorldType *W,double PosN[3],double svn[3])
       GLfloat LightPos[4] = {0.0,0.0,0.0,0.0};
       GLfloat CWEarray[9];
       long i,j;
-      
+
       A = &W->Atmo;
-      
+
       glPushMatrix();
       glLoadIdentity();
-      
+
       /* Transform and scale into Eye frame */
       MxV(POV.CN,svn,sve);
       for(i=0;i<3;i++) LightPos[i] = sve[i];
@@ -49,17 +49,17 @@ void DrawWorldAsBackdrop(struct WorldType *W,double PosN[3],double svn[3])
       MxMT(W->CWN,POV.CN,CWE);
       WorldDist = CopyUnitV(PosE,UnitWorldVecE);
       for(i=0;i<3;i++) UnitWorldVecE[i] = -UnitWorldVecE[i];
-      
+
       if (WorldDist > W->rad) {
          CosWorldAng = sqrt(1.0-W->rad*W->rad/(WorldDist*WorldDist));
       }
       else CosWorldAng = 0.0;
-      
+
       if (WorldDist > A->rad) {
          CosAtmoAng = sqrt(1.0-A->rad*A->rad/(WorldDist*WorldDist));
       }
       else CosAtmoAng = -1.0;
-      
+
       if (WorldDist > W->RingOuter) {
          CosRingAng = sqrt(1.0-W->RingOuter*W->RingOuter/(WorldDist*WorldDist));
       }
@@ -78,7 +78,7 @@ void DrawWorldAsBackdrop(struct WorldType *W,double PosN[3],double svn[3])
 
       UniLoc = glGetUniformLocation(WorldShaderProgram,"HasAtmo");
       glUniform1i(UniLoc,A->Exists);
-      
+
       UniLoc = glGetUniformLocation(WorldShaderProgram,"Br");
       glUniform3f(UniLoc,A->RayScat[0],A->RayScat[1],A->RayScat[2]);
 
@@ -99,38 +99,38 @@ void DrawWorldAsBackdrop(struct WorldType *W,double PosN[3],double svn[3])
 
       UniLoc = glGetUniformLocation(WorldShaderProgram,"CosWorldAng");
       glUniform1f(UniLoc,CosWorldAng);
-      
+
       UniLoc = glGetUniformLocation(WorldShaderProgram,"CosAtmoAng");
       glUniform1f(UniLoc,CosAtmoAng);
-      
+
       UniLoc = glGetUniformLocation(WorldShaderProgram,"CosRingAng");
       glUniform1f(UniLoc,CosRingAng);
-      
+
       UniLoc = glGetUniformLocation(WorldShaderProgram,"WorldRad");
       glUniform1f(UniLoc,W->rad);
-      
+
       UniLoc = glGetUniformLocation(WorldShaderProgram,"PosEyeW");
       glUniform3f(UniLoc,PosW[0],PosW[1],PosW[2]);
-      
+
       UniLoc = glGetUniformLocation(WorldShaderProgram,"MagPosEye");
       glUniform1f(UniLoc,MAGV(PosW));
-      
+
       UniLoc = glGetUniformLocation(WorldShaderProgram,"CWE");
       for(i=0;i<3;i++) {
          for(j=0;j<3;j++) CWEarray[3*i+j] = CWE[i][j];
       }
       glUniformMatrix3fv(UniLoc,1,1,CWEarray);
-      
+
       UniLoc = glGetUniformLocation(WorldShaderProgram,"HasRing");
       glUniform1i(UniLoc,W->HasRing);
-      
+
       glBegin(GL_QUADS);
          glVertex3d(-POV.Width,-POV.Height,-1.0);
          glVertex3d( POV.Width,-POV.Height,-1.0);
          glVertex3d( POV.Width, POV.Height,-1.0);
          glVertex3d(-POV.Width, POV.Height,-1.0);
       glEnd();
-      
+
       glUseProgram(0);
 
       glPopMatrix();
@@ -143,20 +143,20 @@ void DrawSunAsBackdrop(void)
       double UnitSunVecE[3],SunDist;
       double CosSunAng,CosCoronaAng;
       long i;
-      
+
       glPushMatrix();
       glLoadIdentity();
-      
+
       /* Transform and scale into Eye frame */
       for(i=0;i<3;i++) svh[i] = -POV.PosH[i];
       SunDist = UNITV(svh);
       MxV(POV.CH,svh,UnitSunVecE);
-      
+
       RadRatio = World[0].rad/SunDist;
       RadRatio2 = RadRatio*RadRatio;
       CosSunAng = sqrt(1.0-RadRatio2);
       CosCoronaAng = sqrt(1.0-16.0*RadRatio2);
-      
+
       glUseProgram(SunShaderProgram);
 
       UniLoc = glGetUniformLocation(SunShaderProgram,"UnitSunVecE");
@@ -164,17 +164,17 @@ void DrawSunAsBackdrop(void)
 
       UniLoc = glGetUniformLocation(SunShaderProgram,"CosSunAng");
       glUniform1f(UniLoc,CosSunAng);
-      
+
       UniLoc = glGetUniformLocation(SunShaderProgram,"CosCoronaAng");
       glUniform1f(UniLoc,CosCoronaAng);
-      
+
       glBegin(GL_QUADS);
          glVertex3d(-POV.Width,-POV.Height,-1.0);
          glVertex3d( POV.Width,-POV.Height,-1.0);
          glVertex3d( POV.Width, POV.Height,-1.0);
          glVertex3d(-POV.Width, POV.Height,-1.0);
       glEnd();
-      
+
       glUseProgram(0);
 
       glPopMatrix();
@@ -1079,7 +1079,7 @@ void DrawFarScene(void)
       /*if (CamShow[PULSAR_SOURCES]) DrawPulsars(LoS,BuckyPf,PulsarList);*/
 
       glClear(GL_DEPTH_BUFFER_BIT);
-      
+
 
 /* .. Find depth, visibility for each world */
       VisCoef = 0.5*CamHeight/POV.SinFov;
@@ -2365,7 +2365,7 @@ void DrawMap(void)
          /* Orbits of SC that aren't the POV host */
          for(Isc=0;Isc<Nsc;Isc++) {
             if (SC[Isc].Exists && Orb[SC[Isc].RefOrb].World == Orb[S->RefOrb].World && Isc != S->ID) {
-            
+
                /* SC Sprite */
                MxV(W->CWN,SC[Isc].PosN,p);
                UNITV(p);
@@ -3128,7 +3128,7 @@ void DrawSphereHUD(void)
          glRasterPos2i(W->Spot[i].xmin+1,W->Spot[i].ymin+2);
          DrawBitmapString(GLUT_BITMAP_8_BY_13,show[i]);
       }
-      
+
 /* .. Vectors Box */
       W = &VectorsWidget;
       DrawWidget(W);
@@ -3140,7 +3140,7 @@ void DrawSphereHUD(void)
          glRasterPos2i(W->Spot[i].xmin+1,W->Spot[i].ymin+2);
          DrawBitmapString(GLUT_BITMAP_8_BY_13,vectors[i]);
       }
-      
+
 /* .. FOVs Box */
       W = &FOVsWidget;
       DrawWidget(W);
@@ -3152,7 +3152,7 @@ void DrawSphereHUD(void)
          glRasterPos2i(W->Spot[i].xmin+1,W->Spot[i].ymin+2);
          DrawBitmapString(GLUT_BITMAP_8_BY_13,fovs[i]);
       }
-      
+
 /* .. Grids Box */
       W = &GridsWidget;
       DrawWidget(W);
@@ -3164,7 +3164,7 @@ void DrawSphereHUD(void)
          glRasterPos2i(W->Spot[i].xmin+1,W->Spot[i].ymin+2);
          DrawBitmapString(GLUT_BITMAP_8_BY_13,frames[i]);
       }
-      
+
 /* .. Axes Box */
       W = &AxesWidget;
       DrawWidget(W);
@@ -3247,10 +3247,10 @@ void DrawConstellation(struct ConstellationType *C, double CVJ[3][3])
       for (i=0;i<Nlines;i++) {
          MxV(CVJ,C->StarVec[C->Star1[i]],VecV);
          VecToLngLat(VecV,&lngA,&latA);
-         
+
          MxV(CVJ,C->StarVec[C->Star2[i]],VecV);
          VecToLngLat(VecV,&lngB,&latB);
-         
+
          DrawMercatorLine(lngA,latA,lngB,latB);
       }
 }
@@ -3297,7 +3297,7 @@ void DrawUnitSphere(void)
 
       GLfloat MenuOutlineColor[4] = {0.2,0.2,1.0,1.0};
       GLfloat MenuBackgroundColor[4] = {0.15,0.15,0.3,1.0};
-      
+
       long MenuTop;
       double rad;
       double rmn[3],rmh[3];
@@ -3331,7 +3331,7 @@ void DrawUnitSphere(void)
 
       if (W->Spot[0].Selected) {
          rad = asin(Wd->rad / MAGV(S->PosN));
-         
+
          for(i=0;i<3;i++) VecN[i] = -S->PosN[i];
          UNITV(VecN);
          MxV(CVN,VecN,VecV);
@@ -3345,7 +3345,7 @@ void DrawUnitSphere(void)
          DrawMercatorVector(lng,lat,Wd->Name);
       }
 
-/* .. Grids */ 
+/* .. Grids */
       W = &GridsWidget;
 
       if (W->Spot[0].Selected) { /* B grid */
@@ -3391,10 +3391,10 @@ void DrawUnitSphere(void)
       if (W->Spot[1].Selected) {
          for (i=0; i<S->Nfss; i++) {
             sprintf(label,"FSS%ld",i);
-            
+
             if (S->FSS[i].Valid) glColor4fv(ValidFSSColor);
             else glColor4fv(InvalidFSSColor);
-            
+
             MxMT(CVB0,S->FSS[i].CB,CVS);
             DrawMercatorSquare(CVS,S->FSS[i].FovHalfAng);
 
@@ -3431,20 +3431,20 @@ void DrawUnitSphere(void)
          glColor4fv(BBrightColor);
          DrawMercatorAxes(CVB0,"B");
       }
-      
+
       /* N Axes */
       if (W->Spot[1].Selected) {
          glColor4fv(NBrightColor);
          DrawMercatorAxes(CVN,"N");
       }
-      
+
       /* L Axes */
       if (W->Spot[2].Selected) {
          glColor4fv(LBrightColor);
          DrawMercatorAxes(CVL,"L");
       }
 
-/* .. Vectors */ 
+/* .. Vectors */
       W = &VectorsWidget;
 
       /* Magnetic Field */
@@ -3572,7 +3572,7 @@ void DrawUnitSphere(void)
             glDisable(GL_TEXTURE_2D);
          }
       }
-      
+
 /* .. Planets */
       W = &SphereShowWidget;
       if (W->Spot[3].Selected) {
@@ -3597,7 +3597,7 @@ void DrawUnitSphere(void)
          glColor4fv(ConstellationColor);
          for (i=0;i<89;i++) {
             if (ShowConstellations[Constell[i].Class]) {
-               if (Constell[i].Nstars > 0) 
+               if (Constell[i].Nstars > 0)
                   DrawConstellation(&Constell[i],CVJ);
             }
          }
@@ -4840,7 +4840,7 @@ void SphereMouseButtonHandler(int Button, int State, int x, int y)
                      for (i=0; i<6; i++) {
                         if (i != Pick) W->Spot[i].Selected = 0;
                      }
-                  } 
+                  }
                   else {
                      for (i=6; i<10; i++) {
                         if (i != Pick) W->Spot[i].Selected = 0;
@@ -4863,16 +4863,16 @@ void SphereMouseButtonHandler(int Button, int State, int x, int y)
                }
 
                if (Pick != 100) {
-               
+
                   if (W->Spot[Pick].Selected == 0) {
                      W->Spot[Pick].Selected = 1;
-                  } 
+                  }
                   else {
                      W->Spot[Pick].Selected = 0;
                   }
                }
             }
-         
+
             /* Vectors Widget */
             W = &VectorsWidget;
 
@@ -4887,16 +4887,16 @@ void SphereMouseButtonHandler(int Button, int State, int x, int y)
                }
 
                if (Pick != 100) {
-               
+
                   if (W->Spot[Pick].Selected == 0) {
                      W->Spot[Pick].Selected = 1;
-                  } 
+                  }
                   else {
                      W->Spot[Pick].Selected = 0;
                   }
                }
             }
-         
+
             /* FOVs Widget */
             W = &FOVsWidget;
 
@@ -4911,10 +4911,10 @@ void SphereMouseButtonHandler(int Button, int State, int x, int y)
                }
 
                if (Pick != 100) {
-               
+
                   if (W->Spot[Pick].Selected == 0) {
                      W->Spot[Pick].Selected = 1;
-                  } 
+                  }
                   else {
                      W->Spot[Pick].Selected = 0;
                   }
@@ -4935,16 +4935,16 @@ void SphereMouseButtonHandler(int Button, int State, int x, int y)
                }
 
                if (Pick != 100) {
-               
+
                   if (W->Spot[Pick].Selected == 0) {
                      W->Spot[Pick].Selected = 1;
-                  } 
+                  }
                   else {
                      W->Spot[Pick].Selected = 0;
                   }
                }
             }
-         
+
             /* Axes Widget */
             W = &AxesWidget;
 
@@ -4959,10 +4959,10 @@ void SphereMouseButtonHandler(int Button, int State, int x, int y)
                }
 
                if (Pick != 100) {
-               
+
                   if (W->Spot[Pick].Selected == 0) {
                      W->Spot[Pick].Selected = 1;
-                  } 
+                  }
                   else {
                      W->Spot[Pick].Selected = 0;
                   }
@@ -5228,7 +5228,7 @@ void InitSphereWidgets(void)
 
       long x0,y0;
       long i;
-      
+
       long xpos[2] = {4,34};
       long ypos[5] = {36,52,68,100,116};
       long Xgrid[3] = {512-82,512-57,512-33};
@@ -5236,14 +5236,14 @@ void InitSphereWidgets(void)
       long x,y;
 
       long NLines = NumSphereWindowMenuLines;
-      
+
       SphereShowWidget.Nspot = 6;
       VectorsWidget.Nspot = 6;
       FOVsWidget.Nspot = 3; /* Max of NLines - 3 */
 
 /* .. Top/Center Widget */
       x0 = 8;
-      y0 = 4; 
+      y0 = 4;
       CenterWidget.xmin = x0;
       CenterWidget.xmax = x0 + 57;
       CenterWidget.ymin = y0;
@@ -5402,14 +5402,14 @@ void InitSphereWidgets(void)
       x0 = VectorsWidget.xmax + 3;
       y0 = 4;
       AxesWidget.xmin = x0;
-      AxesWidget.xmax = 512-8; 
+      AxesWidget.xmax = 512-8;
       AxesWidget.ymin = y0;
       AxesWidget.ymax = y0 + 20;
       memcpy(AxesWidget.BorderColor,BorderColor,4*sizeof(GLfloat));
       memcpy(AxesWidget.TextColor,TextColor,4*sizeof(GLfloat));
       memcpy(AxesWidget.SelectedColor,SelectedColor,4*sizeof(GLfloat));
       memcpy(AxesWidget.UnselectedColor,UnselectedColor,4*sizeof(GLfloat));
-      
+
       AxesWidget.Nspot = 3;
       AxesWidget.Spot =
          (struct SpotType *) calloc(AxesWidget.Nspot,sizeof(struct SpotType));
@@ -5461,14 +5461,14 @@ void OrreryReshapeHandler(int width, int height)
 }
 /**********************************************************************/
 void SphereReshapeHandler(int width, int height)
-{      
+{
       double ymin;
-      
+
       if (width >= 512) SphereWindowWidth = width;
       else SphereWindowWidth = 512;
 
       SphereWindowHeight = SphereWindowWidth/2 + 16*(NumSphereWindowMenuLines + 2);
-            
+
       glutReshapeWindow(SphereWindowWidth,SphereWindowHeight);
 
       glMatrixMode(GL_PROJECTION);
@@ -5478,7 +5478,7 @@ void SphereReshapeHandler(int width, int height)
       gluOrtho2D(180.0,-180.0,ymin,90.0);
       glMatrixMode(GL_MODELVIEW);
 
-      
+
       InitSphereWidgets();
 }
 /**********************************************************************/
@@ -5985,7 +5985,7 @@ void LoadCamShaders(void)
       glUniform1f(UniLoc,1.0);
       UniLoc = glGetUniformLocation(SunShaderProgram,"CosCoronaAng");
       glUniform1f(UniLoc,1.0);
-      
+
       glUseProgram(WorldShaderProgram);
       UniLoc = glGetUniformLocation(WorldShaderProgram,"MapTexture");
       glUniform1i(UniLoc,0);
@@ -6004,7 +6004,7 @@ void LoadCamShaders(void)
       UniLoc = glGetUniformLocation(WorldShaderProgram,"CosAtmoAng");
       glUniform1f(UniLoc,0.0);
       UniLoc = glGetUniformLocation(WorldShaderProgram,"WorldRad");
-      glUniform1f(UniLoc,0.0);      
+      glUniform1f(UniLoc,0.0);
       UniLoc = glGetUniformLocation(WorldShaderProgram,"PosEyeW");
       glUniform3f(UniLoc,0.0,0.0,0.0);
       UniLoc = glGetUniformLocation(WorldShaderProgram,"MagPosEye");
@@ -6114,7 +6114,10 @@ void LoadMapShaders(void)
 /*********************************************************************/
 void InitCamWindow(void)
 {
+      int GlutParm;
+
       glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
+      //glutInitDisplayString("rgba double depth hidpi");
       glutInitWindowSize(CamWidth,CamHeight);
       CamWindow = glutCreateWindow(CamTitle);
       #if (defined(GLEW_BUILD) || defined(GLEW_STATIC))
@@ -6191,7 +6194,16 @@ void InitCamWindow(void)
       BannerColor[1] = 0.3;
       BannerColor[2] = 0.4;
       BannerColor[3] = 1.0;
-
+      
+      GlutParm = glutGet(GLUT_WINDOW_WIDTH);
+      printf("Cam Window Width = %d\n",GlutParm);
+      GlutParm = glutGet(GLUT_WINDOW_HEIGHT);
+      printf("Cam Window Height = %d\n",GlutParm);
+      GlutParm = glutGet(GLUT_SCREEN_WIDTH);
+      printf("Cam Screen Width = %d\n",GlutParm);
+      GlutParm = glutGet(GLUT_SCREEN_HEIGHT);
+      printf("Cam Screen Height = %d\n",GlutParm);
+      
       printf("Done Initializing Cam Window\n");
 
 }
@@ -6365,7 +6377,7 @@ void InitSphereWindow(void)
       double ymin;
       glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
 
-      NumSphereWindowMenuLines = 6; 
+      NumSphereWindowMenuLines = 6;
       /* In addition to changing this, the number of entries in each
          widget must be changed in InitSphereWidgets, and new entries
          are added in DrawSphereHUD                                  */

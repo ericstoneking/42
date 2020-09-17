@@ -87,16 +87,16 @@ long AdvanceTime(void)
             itime = (long) ((SimTime+0.5*DTSIM)/(DTSIM));
             SimTime = ((double) itime)*DTSIM;
             DynTime = DynTime0 + SimTime;
-            
+
             AtomicTime = DynTime - 32.184; /* TAI */
             CivilTime = AtomicTime - LeapSec; /* UTC "clock" time */
             GpsTime = AtomicTime - 19.0;
-            
+
             TT.JulDay = TimeToJD(DynTime);
             TimeToDate(DynTime,&TT.Year,&TT.Month,&TT.Day,
                &TT.Hour,&TT.Minute,&TT.Second,DTSIM);
             TT.doy = MD2DOY(TT.Year,TT.Month,TT.Day);
-            
+
             UTC.JulDay = TimeToJD(CivilTime);
             TimeToDate(CivilTime,&UTC.Year,&UTC.Month,&UTC.Day,
                &UTC.Hour,&UTC.Minute,&UTC.Second,DTSIM);
@@ -111,23 +111,23 @@ long AdvanceTime(void)
             itime = (long) ((SimTime+0.5*DTSIM)/(DTSIM));
             SimTime = ((double) itime)*DTSIM;
             DynTime = DynTime0 + SimTime;
-            
+
             AtomicTime = DynTime - 32.184; /* TAI */
             CivilTime = AtomicTime - LeapSec; /* UTC "clock" time */
             GpsTime = AtomicTime - 19.0;
-            
+
             TT.JulDay = TimeToJD(DynTime);
             TimeToDate(DynTime,&TT.Year,&TT.Month,&TT.Day,
                &TT.Hour,&TT.Minute,&TT.Second,DTSIM);
             TT.doy = MD2DOY(TT.Year,TT.Month,TT.Day);
-            
+
             UTC.JulDay = TimeToJD(CivilTime);
             TimeToDate(CivilTime,&UTC.Year,&UTC.Month,&UTC.Day,
                &UTC.Hour,&UTC.Minute,&UTC.Second,DTSIM);
             UTC.doy = MD2DOY(UTC.Year,UTC.Month,UTC.Day);
-            
+
             JDToGpsTime(TT.JulDay,&GpsRollover,&GpsWeek,&GpsSecond);
-            
+
             break;
          case EXTERNAL_TIME :
             while(CurrTick == PrevTick) {
@@ -137,30 +137,30 @@ long AdvanceTime(void)
             SimTime += DTSIM;
             itime = (long) ((SimTime+0.5*DTSIM)/(DTSIM));
             SimTime = ((double) itime)*DTSIM;
-            
+
             RealSystemTime(&UTC.Year,&UTC.doy,&UTC.Month,&UTC.Day,
                &UTC.Hour,&UTC.Minute,&UTC.Second,DTSIM);
             CivilTime = DateToTime(UTC.Year,UTC.Month,UTC.Day,
                UTC.Hour,UTC.Minute,UTC.Second);
             AtomicTime = CivilTime + LeapSec;
             DynTime = AtomicTime + 32.184;
-                           
+
             TT.JulDay = TimeToJD(DynTime);
             TimeToDate(DynTime,&TT.Year,&TT.Month,&TT.Day,
                &TT.Hour,&TT.Minute,&TT.Second,DTSIM);
             TT.doy = MD2DOY(TT.Year,TT.Month,TT.Day);
-                           
+
             UTC.JulDay = TimeToJD(CivilTime);
             UTC.doy = MD2DOY(UTC.Year,UTC.Month,UTC.Day);
 
             JDToGpsTime(TT.JulDay,&GpsRollover,&GpsWeek,&GpsSecond);
             DynTime0 = DynTime - SimTime;
-            
+
             break;
          case NOS3_TIME :
             if (First) {
                First = 0;
-               double JD = DateToJD(TT.Year, TT.Month, TT.Day, 
+               double JD = DateToJD(TT.Year, TT.Month, TT.Day,
                   TT.Hour, TT.Minute, TT.Second);
                DynTime0 = JDToTime(JD);
             }
@@ -171,12 +171,12 @@ long AdvanceTime(void)
                UTC.Hour,UTC.Minute,UTC.Second);
             AtomicTime = CivilTime + LeapSec;
             DynTime = AtomicTime + 32.184;
-                           
+
             TT.JulDay = TimeToJD(DynTime);
             TimeToDate(DynTime,&TT.Year,&TT.Month,&TT.Day,
                &TT.Hour,&TT.Minute,&TT.Second,DTSIM);
             TT.doy = MD2DOY(TT.Year,TT.Month,TT.Day);
-                           
+
             UTC.JulDay = TimeToJD(CivilTime);
             UTC.doy = MD2DOY(UTC.Year,UTC.Month,UTC.Day);
 
@@ -301,7 +301,7 @@ void ZeroFrcTrq(void)
                  FN->Trq[2] = 0.0;
                }
             }
-         }     
+         }
       }
 }
 /**********************************************************************/
@@ -316,10 +316,8 @@ long SimStep(void)
       if (First) {
          First = 0;
          SimTime = 0.0;
-         #if defined _USE_SYSTEM_TIME_
-            /* First call just initializes timer */
-            RealRunTime(&TotalRunTime,DTSIM);
-         #endif
+         /* First call just initializes timer */
+         RealRunTime(&TotalRunTime,DTSIM);
          ManageFlags();
 
          Ephemerides(); /* Sun, Moon, Planets, Spacecraft, Useful Auxiliary Frames */
@@ -349,7 +347,7 @@ long SimStep(void)
       for(Isc=0;Isc<Nsc;Isc++) {
          if (SC[Isc].Exists) Dynamics(&SC[Isc]);
       }
-      OrbitMotion();
+      OrbitMotion(DynTime+DTSIM);
       SimComplete = AdvanceTime();
 
       /* Update SC Bounding Boxes occasionally */

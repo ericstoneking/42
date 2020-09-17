@@ -442,7 +442,7 @@ void SplineToPosVel(struct OrbitType *O)
       }
 }
 /**********************************************************************/
-void OrbitMotion(void)
+void OrbitMotion(double Time)
 {
       long Iorb,i,j;
       struct OrbitType *O;
@@ -467,13 +467,13 @@ void OrbitMotion(void)
          if (O->Exists) {
             if (O->Regime == ORB_THREE_BODY) {
                if (O->LagDOF == LAGDOF_MODES) {
-                  LagModes2RV(DynTime,&LagSys[O->Sys],
+                  LagModes2RV(Time,&LagSys[O->Sys],
                      O,O->PosN,O->VelN);
                }
                else if (O->LagDOF == LAGDOF_COWELL) {
                   ThreeBodyOrbitRK4(O);
-                  RV2LagModes(DynTime,&LagSys[O->Sys],O);
-                  O->Epoch = DynTime;
+                  RV2LagModes(Time,&LagSys[O->Sys],O);
+                  O->Epoch = Time;
                }
                else if (O->LagDOF == LAGDOF_SPLINE) {
                   SplineToPosVel(O);
@@ -485,13 +485,13 @@ void OrbitMotion(void)
                   O->ArgP = O->ArgP0 + O->ArgPdot*SimTime;
                   Eph2RV(O->MuPlusJ2,O->SLR,O->ecc,
                          O->inc,O->RAAN,O->ArgP,
-                         DynTime+DTSIM-O->tp,
+                         Time-O->tp,
                          O->PosN,O->VelN,&O->anom);
                }
                else {
                   Eph2RV(O->mu,O->SLR,O->ecc,
                          O->inc,O->RAAN,O->ArgP,
-                         DynTime+DTSIM-O->tp,
+                         Time-O->tp,
                          O->PosN,O->VelN,&O->anom);
                }
             }

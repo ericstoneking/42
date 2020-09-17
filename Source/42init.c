@@ -388,27 +388,28 @@ long LoadTRVfromFile(const char *Path, const char *TrvFileName,
 
       Nchar = strlen(ElemLabel);
       /* Pad label to 24 characters to assure unique match */
-      for(i=0;i<Nchar;i++) Label[i] = ElemLabel[i];
-      for(i=Nchar;i<24;i++) Label[i] = ' ';
-      Label[24] = '\0';
       while(!feof(infile) && !Success) {
-         fgets(line,80,infile);
-         if (!strncmp(line,Label,24)) {
-            Success = 1;
-            fscanf(infile,"%s %s %ld-%ld-%ld %ld:%ld:%lf\n",
-               response1,response2,
-               &EpochYear,&EpochMonth,&EpochDay,
-               &EpochHour,&EpochMinute,&EpochSecond);
-            fscanf(infile,"%lf %lf %lf\n",&R[0],&R[1],&R[2]);
-            fscanf(infile,"%lf %lf %lf\n",&V[0],&V[1],&V[2]);
+         fgets(line,79,infile);
+         if (sscanf(line,"\"%[^\"]\"",Label) == 1) {
+            if (!strncmp(Label,ElemLabel,Nchar)) {
+               Success = 1;
+               fscanf(infile,"%s %s %ld-%ld-%ld %ld:%ld:%lf\n",
+                  response1,response2,
+                  &EpochYear,&EpochMonth,&EpochDay,
+                  &EpochHour,&EpochMinute,&EpochSecond);
+               fscanf(infile,"%lf %lf %lf\n",&R[0],&R[1],&R[2]);
+               fscanf(infile,"%lf %lf %lf\n",&V[0],&V[1],&V[2]);
+            }
          }
       }
       fclose(infile);
 
       if (Success) {
+         /* Epoch is in UTC */
          EpochJD = DateToJD(EpochYear,EpochMonth,EpochDay,
             EpochHour,EpochMinute,EpochSecond);
          O->Epoch = JDToTime(EpochJD);
+         O->Epoch += DynTime-CivilTime;
          O->Regime = DecodeString(response1);
          if (O->Regime == ORB_CENTRAL) {
             O->World = DecodeString(response2);
@@ -644,7 +645,7 @@ void InitOrbit(struct OrbitType *O)
             }
             else if (ElementType == INP_TRV) {
                Success = LoadTRVfromFile(InOutPath, ElementFileName,
-                  ElementLabel, DynTime, O);
+                  ElementLabel, CivilTime, O);
                if (!Success) {
                   printf("Error loading TRV %s from file %s.\n",
                      ElementLabel,ElementFileName);
@@ -743,7 +744,7 @@ void InitOrbit(struct OrbitType *O)
             fscanf(infile,"\"%[^\"]\" %[^\n] %[\n]",ElementFileName,junk,&newline);
             if (ElementType == INP_TRV) {
                Success = LoadTRVfromFile(InOutPath, ElementFileName,
-                  ElementLabel, DynTime, O);
+                  ElementLabel, CivilTime, O);
                if (!Success) {
                   printf("Error loading TRV %s from file %s.\n",
                      ElementLabel,ElementFileName);
@@ -3455,7 +3456,7 @@ long LoadDE430(char DE430Path[80],double JD)
       double Block[1020];
       long BlockNum,NumEntries;
       long FoundBlock;
-      char line[511];
+      char line[512];
       double JD1,JD2;
       long i,n,Ic,Iw;
       long Nseg,Start,N;
@@ -3492,9 +3493,9 @@ long LoadDE430(char DE430Path[80],double JD)
 /* .. Search for block */
       FoundBlock = 0;
       while(!FoundBlock) {
-         fgets(line,512,infile);
+         fgets(line,511,infile);
          if (sscanf(line,"%ld %ld",&BlockNum,&NumEntries) == 2) {
-         fgets(line,512,infile);
+         fgets(line,511,infile);
             if (sscanf(line,"%lf %lf %lf",&Block[0],&Block[1],&Block[2]) == 3) {
                if (JD >= Block[0] && JD < Block[1]) {
                   FoundBlock = 1;
@@ -3507,7 +3508,7 @@ long LoadDE430(char DE430Path[80],double JD)
       
 /* .. Load block */ 
       for(i=1;i<340;i++) {
-         fgets(line,512,infile);
+         fgets(line,511,infile);
          sscanf(line,"%lf %lf %lf",&Block[3*i],&Block[3*i+1],&Block[3*i+2]);
       }
       fclose(infile);
@@ -4129,7 +4130,7 @@ void InitSim(int argc, char **argv)
       for(Iorb=0;Iorb<Norb;Iorb++) {
          if (Orb[Iorb].Exists) InitOrbit(&Orb[Iorb]);
       }
-      OrbitMotion();
+      OrbitMotion(DynTime);
       for (Isc=0;Isc<Nsc;Isc++) {
          if (SC[Isc].Exists) {
             InitSpacecraft(&SC[Isc]);
