@@ -46,6 +46,9 @@
    #include <OpenGL/gl.h>
    #include <OpenGL/glu.h>
    #include <GLUT/glut.h>
+   #ifdef _USE_GLFW_
+     #include <GLFW/glfw3.h>
+   #endif
    /* #include <CGDirectDisplay.h> */ /* For CGDisplayHideCursor */
 #else
    #error "Yo!  I don't know where to look for glut.h!"
@@ -212,17 +215,3 @@ void ValidateShaderProgram(GLuint ShaderProgram, const char *Name);
 */
 
 #endif /* __GLKIT_H__ */
-
-
-
-
-
-
-
-
-
-
-
-
-
-

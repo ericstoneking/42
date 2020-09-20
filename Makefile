@@ -1,6 +1,6 @@
 ##########################  Macro Definitions  ############################
 
-# Let's try to auto-detect what platform we're on.  
+# Let's try to auto-detect what platform we're on.
 # If this fails, set 42PLATFORM manually in the else block.
 AUTOPLATFORM = Failed
 ifeq ($(MSYSTEM),MINGW32)
@@ -44,6 +44,9 @@ STANDALONEFLAG =
 NOS3FSWFLAG =
 #NOS3FSWFLAG = -D _ENABLE_NOS3_FSW_
 
+#GLFWFLAG = 
+GLFWFLAG = -D _USE_GLFW_
+
 GMSECFLAG =
 #GMSECFLAG = -D _ENABLE_GMSEC_
 ifeq ($(strip $(GMSECFLAG)),)
@@ -83,8 +86,13 @@ ifeq ($(42PLATFORM),__APPLE__)
    ARCHFLAG = -arch x86_64
 
    LFLAGS = -bind_at_load
-   LIBS = -framework System -framework Carbon -framework OpenGL -framework GLUT 
-   GUIOBJ = $(OBJ)42GlutGui.o $(OBJ)glkit.o 
+   ifeq ($(strip $(GLFWFLAG)),)
+      LIBS = -framework System -framework Carbon -framework OpenGL -framework GLUT
+      GUIOBJ = $(OBJ)42GlutGui.o $(OBJ)glkit.o
+   else
+      LIBS = -lglfw -framework System -framework Carbon -framework OpenGL -framework GLUT
+      GUIOBJ = $(OBJ)42glfwgui.o $(OBJ)glkit.o
+   endif
    EXENAME = 42
    CC = gcc
 endif
@@ -92,10 +100,10 @@ endif
 ifeq ($(42PLATFORM),__linux__)
    # Linux Macros
    CINC =
-   EXTERNDIR = 
+   EXTERNDIR =
 
    ifneq ($(strip $(GUIFLAG)),)
-      GUIOBJ = $(OBJ)42GlutGui.o $(OBJ)glkit.o 
+      GUIOBJ = $(OBJ)42GlutGui.o $(OBJ)glkit.o
       #GLINC = -I /usr/include/
       GLINC = -I $(KITDIR)/include/GL/
       LIBS = -lglut -lGLU -lGL -ldl -lm
@@ -124,7 +132,7 @@ ifeq ($(42PLATFORM),__MSYS__)
       GLUT = $(EXTERNDIR)freeglut/
       LIBS =  -lopengl32 -lglu32 -lfreeglut -lws2_32 -lglew32
       LFLAGS = -L $(GLUT)lib/ -L $(GLEW)lib/
-      GUIOBJ = $(OBJ)42GlutGui.o $(OBJ)glkit.o 
+      GUIOBJ = $(OBJ)42GlutGui.o $(OBJ)glkit.o
       GLINC = -I $(GLEW)include/GL/ -I $(GLUT)include/GL/
       ARCHFLAG = -D GLUT_NO_LIB_PRAGMA -D GLUT_NO_WARNING_DISABLE -D GLUT_DISABLE_ATEXIT_HACK
    else
@@ -156,25 +164,25 @@ else
    SLOSHOBJ =
 endif
 
-# If not _AC_STANDALONE_, link AcApp.c in with the rest of 42 
+# If not _AC_STANDALONE_, link AcApp.c in with the rest of 42
 ifneq ($(strip $(STANDALONEFLAG)),)
    ACOBJ =
 else
-   ACOBJ = $(OBJ)AcApp.o 
+   ACOBJ = $(OBJ)AcApp.o
 endif
 
 ifneq ($(strip $(GMSECFLAG)),)
    GMSECOBJ = $(OBJ)gmseckit.o
    ACIPCOBJ = $(OBJ)AppReadFromFile.o $(OBJ)AppWriteToGmsec.o $(OBJ)AppReadFromGmsec.o \
-      $(OBJ)AppWriteToSocket.o $(OBJ)AppReadFromSocket.o $(OBJ)AppWriteToFile.o 
+      $(OBJ)AppWriteToSocket.o $(OBJ)AppReadFromSocket.o $(OBJ)AppWriteToFile.o
    SIMIPCOBJ = $(OBJ)SimWriteToFile.o $(OBJ)SimWriteToGmsec.o $(OBJ)SimWriteToSocket.o \
-      $(OBJ)SimReadFromFile.o $(OBJ)SimReadFromGmsec.o $(OBJ)SimReadFromSocket.o 
+      $(OBJ)SimReadFromFile.o $(OBJ)SimReadFromGmsec.o $(OBJ)SimReadFromSocket.o
 else
    GMSECOBJ =
    ACIPCOBJ = $(OBJ)AppReadFromFile.o \
-      $(OBJ)AppWriteToSocket.o $(OBJ)AppReadFromSocket.o $(OBJ)AppWriteToFile.o 
+      $(OBJ)AppWriteToSocket.o $(OBJ)AppReadFromSocket.o $(OBJ)AppWriteToFile.o
    SIMIPCOBJ = $(OBJ)SimWriteToFile.o $(OBJ)SimWriteToSocket.o \
-      $(OBJ)SimReadFromFile.o $(OBJ)SimReadFromSocket.o 
+      $(OBJ)SimReadFromFile.o $(OBJ)SimReadFromSocket.o
 endif
 
 42OBJ = $(OBJ)42main.o $(OBJ)42exec.o $(OBJ)42actuators.o $(OBJ)42cmd.o \
@@ -190,12 +198,12 @@ $(OBJ)orbkit.o $(OBJ)radbeltkit.o $(OBJ)sigkit.o $(OBJ)sphkit.o $(OBJ)timekit.o
 ACKITOBJ = $(OBJ)dcmkit.o $(OBJ)mathkit.o $(OBJ)fswkit.o $(OBJ)iokit.o $(OBJ)timekit.o
 
 ACIPCOBJ = $(OBJ)AppReadFromFile.o \
-$(OBJ)AppWriteToSocket.o $(OBJ)AppReadFromSocket.o $(OBJ)AppWriteToFile.o 
+$(OBJ)AppWriteToSocket.o $(OBJ)AppReadFromSocket.o $(OBJ)AppWriteToFile.o
 
 #ANSIFLAGS = -Wstrict-prototypes -pedantic -ansi -Werror
 ANSIFLAGS =
 
-CFLAGS = -Wall -Wshadow -Wno-deprecated -g  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(INC) -I $(KITINC) -I $(KITSRC) $(GMSECINC) -O0 $(ARCHFLAG) $(GUIFLAG) $(SHADERFLAG) $(CFDFLAG) $(FFTBFLAG) $(GSFCFLAG) $(GMSECFLAG) $(STANDALONEFLAG) $(NOS3FSWFLAG)
+CFLAGS = -Wall -Wshadow -Wno-deprecated -g  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(INC) -I $(KITINC) -I $(KITSRC) $(GMSECINC) -O0 $(ARCHFLAG) $(GUIFLAG) $(SHADERFLAG) $(CFDFLAG) $(FFTBFLAG) $(GSFCFLAG) $(GMSECFLAG) $(STANDALONEFLAG) $(NOS3FSWFLAG) $(GLFWFLAG)
 
 
 ##########################  Rules to link 42  #############################
@@ -208,98 +216,101 @@ AcApp : $(OBJ)AcApp.o $(ACKITOBJ) $(ACIPCOBJ) $(GMSECOBJ)
 
 ####################  Rules to compile objects  ###########################
 
-$(OBJ)42main.o          : $(SRC)42main.c 
-	$(CC) $(CFLAGS) -c $(SRC)42main.c -o $(OBJ)42main.o  
+$(OBJ)42main.o          : $(SRC)42main.c
+	$(CC) $(CFLAGS) -c $(SRC)42main.c -o $(OBJ)42main.o
 
 $(OBJ)42exec.o          : $(SRC)42exec.c $(INC)42.h
-	$(CC) $(CFLAGS) -c $(SRC)42exec.c -o $(OBJ)42exec.o  
+	$(CC) $(CFLAGS) -c $(SRC)42exec.c -o $(OBJ)42exec.o
 
 $(OBJ)42actuators.o : $(SRC)42actuators.c $(INC)42.h $(INC)Ac.h $(INC)AcTypes.h
-	$(CC) $(CFLAGS) -c $(SRC)42actuators.c -o $(OBJ)42actuators.o  
+	$(CC) $(CFLAGS) -c $(SRC)42actuators.c -o $(OBJ)42actuators.o
 
 $(OBJ)42cmd.o : $(SRC)42cmd.c $(INC)42.h $(INC)Ac.h $(INC)AcTypes.h
-	$(CC) $(CFLAGS) -c $(SRC)42cmd.c -o $(OBJ)42cmd.o  
+	$(CC) $(CFLAGS) -c $(SRC)42cmd.c -o $(OBJ)42cmd.o
 
-$(OBJ)42dynamics.o     : $(SRC)42dynamics.c $(INC)42.h 
-	$(CC) $(CFLAGS) -c $(SRC)42dynamics.c -o $(OBJ)42dynamics.o  
+$(OBJ)42dynamics.o     : $(SRC)42dynamics.c $(INC)42.h
+	$(CC) $(CFLAGS) -c $(SRC)42dynamics.c -o $(OBJ)42dynamics.o
 
 $(OBJ)42environs.o  : $(SRC)42environs.c $(INC)42.h
-	$(CC) $(CFLAGS) -c $(SRC)42environs.c -o $(OBJ)42environs.o  
+	$(CC) $(CFLAGS) -c $(SRC)42environs.c -o $(OBJ)42environs.o
 
 $(OBJ)42ephem.o     : $(SRC)42ephem.c $(INC)42.h
-	$(CC) $(CFLAGS) -c $(SRC)42ephem.c -o $(OBJ)42ephem.o  
+	$(CC) $(CFLAGS) -c $(SRC)42ephem.c -o $(OBJ)42ephem.o
 
-$(OBJ)42fsw.o       : $(SRC)42fsw.c $(INC)Ac.h $(INC)AcTypes.h 
-	$(CC) $(CFLAGS) -c $(SRC)42fsw.c -o $(OBJ)42fsw.o  
+$(OBJ)42fsw.o       : $(SRC)42fsw.c $(INC)Ac.h $(INC)AcTypes.h
+	$(CC) $(CFLAGS) -c $(SRC)42fsw.c -o $(OBJ)42fsw.o
 
-$(OBJ)42GlutGui.o        : $(SRC)42GlutGui.c $(INC)42.h $(INC)42GlutGui.h 
-	$(CC) $(CFLAGS) -c $(SRC)42GlutGui.c -o $(OBJ)42GlutGui.o  
+$(OBJ)42glfwgui.o		: $(SRC)42glfwgui.c $(INC)42.h $(INC)42glfwgui.h
+		$(CC) $(CFLAGS) -c $(SRC)42glfwgui.c -o $(OBJ)42glfwgui.o
 
-$(OBJ)42init.o      : $(SRC)42init.c $(INC)42.h  
-	$(CC) $(CFLAGS) -c $(SRC)42init.c -o $(OBJ)42init.o  
+$(OBJ)42GlutGui.o        : $(SRC)42GlutGui.c $(INC)42.h $(INC)42GlutGui.h
+	$(CC) $(CFLAGS) -c $(SRC)42GlutGui.c -o $(OBJ)42GlutGui.o
 
-$(OBJ)42ipc.o       : $(SRC)42ipc.c $(INC)42.h  
-	$(CC) $(CFLAGS) -c $(SRC)42ipc.c -o $(OBJ)42ipc.o 
+$(OBJ)42init.o      : $(SRC)42init.c $(INC)42.h
+	$(CC) $(CFLAGS) -c $(SRC)42init.c -o $(OBJ)42init.o
 
-$(OBJ)42perturb.o   : $(SRC)42perturb.c $(INC)42.h 
-	$(CC) $(CFLAGS) -c $(SRC)42perturb.c -o $(OBJ)42perturb.o  
+$(OBJ)42ipc.o       : $(SRC)42ipc.c $(INC)42.h
+	$(CC) $(CFLAGS) -c $(SRC)42ipc.c -o $(OBJ)42ipc.o
 
-$(OBJ)42report.o    : $(SRC)42report.c $(INC)42.h 
-	$(CC) $(CFLAGS) -c $(SRC)42report.c -o $(OBJ)42report.o  
+$(OBJ)42perturb.o   : $(SRC)42perturb.c $(INC)42.h
+	$(CC) $(CFLAGS) -c $(SRC)42perturb.c -o $(OBJ)42perturb.o
+
+$(OBJ)42report.o    : $(SRC)42report.c $(INC)42.h
+	$(CC) $(CFLAGS) -c $(SRC)42report.c -o $(OBJ)42report.o
 
 $(OBJ)42sensors.o   : $(SRC)42sensors.c $(INC)42.h $(INC)Ac.h $(INC)AcTypes.h
-	$(CC) $(CFLAGS) -c $(SRC)42sensors.c -o $(OBJ)42sensors.o  
+	$(CC) $(CFLAGS) -c $(SRC)42sensors.c -o $(OBJ)42sensors.o
 
 $(OBJ)dcmkit.o      : $(KITSRC)dcmkit.c
-	$(CC) $(CFLAGS) -c $(KITSRC)dcmkit.c -o $(OBJ)dcmkit.o  
+	$(CC) $(CFLAGS) -c $(KITSRC)dcmkit.c -o $(OBJ)dcmkit.o
 
 $(OBJ)envkit.o      : $(KITSRC)envkit.c
-	$(CC) $(CFLAGS) -c $(KITSRC)envkit.c -o $(OBJ)envkit.o  
+	$(CC) $(CFLAGS) -c $(KITSRC)envkit.c -o $(OBJ)envkit.o
 
-$(OBJ)fswkit.o      : $(KITSRC)fswkit.c 
-	$(CC) $(CFLAGS) -c $(KITSRC)fswkit.c -o $(OBJ)fswkit.o  
+$(OBJ)fswkit.o      : $(KITSRC)fswkit.c
+	$(CC) $(CFLAGS) -c $(KITSRC)fswkit.c -o $(OBJ)fswkit.o
 
 $(OBJ)glkit.o      : $(KITSRC)glkit.c $(KITINC)glkit.h
-	$(CC) $(CFLAGS) -c $(KITSRC)glkit.c -o $(OBJ)glkit.o  
+	$(CC) $(CFLAGS) -c $(KITSRC)glkit.c -o $(OBJ)glkit.o
 
-$(OBJ)geomkit.o      : $(KITSRC)geomkit.c $(KITINC)geomkit.h 
-	$(CC) $(CFLAGS) -c $(KITSRC)geomkit.c -o $(OBJ)geomkit.o  
+$(OBJ)geomkit.o      : $(KITSRC)geomkit.c $(KITINC)geomkit.h
+	$(CC) $(CFLAGS) -c $(KITSRC)geomkit.c -o $(OBJ)geomkit.o
 
-$(OBJ)gmseckit.o      : $(KITSRC)gmseckit.c $(KITINC)gmseckit.h 
-	$(CC) $(CFLAGS) -c $(KITSRC)gmseckit.c -o $(OBJ)gmseckit.o  
+$(OBJ)gmseckit.o      : $(KITSRC)gmseckit.c $(KITINC)gmseckit.h
+	$(CC) $(CFLAGS) -c $(KITSRC)gmseckit.c -o $(OBJ)gmseckit.o
 
-$(OBJ)iokit.o      : $(KITSRC)iokit.c 
-	$(CC) $(CFLAGS) -c $(KITSRC)iokit.c -o $(OBJ)iokit.o  
+$(OBJ)iokit.o      : $(KITSRC)iokit.c
+	$(CC) $(CFLAGS) -c $(KITSRC)iokit.c -o $(OBJ)iokit.o
 
 $(OBJ)mathkit.o     : $(KITSRC)mathkit.c
-	$(CC) $(CFLAGS) -c $(KITSRC)mathkit.c -o $(OBJ)mathkit.o  
+	$(CC) $(CFLAGS) -c $(KITSRC)mathkit.c -o $(OBJ)mathkit.o
 
-$(OBJ)nrlmsise00kit.o   : $(KITSRC)nrlmsise00kit.c  
-	$(CC) $(CFLAGS) -c $(KITSRC)nrlmsise00kit.c -o $(OBJ)nrlmsise00kit.o  
+$(OBJ)nrlmsise00kit.o   : $(KITSRC)nrlmsise00kit.c
+	$(CC) $(CFLAGS) -c $(KITSRC)nrlmsise00kit.c -o $(OBJ)nrlmsise00kit.o
 
-$(OBJ)msis86kit.o   : $(KITSRC)msis86kit.c $(KITINC)msis86kit.h 
-	$(CC) $(CFLAGS) -c $(KITSRC)msis86kit.c -o $(OBJ)msis86kit.o  
+$(OBJ)msis86kit.o   : $(KITSRC)msis86kit.c $(KITINC)msis86kit.h
+	$(CC) $(CFLAGS) -c $(KITSRC)msis86kit.c -o $(OBJ)msis86kit.o
 
 $(OBJ)orbkit.o      : $(KITSRC)orbkit.c
-	$(CC) $(CFLAGS) -c $(KITSRC)orbkit.c -o $(OBJ)orbkit.o  
+	$(CC) $(CFLAGS) -c $(KITSRC)orbkit.c -o $(OBJ)orbkit.o
 
 $(OBJ)radbeltkit.o      : $(KITSRC)radbeltkit.c
-	$(CC) $(CFLAGS) -c $(KITSRC)radbeltkit.c -o $(OBJ)radbeltkit.o  
+	$(CC) $(CFLAGS) -c $(KITSRC)radbeltkit.c -o $(OBJ)radbeltkit.o
 
 $(OBJ)sigkit.o      : $(KITSRC)sigkit.c
-	$(CC) $(CFLAGS) -c $(KITSRC)sigkit.c -o $(OBJ)sigkit.o  
+	$(CC) $(CFLAGS) -c $(KITSRC)sigkit.c -o $(OBJ)sigkit.o
 
 $(OBJ)sphkit.o      : $(KITSRC)sphkit.c
-	$(CC) $(CFLAGS) -c $(KITSRC)sphkit.c -o $(OBJ)sphkit.o  
+	$(CC) $(CFLAGS) -c $(KITSRC)sphkit.c -o $(OBJ)sphkit.o
 
-$(OBJ)timekit.o     : $(KITSRC)timekit.c 
-	$(CC) $(CFLAGS) -c $(KITSRC)timekit.c -o $(OBJ)timekit.o  
+$(OBJ)timekit.o     : $(KITSRC)timekit.c
+	$(CC) $(CFLAGS) -c $(KITSRC)timekit.c -o $(OBJ)timekit.o
 
-$(OBJ)42CfdSlosh.o      : $(GSFCSRC)42CfdSlosh.c $(INC)42.h   
-	$(CC) $(CFLAGS) -c $(GSFCSRC)42CfdSlosh.c -o $(OBJ)42CfdSlosh.o  
+$(OBJ)42CfdSlosh.o      : $(GSFCSRC)42CfdSlosh.c $(INC)42.h
+	$(CC) $(CFLAGS) -c $(GSFCSRC)42CfdSlosh.c -o $(OBJ)42CfdSlosh.o
 
-$(OBJ)42fftb.o         : $(GSFCSRC)42fftb.c $(INC)42.h   
-	$(CC) $(CFLAGS) -c $(GSFCSRC)42fftb.c -o $(OBJ)42fftb.o  
+$(OBJ)42fftb.o         : $(GSFCSRC)42fftb.c $(INC)42.h
+	$(CC) $(CFLAGS) -c $(GSFCSRC)42fftb.c -o $(OBJ)42fftb.o
 
 $(OBJ)AcApp.o          : $(SRC)AcApp.c $(INC)Ac.h $(INC)AcTypes.h
 	$(CC) $(CFLAGS) -c $(SRC)AcApp.c -o $(OBJ)AcApp.o
@@ -340,8 +351,8 @@ $(OBJ)AppReadFromGmsec.o  : $(IPCSRC)AppReadFromGmsec.c $(INC)42.h $(INC)AcTypes
 $(OBJ)AppReadFromSocket.o  : $(IPCSRC)AppReadFromSocket.c $(INC)42.h $(INC)AcTypes.h
 	$(CC) $(CFLAGS) -c $(IPCSRC)AppReadFromSocket.c -o $(OBJ)AppReadFromSocket.o
 
-$(OBJ)42nos3.o         : $(SRC)42nos3.c 
-	$(CC) $(CFLAGS) -c $(SRC)42nos3.c -o $(OBJ)42nos3.o  
+$(OBJ)42nos3.o         : $(SRC)42nos3.c
+	$(CC) $(CFLAGS) -c $(SRC)42nos3.c -o $(OBJ)42nos3.o
 
 ########################  Miscellaneous Rules  ############################
 clean :
@@ -352,5 +363,3 @@ else ifeq ($(42PLATFORM),_WIN64)
 else
 	rm -f $(OBJ)*.o ./$(EXENAME) ./AcApp $(INOUT)*.42 ./Standalone/*.42 ./Demo/*.42 ./Rx/*.42 ./Tx/*.42
 endif
-
-
