@@ -641,6 +641,23 @@ void InitOrbit(struct OrbitType *O)
                      ElementLabel,ElementFileName);
                   exit(1);
                }
+               if (O->J2DriftEnabled) {
+                  O->RAAN0 = O->RAAN;
+                  O->ArgP0 = O->ArgP;
+                  printf("Arg:  %.3lf*\n",O->ArgP0*57.2958);
+                  printf("RAAN: %.3lf*\n",O->RAAN0*57.2958);
+
+                  FindJ2DriftParms(O->mu,World[O->World].J2,World[O->World].rad,O);
+
+                  O->RAAN0 = O->RAAN + O->RAANdot*(DynTime-O->Epoch);
+                  O->ArgP0 = O->ArgP + O->ArgPdot*(DynTime-O->Epoch);
+                  printf("Arg:  %.3lf deg\n",O->ArgP0*57.2958);
+                  printf("RAAN: %.3lf deg\n",O->RAAN0*57.2958);
+                  //O->tp = O->Epoch - TimeSincePeriapsis(O->MuPlusJ2,O->SLR,O->ecc,O->anom);
+                  //Eph2RV(O->MuPlusJ2,O->SLR,O->ecc,O->inc,
+                  //       O->RAAN,O->ArgP,O->Epoch-O->tp,
+                  //       O->PosN,O->VelN,&O->anom);
+               }
             }
             else if (ElementType == INP_TRV) {
                Success = LoadTRVfromFile(InOutPath, ElementFileName,

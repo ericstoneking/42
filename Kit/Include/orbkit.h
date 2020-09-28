@@ -196,7 +196,8 @@ void  RV2Eph(double time, double mu, double xr[3], double xv[3],
 void TLE2Eph(const char Line1[80], const char Line2[80], double JD,
    double mu, double *SMA, double *e, double *i, double *RAAN,
    double *ArgP, double *th, double *tp, double *SLR,
-   double *alpha, double *rmin, double *Period, double *MeanMotion);
+   double *alpha, double *rmin, double *Period, double *MeanMotion,
+   double *TLEEpoch);
 long LoadTleFromFile(const char *Path, const char *TleFileName, const char *TleLabel,
                       double JD, double mu, struct OrbitType *O);
 double RV2RVp(double mu, double r[3], double v[3], double rp[3], double vp[3]);

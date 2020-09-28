@@ -400,7 +400,8 @@ void  RV2Eph(double time, double mu, double xr[3], double xv[3],
 void TLE2Eph(const char Line1[80], const char Line2[80], double JD,
    double mu, double *SMA, double *e, double *i, double *RAAN,
    double *ArgP, double *th, double *tp, double *SLR,
-   double *alpha, double *rmin, double *Period, double *MeanMotion)
+   double *alpha, double *rmin, double *Period, double *MeanMotion,
+   double *TLEEpoch)
 {
 #define TWOPI (6.283185307179586)
 #define D2R (1.74532925199E-2)
@@ -432,6 +433,10 @@ void TLE2Eph(const char Line1[80], const char Line2[80], double JD,
       JDepoch += FracDay;
       Epoch = JDToTime(JDepoch);
       DynTime = JDToTime(JD);
+
+      // sets Orbit Epoch to the TLE epoch. useful for
+      // correcting J2 drift at startup
+      *TLEEpoch = Epoch;
 
       strncpy(IncString,&Line2[8],8);
       IncString[8] = 0;
@@ -501,7 +506,7 @@ long LoadTleFromFile(const char *Path, const char *TleFileName,
             TLE2Eph(line1,line2,JD,O->mu,
                &O->SMA,&O->ecc,&O->inc,&O->RAAN,&O->ArgP,&O->anom,
                &O->tp,&O->SLR,&O->alpha,&O->rmin,
-               &O->Period,&O->MeanMotion);
+               &O->Period,&O->MeanMotion, &O->Epoch);
             Eph2RV(O->mu,O->SLR,O->ecc,O->inc,O->RAAN,O->ArgP,
                    -O->tp,O->PosN,O->VelN,&O->anom);
          }
