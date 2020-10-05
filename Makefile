@@ -79,7 +79,7 @@ EMBEDDED =
 
 ifeq ($(42PLATFORM),__APPLE__)
    # Mac Macros
-   CINC = -I /usr/include
+   CINC = -I /usr/include -I /usr/local/include
    EXTERNDIR =
    GLINC = -I /System/Library/Frameworks/OpenGL.framework/Headers/ -I /System/Library/Frameworks/GLUT.framework/Headers/
    # ARCHFLAG = -arch i386
@@ -240,8 +240,8 @@ $(OBJ)42ephem.o     : $(SRC)42ephem.c $(INC)42.h
 $(OBJ)42fsw.o       : $(SRC)42fsw.c $(INC)Ac.h $(INC)AcTypes.h
 	$(CC) $(CFLAGS) -c $(SRC)42fsw.c -o $(OBJ)42fsw.o
 
-$(OBJ)42glfwgui.o		: $(SRC)42glfwgui.c $(INC)42.h $(INC)42glfwgui.h
-		$(CC) $(CFLAGS) -c $(SRC)42glfwgui.c -o $(OBJ)42glfwgui.o
+$(OBJ)42glfwgui.o	: $(SRC)42glfwgui.c $(INC)42.h $(INC)42glfwgui.h
+	$(CC) $(CFLAGS) -c $(SRC)42glfwgui.c -o $(OBJ)42glfwgui.o
 
 $(OBJ)42GlutGui.o        : $(SRC)42GlutGui.c $(INC)42.h $(INC)42GlutGui.h
 	$(CC) $(CFLAGS) -c $(SRC)42GlutGui.c -o $(OBJ)42GlutGui.o

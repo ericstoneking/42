@@ -398,7 +398,7 @@ void  RV2Eph(double time, double mu, double xr[3], double xv[3],
 }
 /**********************************************************************/
 void TLE2Eph(const char Line1[80], const char Line2[80], double JD,
-   double mu, double *SMA, double *e, double *i, double *RAAN,
+   double mu, double *Epoch, double *SMA, double *e, double *i, double *RAAN,
    double *ArgP, double *th, double *tp, double *SLR,
    double *alpha, double *rmin, double *Period, double *MeanMotion)
 {
@@ -415,7 +415,7 @@ void TLE2Eph(const char Line1[80], const char Line2[80], double JD,
       char MeanMotionString[12];
       long year,DOY,Month,Day;
       double FloatDOY,FracDay,MeanAnom,JDepoch;
-      double Epoch,DynTime;
+      double DynTime;
 
       strncpy(YearString,&Line1[18],2);
       YearString[2] = 0;
@@ -430,7 +430,7 @@ void TLE2Eph(const char Line1[80], const char Line2[80], double JD,
       DOY2MD(year,DOY,&Month,&Day);
       JDepoch = DateToJD(year,Month,Day,0,0,0.0);
       JDepoch += FracDay;
-      Epoch = JDToTime(JDepoch);
+      *Epoch = JDToTime(JDepoch);
       DynTime = JDToTime(JD);
 
       strncpy(IncString,&Line2[8],8);
@@ -459,7 +459,7 @@ void TLE2Eph(const char Line1[80], const char Line2[80], double JD,
       *Period = TWOPI/(*MeanMotion);
 
       /* Time of Periapsis passage given in seconds since J2000 */
-      *tp = Epoch - MeanAnom/(*MeanMotion);
+      *tp = *Epoch - MeanAnom/(*MeanMotion);
       while ((*tp-DynTime) < -(*Period)) *tp += *Period;
       while ((*tp-DynTime) >   *Period ) *tp -= *Period;
 
@@ -498,7 +498,7 @@ long LoadTleFromFile(const char *Path, const char *TleFileName,
             fgets(line1,80,infile);
             fgets(line2,80,infile);
             O->mu = mu;
-            TLE2Eph(line1,line2,JD,O->mu,
+            TLE2Eph(line1,line2,JD,O->mu,&O->Epoch,
                &O->SMA,&O->ecc,&O->inc,&O->RAAN,&O->ArgP,&O->anom,
                &O->tp,&O->SLR,&O->alpha,&O->rmin,
                &O->Period,&O->MeanMotion);

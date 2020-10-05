@@ -582,9 +582,9 @@ void InitOrbit(struct OrbitType *O)
             }
 
             if (O->J2DriftEnabled) {
+               FindJ2DriftParms(O->mu,World[O->World].J2,World[O->World].rad,O);
                O->RAAN0 = O->RAAN;
                O->ArgP0 = O->ArgP;
-               FindJ2DriftParms(O->mu,World[O->World].J2,World[O->World].rad,O);
                O->tp = O->Epoch - TimeSincePeriapsis(O->MuPlusJ2,O->SLR,O->ecc,O->anom);
                Eph2RV(O->MuPlusJ2,O->SLR,O->ecc,O->inc,
                       O->RAAN,O->ArgP,O->Epoch-O->tp,
@@ -619,12 +619,29 @@ void InitOrbit(struct OrbitType *O)
             for(j=0;j<3;j++){
                O->PosN[j] *= 1.0E3;
                O->VelN[j] *= 1.0E3;
+            }            
+            if (O->J2DriftEnabled) {
+               FindJ2DriftParms(O->mu,World[O->World].J2,World[O->World].rad,O);
+               RV2Eph(O->Epoch,O->MuPlusJ2,O->PosN,O->VelN,
+                  &O->SMA,&O->ecc,&O->inc,&O->RAAN,
+                  &O->ArgP,&O->anom,&O->tp,
+                  &O->SLR,&O->alpha,&O->rmin,
+                  &O->MeanMotion,&O->Period);
+               O->RAAN0 = O->RAAN;
+               O->ArgP0 = O->ArgP;
             }
-            RV2Eph(O->Epoch,O->mu,O->PosN,O->VelN,
-               &O->SMA,&O->ecc,&O->inc,&O->RAAN,
-               &O->ArgP,&O->anom,&O->tp,
-               &O->SLR,&O->alpha,&O->rmin,
-               &O->MeanMotion,&O->Period);
+            else {
+               O->MuPlusJ2 = O->mu;
+               O->RAANdot = 0.0;
+               O->ArgPdot = 0.0;
+               O->J2Fr0 = 0.0;
+               O->J2Fh1 = 0.0;
+               RV2Eph(O->Epoch,O->mu,O->PosN,O->VelN,
+                  &O->SMA,&O->ecc,&O->inc,&O->RAAN,
+                  &O->ArgP,&O->anom,&O->tp,
+                  &O->SLR,&O->alpha,&O->rmin,
+                  &O->MeanMotion,&O->Period);
+            }
             /* Skip FILE section */
             for(j=0;j<2;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
          }
@@ -655,6 +672,28 @@ void InitOrbit(struct OrbitType *O)
             else {
                printf("Oops.  Unknown ElementType in InitOrbit.\n");
                exit(1);
+            }
+            if (O->J2DriftEnabled) {
+               FindJ2DriftParms(O->mu,World[O->World].J2,World[O->World].rad,O);
+               O->RAAN0 = O->RAAN + O->RAANdot*(DynTime-O->Epoch);
+               O->ArgP0 = O->ArgP + O->ArgPdot*(DynTime-O->Epoch);
+               O->tp = O->Epoch - TimeSincePeriapsis(O->MuPlusJ2,O->SLR,O->ecc,O->anom);
+               Eph2RV(O->MuPlusJ2,O->SLR,O->ecc,O->inc,
+                      O->RAAN,O->ArgP,O->Epoch-O->tp,
+                      O->PosN,O->VelN,&O->anom);
+            }
+            else {
+               O->MuPlusJ2 = O->mu;
+               O->RAANdot = 0.0;
+               O->ArgPdot = 0.0;
+               O->J2Fr0 = 0.0;
+               O->J2Fh1 = 0.0;
+               O->MeanMotion = sqrt(O->mu/(O->SMA*O->SMA*O->SMA));
+               O->Period = TwoPi/O->MeanMotion;
+               O->tp = O->Epoch - TimeSincePeriapsis(O->mu,O->SLR,O->ecc,O->anom);
+               Eph2RV(O->mu,O->SLR,O->ecc,O->inc,
+                      O->RAAN,O->ArgP,O->Epoch-O->tp,
+                      O->PosN,O->VelN,&O->anom);
             }
          }
          else {

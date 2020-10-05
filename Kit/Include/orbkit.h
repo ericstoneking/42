@@ -194,7 +194,7 @@ void  RV2Eph(double time, double mu, double xr[3], double xv[3],
              double *SLR, double *alpha, double *rmin,
              double *MeanMotion, double *Period);
 void TLE2Eph(const char Line1[80], const char Line2[80], double JD,
-   double mu, double *SMA, double *e, double *i, double *RAAN,
+   double mu, double *Epoch, double *SMA, double *e, double *i, double *RAAN,
    double *ArgP, double *th, double *tp, double *SLR,
    double *alpha, double *rmin, double *Period, double *MeanMotion);
 long LoadTleFromFile(const char *Path, const char *TleFileName, const char *TleLabel,

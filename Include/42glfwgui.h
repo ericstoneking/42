@@ -12,8 +12,8 @@
 /*    All Other Rights Reserved.                                      */
 
 
-#ifndef __42GLUTGUI_H__
-#define __42GLUTGUI_H__
+#ifndef __42GLFWGUI_H__
+#define __42GLFWGUI_H__
 
 #include <stdlib.h>
 #include <math.h>
@@ -229,15 +229,10 @@ EXTERN GLfloat BannerColor[4];
 
 void GeomToDisplayLists(struct GeomType *G);
 
-void DrawWidget(struct WidgetType *W);
-void Idle(void);
-void AsciiKeyHandler(unsigned char CharCode, int x, int y);
-
-
 /*
 ** #ifdef __cplusplus
 ** }
 ** #endif
 */
 
-#endif /* __42GLUTGUI_H__ */
+#endif /* __42GLFWGUI_H__ */

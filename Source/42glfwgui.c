@@ -4273,6 +4273,7 @@ void CamMouseButtonHandler(GLFWwindow *Window, int Button, int Action, int Mods)
       long Pick,i;
       double x,y;
 
+      
       /* printf("Mouse Button Event\n"); */
       if (Button == GLFW_MOUSE_BUTTON_1) {
          if (Action == GLFW_PRESS) {
@@ -4560,7 +4561,7 @@ void CamMouseButtonHandler(GLFWwindow *Window, int Button, int Action, int Mods)
             }
             /* printf("Mouse Down\n"); */
          }
-         else { /* GLUT_UP */
+         else { /* UP */
             /* printf("Mouse Up\n"); */
             if (PausedByMouse) PauseFlag = 0;
             PausedByMouse = 0;
@@ -4575,9 +4576,9 @@ void CamMouseButtonHandler(GLFWwindow *Window, int Button, int Action, int Mods)
       }
 }
 /**********************************************************************/
-void CamMouseActiveMotionHandler(GLFWwindow *Window, double x, double y)
+void CamMouseMotionHandler(GLFWwindow *Window, double x, double y)
 {
-      if (POV.Mode == TRACK_HOST) {
+      if (PausedByMouse && POV.Mode == TRACK_HOST) {
          POV.w[1] = MouseScaleFactor * (x-MouseClickX);
          POV.w[0] = MouseScaleFactor * (y-MouseClickY);
          POV.w[2] = 0.0;
@@ -6117,7 +6118,7 @@ void InitCamWindow(void)
 
 /* .. Set Callback Functions */
       glfwSetMouseButtonCallback(CamWindow,CamMouseButtonHandler);
-      glfwSetCursorPosCallback(CamWindow,CamMouseActiveMotionHandler);
+      glfwSetCursorPosCallback(CamWindow,CamMouseMotionHandler);
       glfwSetKeyCallback(CamWindow,KeyHandler);
       glfwSetFramebufferSizeCallback(CamWindow,FrameReshape);
       glfwSetWindowSizeCallback(CamWindow,CamReshape);
