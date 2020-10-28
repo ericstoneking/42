@@ -503,7 +503,7 @@ long LoadTleFromFile(const char *Path, const char *TleFileName,
                &O->tp,&O->SLR,&O->alpha,&O->rmin,
                &O->Period,&O->MeanMotion);
             Eph2RV(O->mu,O->SLR,O->ecc,O->inc,O->RAAN,O->ArgP,
-                   -O->tp,O->PosN,O->VelN,&O->anom);
+                   O->Epoch-O->tp,O->PosN,O->VelN,&O->anom);
          }
       }
       fclose(infile);
