@@ -260,9 +260,9 @@
 #define VIEW_TOP 7
 
 /* Solar Activity Modes */
-#define TWOSIGMA_KP 0
-#define NOMINAL 1
-#define USER_DEFINED 2
+#define TWOSIGMA_ATMO 0
+#define NOMINAL_ATMO 1
+#define USER_ATMO 2
 
 /* Modes for InterProcess Comm */
 #define IPC_OFF 0

@@ -85,7 +85,7 @@ EXTERN long RwaImbalanceActive;
 EXTERN long ContactActive;
 EXTERN long SloshActive;
 EXTERN long ComputeEnvTrq;
-EXTERN long EphemOption; /* VSOP87 or DE430 */
+EXTERN long EphemOption; /* MEAN or DE430 */
 
 /* Calendar Time is all based in Terrestrial Dynamical Time (TT or TDT) unless otherwise noted */
 EXTERN double DynTime0; /* Time in sec since J2000 Epoch at Sim Start (TT) */
@@ -100,8 +100,9 @@ EXTERN long GpsRollover,GpsWeek;
 EXTERN double GpsSecond;
 
 /* Parameters for environmental models  */
-EXTERN long UseFileForInterpolation; /*TWOSIGMA_KP, NOMINAL, USER_DEFINED*/
+EXTERN long AtmoOption; /* TWOSIGMA_ATMO, NOMINAL_ATMO, USER_ATMO */
 EXTERN double Flux10p7, GeomagIndex;
+EXTERN double SchattenTable[5][410]; /* JD, +2sig F10.7, Nom F10.7, +2sig Kp, Nom Kp */
 
 EXTERN struct WorldType World[NWORLD];
 EXTERN struct LagrangeSystemType LagSys[3];

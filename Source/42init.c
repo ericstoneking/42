@@ -198,9 +198,9 @@ long DecodeString(char *s)
 
       else if (!strcmp(s,"SIDE")) return VIEW_SIDE;
       else if (!strcmp(s,"TOP")) return VIEW_TOP;
-      else if (!strcmp(s,"TWOSIGMA_KP")) return TWOSIGMA_KP;
-      else if (!strcmp(s,"NOMINAL")) return NOMINAL;
-      else if (!strcmp(s,"USER_DEFINED")) return USER_DEFINED;
+      else if (!strcmp(s,"TWOSIGMA")) return TWOSIGMA_ATMO;
+      else if (!strcmp(s,"NOMINAL")) return NOMINAL_ATMO;
+      else if (!strcmp(s,"USER")) return USER_ATMO;
       else if (!strcmp(s,"TX")) return IPC_TX;
       else if (!strcmp(s,"RX")) return IPC_RX;
       else if (!strcmp(s,"TXRX")) return IPC_TXRX;
@@ -3863,6 +3863,26 @@ void LoadConstellations(void) {
       fclose(infile);
 }
 /**********************************************************************/
+void LoadSchatten(void)
+{
+      FILE *infile;
+      char junk[120],newline;
+      long i,fileyear,filemonth;
+      
+      infile = FileOpen(ModelPath,"SolFlx0908_Schatten.txt","rt");
+
+      fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      for(i=0;i<410;i++) {
+         fscanf(infile,"%ld %ld %lf %lf %lf %lf,%[^\n] %[\n]",
+            &fileyear,&filemonth,
+            &SchattenTable[1][i],&SchattenTable[2][i],
+            &SchattenTable[3][i],&SchattenTable[4][i],junk,&newline);
+         SchattenTable[0][i] = DateToJD(fileyear,filemonth,01,12,00,00);
+      }
+      fclose(infile);
+}
+/**********************************************************************/
 void InitSim(int argc, char **argv)
 {
       FILE *infile;
@@ -3933,7 +3953,6 @@ void InitSim(int argc, char **argv)
          Orb[Iorb].Tag = Iorb;
       }
 
-
 /* .. Spacecraft */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%ld %[^\n] %[\n]",&Nsc,junk,&newline);
@@ -3963,7 +3982,7 @@ void InitSim(int argc, char **argv)
       fscanf(infile,"%lf %[^\n] %[\n]",&LeapSec,junk,&newline);
 /* .. Choices for Modeling Solar Activity */
       fscanf(infile,"%s  %[^\n] %[\n]",response,junk,&newline);
-      UseFileForInterpolation=DecodeString(response);
+      AtmoOption=DecodeString(response);
       fscanf(infile,"%lf %[^\n] %[\n]",&Flux10p7,junk,&newline);
       fscanf(infile,"%lf %[^\n] %[\n]",&GeomagIndex,junk,&newline);
 /* .. Magnetic Field Model */
@@ -4072,7 +4091,7 @@ void InitSim(int argc, char **argv)
       LoadSun();
       LoadPlanets();
       /* JPL planetary ephems */
-      LoadDE430(ModelPath,TT.JulDay);
+      if (EphemOption == EPH_DE430) LoadDE430(ModelPath,TT.JulDay);
 
 /* .. Load Moons */
       if (World[EARTH].Exists) LoadMoonOfEarth();
@@ -4181,6 +4200,8 @@ void InitSim(int argc, char **argv)
       RNG = CreateRandomProcess(1);
 
       LoadConstellations();
+      
+      LoadSchatten();
 }
 
 /* #ifdef __cplusplus

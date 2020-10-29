@@ -4556,6 +4556,7 @@ void CamMouseButtonHandler(GLFWwindow *Window, int Button, int Action, int Mods)
                if (!PauseFlag) PausedByMouse = 1;
                else PausedByMouse = 0;
                PauseFlag = 1;
+               MouseDown = 1;
                MouseClickX = x;
                MouseClickY = y;
             }
@@ -4565,6 +4566,7 @@ void CamMouseButtonHandler(GLFWwindow *Window, int Button, int Action, int Mods)
             /* printf("Mouse Up\n"); */
             if (PausedByMouse) PauseFlag = 0;
             PausedByMouse = 0;
+            MouseDown = 0;
             POV.w[1] = 0.0;
             POV.w[0] = 0.0;
          }
@@ -4578,7 +4580,7 @@ void CamMouseButtonHandler(GLFWwindow *Window, int Button, int Action, int Mods)
 /**********************************************************************/
 void CamMouseMotionHandler(GLFWwindow *Window, double x, double y)
 {
-      if (PausedByMouse && POV.Mode == TRACK_HOST) {
+      if (MouseDown && POV.Mode == TRACK_HOST) {
          POV.w[1] = MouseScaleFactor * (x-MouseClickX);
          POV.w[0] = MouseScaleFactor * (y-MouseClickY);
          POV.w[2] = 0.0;

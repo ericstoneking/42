@@ -69,6 +69,7 @@ EXTERN int TimerDuration;
 EXTERN double MouseClickX,MouseClickY;
 EXTERN long PauseFlag;
 EXTERN long PausedByMouse;
+EXTERN long MouseDown;
 EXTERN long CamWidth, CamHeight;
 EXTERN char CamTitle[80];
 EXTERN long CamShow[CAM_MENU_SIZE];

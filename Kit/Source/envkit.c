@@ -332,6 +332,25 @@ void DipoleMagField(double DipoleMoment, double DipoleAxis[3],
 
 }
 /**********************************************************************/
+/* Ref: Rostoker, "Geomagnetic Indices", Rev. of Geophysics and       */
+/* Space Physics, Vol 10, No. 4, pp. 935-950, Nov 1972.               */
+/* Kp is in the scale [0o 0+ 1- 1o 1+ ... 8+ 9- 9o].                  */
+/* We map it to [0.0 0.33 0.67 1.0 1.33 ... 8.33 8.67 9.0] for ease   */
+/* of table lookup.                                                   */
+double KpToAp(double Kp)
+{
+      long k;
+      double Ap[28] = {  0,  2,  3,  4,  5,  6,  7,
+                         9, 12, 15, 18, 22, 27, 32,
+                        39, 48, 56, 67, 80, 94,111,
+                       132,154,179,207,236,300,400};
+      
+      k = (long) (3.0*Kp+0.5); /* Round to the nearest 1/3 */
+      if (k < 0) k = 0;
+      if (k > 27) k = 27;
+      
+      return(Ap[k]);
+}/**********************************************************************/
 /*                                                                    */
 /* This is an atmospheric density model, described in  "Models of     */
 /* Earth's Atmosphere", NASA SP-8021, May 1969.  It is a modification */

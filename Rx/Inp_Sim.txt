@@ -15,7 +15,7 @@ TRUE  0 SC_Simple.txt           !  Existence, RefOrb, Input file for SC 0
 06 23 2014                      !  Date (UTC) (Month, Day, Year)
 09 00 00.00                     !  Time (UTC) (Hr,Min,Sec)
 0.0                             !  Leap Seconds (sec)
-USER_DEFINED                    !  Model Date Interpolation for Solar Flux and AP values?(TWOSIGMA_KP, NOMINAL or USER_DEFINED)
+USER                            !  F10.7, Ap (USER, NOMINAL or TWOSIGMA)
 230.0                           !  If USER_DEFINED, enter desired F10.7 value
 100.0                           !  If USER_DEFINED, enter desired AP value
 IGRF                            !  Magfield (NONE,DIPOLE,IGRF)

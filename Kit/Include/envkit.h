@@ -40,6 +40,7 @@ void IGRFMagField(const char *ModelPath, long N, long M, double pbn[3],double Pr
 void DipoleMagField(double DipoleMoment, double DipoleAxis[3],
                     double DipoleOffset[3],double p[3],
                     double PriMerAng,double MagVecN[3]);
+double KpToAp(double Kp);
 double JacchiaRoberts(double pbn[3],double svn[3],double F10p7,double Ap);
 double SimpleMSIS(double pbn[3], long Col);
 double NRLMSISE00(long Year, long DOY, long Hour, long Minute,

@@ -242,9 +242,11 @@ void FindUnshadedAreas(struct SCType *S, double DirVecN[3])
                            }
                         }
                      }
-                     free(InVtx);
-                     InVtx = (struct SilVtxType *) calloc(SilNc,sizeof(struct SilVtxType));
-                     memcpy(InVtx,ClipVtx,SilNc*sizeof(struct SilVtxType));
+                     if (SilNc > 0) {
+                        free(InVtx);
+                        InVtx = (struct SilVtxType *) calloc(SilNc,sizeof(struct SilVtxType));
+                        memcpy(InVtx,ClipVtx,SilNc*sizeof(struct SilVtxType));
+                     }
                      SilNin = SilNc;
                   }
                }

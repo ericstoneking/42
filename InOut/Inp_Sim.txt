@@ -15,9 +15,9 @@ TRUE  0 SC_Simple.txt           !  Existence, RefOrb, Input file for SC 0
 05 07 2019                      !  Date (UTC) (Month, Day, Year)
 12 00 00.00                     !  Time (UTC) (Hr,Min,Sec)
 37.0                            !  Leap Seconds (sec)
-USER_DEFINED                    !  Model Date Interpolation for Solar Flux and AP values?(TWOSIGMA_KP, NOMINAL or USER_DEFINED)
-230.0                           !  If USER_DEFINED, enter desired F10.7 value
-100.0                           !  If USER_DEFINED, enter desired AP value
+USER                            !  F10.7, Ap (USER, NOMINAL or TWOSIGMA)
+230.0                           !  USER-provided F10.7
+100.0                           !  USER-provided Ap 
 IGRF                            !  Magfield (NONE,DIPOLE,IGRF)
 8   8                           !  IGRF Degree and Order (<=10)
 8   8                           !  Earth Gravity Model N and M (<=18)
