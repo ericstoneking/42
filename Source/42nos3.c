@@ -59,7 +59,7 @@ void NOS3Time(long *year, long *day_of_year, long *month, long *day, long *hour,
         InitializeTimeNode();
     }
     ticks = NE_bus_get_time(Bus);
-    abs_time = DynTime0 + (ticks * DTSIM);
+    abs_time = DynTime0 + (ticks * DTSIM) - LeapSec - 32.184;
     jd = TimeToJD(abs_time);
     JDToDate(jd, year, month, day, hour, minute, second);
     *day_of_year = MD2DOY(*year, *month, *day);

@@ -31,9 +31,8 @@ void Environment(struct SCType *S)
       struct WorldType *P;
       double Alt;
       double PosW[3];
-      double Kp;
       #ifdef _RADBELT_
-      int NumEnergies = 5; */
+      int NumEnergies = 5;
       float ElectronEnergy[5] = {0.15,0.5,1.0,3.0,4.0}; /* MeV */
       float ProtonEnergy[5] = {4.0,10.0,20.0,30.0,50.0}; /* MeV */
       static double **Flux;
@@ -70,13 +69,11 @@ void Environment(struct SCType *S)
       if (O->World == EARTH) {
          if (AtmoOption == TWOSIGMA_ATMO) {
             Flux10p7 = LinInterp(SchattenTable[0],SchattenTable[1],TT.JulDay,410);
-            Kp = LinInterp(SchattenTable[0],SchattenTable[3],TT.JulDay,410);
-            GeomagIndex = KpToAp(Kp);
+            GeomagIndex = LinInterp(SchattenTable[0],SchattenTable[3],TT.JulDay,410);
          }
          else if (AtmoOption == NOMINAL_ATMO) {
             Flux10p7 = LinInterp(SchattenTable[0],SchattenTable[2],TT.JulDay,410);
-            Kp = LinInterp(SchattenTable[0],SchattenTable[4],TT.JulDay,410);
-            GeomagIndex = KpToAp(Kp);
+            GeomagIndex = LinInterp(SchattenTable[0],SchattenTable[4],TT.JulDay,410);
          }
          /* else USER_ATMO: Flux10p7, GeomagIndex read from Inp_Sim.txt */
       

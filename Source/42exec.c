@@ -78,7 +78,6 @@ long AdvanceTime(void)
       static long PrevTick = 0;
       static long CurrTick = 1;
       long Done;
-      static long First = 1;
 
       /* Advance time to next Timestep */
       switch (TimeMode) {
@@ -158,13 +157,6 @@ long AdvanceTime(void)
 
             break;
          case NOS3_TIME :
-            if (First) {
-               First = 0;
-               double JD = DateToJD(TT.Year, TT.Month, TT.Day,
-                  TT.Hour, TT.Minute, TT.Second);
-               DynTime0 = JDToTime(JD);
-            }
-            usleep(1.0E6*DTSIM);
             NOS3Time(&UTC.Year,&UTC.doy,&UTC.Month,&UTC.Day,
                &UTC.Hour,&UTC.Minute,&UTC.Second);
             CivilTime = DateToTime(UTC.Year,UTC.Month,UTC.Day,

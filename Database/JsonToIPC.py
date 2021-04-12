@@ -231,7 +231,7 @@ def WriteEpilog():
          outfile.write("      LineLen = strlen(line);\n")
          outfile.write("      memcpy(&Msg[MsgLen],line,LineLen);\n")
          outfile.write("      MsgLen += LineLen;\n")
-         outfile.write("      Success = send(Socket,Msg,strlen(Msg),0);\n\n")
+         outfile.write("      Success = send(Socket,Msg,MsgLen,0);\n\n")
          outfile.write("      /* Wait for Ack */\n");
          outfile.write("      recv(Socket,AckMsg,5,0);\n")
       elif Pipe == "Gmsec":

@@ -41,9 +41,6 @@ GSFCFLAG = -D _USE_GSFC_WATERMARK_
 STANDALONEFLAG =
 #STANDALONEFLAG = -D _AC_STANDALONE_
 
-NOS3FSWFLAG =
-#NOS3FSWFLAG = -D _ENABLE_NOS3_FSW_
-
 #GLFWFLAG = 
 GLFWFLAG = -D _USE_GLFW_
 
@@ -176,13 +173,13 @@ ifneq ($(strip $(GMSECFLAG)),)
    ACIPCOBJ = $(OBJ)AppReadFromFile.o $(OBJ)AppWriteToGmsec.o $(OBJ)AppReadFromGmsec.o \
       $(OBJ)AppWriteToSocket.o $(OBJ)AppReadFromSocket.o $(OBJ)AppWriteToFile.o
    SIMIPCOBJ = $(OBJ)SimWriteToFile.o $(OBJ)SimWriteToGmsec.o $(OBJ)SimWriteToSocket.o \
-      $(OBJ)SimReadFromFile.o $(OBJ)SimReadFromGmsec.o $(OBJ)SimReadFromSocket.o
+      $(OBJ)SimReadFromFile.o $(OBJ)SimReadFromGmsec.o $(OBJ)SimReadFromSocket.o 
 else
    GMSECOBJ =
    ACIPCOBJ = $(OBJ)AppReadFromFile.o \
       $(OBJ)AppWriteToSocket.o $(OBJ)AppReadFromSocket.o $(OBJ)AppWriteToFile.o
    SIMIPCOBJ = $(OBJ)SimWriteToFile.o $(OBJ)SimWriteToSocket.o \
-      $(OBJ)SimReadFromFile.o $(OBJ)SimReadFromSocket.o
+      $(OBJ)SimReadFromFile.o $(OBJ)SimReadFromSocket.o 
 endif
 
 42OBJ = $(OBJ)42main.o $(OBJ)42exec.o $(OBJ)42actuators.o $(OBJ)42cmd.o \
@@ -332,6 +329,9 @@ $(OBJ)SimReadFromGmsec.o  : $(IPCSRC)SimReadFromGmsec.c $(INC)42.h $(INC)AcTypes
 
 $(OBJ)SimReadFromSocket.o  : $(IPCSRC)SimReadFromSocket.c $(INC)42.h $(INC)AcTypes.h
 	$(CC) $(CFLAGS) -c $(IPCSRC)SimReadFromSocket.c -o $(OBJ)SimReadFromSocket.o
+
+#$(OBJ)SimReadFromCmd.o  : $(IPCSRC)SimReadFromCmd.c $(INC)42.h $(INC)AcTypes.h
+#	$(CC) $(CFLAGS) -c $(IPCSRC)SimReadFromCmd.c -o $(OBJ)SimReadFromCmd.o
 
 $(OBJ)AppWriteToFile.o  : $(IPCSRC)AppWriteToFile.c $(INC)42.h $(INC)AcTypes.h
 	$(CC) $(CFLAGS) -c $(IPCSRC)AppWriteToFile.c -o $(OBJ)AppWriteToFile.o
