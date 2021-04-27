@@ -211,8 +211,11 @@ void FindUnshadedAreas(struct SCType *S, double DirVecN[3])
                }
 
                /* Clip Silhouette against Poly */
-               InVtx = (struct SilVtxType *) calloc(SilNv,sizeof(struct SilVtxType));
-               memcpy(InVtx,SilVtx,SilNv*sizeof(struct SilVtxType));
+               if (SilNv > 0) {
+                 free(InVtx);
+                 InVtx = (struct SilVtxType *) calloc(SilNv,sizeof(struct SilVtxType));
+                 memcpy(InVtx,SilVtx,SilNv*sizeof(struct SilVtxType));
+               }
                SilNin = SilNv;
                for(Iv=0;Iv<3;Iv++) {
                   if (SilNin > 2) {
