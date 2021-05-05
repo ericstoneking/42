@@ -41,6 +41,7 @@ long FswCmdInterpreter(char CmdLine[512],double *CmdTime)
       double wc,amax,vmax;
       long RotSeq;
       char VecString[20],TargetString[20];
+      double ThrPulseCmd;
 
       if (sscanf(CmdLine,"%lf SC[%ld] qrn = [%lf %lf %lf %lf]",
          CmdTime,&Isc,&q[0],&q[1],&q[2],&q[3]) == 6) {
@@ -357,13 +358,10 @@ long FswCmdInterpreter(char CmdLine[512],double *CmdTime)
          }
       }
 
-      else if (sscanf(CmdLine,"%lf SC[%ld].Thr[%ld] %s",
-         CmdTime,&Isc,&Ithr,response) == 4) {
+      else if (sscanf(CmdLine,"%lf SC[%ld].Thr[%ld].PulseWidthCmd = %lf",
+         CmdTime,&Isc,&Ithr,&ThrPulseCmd) == 4) {
          NewCmdProcessed = TRUE;
-         if (DecodeString(response))
-            SC[Isc].AC.Thr[Ithr].PulseWidthCmd = SC[Isc].AC.DT;
-         else
-            SC[Isc].AC.Thr[Ithr].PulseWidthCmd = 0.0;
+         SC[Isc].AC.Thr[Ithr].PulseWidthCmd = ThrPulseCmd;
       }
 
       else if (sscanf(CmdLine,"Event Eclipse Entry SC[%ld] qrl = [%lf %lf %lf %lf]",
@@ -1669,6 +1667,10 @@ void AdHocFSW(struct SCType *S)
 {
       struct AcType *AC;
       struct AcAdHocCtrlType *C;
+      double CLN[3][3],CRN[3][3],qrn[4],wln[3];
+      double CRL[3][3] = {{ 0.0, 0.0, 1.0}, /* Point +X to nadir */
+                          { 0.0, 1.0, 0.0},
+                          {-1.0, 0.0, 0.0}}; /* Point +Z to antivelocity */
       long i;
 
       AC = &S->AC;
@@ -1681,10 +1683,14 @@ void AdHocFSW(struct SCType *S)
       }
 
 /* .. Form attitude error signals */
-      RECTIFYQ(AC->qbn);
+      FindCLN(AC->PosN,AC->VelN,CLN,wln);
+      MxM(CRL,CLN,CRN);
+      C2Q(CRN,qrn);
+      QxQT(AC->qbn,qrn,AC->qbr);
+      RECTIFYQ(AC->qbr);
       for(i=0;i<3;i++) {
-         C->therr[i] = 2.0*AC->qbn[i];
-         C->werr[i] = AC->wbn[i];
+         C->therr[i] = 2.0*AC->qbr[i];
+         C->werr[i] = AC->wbn[i] - wln[i];
       }
 
 /* .. Closed-loop attitude control */

@@ -1,4 +1,4 @@
-              F10.7     Kp
+              F10.7     ap
 YYYY MM  +2sig  nom. +2sig nom.
 2008  9     75   68    8   8
 2008 10     75   68    8   8

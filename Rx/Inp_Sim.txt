@@ -13,7 +13,7 @@ TRUE   Orb_LEO.txt              !  Input file name for Orb 0
 TRUE  0 SC_Simple.txt           !  Existence, RefOrb, Input file for SC 0
 ***************************** Environment  *****************************
 06 23 2014                      !  Date (UTC) (Month, Day, Year)
-09 00 00.00                     !  Time (UTC) (Hr,Min,Sec)
+00 00 00.00                     !  Time (UTC) (Hr,Min,Sec)
 0.0                             !  Leap Seconds (sec)
 USER                            !  F10.7, Ap (USER, NOMINAL or TWOSIGMA)
 230.0                           !  If USER_DEFINED, enter desired F10.7 value

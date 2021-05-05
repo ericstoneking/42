@@ -250,8 +250,10 @@ void Report(void)
             MxMT(SC[0].B[0].CN,SC[0].CLN,CBL);
             C2A(123,CBL,&Roll,&Pitch,&Yaw);
             fprintf(RPYfile,"%lf %lf %lf\n",Roll*R2D,Pitch*R2D,Yaw*R2D);
-            for(i=0;i<SC[0].Nw;i++) fprintf(Hwhlfile,"%lf ",SC[0].Whl[i].H);
-            fprintf(Hwhlfile,"\n");
+            if (SC[0].Nw > 0) {
+               for(i=0;i<SC[0].Nw;i++) fprintf(Hwhlfile,"%lf ",SC[0].Whl[i].H);
+               fprintf(Hwhlfile,"\n");
+            }
             if (SC[0].Nmtb > 0) {
                for(i=0;i<SC[0].Nmtb;i++) fprintf(MTBfile,"%lf ",SC[0].MTB[i].M);
                fprintf(MTBfile,"\n");

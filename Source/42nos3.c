@@ -19,14 +19,19 @@
 #include "42.h"
 
 #if defined(__linux__)
+#include <semaphore.h>
 static char BusName[120] = "command";
 static char ConnectionString[120] = "tcp://127.0.0.1:12001";
+static sem_t sem;
 
 typedef struct NE_Bus NE_Bus;
 typedef int64_t NE_SimTime;
+typedef size_t NE_TimeTickCallbackId;
+typedef void (*NE_TimeTickCallbackFunction)(NE_SimTime time);
 static void *NOSHandle = NULL; /* static so the handle remains at file scope */
 static NE_Bus *Bus = NULL;     /* ditto */
 static NE_SimTime (*NE_bus_get_time)(NE_Bus *) = NULL; /* Pointer to get time function from the library */
+static NE_TimeTickCallbackId (*NE_bus_add_time_tick_callback)(NE_Bus *, NE_TimeTickCallbackFunction) = NULL; /* Pointer to add time tick callback function from the library */
 
 static void ReleaseHandle(void) {
     if (NOSHandle != NULL) dlclose(NOSHandle);
@@ -35,6 +40,7 @@ static void ReleaseHandle(void) {
 /* Forward declarations: */
 static void ReadNos3InpFile(void);
 static void InitializeTimeNode(void);
+static void TimeTickCallback(NE_SimTime time);
 #endif
 
 void NOS3Time(long *year, long *day_of_year, long *month, long *day, long *hour, long *minute, double *second)
@@ -58,8 +64,12 @@ void NOS3Time(long *year, long *day_of_year, long *month, long *day, long *hour,
         ReadNos3InpFile();
         InitializeTimeNode();
     }
+    if (sem_wait(&sem) == -1) {
+        perror("NOS3Time error on sem_wait");
+        exit(3);
+    }
     ticks = NE_bus_get_time(Bus);
-    abs_time = DynTime0 + (ticks * DTSIM);
+    abs_time = DynTime0 + (ticks * DTSIM) - LeapSec - 32.184;
     jd = TimeToJD(abs_time);
     JDToDate(jd, year, month, day, hour, minute, second);
     *day_of_year = MD2DOY(*year, *month, *day);
@@ -111,18 +121,35 @@ static void InitializeTimeNode(void)
 #pragma GCC diagnostic ignored "-Wpedantic"
     NE_create_bus2 = (NE_Bus *(*)(const char *, const char *))dlsym(NOSHandle, "NE_create_bus2");
     if ((error = dlerror()) != NULL)  {
-        printf("NOS3Time error:  %s\n", error);
+        printf("NOS3Time error finding symbol NE_create_bus2:  %s\n", error);
         exit(1);
     }
 
     NE_bus_get_time = (NE_SimTime (*)(NE_Bus *))dlsym(NOSHandle, "NE_bus_get_time");
-#pragma GCC diagnostic pop
     if ((error = dlerror()) != NULL)  {
-        printf("NOS3Time error:  %s\n", error);
+        printf("NOS3Time error finding symbol NE_bus_get_time:  %s\n", error);
         exit(1);
     }
 
+    NE_bus_add_time_tick_callback = 
+        (NE_TimeTickCallbackId (*)(NE_Bus *, NE_TimeTickCallbackFunction))dlsym(NOSHandle, "NE_bus_add_time_tick_callback");
+    if ((error = dlerror()) != NULL)  {
+        printf("NOS3Time error finding symbol NE_bus_add_time_tick_callback:  %s\n", error);
+        exit(1);
+    }
+#pragma GCC diagnostic pop
+
     Bus = NE_create_bus2(BusName, ConnectionString);
+    NE_bus_add_time_tick_callback(Bus, TimeTickCallback);
     return;
 }
+
+static void TimeTickCallback(NE_SimTime time)
+{
+    if (sem_post(&sem) == -1) {
+        perror("NOS3Time error on sem_post");
+	exit(2);
+    }
+}
+
 #endif
