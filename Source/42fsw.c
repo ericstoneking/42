@@ -1702,6 +1702,133 @@ void AdHocFSW(struct SCType *S)
       for(i=0;i<3;i++) AC->IdealTrq[i] = C->Tcmd[i];
 }
 /**********************************************************************/
+/* Learning about finding frequency response in time domain           */
+void FreqRespFSW(struct SCType *S)
+{
+      struct AcType *AC;
+      struct AcAdHocCtrlType *C;
+      long i;
+
+      AC = &S->AC;
+      C = &AC->AdHocCtrl;
+
+      if (C->Init) {
+         C->Init = 0;
+         for(i=0;i<3;i++)
+            FindPDGains(AC->MOI[i][i],0.1*TwoPi,0.7,&C->Kr[i],&C->Kp[i]);
+      }
+
+/* .. Form attitude error signals */
+      QxQT(AC->qbn,AC->qrn,AC->qbr);
+      RECTIFYQ(AC->qbr);
+      for(i=0;i<3;i++) {
+         C->therr[i] = 2.0*AC->qbr[i];
+         C->werr[i] = AC->wbn[i];
+      }
+
+/* .. Closed-loop attitude control */
+      for(i=0;i<3;i++) {
+         C->Tcmd[i] =
+         -C->Kr[i]*C->werr[i]-C->Kp[i]*C->therr[i];
+      }
+
+      for(i=0;i<3;i++) AC->IdealTrq[i] = C->Tcmd[i];
+}
+/**********************************************************************/
+void FreqResp(struct SCType *S)
+{
+      struct AcType *AC;
+      struct FreqRespType *F;
+      double Span,Decade,c,s,z,EstAng,Mag,dB[3],Phase[3];
+      long i;
+      char str[80];
+      
+      AC = &S->AC;
+      F = &S->FreqResp;
+      
+      if (F->Init) {
+         F->Init = FALSE;
+         sprintf(str,"FreqResp%02ld.42",S->ID);
+         F->outfile = FileOpen(InOutPath,str,"w");
+         
+         F->MinDecade = -3.0;
+         F->MaxDecade =  2.0;
+         F->Ndec = 20;
+         F->Idec = 0;
+         F->InitFreq = 1;
+         F->RefAmp = 1.0/3600.0*D2R;
+         for(i=0;i<3;i++) {
+            AC->qrn[i] = 0.0;
+            F->A0[i] = 0.0;
+            F->A1[i] = 0.0;
+            F->B1[i] = 0.0;
+         }
+         AC->qrn[3] = 1.0;
+      }
+
+/* .. Sweep over frequencies */
+      if (F->Idec <= F->Ndec) {
+         if (F->InitFreq) {
+            F->InitFreq = 0;
+            F->Time = 0.0;
+            Span = F->MaxDecade - F->MinDecade;
+            Decade = F->MinDecade + ((double) F->Idec)/((double) F->Ndec)*Span;
+            F->RefFreq = TwoPi*pow(10.0,Decade);            
+            F->RefPeriod = TwoPi/F->RefFreq;
+            F->EndTime = 10.0*F->RefPeriod;
+            F->EstGain = 0.5*DTSIM/F->RefPeriod; //2.0*DTSIM/F->RefPeriod;
+            
+            printf("Starting FreqResp %ld of %ld at Time = %lf\n",
+               F->Idec,F->Ndec,SimTime);
+         }
+         else {            
+            /* Fit response to sinusoid */
+            Q2AngleVec(AC->qbn,F->OutAng);
+            c = cos(F->RefFreq*SimTime);
+            s = sin(F->RefFreq*SimTime);
+            for(i=0;i<3;i++) {
+               EstAng = F->A0[i] + F->A1[i]*c + F->B1[i]*s;
+               z = F->OutAng[i] - EstAng;
+               F->A0[i] += F->EstGain*z;
+               F->A1[i] += F->EstGain*c*z;
+               F->B1[i] += F->EstGain*s*z;
+            }
+            /* Record magnitude, phase */
+            F->Time += DTSIM;
+            if (F->Time > F->EndTime) {
+               F->Time = 0.0;
+               F->Idec++;
+               F->InitFreq = 1;
+               
+               for(i=0;i<3;i++) {
+                  Mag = sqrt(F->A1[i]*F->A1[i]+F->B1[i]*F->B1[i]);
+                  Mag /= F->RefAmp;
+                  dB[i] = 20.0*log10(Mag);
+                  Phase[i] = atan2(F->B1[i],F->A1[i])*R2D;
+               }
+               fprintf(F->outfile,"%le %lf %lf %lf %lf %lf %lf\n",
+                  F->RefFreq/TwoPi,dB[0],dB[1],dB[2],Phase[0],Phase[1],Phase[2]);
+            }
+         }
+      }
+      else {
+         fclose(F->outfile);
+         for(i=0;i<3;i++) F->RefAng[i] = 0.0;
+         S->FreqRespActive = FALSE;
+         printf("Frequency Response Complete at Time = %lf\n",SimTime);
+      }
+      
+/* .. Generate New Reference Signal and Overwrite qbn */
+      for(i=0;i<3;i++) {
+         F->RefAng[i] = F->RefAmp*sin(F->RefFreq*SimTime);
+         AC->qrn[i] = 0.5*F->RefAng[i];
+         AC->qbn[i] = 0.0;
+      }
+      AC->qrn[3] = 1.0;
+      AC->qbn[3] = 1.0;
+      UNITQ(AC->qrn);            
+}
+/**********************************************************************/
 /*  This function is called at the simulation rate.  Sub-sampling of  */
 /*  control loops should be done on a case-by-case basis.             */
 /*  Mode handling, command generation, error determination, feedback  */
@@ -1714,6 +1841,10 @@ void FlightSoftWare(struct SCType *S)
       struct IpcType *I;
       long Iipc;
       #endif
+
+      if (S->FreqRespActive) {
+         FreqResp(S);
+      }
             
       S->FswSampleCounter++;
       if (S->FswSampleCounter >= S->FswMaxCounter) {
@@ -1772,6 +1903,9 @@ void FlightSoftWare(struct SCType *S)
                #else
                   AcFsw(&S->AC);
                #endif
+               break;
+            case FREQRESP_FSW:
+               FreqRespFSW(S);
                break;
          }
       }

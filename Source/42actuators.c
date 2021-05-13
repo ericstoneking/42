@@ -216,6 +216,7 @@ void ThrusterPlumeFrcTrq(struct SCType *S)
 void Actuators(struct SCType *S)
 {
 
+      struct FlexNodeType *FN;
       long i,j;
       double FrcN[3];
       struct AcType *AC;
@@ -230,6 +231,14 @@ void Actuators(struct SCType *S)
          S->B[0].Frc[j] += AC->IdealFrc[j];
          S->B[0].Trq[j] += AC->IdealTrq[j];
       }
+      if (S->FlexActive) {
+         FN = &S->B[0].FlexNode[0]; /* Arbitrarily put ideal actuators at FN 0 */
+         for(i=0;i<3;i++) {
+            FN->Trq[i] += AC->IdealTrq[i];
+            FN->Frc[i] += AC->IdealFrc[i];
+         }
+      }
+
       /* Wheels */
       for(i=0;i<S->Nw;i++) {
          WhlModel(AC->Whl[i].Tcmd,&S->Whl[i],S);

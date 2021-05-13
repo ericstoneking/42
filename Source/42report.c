@@ -114,6 +114,26 @@ void GyroReport(void)
       
 }
 /*********************************************************************/
+void FreqRespDiag(void)
+{
+      static FILE *outfile;
+      struct FreqRespType *F;
+      static long First = 1;
+      
+      if (First) {
+         First = 0;
+         outfile = FileOpen(InOutPath,"FreqRespDiag.42","wt");
+      }
+      
+      F = &SC[0].FreqResp;
+      fprintf(outfile,"%le %le %le %le %le %le %le %le %le %le %le %le %le %le %le\n",
+         F->A0[0],F->A0[1],F->A0[2],
+         F->A1[0],F->A1[1],F->A1[2],
+         F->B1[0],F->B1[1],F->B1[2],
+         F->RefAng[0],F->RefAng[1],F->RefAng[2],
+         F->OutAng[0],F->OutAng[1],F->OutAng[2]);
+}
+/*********************************************************************/
 void Report(void)
 {
       static FILE *timefile,*DynTimeFile;
@@ -266,6 +286,8 @@ void Report(void)
             
             //MagReport();
             //GyroReport();
+            
+            FreqRespDiag();
 
          }
 

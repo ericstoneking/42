@@ -440,6 +440,24 @@ struct EnvTrqType {
    double Hs[3];
 };
 
+struct FreqRespType {
+   long Init;
+   FILE *outfile;
+   double MinDecade;
+   double MaxDecade;
+   long Ndec;
+   long Idec;
+   long InitFreq;
+   double RefAmp;
+   double A0[3],A1[3],B1[3];
+   double Time,EndTime;
+   double RefFreq;
+   double RefPeriod;
+   double EstGain;
+   double RefAng[3];
+   double OutAng[3];
+};
+
 struct SCType {
    /*~ Internal Variables ~*/
    long ID;     /* SC[x].ID = x */
@@ -526,6 +544,9 @@ struct SCType {
    long GainAndDelayActive;
    double LoopGain; /* [[None]] */
    double LoopDelay; /* [[sec]] */
+   
+   long FreqRespActive;
+   struct FreqRespType FreqResp;
    
    /*~ Structures ~*/
    struct AcType AC;

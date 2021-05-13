@@ -403,6 +403,7 @@ struct AcType {
    
    /*~ Internal Variables ~*/
    long Init;
+   double qrn[4];
    double qbr[4];
    double Hvb[3]; /* [~<~] */
 

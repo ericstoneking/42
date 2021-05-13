@@ -143,6 +143,7 @@ long DecodeString(char *s)
       else if (!strcmp(s,"CMG_FSW")) return CMG_FSW;
       else if (!strcmp(s,"THR_FSW")) return THR_FSW;
       else if (!strcmp(s,"CFS_FSW")) return CFS_FSW;
+      else if (!strcmp(s,"FREQRESP_FSW")) return FREQRESP_FSW;
 
       else if (!strcmp(s,"PHOBOS")) return PHOBOS;
       else if (!strcmp(s,"DEIMOS")) return DEIMOS;
@@ -2330,6 +2331,9 @@ void InitSpacecraft(struct SCType *S)
       for(Iw=0;Iw<S->Nw;Iw++) S->Whl[Iw].Delay = NULL;
       for(Im=0;Im<S->Nmtb;Im++) S->MTB[Im].Delay = NULL;
       for(It=0;It<S->Nthr;It++) S->Thr[It].Delay = NULL;
+      
+      S->FreqRespActive = TRUE;
+      S->FreqResp.Init = TRUE;
 
 }
 /*********************************************************************/

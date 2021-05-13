@@ -103,18 +103,15 @@ ifeq ($(42PLATFORM),__linux__)
       GUIOBJ = $(OBJ)42GlutGui.o $(OBJ)glkit.o
       #GLINC = -I /usr/include/
       GLINC = -I $(KITDIR)/include/GL/
-      LIBS = -lglut -lGLU -lGL -ldl -lm
+      LIBS = -lglut -lGLU -lGL -ldl -lm -lpthread
       LFLAGS = -L $(KITDIR)/GL/lib/
       ARCHFLAG =
    else
       GUIOBJ =
       GLINC =
-      LIBS = -ldl -lm
+      LIBS = -ldl -lm -lpthread
       LFLAGS =
       ARCHFLAG =
-   endif
-   ifneq ($(strip $(NOS3FSWFLAG)),)
-      LIBS += -lpthread
    endif
    EXENAME = 42
    CC = gcc
@@ -200,7 +197,7 @@ $(OBJ)AppWriteToSocket.o $(OBJ)AppReadFromSocket.o $(OBJ)AppWriteToFile.o
 #ANSIFLAGS = -Wstrict-prototypes -pedantic -ansi -Werror
 ANSIFLAGS =
 
-CFLAGS = -Wall -Wshadow -Wno-deprecated -g  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(INC) -I $(KITINC) -I $(KITSRC) $(GMSECINC) -O0 $(ARCHFLAG) $(GUIFLAG) $(SHADERFLAG) $(CFDFLAG) $(FFTBFLAG) $(GSFCFLAG) $(GMSECFLAG) $(STANDALONEFLAG) $(NOS3FSWFLAG) $(GLFWFLAG)
+CFLAGS = -Wall -Wshadow -Wno-deprecated -g  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(INC) -I $(KITINC) -I $(KITSRC) $(GMSECINC) -O0 $(ARCHFLAG) $(GUIFLAG) $(SHADERFLAG) $(CFDFLAG) $(FFTBFLAG) $(GSFCFLAG) $(GMSECFLAG) $(STANDALONEFLAG) $(GLFWFLAG)
 
 
 ##########################  Rules to link 42  #############################
