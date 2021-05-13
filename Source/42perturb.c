@@ -75,7 +75,8 @@ long ClipEdgeAgainstPlane(double V1[3],double V2[3],
 void FindUnshadedAreas(struct SCType *S, double DirVecN[3])
 {
       struct SilEdgeType *SilEdge,SwapEdge,*SE;
-      struct SilVtxType *SilVtx,*InVtx;
+      struct SilVtxType *SilVtx;
+      struct SilVtxType *InVtx = NULL;
       struct SilVtxType *ClipVtx;
       struct BodyType *B;
       struct GeomType *G;
@@ -212,8 +213,11 @@ void FindUnshadedAreas(struct SCType *S, double DirVecN[3])
                }
 
                /* Clip Silhouette against Poly */
-               InVtx = (struct SilVtxType *) calloc(SilNv,sizeof(struct SilVtxType));
-               memcpy(InVtx,SilVtx,SilNv*sizeof(struct SilVtxType));
+               if (SilNv > 0) {
+                  free(InVtx);
+                  InVtx = (struct SilVtxType *) calloc(SilNv,sizeof(struct SilVtxType));
+                  memcpy(InVtx,SilVtx,SilNv*sizeof(struct SilVtxType));
+               }
                SilNin = SilNv;
                for(Iv=0;Iv<3;Iv++) {
                   if (SilNin > 2) {
