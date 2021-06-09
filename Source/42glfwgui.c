@@ -23,6 +23,8 @@
 ** #endif
 */
 
+void UpdatePOV(void);
+
 /*******************************************************************************/
 void DrawWorldAsBackdrop(struct WorldType *W,double PosN[3],double svn[3])
 {
@@ -2016,6 +2018,7 @@ void FindModelMatrices(void)
 void CamRenderExec(void)
 {
       FindModelMatrices();
+      UpdatePOV();
 
       if (VREnabled) {
          SetDestination(OFFSCREEN);
