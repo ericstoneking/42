@@ -22,8 +22,12 @@
 ** #endif
 */
 
-#ifdef _USE_GUI_
-   extern int HandoffToGui(int argc, char **argv);
+#ifdef _ENABLE_GUI_
+   #ifdef _USE_GLUT_
+      extern int HandoffToGui(int argc, char **argv);
+   #else
+      extern int HandoffToGui(void);
+   #endif
 #endif
 
 /**********************************************************************/
@@ -392,8 +396,14 @@ int exec(int argc,char **argv)
       InitSim(argc,argv);
       CmdInterpreter();
       InitInterProcessComm();
-      #ifdef _USE_GUI_
-         if (GLEnable) HandoffToGui(argc,argv);
+      #ifdef _ENABLE_GUI_
+         if (GLEnable) {
+            #ifdef _USE_GLUT_
+               HandoffToGui(argc,argv);
+            #else
+               HandoffToGui();
+            #endif
+         }
          else {
             while(!Done) {
                Done = SimStep();

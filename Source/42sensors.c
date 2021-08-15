@@ -428,10 +428,11 @@ void GpsModel(struct SCType *S)
 void Sensors(struct SCType *S)
 {
 
-      double evn[3],evb[3];
+      double evn[3],evb[3],qfb[4];
       long i,j,k,DOF;
       struct AcType *AC;
       struct JointType *G;
+      struct FlexNodeType *FN;
 
       AC = &S->AC;
       
@@ -488,8 +489,14 @@ void Sensors(struct SCType *S)
       
       /* Star Tracker */
       if (S->Nst == 0) {
-         for (i=0;i<4;i++) {
-            AC->qbn[i] = S->B[0].qn[i];
+         if (S->FlexActive) {
+            FN = &S->B[0].FlexNode[0]; /* Arbitrarily use FlexNode[0] */
+            for(i=0;i<3;i++) qfb[i] = 0.5*FN->ang[i];
+            qfb[3] = sqrt(1.0-qfb[0]*qfb[0]-qfb[1]*qfb[1]-qfb[2]*qfb[2]);
+            QxQ(qfb,S->B[0].qn,AC->qbn);
+         }
+         else {
+            for (i=0;i<4;i++) AC->qbn[i] = S->B[0].qn[i];
          }
       }
       else {

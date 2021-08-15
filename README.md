@@ -33,6 +33,8 @@ The compiler will attempt to detect what platform you're on (Linux, OSX, or
 Msys), but its success rate isn't great. If you have errors on the first
 compile or run, try editing your Makefile to manually set your `42PLATFORM`.
 
+For OpenGL graphics, newer Macs with Retina displays will need the GLFW graphics libraries, available from MacPorts, Homebrew, and probably elsewhere.  Otherwise, you'll need the GLUT libraries, which are also readily available if not already installed on your system.  Graphics are optional, settable in the Makefile by GUIFLAG.
+
 ## Getting Started
 
 See the overview, "42 Overview.pdf", in the Docs folder. Also recommended:

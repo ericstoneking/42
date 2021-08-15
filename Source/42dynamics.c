@@ -407,9 +407,9 @@ void FindTotalAngMom(struct SCType *S) {
       for(Iwhl=0;Iwhl<S->Nw;Iwhl++) {
          W = &S->Whl[Iwhl];
          for(i=0;i<3;i++) Hwb[i] += W->A[i]*W->H;
+         MTxV(S->B[W->Body].CN,Hwb,Hwn);
+         for(i=0;i<3;i++) S->Hvn[i] += Hwn[i];
       }
-      MTxV(S->B[0].CN,Hwb,Hwn);
-      for(i=0;i<3;i++) S->Hvn[i] += Hwn[i];
 
       /* Express in B[0] frame */
       MxV(S->B[0].CN,S->Hvn,S->Hvb);
@@ -1358,33 +1358,30 @@ void FindFlexTerms(struct SCType *S)
 void FindInertiaTrq(struct SCType *S)
 {
       struct BodyType *B;
+      struct WhlType *W;
       double H[3],wxH[3],Ia[3];
       double cPexa[3];
       double CAccR[3];
-      long Ib,i,j,Nf;
+      long Ib,Iw,i,Nf;
 
-      /*  -wxH for B[0], including wheels. */
-      /*  B[0].AlphaR always = 0 */
-      B = &S->B[0];
-      MxV(B->I,B->wn,H);
-      for(i=0;i<3;i++) {
-         H[i] += B->Hgyro[i];
-         for(j=0;j<S->Nw;j++) {
-            H[i] += S->Whl[j].H*S->Whl[j].A[i];
-         }
-      }
-
-      VxV(B->wn,H,wxH);
-      for(i=0;i<3;i++) B->InertiaTrq[i] =  -wxH[i];
-
-      /* -I*AlphaR - wxH for other bodies */
-      for(Ib=1;Ib<S->Nb;Ib++) {
+      /* -I*AlphaR - wxH for all bodies */
+      for(Ib=0;Ib<S->Nb;Ib++) {
          B = &S->B[Ib];
          MxV(B->I,B->wn,H);
          for(i=0;i<3;i++) H[i] += B->Hgyro[i];
          VxV(B->wn,H,wxH);
          MxV(B->I,B->AlphaR,Ia);
          for(i=0;i<3;i++) B->InertiaTrq[i] = -Ia[i] - wxH[i];
+      }
+      
+      for(Iw=0;Iw<S->Nw;Iw++) {
+         W = &S->Whl[Iw];
+         B = &S->B[W->Body];
+         for(i=0;i<3;i++) {
+            H[i] = W->H*W->A[i];
+         }
+         VxV(B->wn,H,wxH);
+         for(i=0;i<3;i++) B->InertiaTrq[i] +=  -wxH[i];
       }
 
       if (S->FlexActive && S->RefPt == REFPT_JOINT) {
@@ -1938,11 +1935,11 @@ void KaneNBodyEOM(double *u, double *x, double *h,
                   double *ufdot, double *xfdot,
                   struct SCType *S)
 {
-      long i,j,k,Nk,Ig,Ib,N,ii,jj;
+      long i,j,k,Nk,Ig,Ib,Iw,N,ii,jj;
       struct DynType *D;
       struct JointType *G;
       struct BodyType *B;
-      double WhlTrq[3] = {0.0,0.0,0.0};
+      struct WhlType *W;
       double TrqBo[3],TrqGo[3],TrqBi[3];
       double FrcBo[3],FrcGo[3],FrcBi[3],FrcGi[3];
       double FrcBiN[3], FrcBoN[3];
@@ -1951,13 +1948,6 @@ void KaneNBodyEOM(double *u, double *x, double *h,
       static long First = 1;
 
 /* .. Dynamics */
-
-      /* Apply wheel torque to B[0] */
-      for (i=0;i<3;i++) {
-         for (j=0;j<S->Nw;j++) {
-            WhlTrq[i] -= S->Whl[j].Trq*S->Whl[j].A[i];
-         }
-      }
 
       tic = usec();
       MapStateVectorToBodyStates(u,x,uf,xf,S);
@@ -2028,16 +2018,19 @@ void KaneNBodyEOM(double *u, double *x, double *h,
       }
 
       /* Assemble BodyTrq, BodyFrc, and FlexFrc Terms */
-      B = &S->B[0];
-      for(i=0;i<3;i++) {
-         D->BodyTrq[i] = B->Trq[i] + WhlTrq[i] + B->InertiaTrq[i];
-         D->BodyFrc[i] = B->Frc[i] + B->InertiaFrc[i];
-      }
-      for(Ib=1;Ib<S->Nb;Ib++) {
+      for(Ib=0;Ib<S->Nb;Ib++) {
          B = &S->B[Ib];
          for(i=0;i<3;i++) {
             D->BodyTrq[3*Ib+i] = B->Trq[i] + B->InertiaTrq[i];
             D->BodyFrc[3*Ib+i] = B->Frc[i] + B->InertiaFrc[i];
+         }
+      }
+      /* Add Wheel Torques */
+      for(Iw=0;Iw<S->Nw;Iw++) {
+         W = &S->Whl[Iw];
+         Ib = W->Body;
+         for(i=0;i<3;i++) {
+            D->BodyTrq[3*Ib+i] -= W->Trq*W->A[i];
          }
       }
       /* Applied Joint Torques and Forces */
@@ -2317,21 +2310,14 @@ void KaneNBodyConstraints(struct SCType *S)
       struct DynType *D;
       struct BodyType *B;
       struct JointType *G;
-      long Ig,Ib,i,j;
-      double WhlTrq[3] = {0.0,0.0,0.0};
+      struct WhlType *W;
+      long Ig,Ib,Iw,i,j;
       double TrqBo[3],TrqGo[3],TrqBi[3];
       double FrcBo[3],FrcGo[3],FrcBi[3],FrcGi[3];
       double FrcBiN[3], FrcBoN[3];
       double rxFi[3],rxFo[3];
 
       D = &S->Dyn;
-
-      /* Apply wheel torque to B[0] */
-      for (i=0;i<3;i++) {
-         for (j=0;j<S->Nw;j++) {
-            WhlTrq[i] -= S->Whl[j].Trq*S->Whl[j].A[i];
-         }
-      }
 
       MapStateVectorToBodyStates(D->u,D->x,D->uf,D->xf,S);
 
@@ -2365,16 +2351,19 @@ void KaneNBodyConstraints(struct SCType *S)
       }
 
       /* Assemble BodyTrq, BodyFrc, and FlexFrc Terms */
-      B = &S->B[0];
-      for(i=0;i<3;i++) {
-         D->BodyTrq[i] = B->Trq[i] + WhlTrq[i] + B->InertiaTrq[i];
-         D->BodyFrc[i] = B->Frc[i] + B->InertiaFrc[i];
-      }
-      for(Ib=1;Ib<S->Nb;Ib++) {
+      for(Ib=0;Ib<S->Nb;Ib++) {
          B = &S->B[Ib];
          for(i=0;i<3;i++) {
             D->BodyTrq[3*Ib+i] = B->Trq[i] + B->InertiaTrq[i];
             D->BodyFrc[3*Ib+i] = B->Frc[i] + B->InertiaFrc[i];
+         }
+      }
+      /* Add Wheel Torques */
+      for(Iw=0;Iw<S->Nw;Iw++) {
+         W = &S->Whl[Iw];
+         Ib = W->Body;
+         for(i=0;i<3;i++) {
+            D->BodyTrq[3*Ib+i] -= W->Trq*W->A[i];
          }
       }
       /* Applied Joint Torques and Forces */
@@ -2993,88 +2982,6 @@ void OneBodyRK4(struct SCType *S)
          S->abs[i] = 0.0;
       }
 }
-#if 0
-/**********************************************************************/
-/*  This simplified NBody formulation assumes that gimbals follow     */
-/*  their commands ideally.  The attitude dynamics are OneBodyAttEOM, */
-/*  using SC.I and total applied torques.                             */
-/*                                                                    */
-/*  The dynamical state vector u is:                                  */
-/*     u[  i] = B[0].wn[i]                                            */
-/*     u[3+i] = B[0].qn[i]                                            */
-/*     u[7+i] = Whl[i].H                                              */
-/* TO BE REVIEWED                                                     */
-void KinJointNBodyRK4(struct SCType *S)
-{
-      double u[11],uu[11],m1[11],m2[11],m3[11],m4[11];
-      double Iinv[3][3];
-      double Coi[3][3];
-      long Nb,Nw,Ng;
-      struct DynType *D;
-      struct JointType *G;
-      long i,k;
-
-      Nb = S->Nb;
-      Ng = S->Ng;
-      Nw = S->Nw;
-
-/* .. Map in state variables */
-      for(i=0;i<3;i++) u[i] = S->B[0].wn[i];
-      for(i=0;i<4;i++) u[3+i] = S->B[0].qn[i];
-      for(i=0;i<Nw;i++) u[7+i] = S->Whl[i].H;
-
-      MINV3(S->I,Iinv);
-
-/* .. 4th order Runge Kutta */
-      OneBodyEOM(u, m1, Iinv, S);
-      for(i=0;i<11;i++) uu[i] = u[i] + 0.5*DTSIM*m1[i];
-      OneBodyEOM(uu, m2, Iinv, S);
-      for(i=0;i<11;i++) uu[i] = u[i] + 0.5*DTSIM*m2[i];
-      OneBodyEOM(uu, m3, Iinv, S);
-      for(i=0;i<11;i++) uu[i] = u[i] + DTSIM*m3[i];
-      OneBodyEOM(uu, m4, Iinv, S);
-      for(i=0;i<11;i++) {
-         u[i]+=DTSIM/6.0*(m1[i]+2.0*(m2[i]+m3[i])+m4[i]);
-      }
-
-/* .. Map out state variables */
-      D = &S->Dyn;
-      for(i=0;i<3;i++) D->u[i] = u[i];
-      for(i=0;i<4;i++) D->x[i] = u[3+i];
-      for(i=0;i<Nw;i++) {
-         S->Whl[i].H = u[7+i];
-         S->Whl[i].w = S->Whl[i].H / S->Whl[i].J;
-      }
-
-      /* Gimbals follow commands ideally */
-      for(k=0;k<Ng;k++) {
-         G = &S->G[k];
-         if (G->Type == SPHERICAL_JOINT) {
-            for(i=0;i<3;i++) {
-               D->u[G->u0+i] = G->RateCmd[i];
-            }
-            A2C(G->Seq,G->AngCmd[0],G->AngCmd[1],G->AngCmd[2],Coi);
-            C2Q(Coi,&D->x[G->x0]);
-         }
-         else if (G->Type == GIMBAL_JOINT) {
-            for(i=0;i<G->DOF;i++) {
-               D->u[G->u0+i] = G->RateCmd[i];
-               D->x[G->x0+i] = G->AngCmd[i];
-            }
-         } else if (G->Type = TRANSLATIONAL_JOINT) {
-            for(i=0;i<G->DOF;i++) {
-               D->u[G->u0+i] = 0.0;
-            }
-         }
-      }
-
-      /* Update rest of state */
-      MapStateVectorToBodyStates(D->u,D->x,D->uf,D->xf,S);
-      MotionConstraints(S);
-      SCMassProps(S);
-
-}
-#endif
 /**********************************************************************/
 /* Utility function for Encke's method.  Computes f(q).               */
 /* See Battin, p. 449                                                 */

@@ -620,10 +620,9 @@ void RwaImbalance(struct SCType *S)
       long Iw,i;
       double SincFactor;
 
-      B = &S->B[0];
-
       for(Iw=0;Iw<S->Nw;Iw++) {
          W = &S->Whl[Iw];
+         B = &S->B[W->Body];
          if (S->FlexActive) {
             FN = &B->FlexNode[W->FlexNode];
          }

@@ -189,6 +189,7 @@ struct AcEarthSensorType {
 
 struct AcWhlType {
    /*~ Parameters ~*/
+   long Body;
    double Axis[3];
    double DistVec[3];
    double J;
@@ -213,6 +214,7 @@ struct AcMtbType {
 
 struct AcThrType {
    /*~ Parameters ~*/
+   long Body;
    double PosB[3];
    double Axis[3];
    double rxA[3];
@@ -404,6 +406,7 @@ struct AcType {
    /*~ Internal Variables ~*/
    long Init;
    double qrn[4];
+   double wrn[3];
    double qbr[4];
    double Hvb[3]; /* [~<~] */
 

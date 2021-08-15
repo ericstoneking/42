@@ -877,6 +877,7 @@ void InitAC(struct SCType *S)
          A = CreateMatrix(3,AC->Nwhl);
          Aplus = CreateMatrix(AC->Nwhl,3);
          for (i=0;i<S->Nw;i++) {
+            AC->Whl[i].Body = S->Whl[i].Body;
             for (j=0;j<3;j++) {
                AC->Whl[i].Axis[j] = S->Whl[i].A[j];
                A[j][i] = S->Whl[i].A[j];
@@ -937,6 +938,7 @@ void InitAC(struct SCType *S)
       if (AC->Nthr > 0) {
          AC->Thr = (struct AcThrType *) calloc(AC->Nthr,sizeof(struct AcThrType));
          for(i=0;i<S->Nthr;i++) {
+            AC->Thr[i].Body = S->Thr[i].Body;
             AC->Thr[i].Fmax = S->Thr[i].Fmax;
             for(j=0;j<3;j++) {
                AC->Thr[i].Axis[j] = S->Thr[i].A[j];
@@ -1018,23 +1020,46 @@ void FindAppendageInertia(long Ig, struct SCType *S,double Iapp[3])
       }
 }
 /**********************************************************************/
-void ApplyLoopGainAndDelays(struct SCType *S)
+void MapCmdsToActuators(struct SCType *S)
 {
       struct AcType *AC;
-      long Iw,Im,It;
+      long i,Iw,Im,It;
 
       AC = &S->AC;
       
-      for(Iw=0;Iw<AC->Nwhl;Iw++) {
-         AC->Whl[Iw].Tcmd = Delay(S->Whl[Iw].Delay,S->LoopGain*AC->Whl[Iw].Tcmd);
+      if (S->GainAndDelayActive) {
+         for(i=0;i<3;i++) {
+            S->IdealAct[i].Fcmd = Delay(S->IdealAct[i].FrcDelay,S->LoopGain*AC->IdealFrc[i]);
+            S->IdealAct[i].Tcmd = Delay(S->IdealAct[i].TrqDelay,S->LoopGain*AC->IdealTrq[i]);
+         }
+            
+         for(Iw=0;Iw<AC->Nwhl;Iw++) {
+            S->Whl[Iw].Tcmd = Delay(S->Whl[Iw].Delay,S->LoopGain*AC->Whl[Iw].Tcmd);
+         }
+         for(Im=0;Im<AC->Nmtb;Im++) {
+            S->MTB[Im].Mcmd = Delay(S->MTB[Im].Delay,S->LoopGain*AC->MTB[Im].Mcmd);
+         }
+         for(It=0;It<AC->Nthr;It++) {
+            S->Thr[It].PulseWidthCmd = Delay(S->Thr[It].Delay,S->LoopGain*AC->Thr[It].PulseWidthCmd);
+         }         
       }
-      for(Im=0;Im<AC->Nmtb;Im++) {
-         AC->MTB[Im].Mcmd = Delay(S->MTB[Im].Delay,S->LoopGain*AC->MTB[Im].Mcmd);
-      }
-      for(It=0;It<AC->Nthr;It++) {
-         AC->Thr[It].PulseWidthCmd = Delay(S->Thr[It].Delay,S->LoopGain*AC->Thr[It].PulseWidthCmd);
-      }
-         
+      else {      
+         for(i=0;i<3;i++) {
+            S->IdealAct[i].Fcmd = AC->IdealFrc[i];
+            S->IdealAct[i].Tcmd = AC->IdealTrq[i];
+         }
+      
+         for(Iw=0;Iw<AC->Nwhl;Iw++) {
+            S->Whl[Iw].Tcmd = AC->Whl[Iw].Tcmd;
+         }
+         for(Im=0;Im<AC->Nmtb;Im++) {
+            S->MTB[Im].Mcmd = AC->MTB[Im].Mcmd;
+         }
+         for(It=0;It<AC->Nthr;It++) {
+            S->Thr[It].PulseWidthCmd = AC->Thr[It].PulseWidthCmd;
+         }
+      } 
+              
 }
 /**********************************************************************/
 /*  This simple control law is suitable for rapid prototyping.        */
@@ -1668,9 +1693,9 @@ void AdHocFSW(struct SCType *S)
       struct AcType *AC;
       struct AcAdHocCtrlType *C;
       double CLN[3][3],CRN[3][3],qrn[4],wln[3];
-      double CRL[3][3] = {{ 0.0, 0.0, 1.0}, /* Point +X to nadir */
+      double CRL[3][3] = {{ 1.0, 0.0, 0.0}, 
                           { 0.0, 1.0, 0.0},
-                          {-1.0, 0.0, 0.0}}; /* Point +Z to antivelocity */
+                          { 0.0, 0.0, 1.0}}; /* Point +Z to antivelocity */
       long i;
 
       AC = &S->AC;
@@ -1678,19 +1703,23 @@ void AdHocFSW(struct SCType *S)
 
       if (C->Init) {
          C->Init = 0;
-         for(i=0;i<3;i++)
-            FindPDGains(AC->MOI[i][i],0.1,0.7,&C->Kr[i],&C->Kp[i]);
+         for(i=0;i<3;i++) {
+            FindPDGains(AC->MOI[i][i],0.1*TwoPi,0.7,&C->Kr[i],&C->Kp[i]);
+            //C->Kp[i] *= 0.5;
+            //C->Kr[i] *= 0.5;
+         }
       }
 
 /* .. Form attitude error signals */
       FindCLN(AC->PosN,AC->VelN,CLN,wln);
       MxM(CRL,CLN,CRN);
       C2Q(CRN,qrn);
-      QxQT(AC->qbn,qrn,AC->qbr);
+      //QxQT(AC->qbn,qrn,AC->qbr);
+      for(i=0;i<4;i++) AC->qbr[i] = AC->qbn[i];
       RECTIFYQ(AC->qbr);
       for(i=0;i<3;i++) {
          C->therr[i] = 2.0*AC->qbr[i];
-         C->werr[i] = AC->wbn[i] - wln[i];
+         C->werr[i] = AC->wbn[i]; // - wln[i];
       }
 
 /* .. Closed-loop attitude control */
@@ -1700,6 +1729,7 @@ void AdHocFSW(struct SCType *S)
       }
 
       for(i=0;i<3;i++) AC->IdealTrq[i] = C->Tcmd[i];
+      //for(i=0;i<3;i++) AC->Whl[i].Tcmd = -C->Tcmd[i];
 }
 /**********************************************************************/
 /* Learning about finding frequency response in time domain           */
@@ -1714,8 +1744,12 @@ void FreqRespFSW(struct SCType *S)
 
       if (C->Init) {
          C->Init = 0;
-         for(i=0;i<3;i++)
+         for(i=0;i<3;i++) {
             FindPDGains(AC->MOI[i][i],0.1*TwoPi,0.7,&C->Kr[i],&C->Kp[i]);
+            AC->qrn[i] = 0.0;
+            AC->wrn[i] = 0.0;
+         }
+         AC->qrn[3] = 1.0;
       }
 
 /* .. Form attitude error signals */
@@ -1723,7 +1757,7 @@ void FreqRespFSW(struct SCType *S)
       RECTIFYQ(AC->qbr);
       for(i=0;i<3;i++) {
          C->therr[i] = 2.0*AC->qbr[i];
-         C->werr[i] = AC->wbn[i];
+         C->werr[i] = AC->wbn[i]-AC->wrn[i];
       }
 
 /* .. Closed-loop attitude control */
@@ -1735,98 +1769,200 @@ void FreqRespFSW(struct SCType *S)
       for(i=0;i<3;i++) AC->IdealTrq[i] = C->Tcmd[i];
 }
 /**********************************************************************/
+#define FREQ_INIT 0
+#define FREQ_WARMUP 1
+#define FREQ_SWEEP 2
+#define FREQ_DONE 3
 void FreqResp(struct SCType *S)
 {
       struct AcType *AC;
       struct FreqRespType *F;
-      double Span,Decade,c,s,z,EstAng,Mag,dB[3],Phase[3];
-      long i;
+      struct FreqNormEqType *NE;
+      double dec,t,c,s,Mag,dB[3],Phase[3];
+      double AtAi[4][4],Soln[4];
+      double A1,B1;
+      double TotTime,f,P;
+      long Ia,i,j;
       char str[80];
       
       AC = &S->AC;
       F = &S->FreqResp;
       
-      if (F->Init) {
-         F->Init = FALSE;
+      if (F->State == FREQ_INIT) {
          sprintf(str,"FreqResp%02ld.42",S->ID);
          F->outfile = FileOpen(InOutPath,str,"w");
          
-         F->MinDecade = -3.0;
+         F->MinDecade = -1.0;
          F->MaxDecade =  2.0;
-         F->Ndec = 20;
-         F->Idec = 0;
-         F->InitFreq = 1;
+         F->Nf = 201;
          F->RefAmp = 1.0/3600.0*D2R;
+               
+         f = pow(10.0,F->MaxDecade);
+         P = 1.0/f;
+         if (DTSIM > 0.1*P) {
+            printf("Warning: DTSIM is too large for FreqResp max freq.  Suggest DTSIM < %lf\n",0.1*P);
+         }
          for(i=0;i<3;i++) {
             AC->qrn[i] = 0.0;
-            F->A0[i] = 0.0;
-            F->A1[i] = 0.0;
-            F->B1[i] = 0.0;
          }
          AC->qrn[3] = 1.0;
-      }
-
-/* .. Sweep over frequencies */
-      if (F->Idec <= F->Ndec) {
-         if (F->InitFreq) {
-            F->InitFreq = 0;
-            F->Time = 0.0;
-            Span = F->MaxDecade - F->MinDecade;
-            Decade = F->MinDecade + ((double) F->Idec)/((double) F->Ndec)*Span;
-            F->RefFreq = TwoPi*pow(10.0,Decade);            
-            F->RefPeriod = TwoPi/F->RefFreq;
-            F->EndTime = 10.0*F->RefPeriod;
-            F->EstGain = 0.5*DTSIM/F->RefPeriod; //2.0*DTSIM/F->RefPeriod;
-            
-            printf("Starting FreqResp %ld of %ld at Time = %lf\n",
-               F->Idec,F->Ndec,SimTime);
+         
+         F->Np = (double *) calloc(F->Nf,sizeof(double));
+         TotTime = 0.0;
+         for(i=0;i<F->Nf;i++) {
+            dec = F->MinDecade+(F->MaxDecade-F->MinDecade)*
+               ((double) i)/((double) (F->Nf-1));
+            f = pow(10.0,dec);            
+            P = 1.0/f;
+            F->SettleTime = ceil(30.0/P)*P;
+            F->ReadTime = F->SettleTime + F->SettleTime;
+            F->EndTime = F->ReadTime + 10.0*F->RefPeriod;
+            TotTime += F->EndTime;
          }
-         else {            
-            /* Fit response to sinusoid */
-            Q2AngleVec(AC->qbn,F->OutAng);
-            c = cos(F->RefFreq*SimTime);
-            s = sin(F->RefFreq*SimTime);
-            for(i=0;i<3;i++) {
-               EstAng = F->A0[i] + F->A1[i]*c + F->B1[i]*s;
-               z = F->OutAng[i] - EstAng;
-               F->A0[i] += F->EstGain*z;
-               F->A1[i] += F->EstGain*c*z;
-               F->B1[i] += F->EstGain*s*z;
-            }
-            /* Record magnitude, phase */
-            F->Time += DTSIM;
-            if (F->Time > F->EndTime) {
+         printf("Expected FreqResp End Time: %lf sec\n",SimTime+TotTime);
+         
+         F->If = 0;
+         F->InitFreq = 1;
+         F->Time = 0.0;
+         F->State = FREQ_SWEEP;
+      }
+      else if (F->State == FREQ_SWEEP) {
+         /* Sweep over frequencies */
+         if (F->If < F->Nf) {
+            if (F->InitFreq) {
+               F->InitFreq = 0;
                F->Time = 0.0;
-               F->Idec++;
-               F->InitFreq = 1;
-               
-               for(i=0;i<3;i++) {
-                  Mag = sqrt(F->A1[i]*F->A1[i]+F->B1[i]*F->B1[i]);
-                  Mag /= F->RefAmp;
-                  dB[i] = 20.0*log10(Mag);
-                  Phase[i] = atan2(F->B1[i],F->A1[i])*R2D;
+               dec = F->MinDecade+(F->MaxDecade-F->MinDecade)*
+                  ((double) F->If)/((double) (F->Nf-1));
+               F->RefFreq = TwoPi*pow(10.0,dec);            
+               F->RefPeriod = TwoPi/F->RefFreq;
+               F->SettleTime = ceil(30.0/F->RefPeriod)*F->RefPeriod;
+               F->ReadTime = F->SettleTime + F->SettleTime;
+               F->EndTime = F->ReadTime + 10.0*F->RefPeriod;
+            
+               for(Ia=0;Ia<3;Ia++) {
+                  for(i=0;i<4;i++) {
+                     for(j=0;j<4;j++) F->NormEq[Ia].AtA[i][j] = 0.0;
+                     F->NormEq[Ia].Atb[i] = 0.0;
+                  }
                }
-               fprintf(F->outfile,"%le %lf %lf %lf %lf %lf %lf\n",
-                  F->RefFreq/TwoPi,dB[0],dB[1],dB[2],Phase[0],Phase[1],Phase[2]);
+               
+            }
+            else {            
+               /* Fit response to sinusoid */
+               Q2AngleVec(AC->qbn,F->OutAng);
+               if (F->Time > F->ReadTime) {
+                  t = F->Time;
+                  c = cos(F->RefFreq*F->Time);
+                  s = sin(F->RefFreq*F->Time);
+                  for(Ia=0;Ia<3;Ia++) {
+                     NE = &F->NormEq[Ia];
+                     NE->AtA[0][0] += 1.0;
+                     NE->AtA[0][1] += t;
+                     NE->AtA[0][2] += c;
+                     NE->AtA[0][3] += s;
+                     NE->AtA[1][0] += t;
+                     NE->AtA[1][1] += t*t;
+                     NE->AtA[1][2] += t*c;
+                     NE->AtA[1][3] += t*s;
+                     NE->AtA[2][0] += c;
+                     NE->AtA[2][1] += c*t;
+                     NE->AtA[2][2] += c*c;
+                     NE->AtA[2][3] += c*s;
+                     NE->AtA[3][0] += s;
+                     NE->AtA[3][1] += s*t;
+                     NE->AtA[3][2] += s*c;
+                     NE->AtA[3][3] += s*s;
+                     NE->Atb[0] +=   F->OutAng[Ia];
+                     NE->Atb[1] += t*F->OutAng[Ia];
+                     NE->Atb[2] += c*F->OutAng[Ia];
+                     NE->Atb[3] += s*F->OutAng[Ia];
+                  }
+               }
+            
+               if (F->Time < F->SettleTime) {
+                  for(i=0;i<3;i++) {
+                     F->RefAng[i] = 0.0;
+                     F->RefRate[i] = 0.0;
+                     AC->qrn[i] = 0.0;
+                     AC->wrn[i] = 0.0;
+                  }
+                  AC->qrn[3] = 1.0;
+               }
+               else if (F->Time < F->ReadTime) {
+                  /* Generate Reference Signal */
+                  for(i=0;i<3;i++) {
+                     F->RefAng[i] = F->RefAmp;
+                     F->RefRate[i] = 0.0;
+                     AC->qrn[i] = 0.5*F->RefAng[i];
+                     AC->wrn[i] = F->RefRate[i];
+                  }
+                  AC->qrn[3] = 1.0;
+                  UNITQ(AC->qrn);
+               }
+               else {
+                  /* Generate Reference Signal */
+                  for(i=0;i<3;i++) {
+                     F->RefAng[i] = F->RefAmp*cos(F->RefFreq*F->Time);
+                     F->RefRate[i] = -F->RefAmp*F->RefFreq*sin(F->RefFreq*F->Time);
+                     AC->qrn[i] = 0.5*F->RefAng[i];
+                     AC->wrn[i] = F->RefRate[i];
+                  }
+                  AC->qrn[3] = 1.0;
+                  UNITQ(AC->qrn);
+               
+                  /* Overwrite qbn, wbn */
+                  for(i=0;i<3;i++) {
+                     AC->qbn[i] = 0.0;
+                     AC->wbn[i] = 0.0;
+                  }
+                  AC->qbn[3] = 1.0;
+               }
+
+               /* Record magnitude, phase */
+               F->Time += DTSIM;
+               if (F->Time > F->EndTime) {
+                  F->Time = 0.0;
+                  F->If++;
+                  F->InitFreq = 1;
+               
+                  for(Ia=0;Ia<3;Ia++) {
+                     MINV4(NE->AtA,AtAi);
+                     for(i=0;i<4;i++) {
+                        Soln[i] = 0.0;
+                        for(j=0;j<4;j++) {
+                           Soln[i] += AtAi[i][j]*NE->Atb[j];
+                        }
+                     }
+                     A1 = Soln[2];
+                     B1 = Soln[3];
+                     Mag = sqrt(A1*A1+B1*B1)/F->RefAmp;
+                     dB[Ia] = 20.0*log10(Mag);
+                     Phase[Ia] = -atan2(B1,A1)*R2D;
+                  }
+                  fprintf(F->outfile,"%le %lf %lf %lf %lf %lf %lf\n",
+                     F->RefFreq/TwoPi,dB[0],dB[1],dB[2],Phase[0],Phase[1],Phase[2]);
+               }
             }
          }
+         else {
+            F->State = FREQ_DONE;
+         }
       }
-      else {
+      else { /* FREQ_DONE */
          fclose(F->outfile);
-         for(i=0;i<3;i++) F->RefAng[i] = 0.0;
+         for(i=0;i<3;i++) {
+            F->RefAng[i] = 0.0;
+            F->RefRate[i] = 0.0;
+            AC->qrn[i] = 0.0;
+            AC->wrn[i] = 0.0;
+         }
+         AC->qrn[3] = 1.0;
          S->FreqRespActive = FALSE;
          printf("Frequency Response Complete at Time = %lf\n",SimTime);
       }
+
       
-/* .. Generate New Reference Signal and Overwrite qbn */
-      for(i=0;i<3;i++) {
-         F->RefAng[i] = F->RefAmp*sin(F->RefFreq*SimTime);
-         AC->qrn[i] = 0.5*F->RefAng[i];
-         AC->qbn[i] = 0.0;
-      }
-      AC->qrn[3] = 1.0;
-      AC->qbn[3] = 1.0;
-      UNITQ(AC->qrn);            
 }
 /**********************************************************************/
 /*  This function is called at the simulation rate.  Sub-sampling of  */
@@ -1908,10 +2044,10 @@ void FlightSoftWare(struct SCType *S)
                FreqRespFSW(S);
                break;
          }
+         
       }
-      if (S->GainAndDelayActive) {
-         ApplyLoopGainAndDelays(S);
-      }
+      
+      MapCmdsToActuators(S);
 }
 
 /* #ifdef __cplusplus

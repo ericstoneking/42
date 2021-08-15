@@ -487,13 +487,14 @@ long LoadTleFromFile(const char *Path, const char *TleFileName,
       infile=FileOpen(Path,TleFileName,"r");
 
       Nchar = strlen(TleLabel);
+      if (Nchar > 24) Nchar = 24;
       /* Pad label to 24 characters to assure unique match */
       for(i=0;i<Nchar;i++) Label[i] = TleLabel[i];
       for(i=Nchar;i<24;i++) Label[i] = ' ';
       Label[24] = '\0';
       while(!feof(infile) && !Success) {
          fgets(line,80,infile);
-         if (!strncmp(line,Label,24)) {
+         if (!strncmp(line,Label,Nchar)) {
             Success = 1;
             fgets(line1,80,infile);
             fgets(line2,80,infile);

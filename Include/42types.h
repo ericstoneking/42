@@ -63,7 +63,7 @@ struct BodyType {
    double c[3]; /* First mass moment about ref pt, expressed in B */
    double I[3][3]; /* Moment of Inertia, about ref pt, expressed in B frame */
    double Hgyro[3];  /* Constant embedded momentum, for CMGs and rotating instruments */
-   double wn[3]; /* Angular Velocity of B expressed in B frame [[rad/sec]] [~=~] */
+   double wn[3]; /* Angular Velocity of B wrt N expressed in B frame [[rad/sec]] [~=~] */
    double qn[4]; /* [~=~] */
    double vn[3]; /* velocity of B ref pt expressed in N frame */
    double pn[3]; /* position of B ref pt in N frame expressed in N frame */
@@ -182,6 +182,14 @@ struct JointType {
    long Trnc0;
 };
 
+struct IdealActType {
+   /*~ Internal Variables ~*/
+   double Tcmd;
+   double Fcmd;
+   struct DelayType *FrcDelay;
+   struct DelayType *TrqDelay;
+};
+
 struct WhlType {
    /*~ Internal Variables ~*/
    double H;  /* Angular Momentum, [[Nms]] [~=~] */
@@ -190,9 +198,11 @@ struct WhlType {
    double A[3]; /* Axis vector wrt Body 0 */
    double Tmax;
    double Hmax;
+   double Tcmd;
    double Trq;  /* Exerted on wheel, expressed along wheel axis */
+   long Body;
    long FlexNode;
-   double Uhat[3],Vhat[3]; /* Transverse basis vectors wrt Body 0 */
+   double Uhat[3],Vhat[3]; /* Transverse basis vectors wrt Body */
    double ang; /* Spin angle, rad */
    double Ks;  /* Static imbalance coefficient, [kg-m] */
    double Kd;  /* Dynamic imbalance coefficient, [kg-m^2] */
@@ -204,6 +214,7 @@ struct MTBType {
    double M;
    double A[3]; /* Axis vector wrt Body 0 */
    double Mmax;
+   double Mcmd;
    double Trq[3]; /* Exerted on Body 0, expressed in B[0] frame */
    long FlexNode;
    struct DelayType *Delay; /* For injecting delay into control loops */
@@ -216,6 +227,7 @@ struct ThrType {
    long Body; /* Body that thruster is mounted on */
    double A[3]; /* Axis vector wrt Body 0 */
    double PosB[3]; /* Position vector in Body 0 */
+   double PulseWidthCmd;
    double Frc[3]; /* Force exerted */
    double Trq[3]; /* Torque exerted */
    long FlexNode;
@@ -440,22 +452,28 @@ struct EnvTrqType {
    double Hs[3];
 };
 
+struct FreqNormEqType {
+   double AtA[4][4];
+   double Atb[4];
+};
+
 struct FreqRespType {
-   long Init;
+   long State;
    FILE *outfile;
    double MinDecade;
    double MaxDecade;
-   long Ndec;
-   long Idec;
+   long Nf;
+   long If;
    long InitFreq;
    double RefAmp;
-   double A0[3],A1[3],B1[3];
-   double Time,EndTime;
+   double Time,SettleTime,ReadTime,EndTime;
    double RefFreq;
    double RefPeriod;
-   double EstGain;
+   double *Np;
    double RefAng[3];
+   double RefRate[3];
    double OutAng[3];
+   struct FreqNormEqType NormEq[3];
 };
 
 struct SCType {
@@ -552,6 +570,7 @@ struct SCType {
    struct AcType AC;
    struct BodyType *B;           /* [*Nb*] */
    struct JointType *G;          /* [*Ng*] */
+   struct IdealActType IdealAct[3];
    struct WhlType *Whl;          /* [*Nw*] */
    struct MTBType *MTB;          /* [*Nmtb*] */
    struct ThrType *Thr;          /* [*Nthr*] */

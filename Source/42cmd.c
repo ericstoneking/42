@@ -21,7 +21,7 @@
 */
 
 long FswCmdInterpreter(char CmdLine[512], double *CmdTime);
-#ifdef _USE_GUI_
+#ifdef _ENABLE_GUI_
 long GuiCmdInterpreter(char CmdLine[512], double *CmdTime);
 #endif
 
@@ -97,6 +97,20 @@ long SimCmdInterpreter(char CmdLine[512],double *CmdTime)
          NewCmdProcessed = TRUE;
          S = &SC[Isc];
          S->LoopDelay = Val;
+         for(i=0;i<3;i++) {
+            if (S->IdealAct[i].FrcDelay == NULL) {
+               S->IdealAct[i].FrcDelay = CreateDelay(S->LoopDelay,DTSIM);
+            }
+            else {
+               S->IdealAct[i].FrcDelay = ResizeDelay(S->IdealAct[i].FrcDelay,S->LoopDelay,DTSIM);
+            }
+            if (S->IdealAct[i].TrqDelay == NULL) {
+               S->IdealAct[i].TrqDelay = CreateDelay(S->LoopDelay,DTSIM);
+            }
+            else {
+               S->IdealAct[i].TrqDelay = ResizeDelay(S->IdealAct[i].TrqDelay,S->LoopDelay,DTSIM);
+            }
+         }
          for(i=0;i<S->Nw;i++) {
             if (S->Whl[i].Delay == NULL) {
                S->Whl[i].Delay = CreateDelay(S->LoopDelay,DTSIM);
@@ -126,6 +140,12 @@ long SimCmdInterpreter(char CmdLine[512],double *CmdTime)
       if (sscanf(CmdLine,"%lf SC[%ld].GainAndDelayActive = %s",CmdTime,&Isc,response) == 3) {
          NewCmdProcessed = TRUE;
          SC[Isc].GainAndDelayActive = DecodeString(response);
+      }
+      
+      if (sscanf(CmdLine,"%lf SC[%ld].FreqRespActive = %s",CmdTime,&Isc,response) == 3) {
+         NewCmdProcessed = TRUE;
+         SC[Isc].FreqRespActive = DecodeString(response);
+         SC[Isc].FreqResp.State = 0;
       }
 
       return(NewCmdProcessed);
@@ -175,7 +195,7 @@ void CmdInterpreter(void)
             NewCmdProcessed = TRUE;
 
          /* Visualization Commands */
-         #ifdef _USE_GUI_
+         #ifdef _ENABLE_GUI_
             else if (GuiCmdInterpreter(CmdLine,&CmdTime))
                NewCmdProcessed = TRUE;
          #endif

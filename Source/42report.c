@@ -126,10 +126,7 @@ void FreqRespDiag(void)
       }
       
       F = &SC[0].FreqResp;
-      fprintf(outfile,"%le %le %le %le %le %le %le %le %le %le %le %le %le %le %le\n",
-         F->A0[0],F->A0[1],F->A0[2],
-         F->A1[0],F->A1[1],F->A1[2],
-         F->B1[0],F->B1[1],F->B1[2],
+      fprintf(outfile,"%le %le %le %le %le %le\n",
          F->RefAng[0],F->RefAng[1],F->RefAng[2],
          F->OutAng[0],F->OutAng[1],F->OutAng[2]);
 }
@@ -147,12 +144,14 @@ void Report(void)
       static FILE *RPYfile;
       static FILE *Hwhlfile;
       static FILE *MTBfile;
-      static FILE *ProjAreaFile;
+      //static FILE *ProjAreaFile;
       static FILE *AccFile;
       static char First = TRUE;
       long Isc,i;
       struct DynType *D;
       double CBL[3][3],Roll,Pitch,Yaw;
+      struct WorldType *W;
+      double WorldAngVel[3],wxR[3],VelN[3];
       double PosW[3],VelW[3],PosR[3],VelR[3];
       char s[40];
       //double ZAxis[3] = {0.0,0.0,1.0};
@@ -197,7 +196,7 @@ void Report(void)
          svnfile = FileOpen(InOutPath,"svn.42","w");
          svbfile = FileOpen(InOutPath,"svb.42","w");
          KEfile = FileOpen(InOutPath,"KE.42","w");
-         ProjAreaFile = FileOpen(InOutPath,"ProjArea.42","w");
+         //ProjAreaFile = FileOpen(InOutPath,"ProjArea.42","w");
          RPYfile = FileOpen(InOutPath,"RPY.42","w");
          Hwhlfile = FileOpen(InOutPath,"Hwhl.42","w");
          MTBfile = FileOpen(InOutPath,"MTB.42","w");
@@ -233,12 +232,18 @@ void Report(void)
                SC[0].PosN[0],SC[0].PosN[1],SC[0].PosN[2]);
             fprintf(VelNfile,"%le %le %le\n",
                SC[0].VelN[0],SC[0].VelN[1],SC[0].VelN[2]);
-            MxV(World[EARTH].CWN,SC[0].PosN,PosW);
-            MxV(World[EARTH].CWN,SC[0].VelN,VelW);
+            W = &World[Orb[SC[0].RefOrb].World];
+            WorldAngVel[0] = 0.0;
+            WorldAngVel[1] = 0.0;
+            WorldAngVel[2] = W->w;
+            VxV(WorldAngVel,SC[0].PosN,wxR);
+            for(i=0;i<3;i++) VelN[i] = SC[0].VelN[i] - wxR[i];
+            MxV(W->CWN,SC[0].PosN,PosW);
+            MxV(W->CWN,VelN,VelW);
             fprintf(PosWfile,"%18.12le %18.12le %18.12le\n",
                PosW[0],PosW[1],PosW[2]);
             fprintf(VelWfile,"%18.12le %18.12le %18.12le\n",
-               VelW[0],VelW[1],VelW[2]);
+               VelW[0],VelW[1],VelW[2]);  
             if (Orb[SC[0].RefOrb].Regime == ORB_FLIGHT) {
                MxV(Rgn[Orb[SC[0].RefOrb].Region].CN,SC[0].PosR,PosR);
                MxV(Rgn[Orb[SC[0].RefOrb].Region].CN,SC[0].VelR,VelR);

@@ -21,20 +21,19 @@
 */
 
 /**********************************************************************/
-void ThrModel(double *PulseWidthCmd,double DT,struct ThrType *Thr,
-   struct SCType *S)
+void ThrModel(struct ThrType *Thr,struct SCType *S,double DT)
 {
       struct FlexNodeType *FN;
       double r[3];
       long i;
 
-      if (*PulseWidthCmd > DT) {
+      if (Thr->PulseWidthCmd > DT) {
          Thr->F = Thr->Fmax;
-         *PulseWidthCmd -= DT;
+         Thr->PulseWidthCmd -= DT;
       }
       else {
-         Thr->F = (*PulseWidthCmd/DT)*Thr->Fmax;
-         *PulseWidthCmd = 0.0;
+         Thr->F = (Thr->PulseWidthCmd/DT)*Thr->Fmax;
+         Thr->PulseWidthCmd = 0.0;
       }
 
       if (Thr->F < 0.0) Thr->F = 0.0;
@@ -56,12 +55,12 @@ void ThrModel(double *PulseWidthCmd,double DT,struct ThrType *Thr,
       }
 }
 /**********************************************************************/
-void WhlModel(double Tcmd,struct WhlType *W,struct SCType *S)
+void WhlModel(struct WhlType *W,struct SCType *S)
 {
       struct FlexNodeType *FN;
       long i;
 
-      W->Trq = Tcmd;
+      W->Trq = W->Tcmd;
       if (W->Trq < -W->Tmax) W->Trq = -W->Tmax;
       if (W->Trq >  W->Tmax) W->Trq =  W->Tmax;
       if (W->Trq < 0.0 && W->H <= -W->Hmax) W->Trq = 0.0;
@@ -74,17 +73,16 @@ void WhlModel(double Tcmd,struct WhlType *W,struct SCType *S)
 
 }
 /**********************************************************************/
-void MTBModel(double bvb[3],double Mcmd, double Mmax, double A[3],
-              double *M, double Trq[3])
+void MTBModel(struct MTBType *MTB,double bvb[3])
 {
 
-      *M = Mcmd;
-      if(*M < -Mmax) *M = -Mmax;
-      if(*M >  Mmax) *M =  Mmax;
+      MTB->M = MTB->Mcmd;
+      if(MTB->M < -MTB->Mmax) MTB->M = -MTB->Mmax;
+      if(MTB->M >  MTB->Mmax) MTB->M =  MTB->Mmax;
 
-      Trq[0] = *M * (A[1]*bvb[2]-A[2]*bvb[1]);
-      Trq[1] = *M * (A[2]*bvb[0]-A[0]*bvb[2]);
-      Trq[2] = *M * (A[0]*bvb[1]-A[1]*bvb[0]);
+      MTB->Trq[0] = MTB->M * (MTB->A[1]*bvb[2]-MTB->A[2]*bvb[1]);
+      MTB->Trq[1] = MTB->M * (MTB->A[2]*bvb[0]-MTB->A[0]*bvb[2]);
+      MTB->Trq[2] = MTB->M * (MTB->A[0]*bvb[1]-MTB->A[1]*bvb[0]);
 
 }
 /**********************************************************************/
@@ -227,27 +225,25 @@ void Actuators(struct SCType *S)
       AC = &S->AC;
 
       /* Ideal Actuators */
-      for(j=0;j<3;j++) {
-         S->B[0].Frc[j] += AC->IdealFrc[j];
-         S->B[0].Trq[j] += AC->IdealTrq[j];
+      for(i=0;i<3;i++) {
+         S->B[0].Frc[i] += S->IdealAct[i].Fcmd;
+         S->B[0].Trq[i] += S->IdealAct[i].Tcmd;
       }
       if (S->FlexActive) {
          FN = &S->B[0].FlexNode[0]; /* Arbitrarily put ideal actuators at FN 0 */
          for(i=0;i<3;i++) {
-            FN->Trq[i] += AC->IdealTrq[i];
-            FN->Frc[i] += AC->IdealFrc[i];
+            FN->Trq[i] += S->IdealAct[i].Tcmd;
+            FN->Frc[i] += S->IdealAct[i].Fcmd;
          }
       }
 
       /* Wheels */
       for(i=0;i<S->Nw;i++) {
-         WhlModel(AC->Whl[i].Tcmd,&S->Whl[i],S);
+         WhlModel(&S->Whl[i],S);
       }
       /* MTBs */
       for(i=0;i<S->Nmtb;i++){
-         MTBModel(S->bvb,AC->MTB[i].Mcmd,S->MTB[i].Mmax,
-                  S->MTB[i].A,&S->MTB[i].M,
-                  S->MTB[i].Trq);
+         MTBModel(&S->MTB[i],S->bvb);
          for(j=0;j<3;j++){
             S->B[0].Trq[j] += S->MTB[i].Trq[j];
          }
@@ -274,7 +270,7 @@ void Actuators(struct SCType *S)
       /* Thrusters */
       for(i=0;i<S->Nthr;i++) {
          Thr = &S->Thr[i];
-         ThrModel(&AC->Thr[i].PulseWidthCmd,DTSIM,Thr,S);
+         ThrModel(Thr,S,DTSIM);
          MTxV(S->B[Thr->Body].CN,Thr->Frc,FrcN);
          for(j=0;j<3;j++) {
             S->B[Thr->Body].Trq[j] += Thr->Trq[j];

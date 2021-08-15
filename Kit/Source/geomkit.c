@@ -1004,8 +1004,8 @@ struct GeomType *LoadWingsObjFile(const char ModelPath[80],const char ObjFilenam
                fputs(line,outfile);
             }
             fclose(outfile);
+            fclose(TmpFile);
          }
-         fclose(TmpFile);
       }
 
 /* .. Allocate arrays */

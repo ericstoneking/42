@@ -1832,7 +1832,7 @@ void InitSpacecraft(struct SCType *S)
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nw,junk,&newline);
       S->Whl = (struct WhlType *) calloc(S->Nw,sizeof(struct WhlType));
       if (S->Nw == 0) {
-         for(i=0;i<8;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(i=0;i<9;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
       else {
          for(Iw=0;Iw<S->Nw;Iw++) {
@@ -1848,6 +1848,7 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%lf %[^\n] %[\n]",&S->Whl[Iw].J,junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&S->Whl[Iw].Ks,junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&S->Whl[Iw].Kd,junk,&newline);
+            fscanf(infile,"%ld %[^\n] %[\n]",&S->Whl[Iw].Body,junk,&newline);
             fscanf(infile,"%ld %[^\n] %[\n]",&S->Whl[Iw].FlexNode,junk,&newline);
             /* Convert from g-cm and g-cm^2 to kg-m and kg-m^2 */
             S->Whl[Iw].Ks *= 1.0E-5;
@@ -1880,15 +1881,14 @@ void InitSpacecraft(struct SCType *S)
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nthr,junk,&newline);
       S->Thr = (struct ThrType *) calloc(S->Nthr,sizeof(struct ThrType));
       if (S->Nthr == 0) {
-         for(i=0;i<5;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(i=0;i<6;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
       else {
          for(It=0;It<S->Nthr;It++) {
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&S->Thr[It].Fmax,
                    junk,&newline);
-            fscanf(infile,"%ld %lf %lf %lf %[^\n] %[\n]",
-                   &S->Thr[It].Body,
+            fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
                    &S->Thr[It].A[0],
                    &S->Thr[It].A[1],
                    &S->Thr[It].A[2],junk,&newline);
@@ -1897,6 +1897,7 @@ void InitSpacecraft(struct SCType *S)
                    &S->Thr[It].PosB[0],
                    &S->Thr[It].PosB[1],
                    &S->Thr[It].PosB[2],junk,&newline);
+            fscanf(infile,"%ld %[^\n] %[\n]",&S->Thr[It].Body,junk,&newline);
             fscanf(infile,"%ld %[^\n] %[\n]",&S->Thr[It].FlexNode,junk,&newline);
          }
       }
@@ -1984,7 +1985,7 @@ void InitSpacecraft(struct SCType *S)
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Ncss,junk,&newline);
       S->CSS = (struct CssType *) calloc(S->Ncss,sizeof(struct CssType));
       if (S->Ncss == 0) {
-         for(i=0;i<7;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(i=0;i<8;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
       else {
          for(Ic=0;Ic<S->Ncss;Ic++) {
@@ -1998,14 +1999,15 @@ void InitSpacecraft(struct SCType *S)
                printf("Info:  CSS[%ld].SampleTime was smaller than DTSIM.  It has been adjusted to be DTSIM.\n",Ig);
             }
             CSS->SampleCounter = CSS->MaxCounter;
-            fscanf(infile,"%ld  %lf %lf %lf %[^\n] %[\n]",
-               &CSS->Body,&CSS->Axis[0],&CSS->Axis[1],&CSS->Axis[2],junk,&newline);
+            fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
+               &CSS->Axis[0],&CSS->Axis[1],&CSS->Axis[2],junk,&newline);
             UNITV(CSS->Axis);
             fscanf(infile,"%lf %[^\n] %[\n]",&CSS->FovHalfAng,junk,&newline);
             CSS->FovHalfAng *= D2R;
             CSS->CosFov = cos(CSS->FovHalfAng);
             fscanf(infile,"%lf %[^\n] %[\n]",&CSS->Scale,junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&CSS->Quant,junk,&newline);
+            fscanf(infile,"%ld %[^\n] %[\n]",&CSS->Body,junk,&newline);
             fscanf(infile,"%ld %[^\n] %[\n]",&CSS->FlexNode,junk,&newline);
          }
       }
@@ -2328,12 +2330,14 @@ void InitSpacecraft(struct SCType *S)
       S->GainAndDelayActive = FALSE;
       S->LoopGain = 1.0;
       S->LoopDelay = 0.0;
+      for(i=0;i<3;i++) S->IdealAct[i].FrcDelay = NULL;
+      for(i=0;i<3;i++) S->IdealAct[i].TrqDelay = NULL;
       for(Iw=0;Iw<S->Nw;Iw++) S->Whl[Iw].Delay = NULL;
       for(Im=0;Im<S->Nmtb;Im++) S->MTB[Im].Delay = NULL;
       for(It=0;It<S->Nthr;It++) S->Thr[It].Delay = NULL;
       
-      S->FreqRespActive = TRUE;
-      S->FreqResp.Init = TRUE;
+      S->FreqRespActive = FALSE;
+      S->FreqResp.State = 0;
 
 }
 /*********************************************************************/

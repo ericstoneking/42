@@ -978,12 +978,12 @@ void LINSOLVE(double **A, double *x, double *b, long n)
       long i,j,k,l,m;
       double mm,*a1,b1;
 
-      a1 = (double *) calloc(n,sizeof(double));
-
       if (n == 1) {
          x[0] = b[0]/A[0][0];
          return;
       }
+
+      a1 = (double *) calloc(n,sizeof(double));
 
       for(j=0;j<n-1;j++){
          mm = fabs(A[j][j]);
