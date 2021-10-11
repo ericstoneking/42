@@ -19,7 +19,7 @@ EOF
 
 # Sim-related commands
 %lf DTSIM = %lf
-%lf SC[%ld].RotDOF %s
+%lf SC[%ld].DynMethod %s
 %lf SC[%ld].G[%ld].RotLocked[%ld] %s
 %lf SC[%ld].G[%ld].TrnLocked[%ld] %s
 %lf Impart Impulsive Delta-V of [%lf %lf %lf] m/s in Frame %c to Orb[%ld]

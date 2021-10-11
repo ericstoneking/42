@@ -196,9 +196,8 @@
 #define LAGDOF_COWELL 1
 #define LAGDOF_SPLINE 2
 
-#define ROTDOF_STEADY 0
-#define ROTDOF_KIN_JOINT 1
-#define ROTDOF_DYN_JOINT 2
+#define DYN_GAUSS_ELIM 0
+#define DYN_ORDER_N 1
 
 #define ORBDOF_FIXED 0
 #define ORBDOF_EULER_HILL 1

@@ -263,14 +263,18 @@ void ZeroFrcTrq(void)
 
       for(Isc=0;Isc<Nsc;Isc++) {
          S = &SC[Isc];
-         S->Frc[0] = 0.0;
-         S->Frc[1] = 0.0;
-         S->Frc[2] = 0.0;
+         S->FrcN[0] = 0.0;
+         S->FrcN[1] = 0.0;
+         S->FrcN[2] = 0.0;
+
          for(Ib=0;Ib<S->Nb;Ib++) {
             B = &S->B[Ib];
-            B->Frc[0] = 0.0;
-            B->Frc[1] = 0.0;
-            B->Frc[2] = 0.0;
+            B->FrcN[0] = 0.0;
+            B->FrcN[1] = 0.0;
+            B->FrcN[2] = 0.0;
+            B->FrcB[0] = 0.0;
+            B->FrcB[1] = 0.0;
+            B->FrcB[2] = 0.0;
             B->Trq[0] = 0.0;
             B->Trq[1] = 0.0;
             B->Trq[2] = 0.0;

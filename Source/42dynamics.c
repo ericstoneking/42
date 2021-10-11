@@ -20,8 +20,6 @@
 ** #endif
 */
 
-double tic, toc;
-
 /**********************************************************************/
 void PassiveJointFrcTrq(double *u, double *x, struct SCType *S)
 {
@@ -194,7 +192,7 @@ void MapJointStatesToStateVector(struct SCType *S)
 void MapStateVectorToBodyStates(double *u, double *x, double *uf,
    double *xf, struct SCType *S)
 {
-      double wi[3],rin[3],rout[3],wxr[3],wxrin[3],wxrout[3];
+      double wi[3],ri[3],ro[3],wxr[3],wxri[3],wxro[3];
       double xg[3];
       double CBfiBi[3][3],CBfoBo[3][3],CGoBfi[3][3];
       double wgon[3],wo[3],fvi[3],fvo[3];
@@ -349,26 +347,26 @@ void MapStateVectorToBodyStates(double *u, double *x, double *uf,
          }
          MTxV(G->CGiBi,xg,G->xb);
          for(i=0;i<3;i++) {
-            G->rin[i] = G->RigidRin[i] + G->xb[i];
-            G->rout[i] = G->RigidRout[i];
+            G->ri[i] = G->RigidRin[i] + G->xb[i];
+            G->ro[i] = G->RigidRout[i];
          }
          MTxV(Bi->CN,G->xb,G->xn);
-         MTxV(Bi->CN,G->rin,rin);
-         MTxV(Bo->CN,G->rout,rout);
-         for(i=0;i<3;i++) Bo->pn[i] = Bi->pn[i] + rin[i] - rout[i];
+         MTxV(Bi->CN,G->ri,ri);
+         MTxV(Bo->CN,G->ro,ro);
+         for(i=0;i<3;i++) Bo->pn[i] = Bi->pn[i] + ri[i] - ro[i];
          /* vn */
-         VxV(Bi->wn,G->rin,wxr);
-         MTxV(Bi->CN,wxr,wxrin);
-         VxV(Bo->wn,G->rout,wxr);
-         MTxV(Bo->CN,wxr,wxrout);
+         VxV(Bi->wn,G->ri,wxr);
+         MTxV(Bi->CN,wxr,wxri);
+         VxV(Bo->wn,G->ro,wxr);
+         MTxV(Bo->CN,wxr,wxro);
          MTxV(G->CGiBi,vg,vgb);
          MTxV(Bi->CN,vgb,vgn);
          for(i=0;i<3;i++)
-            Bo->vn[i] = Bi->vn[i] + wxrin[i] + vgn[i] - wxrout[i];
+            Bo->vn[i] = Bi->vn[i] + wxri[i] + vgn[i] - wxro[i];
          if (S->FlexActive) {
             for(i=0;i<3;i++) {
-               G->rin[i] += G->FlexPosi[i];
-               G->rout[i] += G->FlexPoso[i];
+               G->ri[i] += G->FlexPosi[i];
+               G->ro[i] += G->FlexPoso[i];
             }
             MTxV(Bi->CN,G->FlexVeli,fvi);
             MTxV(Bo->CN,G->FlexVelo,fvo);
@@ -396,7 +394,7 @@ void FindTotalAngMom(struct SCType *S) {
       for(Ib=0;Ib<S->Nb;Ib++) {
          B = &S->B[Ib];
          MxV(B->I,B->wn,Hb);
-         for(i=0;i<3;i++) Hb[i] += B->Hgyro[i];
+         for(i=0;i<3;i++) Hb[i] += B->EmbeddedMom[i];
          MTxV(B->CN,Hb,Hn);
          SxV(B->mass,B->vn,mv);
          VxV(B->pn,mv,rxmv);
@@ -445,42 +443,6 @@ double FindTotalKineticEnergy(struct SCType *S)
       return(KE);
 }
 /**********************************************************************/
-void SteadyAttitudeMotion(struct SCType *S)
-{
-      struct BodyType *B;
-      struct JointType *G;
-      struct DynType *D;
-      double qdot[4];
-      long Ig,i;
-
-      if (S->Nb == 1) {
-         B = &S->B[0];
-         QW2QDOT(B->qn,B->wn,qdot);
-         for(i=0;i<4;i++) B->qn[i] += qdot[i]*DTSIM;
-         UNITQ(B->qn);
-         Q2C(B->qn,B->CN);
-      }
-      else {
-         D = &S->Dyn;
-         QW2QDOT(&D->x[0],&D->u[0],qdot);
-         for(i=0;i<4;i++) D->x[i] += qdot[i]*DTSIM;
-         for(Ig=0;Ig<S->Ng;Ig++) {
-            G = &S->G[Ig];
-            if (G->IsSpherical) {
-               QW2QDOT(&D->x[G->Rotx0],&D->u[G->Rotu0],qdot);
-               for(i=0;i<4;i++) D->x[G->Rotx0+i] += qdot[i]*DTSIM;
-            }
-            else {
-               for(i=0;i<G->RotDOF;i++)
-                  D->x[G->Rotx0+i] += D->u[G->Rotu0+i]*DTSIM;
-            }
-         }
-         MapStateVectorToBodyStates(D->u,D->x,D->uf,D->xf,S);
-         MotionConstraints(S);
-         SCMassProps(S);
-      }
-}
-/**********************************************************************/
 void FindBodyPathDCMs(struct SCType *S)
 {
       struct DynType *D;
@@ -510,7 +472,7 @@ void FindPathVectors(struct SCType *S)
 {
       struct DynType *D;
       struct JointType *G;
-      double rin[3],rout[3];
+      double ri[3],ro[3];
       long Ig,Jg,Ia,i,Bi,Bo;
 
       D = &S->Dyn;
@@ -519,17 +481,17 @@ void FindPathVectors(struct SCType *S)
          G = &S->G[Ig];
          Bi = G->Bin;
          Bo = G->Bout;
-         MTxV(S->B[Bi].CN,G->rin,rin);
-         MTxV(S->B[Bo].CN,G->rout,rout);
+         MTxV(S->B[Bi].CN,G->ri,ri);
+         MTxV(S->B[Bo].CN,G->ro,ro);
          for(i=0;i<3;i++) {
-            S->B[Bo].beta[i] = S->B[Bi].beta[i] + rout[i] - rin[i];
+            S->B[Bo].beta[i] = S->B[Bi].beta[i] + ro[i] - ri[i];
          }
          #if 0
          for(Jg=0;Jg<Ig;Jg++) {
             if (D->JointPathTable[Bo][Jg].InPath) {
                for(i=0;i<3;i++)
                   D->JointPathTable[Bo][Jg].rho[i] =
-                  D->JointPathTable[Bi][Jg].rho[i] + rout[i] - rin[i];
+                  D->JointPathTable[Bi][Jg].rho[i] + ro[i] - ri[i];
             }
          }
          #else
@@ -537,10 +499,10 @@ void FindPathVectors(struct SCType *S)
             Jg = G->Anc[Ia];
             for(i=0;i<3;i++)
                D->JointPathTable[Bo][Jg].rho[i] =
-               D->JointPathTable[Bi][Jg].rho[i] + rout[i] - rin[i];
+               D->JointPathTable[Bi][Jg].rho[i] + ro[i] - ri[i];
          }
          #endif
-         for(i=0;i<3;i++) D->JointPathTable[Bo][Ig].rho[i] = rout[i];
+         for(i=0;i<3;i++) D->JointPathTable[Bo][Ig].rho[i] = ro[i];
       }
 }
 /**********************************************************************/
@@ -585,6 +547,14 @@ void FindPAngVel(struct SCType *S)
             Ig = S->B[Jb].Gin;
             G = &S->G[Ig];
             j0 = G->Rotu0;
+            for(i=0;i<3;i++) {
+               for(j=0;j<G->RotDOF;j++) {
+                  CGo[i][j] = 0.0;
+                  for(k=0;k<3;k++) {
+                     CGo[i][j] += G->CTrqBo[k][i]*G->Gamma[k][j];
+                  }
+               }
+            }
             for(i=0;i<3;i++) {
                for(j=0;j<G->RotDOF;j++) {
                   CG[i][j] = 0.0;
@@ -1265,18 +1235,18 @@ void FindAccR(struct SCType *S)
          Bi = &S->B[G->Bin];
          Bo = &S->B[G->Bout];
 
-         VxV(Bi->wn,G->rin,wxr);
+         VxV(Bi->wn,G->ri,wxr);
          VxV(Bi->wn,wxr,wxwxr);
          MTxV(Bi->CN,wxwxr,Cwri);
 
-         VxV(Bo->wn,G->rout,wxr);
+         VxV(Bo->wn,G->ro,wxr);
          VxV(Bo->wn,wxr,wxwxr);
          MTxV(Bo->CN,wxwxr,Cwro);
 
-         VxV(Bo->AlphaR,G->rout,axr);
+         VxV(Bo->AlphaR,G->ro,axr);
          MTxV(Bo->CN,axr,Caxro);
 
-         VxV(Bi->AlphaR,G->rin,axr);
+         VxV(Bi->AlphaR,G->ri,axr);
          MTxV(Bi->CN,axr,Caxri);
 
          MTxV(G->CGiBi,G->Ds,Dsb);
@@ -1368,7 +1338,7 @@ void FindInertiaTrq(struct SCType *S)
       for(Ib=0;Ib<S->Nb;Ib++) {
          B = &S->B[Ib];
          MxV(B->I,B->wn,H);
-         for(i=0;i<3;i++) H[i] += B->Hgyro[i];
+         for(i=0;i<3;i++) H[i] += B->EmbeddedMom[i];
          VxV(B->wn,H,wxH);
          MxV(B->I,B->AlphaR,Ia);
          for(i=0;i<3;i++) B->InertiaTrq[i] = -Ia[i] - wxH[i];
@@ -1540,205 +1510,6 @@ void FindFlexFrc(struct SCType *S)
          }
       }
 }
-/**********************************************************************/
-#if 1
-void OrderNSolveEOM(struct SCType *S)
-{
-      struct DynType *D;
-      struct JointType *G,*Gi,*Gj;
-      double **M,*F;
-      double *udot;
-      double Mg[6][6],Mw[6][6],Mv[6][6],Mi[6][6],RowFact[6][6];
-      long Ig,Ia,Ja,Ng,Ni,Nj,Ns,ug,ui,uj,uv,i,j,k;
-      double loctic,loctoc;
-
-      D = &S->Dyn;
-      M = D->COEF; /* Generalized Mass matrix */
-      F = D->RHS;  /* Generalized Force vector */
-      udot = D->ActiveState; 
-      
-      Ns = D->Ns - D->Nf; 
-      
-      uv = Ns-3;
-
-/* .. Triangularize-in-place */
-      /* Joints */
-      loctic = usec();
-      for(Ig=S->Ng-1;Ig>=0;Ig--) {
-         G = &S->G[Ig];
-         Ng = G->ActiveRotDOF + G->ActiveTrnDOF;
-         if (Ng > 0) {
-            ug = G->ActiveRotu0;
-            for(i=0;i<Ng;i++) {
-               for(j=0;j<Ng;j++) Mg[i][j] = M[ug+i][ug+j];
-            }
-            FastMINV6(Mg,Mi,Ng);
-            /* For each ancestral joint, row ops to put zeros above/below G */
-            for(Ia=0;Ia<G->Nanc;Ia++) {
-               Gi = &S->G[G->Anc[Ia]];
-               Ni = Gi->ActiveRotDOF + Gi->ActiveTrnDOF;
-               ui = Gi->ActiveRotu0;
-            
-               for(i=0;i<Ni;i++) {
-                  for(j=0;j<Ng;j++) {
-                     RowFact[i][j] = 0.0;
-                     for(k=0;k<Ng;k++) RowFact[i][j] += M[ui+i][ug+k]*Mi[k][j];
-                  }
-               }
-               for(Ja=0;Ja<G->Nanc;Ja++) {
-                  Gj = &S->G[G->Anc[Ja]];
-                  Nj = Gj->ActiveRotDOF + Gj->ActiveTrnDOF;
-                  uj = Gj->ActiveRotu0;
-                  for(i=0;i<Ni;i++) {
-                     for(j=0;j<Nj;j++) {
-                        for(k=0;k<Ng;k++) M[ui+i][uj+j] -= RowFact[i][k]*M[ug+k][uj+j];
-                     }
-                  }
-               }
-               for(i=0;i<3;i++) {
-                  for(j=0;j<3;j++) {
-                     for(k=0;k<Ng;k++) {
-                        M[ui+i][   j] -= RowFact[i][k]*M[ug+k][   j];
-                        M[ui+i][uv+j] -= RowFact[i][k]*M[ug+k][uv+j];
-                     }
-                  }
-                  for(k=0;k<Ng;k++) F[ui+i] -= RowFact[i][k]*F[ug+k];
-               }
-            }
-            /* Now do the same for the wn row */
-            for(i=0;i<3;i++) {
-               for(j=0;j<Ng;j++) {
-                  RowFact[i][j] = 0.0;
-                  for(k=0;k<Ng;k++) RowFact[i][j] += M[i][ug+k]*Mi[k][j];
-               }
-            }
-            for(Ja=0;Ja<G->Nanc;Ja++) {
-               Gj = &S->G[G->Anc[Ja]];
-               Nj = Gj->ActiveRotDOF + Gj->ActiveTrnDOF;
-               uj = Gj->ActiveRotu0;
-               for(i=0;i<3;i++) {
-                  for(j=0;j<Nj;j++) {
-                     for(k=0;k<Ng;k++) M[i][uj+j] -= RowFact[i][k]*M[ug+k][uj+j];
-                  }
-               }
-            }
-            for(i=0;i<3;i++) {
-               for(j=0;j<3;j++) {
-                  for(k=0;k<Ng;k++) {
-                     M[i][   j] -= RowFact[i][k]*M[ug+k][   j];
-                     M[i][uv+j] -= RowFact[i][k]*M[ug+k][uv+j];
-                  }
-               }
-               for(k=0;k<Ng;k++) F[i] -= RowFact[i][k]*F[ug+k];
-            }
-             /* Now do the same for the vn row */
-            for(i=0;i<3;i++) {
-               for(j=0;j<Ng;j++) {
-                  RowFact[i][j] = 0.0;
-                  for(k=0;k<Ng;k++) RowFact[i][j] += M[uv+i][ug+k]*Mi[k][j];
-               }
-            }
-            for(Ja=0;Ja<G->Nanc;Ja++) {
-               Gj = &S->G[G->Anc[Ja]];
-               Nj = Gj->ActiveRotDOF + Gj->ActiveTrnDOF;
-               uj = Gj->ActiveRotu0;
-               for(i=0;i<3;i++) {
-                  for(j=0;j<Nj;j++) {
-                     for(k=0;k<Ng;k++) M[uv+i][uj+j] -= RowFact[i][k]*M[ug+k][uj+j];
-                  }
-               }
-            }
-            for(i=0;i<3;i++) {
-               for(j=0;j<3;j++) {
-                  for(k=0;k<Ng;k++) {
-                     M[uv+i][   j] -= RowFact[i][k]*M[ug+k][   j];
-                     M[uv+i][uv+j] -= RowFact[i][k]*M[ug+k][uv+j];
-                  }
-               }
-               for(k=0;k<Ng;k++) F[uv+i] -= RowFact[i][k]*F[ug+k];
-            }
-        }
-      }
-      /* B[0].wn */
-      for(i=0;i<3;i++) {
-         for(j=0;j<3;j++) Mw[i][j] = M[i][j];
-      }
-      FastMINV6(Mw,Mi,3);
-      for(i=0;i<3;i++) {
-         for(j=0;j<3;j++) {
-            RowFact[i][j] = 0.0;
-            for(k=0;k<3;k++) RowFact[i][j] += M[uv+i][k]*Mi[k][j];
-         }
-      }
-      for(i=0;i<3;i++) {
-         for(j=0;j<3;j++) { 
-            for(k=0;k<3;k++) M[uv+i][uv+j] -= RowFact[i][k]*M[k][uv+j];
-         }
-         for(k=0;k<3;k++) F[uv+i] -= RowFact[i][k]*F[k];
-      }
-      loctoc = usec();
-      TriangleTime += 1.0E-6*(loctoc-loctic);
-
-/* .. Forward Substitution */
-      loctic = usec();
-      /* B[0].vn (N = 3) */
-      for(i=0;i<3;i++) {
-         for(j=0;j<3;j++) Mv[i][j] = M[uv+i][uv+j];
-      }
-      FastMINV6(Mv,Mi,3);
-      for(i=0;i<3;i++) {
-         udot[uv+i] = 0.0;
-         for(j=0;j<3;j++) udot[uv+i] += Mi[i][j]*F[uv+j];
-      }
-      /* B[0].wn  (N = 3) */
-      for(i=0;i<3;i++) {
-         for(j=0;j<3;j++) Mw[i][j] = M[i][j];
-      }
-      FastMINV6(Mw,Mi,3);
-      for(i=0;i<3;i++) {
-         for(j=0;j<3;j++) F[i] -= M[i][uv+j]*udot[uv+j];
-      }
-      for(i=0;i<3;i++) {
-         udot[i] = 0.0;
-         for(j=0;j<3;j++) udot[i] += Mi[i][j]*F[j];
-      }
-      /* Joints */
-      for(Ig=0;Ig<S->Ng;Ig++) {
-         G = &S->G[Ig];
-         Ng = G->ActiveRotDOF + G->ActiveTrnDOF;
-         if (Ng > 0) {
-            ug = G->ActiveRotu0;
-            for(i=0;i<Ng;i++) {
-               for(j=0;j<Ng;j++) Mg[i][j] = M[ug+i][ug+j];
-            }
-            FastMINV6(Mg,Mi,Ng);
-            /* Subtract wn, vn udots from F */
-            for(i=0;i<Ng;i++) {
-               for(j=0;j<3;j++) F[ug+i] -= M[ug+i][j]*udot[j] + M[ug+i][uv+j]*udot[uv+j];
-            }
-            /* For each ancestral joint, subtract udot contributions */
-            for(Ia=0;Ia<G->Nanc;Ia++) {
-               Gj = &S->G[G->Anc[Ia]];
-               Nj = Gj->ActiveRotDOF + Gj->ActiveTrnDOF;
-               uj = Gj->ActiveRotu0;
-               for(i=0;i<Ng;i++) {
-                  for(j=0;j<Nj;j++) F[ug+i] -= M[ug+i][uj+j]*udot[uj+j];
-               }
-            }
-            /* udot[ug] = Mi*F[ug] */
-            for(i=0;i<Ng;i++) {
-               udot[ug+i] = 0.0;
-               for(j=0;j<Ng;j++) udot[ug+i] += Mi[i][j]*F[ug+j];
-            }
-         }
-      }
-      loctoc = usec();
-      SubstTime += 1.0E-6*(loctoc-loctic);
-
-/* TODO: Flex states */
-
-}
-#endif
 /**********************************************************************/
 void EchoPVel(struct SCType *S)
 {
@@ -1945,40 +1716,28 @@ void KaneNBodyEOM(double *u, double *x, double *h,
       double FrcBiN[3], FrcBoN[3];
       double rxFi[3],rxFo[3];
       D = &S->Dyn;
-      static long First = 1;
+      //static long First = 1;
 
 /* .. Dynamics */
 
-      tic = usec();
       MapStateVectorToBodyStates(u,x,uf,xf,S);
-      toc = usec();
-      MapTime += 1.0E-6*(toc-tic);
-
 
       /* Joint Partials */
-      tic = usec();
       for(Ig=0;Ig<S->Ng;Ig++) {
          G = &S->G[Ig];
          JointPartials(FALSE,G->IsSpherical,G->RotSeq,G->TrnSeq,
             G->Ang,G->AngRate,G->Gamma,G->Gs,G->Gds,
             G->PosRate,G->Delta,G->Ds,G->Dds);
       }
-      toc = usec();
-      JointTime += 1.0E-6*(toc-tic);
-
-      tic = usec();
-      FindBodyPathDCMs(S);
 
       /* Path vectors, beta and rho */
+      FindBodyPathDCMs(S);
       FindPathVectors(S);
-      toc = usec();
-      PathTime += 1.0E-6*(toc-tic);
 
       /* Find Peta, cplusPeta, HplusQeta, CnbP for each body */
       FindFlexTerms(S);
 
       /* Partial Angular Velocity Matrix (PAngVel) and I*PAngVel */
-      tic = usec();
       FindPAngVel(S);
       /* Partial Velocity Matrix (PVel) and m*PVel */
       FindPVel(S);
@@ -1997,11 +1756,8 @@ void KaneNBodyEOM(double *u, double *x, double *h,
             FindPCPVelf(S);
          }
       }
-      toc = usec();
-      PVelTime += 1.0E-6*(toc-tic);
 
       /* Remainder Accelerations, AlphaR and AccR */
-      tic = usec();
       FindAlphaR(S);
       FindAccR(S);
 
@@ -2022,7 +1778,7 @@ void KaneNBodyEOM(double *u, double *x, double *h,
          B = &S->B[Ib];
          for(i=0;i<3;i++) {
             D->BodyTrq[3*Ib+i] = B->Trq[i] + B->InertiaTrq[i];
-            D->BodyFrc[3*Ib+i] = B->Frc[i] + B->InertiaFrc[i];
+            D->BodyFrc[3*Ib+i] = B->FrcN[i] + B->InertiaFrc[i];
          }
       }
       /* Add Wheel Torques */
@@ -2053,8 +1809,8 @@ void KaneNBodyEOM(double *u, double *x, double *h,
          MTxV(G->CTrqBo,FrcGo,FrcBo);
          MTxV(S->B[G->Bin].CN,FrcBi,FrcBiN);
          MTxV(S->B[G->Bout].CN,FrcBo,FrcBoN);
-         VxV(G->rin,FrcBi,rxFi);
-         VxV(G->rout,FrcBo,rxFo);
+         VxV(G->ri,FrcBi,rxFi);
+         VxV(G->ro,FrcBo,rxFo);
 
          /* Torque Transformations */
          MTxV(G->CTrqBi,TrqGo,TrqBi);
@@ -2067,11 +1823,8 @@ void KaneNBodyEOM(double *u, double *x, double *h,
             D->BodyFrc[3*G->Bout+i] += FrcBoN[i];
          }
       }
-      toc = usec();
-      FrcTrqTime += 1.0E-6*(toc-tic);
 
       /* Assemble COEF and RHS */
-      tic = usec();
       Nk = 3*S->Nb;
       for(i=0;i<D->Nu;i++) {
          /* Upper Left of COEF */
@@ -2123,11 +1876,8 @@ void KaneNBodyEOM(double *u, double *x, double *h,
             }
          }
       }
-      toc = usec();
-      AssembleTime += 1.0E-6*(toc-tic);
 
 /* .. Eliminate locked DOF */
-      tic = usec();
       if (D->SomeJointsLocked) {
          N = D->Nu + D->Nf;
          /* Eliminate Rows */
@@ -2146,13 +1896,10 @@ void KaneNBodyEOM(double *u, double *x, double *h,
             }
          }
       }
-      toc = usec();
-      LockTime += 1.0E-6*(toc-tic);
 
 /* .. Solve EOM */
-      tic = usec();
-      /* EchoPVel(S); */
-      /* EchoRemAcc(S); */
+      //EchoPVel(S);
+      //EchoRemAcc(S);
       //if (First) {
       //   First = 0;
       //   EchoEOM(D->COEF,D->ActiveState,D->RHS,D->Ns); 
@@ -2160,8 +1907,6 @@ void KaneNBodyEOM(double *u, double *x, double *h,
       LINSOLVE(D->COEF,D->ActiveState,D->RHS,D->Ns);
       //OrderNSolveEOM(S);
       //EchoUdot(D->ActiveState,D->Ns);
-      toc = usec();
-      SolveTime += 1.0E-6*(toc - tic);
 
 /* .. Map out result */
       if(D->SomeJointsLocked) {
@@ -2355,7 +2100,7 @@ void KaneNBodyConstraints(struct SCType *S)
          B = &S->B[Ib];
          for(i=0;i<3;i++) {
             D->BodyTrq[3*Ib+i] = B->Trq[i] + B->InertiaTrq[i];
-            D->BodyFrc[3*Ib+i] = B->Frc[i] + B->InertiaFrc[i];
+            D->BodyFrc[3*Ib+i] = B->FrcN[i] + B->InertiaFrc[i];
          }
       }
       /* Add Wheel Torques */
@@ -2386,8 +2131,8 @@ void KaneNBodyConstraints(struct SCType *S)
          MTxV(G->CTrqBo,FrcGo,FrcBo);
          MTxV(S->B[G->Bin].CN,FrcBi,FrcBiN);
          MTxV(S->B[G->Bout].CN,FrcBo,FrcBoN);
-         VxV(G->rin,FrcBi,rxFi);
-         VxV(G->rout,FrcBo,rxFo);
+         VxV(G->ri,FrcBi,rxFi);
+         VxV(G->ro,FrcBo,rxFo);
 
          /* Torque Transformations */
          MTxV(G->CTrqBi,TrqGo,TrqBi);
@@ -2441,32 +2186,13 @@ void FindBodyAccelerations(struct SCType *S)
          B = &S->B[Ib];
          for(i=0;i<3;i++) {
             B->alpha[i] = B->AlphaR[i];
-            B->accel[i] = S->Frc[i]/S->mass + B->AccR[i];
+            B->accel[i] = S->FrcN[i]/S->mass + B->AccR[i];
             for(j=0;j<D->Nu;j++) {
                B->alpha[i] += D->PAngVel[3*Ib+i][j]*D->du[j];
                B->accel[i] += D->PVel[3*Ib+i][j]*D->du[j];
             }
          }
       }
-}
-/**********************************************************************/
-void ReportUdot(struct SCType *S)
-{
-      struct DynType *D;
-      long i;
-      static FILE *outfile;
-      static long First = 1;
-
-      if (First) {
-         First = 0;
-         outfile = FileOpen(InOutPath,"udot.42","wt");
-      }
-
-      D = &S->Dyn;
-      for(i=0;i<D->Nu;i++) {
-         fprintf(outfile,"%le ",D->du[i]);
-      }
-      fprintf(outfile,"\n");
 }
 /**********************************************************************/
 void KaneNBodyRK4(struct SCType *S)
@@ -2585,8 +2311,7 @@ void KaneNBodyRK4(struct SCType *S)
          KaneNBodyConstraints(S);
       }
       FindBodyAccelerations(S);
-      /* if (OutFlag) ReportUdot(S); */
-
+      
       /* Second Call */
       KaneNBodyEOM(uu,xx,hh,uuf,xxf,du,dx,dh,duf,dxf,S);
 
@@ -2723,7 +2448,7 @@ void OneBodyEOM(double *u, double *x, double *h,
 /* .. Build H's */
       MxV(B->I,u,Hb);
       for (i=0;i<3;i++) {
-         Hb[i] += B->Hgyro[i];
+         Hb[i] += B->EmbeddedMom[i];
          for (j=0;j<S->Nw;j++){
             Hb[i]+= h[j]*S->Whl[j].A[i];
          }
@@ -2861,9 +2586,6 @@ void OneBodyRK4(struct SCType *S)
          xfdot[i] = dxf[i]/6.0;
       }
 
-      /* if (OutFlag) ReportBodyAccelerations(S); */
-      /* if (OutFlag) ReportUdot(S); */
-
       /* Second Call */
       OneBodyEOM(uu,xx,hh,uuf,xxf,du,dx,dh,duf,dxf,S);
 
@@ -2982,6 +2704,1120 @@ void OneBodyRK4(struct SCType *S)
          S->abs[i] = 0.0;
       }
 }
+/******************************************************************************/
+/*  Finds rotational and translational joint partials                         */
+/*  On Init, populate all matrix elements.  Else, only populate               */
+/*  variable ones.                                                            */
+void OrderNJointPartials(struct JointType *G)
+{
+      double s2,c2,s3,c3;
+      double Pw[3][3] = {{0.0,0.0,0.0},{0.0,0.0,0.0},{0.0,0.0,0.0}};
+      double Pwdot[3][3] = {{0.0,0.0,0.0},{0.0,0.0,0.0},{0.0,0.0,0.0}};
+      double Pv[3][3] = {{0.0,0.0,0.0},{0.0,0.0,0.0},{0.0,0.0,0.0}};
+      double CPv[3][3];
+      long i1,i2,i3,Cyclic,i,j,k;
+      struct BodyType *Bi;
+      
+      Bi = G->Bi;
+
+      if (G->Init) {
+         G->Init = 0;
+         
+         for(i=0;i<3;i++) {
+            for(j=0;j<3;j++) {
+               G->Pw[i][j] = 0.0;
+               G->Pv[i][j] = 0.0;
+               G->Pwdot[i][j] = 0.0;
+            }
+         }
+         for(i=0;i<6;i++) {
+            for(j=0;j<6;j++) G->P[i][j] = 0.0;
+         }
+         
+         if (G->IsSpherical) {
+            for(i=0;i<3;i++) {
+               for(j=0;j<3;j++) G->Pw[i][j] = G->CBoGo[i][j];
+            }
+         }
+
+         i3 = G->TrnSeq % 10;         /* Pick off third digit */
+         i2 = (G->TrnSeq % 100)/10;   /* Extract second digit */
+         i1 = G->TrnSeq/100;          /* Pick off first digit */
+
+         Pv[i1-1][0] = 1.0;
+         Pv[i2-1][1] = 1.0;
+         Pv[i3-1][2] = 1.0;
+         MTxM(G->CGiBi,Pv,G->Pv);
+      }
+
+      if (!G->IsSpherical) {
+         i3 = G->RotSeq % 10;         /* Pick off third digit */
+         i2 = (G->RotSeq % 100)/10;   /* Extract second digit */
+         i1 = G->RotSeq/100;          /* Pick off first digit */
+
+         s2 = sin(G->Ang[1]);
+         c2 = cos(G->Ang[1]);
+         s3 = sin(G->Ang[2]);
+         c3 = cos(G->Ang[2]);
+
+         Cyclic = (i2-i1)*(i3-i2)*(i3-i1);
+         /* Convert (123) style to [012] subscripts */
+         i1--;
+         i2--;
+         i3--;
+         if (Cyclic > 0) {  /* 123, 231, 312 */
+            Pw[i1][0] = c2*c3;
+            Pw[i1][1] = s3;
+            Pw[i2][0] = -c2*s3;
+            Pw[i2][1] = c3;
+            Pw[i3][0] = s2;
+            Pw[i3][2] = 1.0;
+            
+            Pwdot[i1][0] = -s2*c3*G->AngRate[1]-c2*s3*G->AngRate[2];
+            Pwdot[i1][1] = c3*G->AngRate[2];
+            Pwdot[i2][0] = s2*s3*G->AngRate[1]-c2*c3*G->AngRate[2];
+            Pwdot[i2][1] = -s3*G->AngRate[2];
+            Pwdot[i3][0] = c2*G->AngRate[1];
+         }
+         else if (Cyclic < 0) {  /* 321, 132, 213 */
+            Pw[i1][0] = c2*c3;
+            Pw[i1][1] = -s3;
+            Pw[i2][0] = c2*s3;
+            Pw[i2][1] = c3;
+            Pw[i3][0] = -s2;
+            Pw[i3][2] = 1.0;
+
+            Pwdot[i1][0] = -s2*c3*G->AngRate[1]-c2*s3*G->AngRate[2];
+            Pwdot[i1][1] = -c3*G->AngRate[2];
+            Pwdot[i2][0] = -s2*s3*G->AngRate[1]+c2*c3*G->AngRate[2];
+            Pwdot[i2][1] = -s3*G->AngRate[2];
+            Pwdot[i3][0] = -c2*G->AngRate[1];
+         }
+         else {
+            printf("RotSeq %ld is not a Body-3 Sequence, so is not supported.\n",G->RotSeq);
+            exit(1);
+         }
+         MxM(G->CBoGo,Pw,G->Pw);
+         MxM(G->CBoGo,Pwdot,G->Pwdot);
+      }
+      
+      /* Pw is expressed in Bo, Pv is expressed in Bi */
+      /* Express P in Bo */
+      for(i=0;i<3;i++) {
+         for(j=0;j<G->TrnDOF;j++) {
+            CPv[i][j] = 0.0;
+            for(k=0;k<3;k++) CPv[i][j] += G->COI[i][k]*G->Pv[k][j];
+         }
+      }
+      for(i=0;i<3;i++) {
+         for(j=0;j<G->RotDOF;j++) G->P[i][j] = G->Pw[i][j];
+         for(j=0;j<G->TrnDOF;j++) G->P[3+i][G->RotDOF+j] = CPv[i][j];
+      }
+}
+/******************************************************************************/
+void MINV1to6(double A[6][6], double AI[6][6], long N)
+{
+      long I,J,ROW;
+      long IPIVOT = 0;
+      double M[6][6];
+      double PIVOT,K,TA[6],TB[6];
+
+      for(I=0;I<N;I++){
+         for(J=0;J<N;J++){
+            M[I][J] = A[I][J];
+            AI[I][J] = 0.0;
+         }
+         AI[I][I] = 1.0;
+      }
+
+      for(ROW=0;ROW<N;ROW++){
+         PIVOT = M[ROW][ROW];
+         IPIVOT = ROW;
+         for(I=ROW+1;I<N;I++){
+            if (fabs(M[I][ROW]) > fabs(PIVOT)){
+               PIVOT = M[I][ROW];
+               IPIVOT = I;
+            }
+         }
+         if (PIVOT == 0.0){
+            printf("Matrix is singular in MINV1to6\n");
+            exit(1);
+         }
+
+         for(J=0;J<N;J++){
+            TA[J] = M[IPIVOT][J];
+            TB[J] = AI[IPIVOT][J];
+            M[IPIVOT][J] = M[ROW][J];
+            AI[IPIVOT][J] = AI[ROW][J];
+            M[ROW][J] = TA[J] / PIVOT;
+            AI[ROW][J] = TB[J] / PIVOT;
+         }
+         for(I=ROW+1;I<N;I++){
+            K = M[I][ROW];
+            for(J=0;J<N;J++){
+               M[I][J] = M[I][J] - K * M[ROW][J];
+               AI[I][J] = AI[I][J] - K * AI[ROW][J];
+            }
+         }
+      }
+
+/*    M is now upper diagonal */
+
+      for(ROW=N-1;ROW>0;ROW--){
+         for(I=0;I<ROW;I++){
+            K = M[I][ROW];
+            for(J=0;J<N;J++){
+               M[I][J] = M[I][J] - K * M[ROW][J];
+               AI[I][J] = AI[I][J] - K * AI[ROW][J];
+            }
+         }
+      }
+}
+/******************************************************************************/
+void ShiftArtFrc(double F[6], double r[3], double Fbar[6])
+{
+      double rxF[3];
+      
+      VxV(r,&F[3],rxF);
+
+      Fbar[0] = F[0] - rxF[0];
+      Fbar[1] = F[1] - rxF[1];
+      Fbar[2] = F[2] - rxF[2];
+      Fbar[3] = F[3];
+      Fbar[4] = F[4];
+      Fbar[5] = F[5];
+}
+/******************************************************************************/
+void ShiftSpatAcc(double a[6], double r[3], double abar[6])
+{
+      double axr[3];
+      
+      VxV(&a[0],r,axr);
+
+      abar[0] = a[0];
+      abar[1] = a[1];
+      abar[2] = a[2];
+      abar[3] = a[3] + axr[0];
+      abar[4] = a[4] + axr[1];
+      abar[5] = a[5] + axr[2];
+}
+/******************************************************************************/
+void ShiftArtMass(double A[6][6], double r[3], double B[6][6])
+{
+      double rx[3][3],rxA21[3][3],A12xr[3][3],rxA22[3][3],A22xr[3][3],rxA22xr[3][3];
+      long i,j,k;
+
+      rx[0][0] =  0.0;
+      rx[1][1] =  0.0;
+      rx[2][2] =  0.0;
+      rx[2][1] =  r[0];
+      rx[0][2] =  r[1];
+      rx[1][0] =  r[2];
+      rx[1][2] = -r[0];
+      rx[2][0] = -r[1];
+      rx[0][1] = -r[2];
+
+      for(i=0;i<3;i++) {
+         for(j=0;j<3;j++) {
+            rxA21[i][j] = 0.0;
+            A12xr[i][j] = 0.0;
+            rxA22[i][j] = 0.0;
+            A22xr[i][j] = 0.0;
+            for(k=0;k<3;k++) {
+               rxA21[i][j] += rx[i][k]*A[3+k][j];
+               A12xr[i][j] += A[i][3+k]*rx[k][j];
+               rxA22[i][j] += rx[i][k]*A[3+k][3+j];
+               A22xr[i][j] += A[3+i][3+k]*rx[k][j];
+            }
+         }
+      }
+      MxM(rxA22,rx,rxA22xr);
+      
+      for(i=0;i<3;i++) {
+         for(j=0;j<3;j++) {
+            for(k=0;k<3;k++) {
+               B[  i][  j] = A[  i][  j] - rxA21[i][j] + A12xr[i][j] - rxA22xr[i][j];
+               B[  i][3+j] = A[  i][3+j] - rxA22[i][j];
+               B[3+i][  j] = A[3+i][  j] + A22xr[i][j];
+            }
+            B[3+i][3+j] = A[3+i][3+j];
+         }
+      }
+      
+}
+/******************************************************************************/
+void RotateSpatVec(double CBA[3][3],double Va[6],double Vb[6])
+{
+      long i,j;
+      
+      for(i=0;i<3;i++) {
+         Vb[i] = 0.0;
+         Vb[3+i] = 0.0;
+         for(j=0;j<3;j++) {
+            Vb[i] += CBA[i][j]*Va[j];
+            Vb[3+i] += CBA[i][j]*Va[3+j];
+         }
+      }
+}
+/******************************************************************************/
+void RotateSpatMat(double CBA[3][3],double Ma[6][6],double Mb[6][6])
+{
+      double CM11[3][3],CM12[3][3],CM21[3][3],CM22[3][3];
+      long i,j,k;
+      
+      for(i=0;i<3;i++) {
+         for(j=0;j<3;j++) {
+            CM11[i][j] = 0.0;
+            CM12[i][j] = 0.0;
+            CM21[i][j] = 0.0;
+            CM22[i][j] = 0.0;
+            for(k=0;k<3;k++) {
+               CM11[i][j] += CBA[i][k]*Ma[  k][  j];
+               CM12[i][j] += CBA[i][k]*Ma[  k][3+j];
+               CM21[i][j] += CBA[i][k]*Ma[3+k][  j];
+               CM22[i][j] += CBA[i][k]*Ma[3+k][3+j];
+            }
+         }
+      }
+      
+      for(i=0;i<3;i++) {
+         for(j=0;j<3;j++) {
+            Mb[  i][  j] = 0.0;
+            Mb[  i][3+j] = 0.0;
+            Mb[3+i][  j] = 0.0;
+            Mb[3+i][3+j] = 0.0;
+            for(k=0;k<3;k++) {
+               Mb[  i][  j] += CM11[i][k]*CBA[j][k];
+               Mb[  i][3+j] += CM12[i][k]*CBA[j][k];
+               Mb[3+i][  j] += CM21[i][k]*CBA[j][k];
+               Mb[3+i][3+j] += CM22[i][k]*CBA[j][k];
+            }
+         }
+      }
+}
+/******************************************************************************/
+void OrderNJointCOI(struct JointType *G)
+{
+      double CBoGi[3][3];
+      
+      if (G->IsSpherical) {
+         Q2C(G->q,G->CGoGi);
+         C2A(G->RotSeq,G->CGoGi,&G->Ang[0],&G->Ang[1],&G->Ang[2]);
+      }
+      else A2C(G->RotSeq,G->Ang[0],G->Ang[1],G->Ang[2],G->CGoGi);
+      
+      MxM(G->CBoGo,G->CGoGi,CBoGi);
+      MxM(CBoGi,G->CGiBi,G->COI);
+}
+/**********************************************************************/
+void OrderNPassiveJointFrcTrq(struct SCType *S)
+{
+      long Ig,i;
+      struct JointType *G;
+      double a[3];
+
+      for(Ig=0;Ig<S->Ng;Ig++) {
+         G = &S->G[Ig];
+         if (G->IsSpherical) {
+            Q2AngleVec(G->q,a);
+            for(i=0;i<3;i++) {
+               G->PassiveTrq[i] = -G->RotDampCoef[i]*G->AngRate[i]
+                                 - G->RotSpringCoef[i]*a[i];
+            }
+         }
+         else {
+            for(i=0;i<G->RotDOF;i++) {
+               G->PassiveTrq[i] = -G->RotDampCoef[i]*G->AngRate[i]
+                                  -G->RotSpringCoef[i]*G->Ang[i];
+            }
+         }
+
+         for(i=0;i<G->TrnDOF;i++) {
+            G->PassiveFrc[i] = -G->TrnDampCoef[i]*G->PosRate[i]
+                               -G->TrnSpringCoef[i]*G->Pos[i];
+         }
+
+      }
+}
+/******************************************************************************/
+void ScatterStates(struct JointType *G)
+{
+      struct BodyType *Bi,*Bo;
+      double Pwu[3],Pvu[3],Pdwu[3];
+      double pni[3],vi[3],Cvi[3],wxPvu[3],ai[3],Cai[3];
+      double wxri[3],wxro[3],Calfri[3],wxPwu[3];
+      double axri[2],axro[3],wxwxri[3];
+      double wxwxro[3],Cwi[3];
+      double Iw[3],Ialfr[3],wxH[3];
+      long i,j;
+
+      Bi = G->Bi;
+      Bo = G->Bo;
+      
+      for(i=0;i<3;i++) {
+         Pwu[i] = 0.0;
+         Pvu[i] = 0.0;
+         Pdwu[i] = 0.0;
+         for(j=0;j<G->RotDOF;j++) {
+            Pwu[i] += G->Pw[i][j]*G->AngRate[j];
+            Pdwu[i] += G->Pwdot[i][j]*G->AngRate[j];
+         }
+         for(j=0;j<G->TrnDOF;j++) {         
+            Pvu[i] += G->Pv[i][j]*G->PosRate[j];
+         }
+      }
+      
+      MxM(G->COI,Bi->CN,Bo->CN);
+      
+      for(i=0;i<3;i++) pni[i] = Bi->pn[i] + G->riplusPx[i];
+      MxV(G->COI,pni,Bo->pn);
+      for(i=0;i<3;i++) Bo->pn[i] -= G->RigidRout[i]; 
+      
+      /* Velocities */
+      MxV(G->COI,Bi->wn,Cwi);
+      for(i=0;i<3;i++) Bo->wn[i] = Cwi[i] + Pwu[i];
+      
+      VxV(Bi->wn,G->riplusPx,wxri);
+      VxV(Bo->wn,G->RigidRout,wxro);
+      for(i=0;i<3;i++) vi[i] = Bi->vn[i] + Pvu[i] + wxri[i];
+      MxV(G->COI,vi,Cvi);
+      for(i=0;i<3;i++) {
+         Bo->vn[i] = Cvi[i] - wxro[i];
+      }
+
+      /* Remainder Accelerations */
+      MxV(G->COI,Bi->RemAlf,Calfri);
+      VxV(Bo->wn,Pwu,wxPwu);
+      for(i=0;i<3;i++) {
+         Bo->RemAlf[i] = Calfri[i] + Pdwu[i] + wxPwu[i];
+      }
+      
+      VxV(Bi->RemAlf,G->riplusPx,axri);
+      VxV(Bi->wn,wxri,wxwxri);
+      VxV(Bi->wn,Pvu,wxPvu);
+      for(i=0;i<3;i++) ai[i] = Bi->RemAcc[i] + 2.0*wxPvu[i] + axri[i] + wxwxri[i] ;
+      MxV(G->COI,ai,Cai);
+      VxV(Bo->RemAlf,G->RigidRout,axro);
+      VxV(Bo->wn,wxro,wxwxro);
+      for(i=0;i<3;i++) {  
+         Bo->RemAcc[i] = Cai[i] - axro[i] - wxwxro[i];
+      }
+
+      MxV(Bo->I,Bo->wn,Iw);
+      for(i=0;i<3;i++) Bo->H[i] = Iw[i] + Bo->WhlMom[i] + Bo->EmbeddedMom[i];
+
+      MxV(Bo->I,Bo->RemAlf,Ialfr);
+      VxV(Bo->wn,Bo->H,wxH);
+      for(i=0;i<3;i++) {
+         Bo->RemInertiaFrc[i] = -Ialfr[i] - wxH[i];
+         Bo->RemInertiaFrc[3+i] = -Bo->mass*Bo->RemAcc[i];
+      }
+}
+/******************************************************************************/
+void GatherMassAndForce(struct JointType *G,struct SCType *S)
+{
+      struct BodyType *Bo;
+      struct JointType *Gd;
+      double F[6],TF[6],CTF[6],rdk[3],SCTF[6];
+      double M[6][6],TM[6][6],CTMC[6][6],SCTMCS[6][6];
+      double Coc[3][3];
+      long i,Id,j,k;
+      
+      Bo = G->Bo;
+      
+      /* Articulated-Body Force */
+      for(i=0;i<6;i++) {
+         F[i] = Bo->SpatFrc[i] + Bo->RemInertiaFrc[i];
+      }
+      ShiftArtFrc(F,G->RigidRout,G->ArtFrc);
+      for(Id=0;Id<Bo->Nd;Id++) {
+         Gd = &S->G[Bo->Gd[Id]];
+         for(i=0;i<6;i++) {
+            TF[i] = 0.0;
+            for(j=0;j<6;j++) TF[i] += Gd->TransMtx[i][j]*Gd->ArtFrc[j];
+         }
+         MT(Gd->COI,Coc);
+         RotateSpatVec(Coc,TF,CTF);
+         for(i=0;i<3;i++) rdk[i] = G->RigidRout[i] - Gd->riplusPx[i]; 
+         ShiftArtFrc(CTF,rdk,SCTF);
+         for(i=0;i<6;i++) G->ArtFrc[i] += SCTF[i];
+      }
+      
+      /* Articulated-Body Mass */
+      for(i=0;i<3;i++) {
+         for(j=0;j<3;j++) {
+            M[i][j] = Bo->I[i][j];
+            M[i][3+j] = 0.0;
+            M[3+i][j] = 0.0;
+            M[3+i][3+j] = 0.0;
+         }
+         M[3+i][3+i] = Bo->mass;
+      }
+      ShiftArtMass(M,G->RigidRout,G->ArtMass);
+      for(Id=0;Id<Bo->Nd;Id++) {
+         Gd = &S->G[Bo->Gd[Id]];
+         for(i=0;i<6;i++) {
+            for(j=0;j<6;j++) {
+               TM[i][j] = 0.0;
+               for(k=0;k<6;k++) {
+                  TM[i][j] += Gd->TransMtx[i][k]*Gd->ArtMass[k][j];
+               }
+            }
+         }
+         MT(Gd->COI,Coc);
+         RotateSpatMat(Coc,TM,CTMC);
+         for(i=0;i<3;i++) rdk[i] = G->ro[i] - Gd->riplusPx[i]; 
+         ShiftArtMass(CTMC,rdk,SCTMCS);
+         for(i=0;i<6;i++) {
+            for(j=0;j<6;j++) G->ArtMass[i][j] += SCTMCS[i][j];
+         }
+      }
+}
+/******************************************************************************/
+void GatherDynMtx(struct JointType *G,struct SCType *S)
+{
+      double MP[6][6];
+      long i,j,k;
+
+      /* Dynamic Matrix, D */
+      for(i=0;i<6;i++) {
+         for(j=0;j<G->Nu;j++) {
+            MP[i][j] = 0.0;
+            for(k=0;k<6;k++) MP[i][j] += G->ArtMass[i][k]*G->P[k][j];
+         }
+      }
+      for(i=0;i<G->Nu;i++) {
+         for(j=0;j<G->Nu;j++) {
+            G->DynMtx[i][j] = 0.0;
+            for(k=0;k<6;k++) G->DynMtx[i][j] += G->P[k][i]*MP[k][j];
+         }
+      }
+      MINV1to6(G->DynMtx,G->InvDynMtx,G->Nu);
+
+      /* Absorption Matrix, A */
+      for(i=0;i<G->Nu;i++) {
+         for(j=0;j<6;j++) {
+            G->InvDynPT[i][j] = 0.0;
+            for(k=0;k<G->Nu;k++) 
+               G->InvDynPT[i][j] += G->InvDynMtx[i][k]*G->P[j][k];
+         }
+      }
+      /* TODO: Save a few cycles by not computing A and T for GN (A = U, T = 0) */
+      for(i=0;i<6;i++) {
+         for(j=0;j<6;j++) {
+            G->AbsorpMtx[i][j] = 0.0;
+            for(k=0;k<G->Nu;k++) G->AbsorpMtx[i][j] += MP[i][k]*G->InvDynPT[k][j];
+         }
+      }
+      
+      /* Transmission Matrix, T */
+      for(i=0;i<6;i++) {
+         for(j=0;j<6;j++) G->TransMtx[i][j] = -G->AbsorpMtx[i][j];
+         G->TransMtx[i][i] += 1.0;
+      }
+}
+/******************************************************************************/
+void ScatterStateDerivatives(struct JointType *G)
+{
+      struct BodyType *Bi,*Bo;
+      double Ma[6],Saui[6],CSaui[6],F[6],CSauiPudot[6],rko[3];
+      long i,j;
+      
+      Bi = G->Bi;
+      Bo = G->Bo;
+      
+      ShiftSpatAcc(Bi->AccU,G->riplusPx,Saui); 
+      RotateSpatVec(G->COI,Saui,CSaui);
+            
+      for(i=0;i<6;i++) {
+         Ma[i] = 0.0;
+         for(j=0;j<6;j++) Ma[i] += G->ArtMass[i][j]*CSaui[j];
+         F[i] = G->ArtFrc[i] - Ma[i];
+      }
+      for(i=0;i<G->Nu;i++) {
+         G->udot[i] = 0.0;
+         for(j=0;j<6;j++) G->udot[i] += G->InvDynPT[i][j]*F[j];
+      }
+      for(i=0;i<6;i++) {
+         CSauiPudot[i] = CSaui[i];
+         for(j=0;j<G->Nu;j++) CSauiPudot[i] += G->P[i][j]*G->udot[j];
+      }
+      for(i=0;i<3;i++) rko[i] = -G->RigidRout[i];
+      ShiftSpatAcc(CSauiPudot,rko,Bo->AccU);
+}
+/******************************************************************************/
+void OrderNMultiBodyEOM(struct SCType *S) 
+{
+      struct BodyType *B,*Bi,*Bo;
+      struct JointType *G;
+      struct WhlType *W;
+      double Iow[3],wxH[3];
+      double TrqBo[3],TrqGo[3],TrqBi[3];
+      double FrcBo[3],FrcBi[3];
+      double rxFi[3],rxFo[3];
+      long i,j,Ib,Ig,Iw;
+      
+      for(Ib=0;Ib<S->Nb;Ib++) {
+         B = &S->B[Ib];
+         for(i=0;i<3;i++) B->WhlMom[i] = 0.0;
+      }
+      for(Iw=0;Iw<S->Nw;Iw++) {
+         W = &S->Whl[Iw];
+         B = &S->B[W->Body];
+         for(i=0;i<3;i++) B->WhlMom[i] += W->H*W->A[i];
+      }
+            
+      /* First Pass: Root to tips */
+      B = &S->B[0];
+      G = &S->GN;
+      OrderNJointCOI(G);
+      OrderNJointPartials(G);
+      for(i=0;i<3;i++) {
+         B->wn[i] = G->AngRate[i];
+         for(j=0;j<3;j++) B->CN[i][j] = G->COI[i][j];
+      }
+      MxV(B->CN,G->Pos,B->pn);
+      MxV(B->CN,G->PosRate,B->vn);
+      MxV(B->I,B->wn,Iow);
+      for(i=0;i<3;i++) B->H[i] = Iow[i] + B->WhlMom[i] + B->EmbeddedMom[i];
+      VxV(B->wn,B->H,wxH);
+      for(i=0;i<3;i++) {
+         B->RemInertiaFrc[i] = -wxH[i];
+         B->RemInertiaFrc[3+i] = 0.0;
+      }
+      for(Ig=0;Ig<S->Ng;Ig++) {
+         G = &S->G[Ig];
+         OrderNJointCOI(G);
+         OrderNJointPartials(G);
+         for(i=0;i<3;i++) {
+            G->riplusPx[i] = G->RigidRin[i];
+            for(j=0;j<G->TrnDOF;j++) {
+               G->riplusPx[i] += G->Pv[i][j]*G->Pos[j];
+            }
+         }
+         ScatterStates(G);
+      }
+      
+      if (S->PassiveJointFrcTrqEnabled) {
+         OrderNPassiveJointFrcTrq(S);
+      }
+      /* Apply joint torques/forces to bodies */
+      for(Ig=0;Ig<S->Ng;Ig++) {
+         G = &S->G[Ig];
+         Bi = G->Bi;
+         Bo = G->Bo;
+         for(i=0;i<3;i++) {
+            FrcBi[i] = 0.0;
+            TrqGo[i] = 0.0;
+            for(j=0;j<G->RotDOF;j++) {
+               TrqGo[i] += G->Pw[i][j]*(G->Trq[j]+G->PassiveTrq[j]);
+            }
+            for(j=0;j<G->TrnDOF;j++) {
+               FrcBi[i] += G->Pv[i][j]*(G->Frc[j]+G->PassiveFrc[j]);
+            }
+         }
+         /* Force Transformations*/
+         MxV(G->COI,FrcBi,FrcBo);
+         VxV(G->riplusPx,FrcBi,rxFi); 
+         VxV(G->RigidRout,FrcBo,rxFo);
+
+         /* Torque Transformations */
+         MTxV(G->CTrqBi,TrqGo,TrqBi);
+         MTxV(G->CTrqBo,TrqGo,TrqBo);
+
+         for(i=0;i<3;i++) {
+            Bi->SpatFrc[  i] -= TrqBi[i] + rxFi[i];
+            Bo->SpatFrc[  i] += TrqBo[i] + rxFo[i];
+            Bi->SpatFrc[3+i] -= FrcBi[i];
+            Bo->SpatFrc[3+i] += FrcBo[i];
+         }
+      }
+      
+      /* Second Pass: Tips to Root */
+      for(Ig=S->Ng-1;Ig>=0;Ig--) {
+         G = &S->G[Ig];
+         GatherMassAndForce(G,S);
+         GatherDynMtx(G,S);
+      }
+      G = &S->GN;
+      GatherMassAndForce(G,S);
+      GatherDynMtx(G,S);
+      
+      /* Third Pass: Root to tips */
+      B = &S->B[0];
+      G = &S->GN;
+      for(i=0;i<6;i++) {
+         G->udot[i] = 0.0;
+         for(j=0;j<6;j++) G->udot[i] += G->InvDynPT[i][j]*G->ArtFrc[j];
+      }
+      for(i=0;i<3;i++) {
+         B->AccU[i] = G->udot[i];
+         B->AccU[3+i] = B->CN[i][0]*G->udot[3]
+                       +B->CN[i][1]*G->udot[4]
+                       +B->CN[i][2]*G->udot[5];
+      }
+      
+      for(Ig=0;Ig<S->Ng;Ig++) ScatterStateDerivatives(&S->G[Ig]);
+      
+      /* Kinematic EOM */
+      G = &S->GN;
+      QW2QDOT(G->q,G->AngRate,G->qdot);
+      for(i=0;i<3;i++) G->xdot[i] = G->PosRate[i];
+      for(Ig=0;Ig<S->Ng;Ig++) {
+         G = &S->G[Ig];
+         if (G->IsSpherical) QW2QDOT(G->q,G->AngRate,G->qdot);
+         else for(i=0;i<G->RotDOF;i++) G->qdot[i] = G->AngRate[i];
+         for(i=0;i<G->TrnDOF;i++) G->xdot[i] = G->PosRate[i];
+      }
+      
+      /* Wheel EOM */
+      for(Iw=0;Iw<S->Nw;Iw++) {
+         W = &S->Whl[Iw];
+         W->Hdot = W->Trq;
+      }
+      
+}
+/******************************************************************************/
+void OrderNMultiBodyRK4(struct SCType *S)
+{
+      struct DynType *D; /* Copy to/from D->u, D->x */
+      struct BodyType *B;
+      struct JointType *G;
+      struct WhlType *W;
+      double f,dt;
+      long i,Ig,Iw,Ib;
+      
+      /* Copy states from Dyn */
+      D = &S->Dyn;
+      G = &S->GN;
+      for(i=0;i<3;i++) {
+         G->RKum[i] = D->u[i];
+         G->RKum[3+i] = D->u[D->Nu-3+i];
+         G->RKxm[i] = D->x[D->Nx-3+i];
+      }
+      for(i=0;i<4;i++) {
+         G->RKqm[i] = D->x[i];
+      }
+      
+      for(Ig=0;Ig<S->Ng;Ig++) {
+         G = &S->G[Ig];
+         for(i=0;i<G->RotDOF;i++) {
+            G->RKum[i] = D->u[G->Rotu0+i];
+         }
+         for(i=0;i<G->TrnDOF;i++) {
+            G->RKum[G->RotDOF+i] = D->u[G->Trnu0+i];
+            G->RKxm[i] = D->x[G->Trnx0+i];
+         }
+         if (G->IsSpherical) {
+            for(i=0;i<4;i++) {
+               G->RKqm[i] = D->x[G->Rotx0+i];
+            }
+         }
+         else {
+            for(i=0;i<G->RotDOF;i++) {
+               G->RKqm[i] = D->x[G->Rotx0+i];
+            }
+         }
+      }
+      
+      for(Iw=0;Iw<S->Nw;Iw++) {
+         W = &S->Whl[Iw];
+         W->RKHm = D->h[Iw];
+      }
+      
+      /* Set up for First Call */
+      for(Ib=0;Ib<S->Nb;Ib++) {
+         B = &S->B[Ib];
+         for(i=0;i<3;i++) {
+            B->SpatFrc[  i] = B->Trq[i];
+            B->SpatFrc[3+i] = B->FrcB[i];
+         }
+      }
+      G = &S->GN;
+      for(i=0;i<3;i++) {
+         G->AngRate[i] = G->RKum[i];
+         G->PosRate[i] = G->RKum[3+i];
+         G->Pos[i] = G->RKxm[i];
+      }
+      for(i=0;i<4;i++) {
+         G->q[i] = G->RKqm[i];
+      }
+      
+      for(Ig=0;Ig<S->Ng;Ig++) {
+         G = &S->G[Ig];
+         for(i=0;i<G->RotDOF;i++) {
+            G->AngRate[i] = G->RKum[i];
+         }
+         for(i=0;i<G->TrnDOF;i++) {
+            G->PosRate[i] = G->RKum[G->RotDOF+i];
+            G->Pos[i] = G->RKxm[i];
+         }
+         if (G->IsSpherical) {
+            for(i=0;i<4;i++) {
+               G->q[i] = G->RKqm[i];
+            }
+         }
+         else {
+            for(i=0;i<G->RotDOF;i++) {
+               G->Ang[i] = G->RKqm[i];
+            }
+         }
+      }
+      
+      for(Iw=0;Iw<S->Nw;Iw++) {
+         W = &S->Whl[Iw];
+         W->H = W->RKHm;
+      }
+      
+      /* First Call */
+      OrderNMultiBodyEOM(S);
+      
+      /* Digest First Call */
+      f = 1.0/6.0;
+      G = &S->GN;
+      for(i=0;i<3;i++) {
+         G->RKdu[  i] = f*G->udot[i];
+         G->RKdu[3+i] = f*G->udot[3+i];
+         G->RKdx[  i] = f*G->xdot[i];         
+      }
+      for(i=0;i<4;i++) {
+         G->RKdq[  i] = f*G->qdot[i];
+      }
+      
+      for(Ig=0;Ig<S->Ng;Ig++) {
+         G = &S->G[Ig];
+         for(i=0;i<G->RotDOF;i++) {
+            G->RKdu[i] = f*G->udot[i];
+         }
+         for(i=0;i<G->TrnDOF;i++) {
+            G->RKdu[G->RotDOF+i] = f*G->udot[G->RotDOF+i];
+            G->RKdx[i] = f*G->xdot[i];
+         }
+         if (G->IsSpherical) {
+            for(i=0;i<4;i++) {
+               G->RKdq[i] = f*G->qdot[i];
+            }
+         }
+         else {
+            for(i=0;i<G->RotDOF;i++) {
+               G->RKdq[i] = f*G->qdot[i];
+            }
+         }
+      }
+      
+      for(Iw=0;Iw<S->Nw;Iw++) {
+         W = &S->Whl[Iw];
+         W->RKdH = f*W->Hdot;
+      }
+
+      /* Set up for Second Call */
+      dt = 0.5*DTSIM;
+      for(Ib=0;Ib<S->Nb;Ib++) {
+         B = &S->B[Ib];
+         for(i=0;i<3;i++) {
+            B->SpatFrc[  i] = B->Trq[i];
+            B->SpatFrc[3+i] = B->FrcB[i];
+         }
+      }
+      G = &S->GN;
+      for(i=0;i<3;i++) {
+         G->AngRate[i] = G->RKum[i] + dt*G->udot[i];
+         G->PosRate[i] = G->RKum[3+i]+dt*G->udot[3+i];
+         G->Pos[i] = G->RKxm[i] + dt*G->xdot[i];
+      }
+      for(i=0;i<4;i++) {
+         G->q[i] = G->RKqm[i] + dt*G->qdot[i]; 
+      }
+      
+      for(Ig=0;Ig<S->Ng;Ig++) {
+         G = &S->G[Ig];
+         for(i=0;i<G->RotDOF;i++) {
+            G->AngRate[i] = G->RKum[i] + dt*G->udot[i];
+         }
+         for(i=0;i<G->TrnDOF;i++) {
+            G->PosRate[i] = G->RKum[G->RotDOF+i]+dt*G->udot[G->RotDOF+i];
+            G->Pos[i] = G->RKxm[i] + dt*G->xdot[i];
+         }
+         if (G->IsSpherical) {
+            for(i=0;i<4;i++) {
+               G->q[i] = G->RKqm[i] + dt*G->qdot[i]; 
+            }
+         }
+         else {
+            for(i=0;i<G->RotDOF;i++) {
+               G->Ang[i] = G->RKqm[i] + dt*G->qdot[i]; /* "q" here used for angle states */
+            }
+         }
+      }
+      
+      for(Iw=0;Iw<S->Nw;Iw++) {
+         W = &S->Whl[Iw];
+         W->H = W->RKHm + dt*W->Hdot;
+      }
+      
+      /* Second Call */
+      OrderNMultiBodyEOM(S);
+      
+      /* Digest Second Call */
+      f = 1.0/3.0;
+      G = &S->GN;
+      for(i=0;i<3;i++) {
+         G->RKdu[  i] += f*G->udot[i];
+         G->RKdu[3+i] += f*G->udot[3+i];
+         G->RKdx[  i] += f*G->xdot[i];         
+      }
+      for(i=0;i<4;i++) {
+         G->RKdq[i] += f*G->qdot[i];
+      }
+      
+      for(Ig=0;Ig<S->Ng;Ig++) {
+         G = &S->G[Ig];
+         for(i=0;i<G->RotDOF;i++) {
+            G->RKdu[i] += f*G->udot[i];
+         }
+         for(i=0;i<G->TrnDOF;i++) {
+            G->RKdu[G->RotDOF+i] += f*G->udot[G->RotDOF+i];
+            G->RKdx[i] += f*G->xdot[i];
+         }
+         if (G->IsSpherical) {
+            for(i=0;i<4;i++) {
+               G->RKdq[i] += f*G->qdot[i];
+            }
+         }
+         else {
+            for(i=0;i<G->RotDOF;i++) {
+               G->RKdq[i] += f*G->qdot[i];
+            }
+         }
+      }
+      
+      for(Iw=0;Iw<S->Nw;Iw++) {
+         W = &S->Whl[Iw];
+         W->RKdH += f*W->Hdot;
+      }
+            
+      /* Set up for Third Call */
+      dt = 0.5*DTSIM;
+      for(Ib=0;Ib<S->Nb;Ib++) {
+         B = &S->B[Ib];
+         for(i=0;i<3;i++) {
+            B->SpatFrc[  i] = B->Trq[i];
+            B->SpatFrc[3+i] = B->FrcB[i];
+         }
+      }
+      G = &S->GN;
+      for(i=0;i<3;i++) {
+         G->AngRate[i] = G->RKum[i] + dt*G->udot[i];
+         G->PosRate[i] = G->RKum[3+i] + dt*G->udot[3+i];
+         G->Pos[i] = G->RKxm[i] + dt*G->xdot[i];
+      }
+      for(i=0;i<4;i++) {
+         G->q[i] = G->RKqm[i] + dt*G->qdot[i]; 
+      }
+      
+      for(Ig=0;Ig<S->Ng;Ig++) {
+         G = &S->G[Ig];
+         for(i=0;i<G->RotDOF;i++) {
+            G->AngRate[i] = G->RKum[i] + dt*G->udot[i];
+         }
+         for(i=0;i<G->TrnDOF;i++) {
+            G->PosRate[i] = G->RKum[G->RotDOF+i]+dt*G->udot[G->RotDOF+i];
+            G->Pos[i] = G->RKxm[i] + dt*G->xdot[i];
+         }
+         if (G->IsSpherical) {
+            for(i=0;i<4;i++) {
+               G->q[i] = G->RKqm[i] + dt*G->qdot[i]; 
+            }
+         }
+         else {
+            for(i=0;i<G->RotDOF;i++) {
+               G->Ang[i] = G->RKqm[i] + dt*G->qdot[i]; /* "q" here used for angle states */
+            }
+         }
+      }
+      
+      for(Iw=0;Iw<S->Nw;Iw++) {
+         W = &S->Whl[Iw];
+         W->H = W->RKHm + dt*W->Hdot;
+      }
+
+      /* Third Call */
+      OrderNMultiBodyEOM(S);
+
+      /* Digest Third Call */
+      f = 1.0/3.0;
+      G = &S->GN;
+      for(i=0;i<3;i++) {
+         G->RKdu[  i] += f*G->udot[i];
+         G->RKdu[3+i] += f*G->udot[3+i];
+         G->RKdx[  i] += f*G->xdot[i];         
+      }
+      for(i=0;i<4;i++) {
+         G->RKdq[i] += f*G->qdot[i];
+      }
+      
+      for(Ig=0;Ig<S->Ng;Ig++) {
+         G = &S->G[Ig];
+         for(i=0;i<G->RotDOF;i++) {
+            G->RKdu[i] += f*G->udot[i];
+         }
+         for(i=0;i<G->TrnDOF;i++) {
+            G->RKdu[G->RotDOF+i] += f*G->udot[G->RotDOF+i];
+            G->RKdx[i] += f*G->xdot[i];
+         }
+         if (G->IsSpherical) {
+            for(i=0;i<4;i++) {
+               G->RKdq[i] += f*G->qdot[i];
+            }
+         }
+         else {
+            for(i=0;i<G->RotDOF;i++) {
+               G->RKdq[i] += f*G->qdot[i];
+            }
+         }
+      }
+      
+      for(Iw=0;Iw<S->Nw;Iw++) {
+         W = &S->Whl[Iw];
+         W->RKdH += f*W->Hdot;
+      }
+            
+      /* Set up for Fourth Call */
+      dt = DTSIM;
+      for(Ib=0;Ib<S->Nb;Ib++) {
+         B = &S->B[Ib];
+         for(i=0;i<3;i++) {
+            B->SpatFrc[  i] = B->Trq[i];
+            B->SpatFrc[3+i] = B->FrcB[i];
+         }
+      }
+      G = &S->GN;
+      for(i=0;i<3;i++) {
+         G->AngRate[i] = G->RKum[i] + dt*G->udot[i];
+         G->PosRate[i] = G->RKum[3+i] + dt*G->udot[3+i];
+         G->Pos[i] = G->RKxm[i] + dt*G->xdot[i];
+      }
+      for(i=0;i<4;i++) {
+         G->q[i] = G->RKqm[i] + dt*G->qdot[i]; 
+      }
+      
+      for(Ig=0;Ig<S->Ng;Ig++) {
+         G = &S->G[Ig];
+         for(i=0;i<G->RotDOF;i++) {
+            G->AngRate[i] = G->RKum[i] + dt*G->udot[i];
+         }
+         for(i=0;i<G->TrnDOF;i++) {
+            G->PosRate[i] = G->RKum[G->RotDOF+i] + dt*G->udot[G->RotDOF+i];
+            G->Pos[i] = G->RKxm[i] + dt*G->xdot[i];
+         }
+         if (G->IsSpherical) {
+            for(i=0;i<4;i++) {
+               G->q[i] = G->RKqm[i] + dt*G->qdot[i]; 
+            }
+         }
+         else {
+            for(i=0;i<G->RotDOF;i++) {
+               G->Ang[i] = G->RKqm[i] + dt*G->qdot[i]; /* "q" here used for angle states */
+            }
+         }
+      }
+      
+      for(Iw=0;Iw<S->Nw;Iw++) {
+         W = &S->Whl[Iw];
+         W->H = W->RKHm + dt*W->Hdot;
+      }
+
+      /* Fourth Call */
+      OrderNMultiBodyEOM(S);
+      
+      /* Digest Fourth Call */
+      f = 1.0/6.0;
+      G = &S->GN;
+      for(i=0;i<3;i++) {
+         G->RKdu[  i] += f*G->udot[i];
+         G->RKdu[3+i] += f*G->udot[3+i];
+         G->RKdx[  i] += f*G->xdot[i];         
+      }
+      for(i=0;i<4;i++) {
+         G->RKdq[i] += f*G->qdot[i];
+      }
+      
+      for(Ig=0;Ig<S->Ng;Ig++) {
+         G = &S->G[Ig];
+         for(i=0;i<G->RotDOF;i++) {
+            G->RKdu[i] += f*G->udot[i];
+         }
+         for(i=0;i<G->TrnDOF;i++) {
+            G->RKdu[G->RotDOF+i] += f*G->udot[G->RotDOF+i];
+            G->RKdx[i] += f*G->xdot[i];
+         }
+         if (G->IsSpherical) {
+            for(i=0;i<4;i++) {
+               G->RKdq[i] += f*G->qdot[i];
+            }
+         }
+         else {
+            for(i=0;i<G->RotDOF;i++) {
+               G->RKdq[i] += f*G->qdot[i];
+            }
+         }
+      }
+
+      for(Iw=0;Iw<S->Nw;Iw++) {
+         W = &S->Whl[Iw];
+         W->RKdH += f*W->Hdot;
+      }
+      
+      /* Update States */
+      dt = DTSIM;
+      G = &S->GN;
+      for(i=0;i<3;i++) {
+         D->u[i] = G->RKum[i] + dt*G->RKdu[i];
+         D->u[D->Nu-3+i] = G->RKum[3+i] + dt*G->RKdu[3+i];
+         D->x[D->Nx-3+i] = G->RKxm[  i] + dt*G->RKdx[i];
+      }
+      for(i=0;i<4;i++) {
+         D->x[i] = G->RKqm[i] + dt*G->RKdq[i];
+      } 
+      UNITQ(&D->x[0]);
+      
+      for(Ig=0;Ig<S->Ng;Ig++) {
+         G = &S->G[Ig];
+         for(i=0;i<G->RotDOF;i++) {
+            D->u[G->Rotu0+i] = G->RKum[i] + dt*G->RKdu[i];
+         }
+         for(i=0;i<G->TrnDOF;i++) {
+            D->u[G->Trnu0+i] = G->RKum[G->RotDOF+i] + dt*G->RKdu[G->RotDOF+i];
+            D->x[G->Trnx0+i] = G->RKxm[i] + dt*G->RKdx[i];
+         }
+         if (G->IsSpherical) {
+            for(i=0;i<4;i++) {
+               D->x[G->Rotx0+i] = G->RKqm[i] + dt*G->RKdq[i]; 
+            }
+            UNITQ(&D->x[G->Rotx0]);
+         }
+         else {
+            for(i=0;i<G->RotDOF;i++) {
+               D->x[G->Rotx0+i] = G->RKqm[i] + dt*G->RKdq[i]; /* "q" here used for angle states */
+            }
+         }
+      }
+
+      MapStateVectorToBodyStates(D->u,D->x,D->uf,D->xf,S); 
+      MotionConstraints(S);
+      SCMassProps(S);
+
+      for(Iw=0;Iw<S->Nw;Iw++) {
+         W = &S->Whl[Iw];
+         D->h[Iw] = W->RKHm + dt*W->RKdH;
+         W->H = D->h[Iw];
+         W->w = W->H/W->J;
+         W->ang += W->w*DTSIM;
+         W->ang = fmod(W->ang,TwoPi);
+      }      
+
+      FindTotalAngMom(S);
+}
 /**********************************************************************/
 /* Utility function for Encke's method.  Computes f(q).               */
 /* See Battin, p. 449                                                 */
@@ -3035,9 +3871,9 @@ void EnckeRK4(struct SCType *S)
 
       O = &Orb[S->RefOrb];
 
-      accel[0] = S->Frc[0]/S->mass;
-      accel[1] = S->Frc[1]/S->mass;
-      accel[2] = S->Frc[2]/S->mass;
+      accel[0] = S->FrcN[0]/S->mass;
+      accel[1] = S->FrcN[1]/S->mass;
+      accel[2] = S->FrcN[2]/S->mass;
       R[0] = O->PosN[0];
       R[1] = O->PosN[1];
       R[2] = O->PosN[2];
@@ -3112,13 +3948,13 @@ void CowellRK4(struct SCType *S)
       u[5] = S->VelN[2];
 
 /* .. 4th Order Runga-Kutta Integration */
-      CowellEOM( u, m1, O->mu, S->mass, S->Frc);
+      CowellEOM( u, m1, O->mu, S->mass, S->FrcN);
       for(j=0;j<6;j++) uu[j] = u[j] + 0.5*DTSIM*m1[j];
-      CowellEOM(uu, m2, O->mu, S->mass, S->Frc);
+      CowellEOM(uu, m2, O->mu, S->mass, S->FrcN);
       for(j=0;j<6;j++) uu[j] = u[j] + 0.5*DTSIM*m2[j];
-      CowellEOM(uu, m3, O->mu, S->mass, S->Frc);
+      CowellEOM(uu, m3, O->mu, S->mass, S->FrcN);
       for(j=0;j<6;j++) uu[j] = u[j] + DTSIM*m3[j];
-      CowellEOM(uu, m4, O->mu, S->mass, S->Frc);
+      CowellEOM(uu, m4, O->mu, S->mass, S->FrcN);
       for(j=0;j<6;j++) u[j]+=DTSIM/6.0*(m1[j]+2.0*(m2[j]+m3[j])+m4[j]);
 
       S->PosN[0] = u[0];
@@ -3179,19 +4015,19 @@ void PolyhedronCowellRK4(struct SCType *S)
 
 /* .. 4th Order Runga-Kutta Integration */
       PolyhedronGravAcc(G,W->Density,u,W->CWN,GravAccN);
-      PolyhedronCowellEOM( u, m1, S->mass, GravAccN, S->Frc);
+      PolyhedronCowellEOM( u, m1, S->mass, GravAccN, S->FrcN);
       for(j=0;j<6;j++) uu[j] = u[j] + 0.5*DTSIM*m1[j];
       
       PolyhedronGravAcc(G,W->Density,uu,W->CWN,GravAccN);
-      PolyhedronCowellEOM(uu, m2, S->mass, GravAccN, S->Frc);
+      PolyhedronCowellEOM(uu, m2, S->mass, GravAccN, S->FrcN);
       for(j=0;j<6;j++) uu[j] = u[j] + 0.5*DTSIM*m2[j];
     
       PolyhedronGravAcc(G,W->Density,uu,W->CWN,GravAccN);
-      PolyhedronCowellEOM(uu, m3, S->mass, GravAccN, S->Frc);
+      PolyhedronCowellEOM(uu, m3, S->mass, GravAccN, S->FrcN);
       for(j=0;j<6;j++) uu[j] = u[j] + DTSIM*m3[j];
       
       PolyhedronGravAcc(G,W->Density,uu,W->CWN,GravAccN);
-      PolyhedronCowellEOM(uu, m4, S->mass, GravAccN, S->Frc);
+      PolyhedronCowellEOM(uu, m4, S->mass, GravAccN, S->FrcN);
       for(j=0;j<6;j++) u[j]+=DTSIM/6.0*(m1[j]+2.0*(m2[j]+m3[j])+m4[j]);
 
       S->PosN[0] = u[0];
@@ -3247,9 +4083,9 @@ void ThreeBodyEnckeRK4(struct SCType *S)
       O = &Orb[S->RefOrb];
       E = &World[O->Body2].eph;
 
-      accel[0] = S->Frc[0]/S->mass;
-      accel[1] = S->Frc[1]/S->mass;
-      accel[2] = S->Frc[2]/S->mass;
+      accel[0] = S->FrcN[0]/S->mass;
+      accel[1] = S->FrcN[1]/S->mass;
+      accel[2] = S->FrcN[2]/S->mass;
       R1[0] = O->PosN[0];
       R1[1] = O->PosN[1];
       R1[2] = O->PosN[2];
@@ -3316,9 +4152,9 @@ void EulHillRK4(struct SCType *S)
 
       O = &Orb[S->RefOrb];
 
-      accelN[0] = S->Frc[0]/S->mass;
-      accelN[1] = S->Frc[1]/S->mass;
-      accelN[2] = S->Frc[2]/S->mass;
+      accelN[0] = S->FrcN[0]/S->mass;
+      accelN[1] = S->FrcN[1]/S->mass;
+      accelN[2] = S->FrcN[2]/S->mass;
       for(j=0;j<3;j++) {
          u[j] = S->PosEH[j];
          u[3+j] = S->VelEH[j];
@@ -3432,23 +4268,27 @@ void FixedOrbitPosition(struct SCType *S)
 void PartitionForces(struct SCType *S)
 {
       long i,Ib;
-      double Fext[3] = {0.0,0.0,0.0};
+      double FextN[3] = {0.0,0.0,0.0};
+      double FextB[3];
       long Nb;
 
       Nb = S->Nb;
       for(Ib=0;Ib<Nb;Ib++) {
-         for(i=0;i<3;i++) Fext[i] += S->B[Ib].Frc[i];
+         for(i=0;i<3;i++) FextN[i] += S->B[Ib].FrcN[i];
       }
 
       /* Non-grav acceleration of SC.cm, for accelerometer */
-      for(i=0;i<3;i++) S->asn[i] = Fext[i]/S->mass;
+      for(i=0;i<3;i++) S->asn[i] = FextN[i]/S->mass;
 
-      S->Frc[0] += Fext[0];
-      S->Frc[1] += Fext[1];
-      S->Frc[2] += Fext[2];
+      S->FrcN[0] += FextN[0];
+      S->FrcN[1] += FextN[1];
+      S->FrcN[2] += FextN[2];
       for(Ib=0;Ib<Nb;Ib++) {
-         for(i=0;i<3;i++)
-            S->B[Ib].Frc[i] -= Fext[i]*S->B[Ib].mass/S->mass;
+         MxV(S->B[Ib].CN,FextN,FextB);
+         for(i=0;i<3;i++) {
+            S->B[Ib].FrcN[i] -= FextN[i]*S->B[Ib].mass/S->mass;
+            S->B[Ib].FrcB[i] -= FextB[i]*S->B[Ib].mass/S->mass;
+         }
       }
 }
 /**********************************************************************/
@@ -3458,23 +4298,22 @@ void Dynamics(struct SCType *S)
 
       O = &Orb[S->RefOrb];
 
-      switch(S->RotDOF) {
-         case ROTDOF_STEADY :
-            SteadyAttitudeMotion(S);
-            break;
-         /* case ROTDOF_KIN_JOINT :
-         **   if (S->Nb == 1) OneBodyRK4(S);
-         **   else KinJointNBodyRK4(S);
-         **   break;
-         */
-         default :
-            if (S->Nb > 1) {
+
+      if (S->Nb > 1) {
+         switch(S->DynMethod) {
+            case DYN_GAUSS_ELIM :
                KaneNBodyRK4(S);
-            }
-            else {
-               OneBodyRK4(S);
-            }
+               break;
+            case DYN_ORDER_N :
+               OrderNMultiBodyRK4(S);
+               break;
+            default :
+               printf("Unknown Dynamics Solution option.  Bailing out.\n");
+               exit(1);
+            
+         }
       }
+      else OneBodyRK4(S);
 
       switch(O->Regime) {
          case ORB_ZERO :

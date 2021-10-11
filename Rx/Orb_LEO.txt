@@ -20,8 +20,9 @@ PA                            !  Use Peri/Apoapsis (PA) or min alt/ecc (AE)
 -30.0                         !  True Anomaly (deg)
 0.0  0.0  0.0                 !  RV Initial Position (km)
 0.0  0.0  0.0                 !  RV Initial Velocity (km/sec)
-TRV  "ORB_ID"                 !  TLE or TRV format, Label to find in file
-"TRV.txt"                     !  File name, label
+TRV                           !  TLE, TRV, or SPLINE file format
+"TRV.txt"                     !  File name
+"EXAMPLE 1"                   !  Label to find in TLE or TRV file
 :::::::::::::  Use these lines if Three-Body Orbit  ::::::::::::::::
 SUNEARTH                      !  Lagrange system
 LAGDOF_MODES                  !  Propagate using LAGDOF_MODES or LAGDOF_COWELL

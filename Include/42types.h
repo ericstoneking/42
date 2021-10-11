@@ -62,14 +62,14 @@ struct BodyType {
    double cm[3]; /* wrt origin of convenience, expressed in B frame */
    double c[3]; /* First mass moment about ref pt, expressed in B */
    double I[3][3]; /* Moment of Inertia, about ref pt, expressed in B frame */
-   double Hgyro[3];  /* Constant embedded momentum, for CMGs and rotating instruments */
+   double EmbeddedMom[3]; /* Constant embedded momentum, for CMGs and rotating instruments */
    double wn[3]; /* Angular Velocity of B wrt N expressed in B frame [[rad/sec]] [~=~] */
    double qn[4]; /* [~=~] */
    double vn[3]; /* velocity of B ref pt expressed in N frame */
    double pn[3]; /* position of B ref pt in N frame expressed in N frame */
    double CN[3][3]; /* Direction Cosine of B frame in N frame */
    double Trq[3]; /* expressed in B */
-   double Frc[3]; /* expressed in N */
+   double FrcN[3]; /* expressed in N */
    double alpha[3]; /* Angular acceleration of B wrt N, expressed in B */
    double accel[3]; /* Linear acceleration of B wrt N, expressed in N */
    char GeomFileName[40];
@@ -84,6 +84,22 @@ struct BodyType {
    double InertiaTrq[3];
    double InertiaFrc[3];
    double JointTrq[3]; /* From all joints exerting trq on this body */
+   
+   /* For OrderN Dynamics */
+   long Nd; /* Number of distal joints (i.e. for which this body is Bi) */
+   long *Gd; /* Indices of distal joints (i.e. for which this body is Bi) */
+   double RemAlf[3];
+   double RemAcc[3];
+   double alfn[3];
+   double accn[3];
+   double H[3];
+   double RemInertiaFrc[6];  
+   double WhlMom[3];
+   double FrcB[3]; /* Expressed in B */
+   double SpatFrc[6]; /* [Trq;Frc] + [PassiveTrq;PassiveFrc] */
+   
+   double AccU[6];
+
    /* For Flex Formulation */
    long Nf;  /* Number of flex modes superimposed on this body */
    double *xi;    /* Flex speed coordinate, Nf x 1 */
@@ -112,17 +128,20 @@ struct BodyType {
 
 struct JointType {
    /*~ Internal Variables ~*/
+   long Init;
    long IsSpherical;      /* TRUE or FALSE */
    long RotDOF;           /* 0,1,2,3 */
    long TrnDOF;           /* 0,1,2,3 */
    long Bin;              /* Index of inner body */
    long Bout;             /* Index of outer body */
+   struct BodyType *Bi;
+   struct BodyType *Bo;
    long Nanc;             /* Number of "ancestor" joints: joints between this one and B[0] */
    long *Anc;             /* Indices of ancestor joints */
    double RigidRin[3];    /* Position wrt inner body ref pt (rigid) */
    double RigidRout[3];   /* Position wrt outer body ref pt (rigid) */
-   double rin[3];         /* Position wrt inner body ref pt (incl flex & TrnDOF) */
-   double rout[3];        /* Position wrt outer body ref pt (incl flex) */
+   double ri[3];         /* Position wrt inner body ref pt (incl flex & TrnDOF) */
+   double ro[3];        /* Position wrt outer body ref pt (incl flex) */
    long RotSeq;           /* Joint Euler sequence */
    long RotLocked[3];     /* Set TRUE if individual DOF is to be locked in place */
    long TrnSeq;           /* Translational joint sequence */
@@ -164,6 +183,32 @@ struct JointType {
    long ActiveTrnu0;         /* Index in DynStateIdx of first unlocked Trn DOF in DynState */
    long ActiveRotDOF;        /* Number of unlocked RotDOF */
    long ActiveTrnDOF;        /* Number of unlocked TrnDOF */
+
+   /* For OrderN Dynamics */
+   double Pw[3][3];
+   double Pv[3][3];
+   double Pwdot[3][3];
+   double P[6][6]; /* [Pw 0; 0 Pv] */
+   double ArtFrc[6]; /* Articulated Body Force */
+   double ArtMass[6][6]; /* Articulated Body Mass */
+   double DynMtx[6][6]; /* Nu x Nu */
+   double InvDynMtx[6][6]; /* Nu x Nu */
+   double InvDynPT[6][6]; /* Nu x 6 */
+   double AbsorpMtx[6][6];
+   double TransMtx[6][6];
+   double riplusPx[3];  /* r_{ik} + P_{vk}x_k */
+   long Nu; /* RotDOF + TrnDOF */
+   double q[4]; /* Quaternion or angle states, depending on IsSpherical */
+   double udot[6];
+   double qdot[4];
+   double xdot[3];
+   double RKum[6]; 
+   double RKqm[4];
+   double RKxm[3];
+   double RKdu[6];
+   double RKdq[4];
+   double RKdx[3];   
+   
    /* For Flex */
    double **PSIi;         /* Translation Mode Shapes, 3 x Bi.Nf */
    double **THETAi;       /* Rotational Mode Shapes, 3 x Bi.Nf */
@@ -192,6 +237,7 @@ struct IdealActType {
 
 struct WhlType {
    /*~ Internal Variables ~*/
+   long Body; /* Body that wheel is mounted in */
    double H;  /* Angular Momentum, [[Nms]] [~=~] */
    double J;  /* Rotary inertia, kg-m^2 */
    double w;  /* Angular speed, rad/sec */
@@ -200,13 +246,17 @@ struct WhlType {
    double Hmax;
    double Tcmd;
    double Trq;  /* Exerted on wheel, expressed along wheel axis */
-   long Body;
    long FlexNode;
    double Uhat[3],Vhat[3]; /* Transverse basis vectors wrt Body */
    double ang; /* Spin angle, rad */
    double Ks;  /* Static imbalance coefficient, [kg-m] */
    double Kd;  /* Dynamic imbalance coefficient, [kg-m^2] */
    struct DelayType *Delay; /* For injecting delay into control loops */
+
+   /* For OrderN Dynamics */
+   double Hdot;
+   double RKHm;
+   double RKdH;
 };
 
 struct MTBType {
@@ -292,6 +342,7 @@ struct CssType {
    long SampleCounter;
    long Valid;
    double Illum; /* Units defined by scale */
+   double Albedo; /* [0.0:1.0] */
 };
 
 struct FssType {
@@ -481,7 +532,7 @@ struct SCType {
    long ID;     /* SC[x].ID = x */
    long Exists;
    char Label[40];
-   long RotDOF;  /* STEADY, KIN_JOINT, DYN_JOINT */
+   long DynMethod;  /* GAUSS_ELIM, ORDER_N */
    long OrbDOF;  /* FIXED, EULER_HILL, ENCKE, COWELL */
    long RefOrb;
    long FswTag;  /* Tag for FSW function, eg. PROTOTYPE_FSW */
@@ -518,7 +569,7 @@ struct SCType {
    double wln[3]; /* Expressed in N */
    double PosH[3];  /* Position of cm wrt H frame, expressed in H */
    double VelH[3];  /* Velocity of cm wrt H frame, expressed in H */
-   double Frc[3]; /* Force, N, expressed in N */
+   double FrcN[3]; /* Force, N, expressed in N */
    double svn[3]; /* Sun-pointing unit vector, expressed in N */
    double svb[3]; /* Sun-pointing unit vector, expressed in SC.B[0] [~=~] */
    double bvn[3]; /* Magfield, Tesla, expressed in N */
@@ -570,6 +621,7 @@ struct SCType {
    struct AcType AC;
    struct BodyType *B;           /* [*Nb*] */
    struct JointType *G;          /* [*Ng*] */
+   struct JointType GN;          /* Joint between N and B[0] */
    struct IdealActType IdealAct[3];
    struct WhlType *Whl;          /* [*Nw*] */
    struct MTBType *MTB;          /* [*Nmtb*] */
@@ -800,6 +852,7 @@ struct FBOType {
    unsigned int Height, Width;
    unsigned int RenderTag;
    unsigned int TexTag;
+   float *Tex;
 };
 
 /* Orrery POV is different from POV */

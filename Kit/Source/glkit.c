@@ -890,7 +890,8 @@ void TexToPpm(const char path[40], const char filename[40],
       GLubyte c;
 
       file = FileOpen(path,filename,"wb");
-      fprintf(file,"P6\n#.\n%ld %ld\n255\n",Nw,Nh);
+      if (Nb==1) fprintf(file,"P5\n#.\n%ld %ld\n255\n",Nw,Nh);
+      else fprintf(file,"P6\n#.\n%ld %ld\n255\n",Nw,Nh);
       fflush(file);
       Nc = Nh*Nw*Nb;
       for(i=0;i<Nc;i++) {
@@ -1004,8 +1005,10 @@ GLuint PpmToCubeTag(const char path[40], const char file[40], int BytesPerPixel)
       char comment[80];
       GLuint CubeTag;
       GLubyte *Tex;
-      char face[6][20] = {"PX.ppm","PY.ppm","PZ.ppm",
+      char PpmFace[6][20] = {"PX.ppm","PY.ppm","PZ.ppm",
                           "MX.ppm","MY.ppm","MZ.ppm"};
+      char PgmFace[6][20] = {"PX.pgm","PY.pgm","PZ.pgm",
+                          "MX.pgm","MY.pgm","MZ.pgm"};
       GLenum CubeFace[6] = {GL_TEXTURE_CUBE_MAP_POSITIVE_X,
                             GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
                             GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
@@ -1026,9 +1029,15 @@ GLuint PpmToCubeTag(const char path[40], const char file[40], int BytesPerPixel)
 
       for(If=0;If<6;If++) {
          strcpy(filename,file);
-         strcat(filename,face[If]);
+         if (BytesPerPixel == 1) strcat(filename,PgmFace[If]);
+         else strcat(filename,PpmFace[If]);
          infile = FileOpen(path,filename,"rb");
-         fscanf(infile,"P6\n%[^\n]\n%ld %ld\n%ld\n",comment,&Nw,&Nh,&junk); /* Header */
+         if (BytesPerPixel == 1) {
+            fscanf(infile,"P5\n%[^\n]\n%ld %ld\n%ld\n",comment,&Nw,&Nh,&junk); /* Header */
+         }
+         else {
+            fscanf(infile,"P6\n%[^\n]\n%ld %ld\n%ld\n",comment,&Nw,&Nh,&junk); /* Header */
+         }
          N = Nw*Nh*BytesPerPixel;
          Tex = (GLubyte *) calloc(N,sizeof(GLubyte));
          if (Tex == NULL) {

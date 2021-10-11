@@ -323,6 +323,7 @@ void GravGradFrcTrq(struct SCType *S)
       struct OrbitType *O;
       struct WorldType *W;
       double GravGradN[3][3],CGG[3][3],GravGradB[3][3],GGxI[3],GGxpn[3];
+      double FrcN[3],FrcB[3];
 
       O = &Orb[S->RefOrb];
       
@@ -351,8 +352,11 @@ void GravGradFrcTrq(struct SCType *S)
 
                /* GG force */
                MxV(GravGradN,B->pn,GGxpn);
+               for(i=0;i<3;i++) FrcN[i] = B->mass*GGxpn[i];
+               MxV(B->CN,FrcN,FrcB);
                for(i=0;i<3;i++) {
-                  B->Frc[i] += B->mass*GGxpn[i];
+                  B->FrcN[i] += FrcN[i];
+                  B->FrcB[i] += FrcB[i];
                }
             }
          }
@@ -381,8 +385,11 @@ void GravGradFrcTrq(struct SCType *S)
                /* GG force from Hughes, p. 246, eq. (56) */
                for(i=0;i<3;i++) c[i] = B->mass*B->pn[i];
                rhatoc = VoV(rhat,c);
+               for(i=0;i<3;i++) FrcN[i] = -Coef*(c[i]-3.0*rhat[i]*rhatoc);
+               MxV(B->CN,FrcN,FrcB);
                for(i=0;i<3;i++) {
-                  B->Frc[i] -= Coef*(c[i]-3.0*rhat[i]*rhatoc);
+                  B->FrcN[i] += FrcN[i];
+                  B->FrcB[i] += FrcB[i];
                }
             }
          }
@@ -415,7 +422,7 @@ void J2Force(struct SCType *S, struct OrbitType *O, double FrcN[3])
 void GravPertForce(struct SCType *S)
 {
       struct OrbitType *O;
-      double FgeoN[3],ph[3],p[3],s[3],Frc[3];
+      double FgeoN[3],ph[3],p[3],s[3],FrcN[3];
       long Iw,Im,j;
       long OrbCenter,SecCenter;
 
@@ -437,8 +444,8 @@ void GravPertForce(struct SCType *S)
                       -World[OrbCenter].eph.PosN[j];
             MxV(World[OrbCenter].CNH,ph,p);
             for(j=0;j<3;j++) s[j] = p[j]-S->PosN[j];
-            ThirdBodyGravForce(p,s,World[Iw].mu,S->mass,Frc);
-            for(j=0;j<3;j++) S->Frc[j] += Frc[j];
+            ThirdBodyGravForce(p,s,World[Iw].mu,S->mass,FrcN);
+            for(j=0;j<3;j++) S->FrcN[j] += FrcN[j];
          }
       }
       /* Moons of OrbCenter (but not SecCenter) */
@@ -450,8 +457,8 @@ void GravPertForce(struct SCType *S)
                   p[j] = World[Iw].eph.PosN[j];
                   s[j] = p[j]-S->PosN[j];
                }
-               ThirdBodyGravForce(p,s,World[Iw].mu,S->mass,Frc);
-               for(j=0;j<3;j++) S->Frc[j] += Frc[j];
+               ThirdBodyGravForce(p,s,World[Iw].mu,S->mass,FrcN);
+               for(j=0;j<3;j++) S->FrcN[j] += FrcN[j];
             }
          }
       }
@@ -466,8 +473,8 @@ void GravPertForce(struct SCType *S)
                p[j] += World[SecCenter].eph.PosN[j];
                s[j] = p[j]-S->PosN[j];
             }
-            ThirdBodyGravForce(p,s,World[Iw].mu,S->mass,Frc);
-            for(j=0;j<3;j++) S->Frc[j] += Frc[j];
+            ThirdBodyGravForce(p,s,World[Iw].mu,S->mass,FrcN);
+            for(j=0;j<3;j++) S->FrcN[j] += FrcN[j];
          }
       }
 
@@ -475,21 +482,21 @@ void GravPertForce(struct SCType *S)
       if (OrbCenter == EARTH) {
          EGM96(ModelPath,EarthGravModel.N,EarthGravModel.M,S->mass,S->PosN,
                World[EARTH].PriMerAng,FgeoN);
-         for(j=0;j<3;j++) S->Frc[j] += FgeoN[j];
+         for(j=0;j<3;j++) S->FrcN[j] += FgeoN[j];
          if (O->J2DriftEnabled) {
-            J2Force(S,O,Frc);
-            for(j=0;j<3;j++) S->Frc[j] -= Frc[j];
+            J2Force(S,O,FrcN);
+            for(j=0;j<3;j++) S->FrcN[j] -= FrcN[j];
          }
       }
       else if (OrbCenter == MARS) {
          GMM2B(ModelPath,MarsGravModel.N,MarsGravModel.M,S->mass,S->PosN,
                World[MARS].PriMerAng,FgeoN);
-         for(j=0;j<3;j++) S->Frc[j] += FgeoN[j];
+         for(j=0;j<3;j++) S->FrcN[j] += FgeoN[j];
       }
       else if (OrbCenter == LUNA) {
          GLGM2(ModelPath,LunaGravModel.N,LunaGravModel.M,S->mass,S->PosN,
                World[LUNA].PriMerAng,FgeoN);
-         for(j=0;j<3;j++) S->Frc[j] += FgeoN[j];
+         for(j=0;j<3;j++) S->FrcN[j] += FgeoN[j];
       }
       /* else if O->CenterType == MINORBODY, use provided gravity model */
 }
@@ -550,7 +557,10 @@ void AeroFrcTrq(struct SCType *S)
                *WindSpeed*WindSpeed*Area;
          for(i=0;i<3;i++) Fb[i] = Coef*VrelB[i];
          MTxV(B->CN,Fb,Fn);
-         for(i=0;i<3;i++) B->Frc[i] += Fn[i];
+         for(i=0;i<3;i++) {
+            B->FrcN[i] += Fn[i];
+            B->FrcB[i] += Fb[i];
+         }
          VxV(cp,Fb,Trq);
          for(i=0;i<3;i++) B->Trq[i] += Trq[i];
       }
@@ -597,7 +607,8 @@ void SolPressFrcTrq(struct SCType *S)
                      VxV(r,Fb,Tb);
                      MTxV(B->CN,Fb,Fn);
                      for(i=0;i<3;i++) {
-                        B->Frc[i] += Fn[i];
+                        B->FrcN[i] += Fn[i];
+                        B->FrcB[i] += Fb[i];
                         B->Trq[i] += Tb[i];
                      }
                   }
@@ -648,7 +659,8 @@ void RwaImbalance(struct SCType *S)
          MTxV(B->CN,Fb,Fn);
          VxV(PosB,Fb,Tb);
          for(i=0;i<3;i++) {
-            B->Frc[i] += Fn[i];
+            B->FrcN[i] += Fn[i];
+            B->FrcB[i] += Fb[i];
             B->Trq[i] += Tb[i];
          }
          if (S->FlexActive) {
@@ -709,8 +721,7 @@ void BodyRgnContactFrcTrq(struct SCType *S, long Ibody,
       struct BodyType *B;
       struct PolyType *Pb,*Pr;
       struct EdgeType *E;
-      double FrcN[3] = {0.0,0.0,0.0};
-      double TrqB[3] = {0.0,0.0,0.0};
+      double FrcN[3],FrcB[3],TrqB[3];
       double rb[3],wxrb[3];
       double prn[3],vrn[3],pbrn[3],vbrn[3],CPR[3][3],CPN[3][3];
       double PosP[3],VelP[3];
@@ -729,6 +740,7 @@ void BodyRgnContactFrcTrq(struct SCType *S, long Ibody,
 
       for(i=0;i<3;i++) {
          FrcN[i] = 0.0;
+         FrcB[i] = 0.0;
          TrqB[i] = 0.0;
       }
 
@@ -806,12 +818,14 @@ void BodyRgnContactFrcTrq(struct SCType *S, long Ibody,
          VxV(rb,Fb,Tb);
          for(i=0;i<3;i++) {
             FrcN[i] += Fn[i];
+            FrcB[i] += Fb[i];
             TrqB[i] += Tb[i];
          }
       }
 
       for(i=0;i<3;i++) {
-         B->Frc[i] += FrcN[i];
+         B->FrcN[i] += FrcN[i];
+         B->FrcB[i] += FrcB[i];
          B->Trq[i] += TrqB[i];
       }
 }
@@ -832,6 +846,7 @@ void BodyBodyContactFrcTrq(struct SCType *Sa, long Ibody,
       double FrcN[3] = {0.0,0.0,0.0};
       double TrqA[3] = {0.0,0.0,0.0};
       double TrqB[3] = {0.0,0.0,0.0};
+      double FrcA[3],FrcB[3];
       long Ia,Ib,i;
       double Fn[3],Fa[3],Ta[3],Fb[3],Tb[3];
       double hbar,r2,v2,dx[3],dv[3],r,v;
@@ -948,12 +963,17 @@ void BodyBodyContactFrcTrq(struct SCType *Sa, long Ibody,
          }
       }
 
+      MxV(Ba->CN,FrcN,FrcA);
+      MxV(Bb->CN,FrcN,FrcB);
       for(i=0;i<3;i++) {
-         Ba->Frc[i] += FrcN[i];
+         Ba->FrcN[i] += FrcN[i];
+         Ba->FrcB[i] += FrcA[i];
          Ba->Trq[i] += TrqA[i];
-         Bb->Frc[i] -= FrcN[i];
+         Bb->FrcN[i] -= FrcN[i];
+         Bb->FrcB[i] += FrcB[i];
          Bb->Trq[i] -= TrqB[i];
       }
+      
 }
 /**********************************************************************/
 void ContactFrcTrq(struct SCType *S)
@@ -1051,7 +1071,7 @@ void EnvTrq(struct SCType *S)
 
       for(Ib=0;Ib<S->Nb;Ib++) {
          MTxV(S->B[Ib].CN,S->B[Ib].Trq,TrqN);
-         VxV(S->B[Ib].pn,S->B[Ib].Frc,rxF);
+         VxV(S->B[Ib].pn,S->B[Ib].FrcN,rxF);
          for(i=0;i<3;i++) SumTrqN[i] += TrqN[i] + rxF[i];
       }
       MxV(CSN,SumTrqN,TrqS);

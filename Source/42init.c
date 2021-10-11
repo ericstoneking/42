@@ -124,9 +124,8 @@ long DecodeString(char *s)
       else if (!strcmp(s,"LAGDOF_COWELL")) return LAGDOF_COWELL;
       else if (!strcmp(s,"LAGDOF_SPLINE")) return LAGDOF_SPLINE;
 
-      else if (!strcmp(s,"STEADY")) return ROTDOF_STEADY;
-      else if (!strcmp(s,"KIN_JOINT")) return ROTDOF_KIN_JOINT;
-      else if (!strcmp(s,"DYN_JOINT")) return ROTDOF_DYN_JOINT;
+      else if (!strcmp(s,"GAUSS_ELIM")) return DYN_GAUSS_ELIM;
+      else if (!strcmp(s,"ORDER_N")) return DYN_ORDER_N;
 
       else if (!strcmp(s,"FIXED")) return ORBDOF_FIXED;
       else if (!strcmp(s,"EULER_HILL")) return ORBDOF_EULER_HILL;
@@ -491,7 +490,7 @@ void InitOrbit(struct OrbitType *O)
          fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
          O->PolyhedronGravityEnabled = DecodeString(response);
          /* Skip FLIGHT, CENTRAL, THREE_BODY sections */
-         for(j=0;j<35;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(j=0;j<36;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
       else if (O->Regime == ORB_FLIGHT) {
          /* Skip ZERO section */
@@ -518,7 +517,7 @@ void InitOrbit(struct OrbitType *O)
          O->PolyhedronGravityEnabled = DecodeString(response);
 
          /* Skip CENTRAL and THREE_BODY sections */
-         for(j=0;j<32;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(j=0;j<33;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
       else if (O->Regime == ORB_CENTRAL) {
          /* Skip ZERO and FLIGHT sections */
@@ -606,7 +605,7 @@ void InitOrbit(struct OrbitType *O)
             }
 
             /* Skip RV and FILE */
-            for(j=0;j<4;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+            for(j=0;j<5;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
          }
          else if (InputType == INP_POSVEL) {
             /* Skip KEPLER section */
@@ -644,14 +643,16 @@ void InitOrbit(struct OrbitType *O)
                   &O->MeanMotion,&O->Period);
             }
             /* Skip FILE section */
-            for(j=0;j<2;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+            for(j=0;j<3;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
          }
          else if (InputType == INP_FILE) {
+            /* Skip KEP and RV sections */
             for(j=0;j<9;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-            fscanf(infile,"%s \"%[^\"]\" %[^\n] %[\n]",
-               response,ElementLabel,junk,&newline);
+            fscanf(infile,"%s %[^\n] %[\n]",
+               response,junk,&newline);
             ElementType = DecodeString(response);
             fscanf(infile,"\"%[^\"]\" %[^\n] %[\n]",ElementFileName,junk,&newline);
+            fscanf(infile,"\"%[^\"]\" %[^\n] %[\n]",ElementLabel,junk,&newline);
             if (ElementType == INP_TLE) {
                Success = LoadTleFromFile(InOutPath,ElementFileName,
                   ElementLabel,TT.JulDay,O->mu,O);
@@ -669,6 +670,27 @@ void InitOrbit(struct OrbitType *O)
                      ElementLabel,ElementFileName);
                   exit(1);
                }
+            }
+            else if (ElementType == INP_SPLINE) {
+               O->SplineFile = FileOpen(InOutPath,ElementFileName,"rt");
+               for(i=0;i<4;i++) {
+                  fscanf(O->SplineFile," %ld:%ld:%ld:%ld:%ld:%lf %lf %lf %lf %lf %lf %lf %[\n]",
+                     &NodeYear,&NodeMonth,&NodeDay,&NodeHour,&NodeMin,&NodeSec,
+                     &O->NodePos[i][0],&O->NodePos[i][1],&O->NodePos[i][2],
+                     &O->NodeVel[i][0],&O->NodeVel[i][1],&O->NodeVel[i][2],
+                     &newline);
+                  O->NodeDynTime[i] = DateToTime(NodeYear,NodeMonth,NodeDay,
+                     NodeHour,NodeMin,NodeSec);
+                  for(j=0;j<3;j++) {
+                     O->NodePos[i][j] *= 1000.0;
+                     O->NodeVel[i][j] *= 1000.0;
+                  }
+                  if (DynTime < O->NodeDynTime[1]) {
+                     printf("Oops.  Spline file beginning is in the future.\n");
+                     exit(1);
+                  }
+               }
+               SplineToPosVel(O);
             }
             else {
                printf("Oops.  Unknown ElementType in InitOrbit.\n");
@@ -709,7 +731,7 @@ void InitOrbit(struct OrbitType *O)
       }
       else if (O->Regime == ORB_THREE_BODY) {
          /* Skip ZERO, FLIGHT, and CENTRAL sections */
-         for(j=0;j<21;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(j=0;j<22;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
 
          fscanf(infile,"%[^\n] %[\n]",junk,&newline);
          fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
@@ -1522,6 +1544,71 @@ void InitFlexModes(struct SCType *S)
       }
 }
 /**********************************************************************/
+void InitOrderNDynamics(struct SCType *S)
+{
+      struct BodyType *B;
+      struct JointType *G;
+      long Ib,Ig,Id,i,j;
+      
+      G = &S->GN;
+      G->Init = 1;
+      G->IsSpherical = 1;
+      G->RotDOF = 3;
+      G->TrnDOF = 3;
+      G->Bo = &S->B[0];
+      G->RotSeq = 123;
+      G->TrnSeq = 123;
+      for(i=0;i<3;i++) {
+         for(j=0;j<3;j++) {
+            G->CGiBi[i][j] = 0.0;
+            G->CBoGo[i][j] = 0.0;
+            G->Pw[i][j] = 0.0;
+            G->Pv[i][j] = 0.0;
+            G->Pwdot[i][j] = 0.0;
+            G->P[i][j] = 0.0;
+            G->P[i][3+j] = 0.0;
+            G->P[3+i][j] = 0.0;
+            G->P[3+i][3+i] = 0.0;
+         }
+         G->CGiBi[i][i] = 1.0;
+         G->CBoGo[i][i] = 1.0;
+         G->Pw[i][i] = 1.0;
+         G->Pv[i][i] = 1.0;
+         G->P[i][i] = 1.0;
+         G->P[3+i][3+i] = 1.0;
+      }
+      G->Nu = 6;
+      
+      for(Ib=0;Ib<S->Nb;Ib++) {
+         B = &S->B[Ib];
+         B->Nd = 0;
+      }
+
+      for(Ig=0;Ig<S->Ng;Ig++) {
+         G = &S->G[Ig];
+         G->Init = 1;
+         G->Bi = &S->B[G->Bin];
+         G->Bo = &S->B[G->Bout];
+         G->Bi->Nd++;
+         G->Nu = G->RotDOF + G->TrnDOF;
+      }
+      
+      for(Ib=0;Ib<S->Nb;Ib++) {
+         B = &S->B[Ib];
+         if (B->Nd > 0) {
+            B->Gd = (long *) calloc(B->Nd,sizeof(long));
+         }
+         Id = 0;
+         for(Ig=0;Ig<S->Ng;Ig++) {
+            G = &S->G[Ig];
+            if (G->Bin == Ib) {
+               B->Gd[Id] = Ig;
+               Id++;
+            }
+         }
+      }
+}
+/**********************************************************************/
 void InitSpacecraft(struct SCType *S)
 {
       FILE *infile;
@@ -1541,6 +1628,7 @@ void InitSpacecraft(struct SCType *S)
       long Seq;
       long i1,i2,i3;
       long UseCM;
+      long SomeJointsLocked;
       struct JointType *G;
       struct BodyType *B;
       struct OrbitType *O;
@@ -1634,7 +1722,7 @@ void InitSpacecraft(struct SCType *S)
 /* .. Dynamics Flags */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
-      S->RotDOF=DecodeString(response);
+      S->DynMethod=DecodeString(response);
       fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
       S->PassiveJointFrcTrqEnabled=DecodeString(response);
       fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
@@ -1688,8 +1776,8 @@ void InitSpacecraft(struct SCType *S)
          B->I[2][1] = B->I[1][2];
          fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",&B->cm[0],
                   &B->cm[1],&B->cm[2],junk,&newline);
-         fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",&B->Hgyro[0],
-                  &B->Hgyro[1],&B->Hgyro[2],junk,&newline);
+         fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",&B->EmbeddedMom[0],
+                  &B->EmbeddedMom[1],&B->EmbeddedMom[2],junk,&newline);
          fscanf(infile,"%s %[^\n] %[\n]",B->GeomFileName,junk,&newline);
          fscanf(infile,"%s %[^\n] %[\n]",B->FlexFileName,junk,&newline);
          if (S->RefPt == REFPT_JOINT)
@@ -1699,6 +1787,7 @@ void InitSpacecraft(struct SCType *S)
       }
 
 /* .. Joint Parameters */
+      SomeJointsLocked = FALSE;
       /* Read Spacecraft input file */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
@@ -1725,6 +1814,10 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%ld %ld %s %[^\n] %[\n]",
                &G->RotDOF,&G->RotSeq,response,junk,&newline);
             G->IsSpherical = DecodeString(response);
+            if (G->IsSpherical && G->RotDOF < 3) {
+               printf("SC[%ld].G[%ld].RotDOF = %ld is inconsistent with SPHERICAL option.  Reconcile and try again.\n",S->ID,Ig,G->RotDOF);
+               exit(1);
+            }
             if (G->RotSeq < 100) {
                printf("Invalid RotSeq %ld for SC[%ld].G[%ld].  All three axes required.\n",
                   G->RotSeq,S->ID,Ig);
@@ -1764,6 +1857,10 @@ void InitSpacecraft(struct SCType *S)
             G->TrnLocked[0] = DecodeString(response1);
             G->TrnLocked[1] = DecodeString(response2);
             G->TrnLocked[2] = DecodeString(response3);
+            
+            for(i=0;i<3;i++) {
+               if (G->RotLocked[i] || G->TrnLocked[i]) SomeJointsLocked = TRUE;
+            }
 
             /* Load in initial angles and angular rates */
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
@@ -1774,11 +1871,21 @@ void InitSpacecraft(struct SCType *S)
                G->Ang[k] *= D2R;
                G->AngRate[k] *= D2R;
             }
+            /* Protect against more inputs than RotDOF */
+            for(k=G->RotDOF;k<3;k++) {
+               G->Ang[k] = 0.0;
+               G->AngRate[k] = 0.0;
+            }
             /* Load in initial displacements and rates */
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
                   &G->Pos[0],&G->Pos[1],&G->Pos[2],junk,&newline);
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
                   &G->PosRate[0],&G->PosRate[1],&G->PosRate[2],junk,&newline);
+            /* Protect against more inputs than TrnDOF */
+            for(k=G->TrnDOF;k<3;k++) {
+               G->Pos[k] = 0.0;
+               G->PosRate[k] = 0.0;
+            }
 
             fscanf(infile,"%lf %lf %lf %ld %[^\n] %[\n]",
                    &Ang1,&Ang2,&Ang3,&Seq,junk,&newline);
@@ -1838,7 +1945,8 @@ void InitSpacecraft(struct SCType *S)
          for(Iw=0;Iw<S->Nw;Iw++) {
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&S->Whl[Iw].H,junk,&newline);
-            fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
+            fscanf(infile,"%ld %lf %lf %lf %[^\n] %[\n]",
+                &S->Whl[Iw].Body,
                 &S->Whl[Iw].A[0],&S->Whl[Iw].A[1],
                 &S->Whl[Iw].A[2],junk,&newline);
             UNITV(S->Whl[Iw].A);
@@ -2293,9 +2401,18 @@ void InitSpacecraft(struct SCType *S)
 
       fclose(infile);
 
+      if (S->DynMethod == DYN_ORDER_N) {
+         if (SomeJointsLocked || S->FlexActive || S->ConstraintsRequested) {
+            printf("Order-N dynamics doesn't (yet) support flex modes, constraint computation, or locking joints.\n");
+            printf("Switching over to Gaussian Elimination.\n");
+            S->DynMethod = DYN_GAUSS_ELIM;
+         }
+      }
+
       D = &S->Dyn;
       InitRigidDyn(S);
       InitFlexModes(S);
+      InitOrderNDynamics(S);
 
       D->ActiveState = (double *) calloc(D->Nu+D->Nf,sizeof(double));
       D->ActiveStateIdx = (long *) calloc(D->Nu+D->Nf,sizeof(long));
@@ -2623,7 +2740,7 @@ void LoadPlanets(void)
          }
       }
 /* .. Earth rotation is a special case */
-      GMST = JD2GMST(TT.JulDay);
+      GMST = JD2GMST(UTC.JulDay);
       World[EARTH].PriMerAng = TwoPi*GMST;
       SimpRot(Zaxis,World[EARTH].PriMerAng,World[EARTH].CWN);
       C2Q(World[EARTH].CWN,World[EARTH].qwn);
@@ -4028,6 +4145,8 @@ void InitSim(int argc, char **argv)
       ContactActive=DecodeString(response);
       fscanf(infile,"%s  %[^\n] %[\n]",response,junk,&newline);
       SloshActive=DecodeString(response);
+      fscanf(infile,"%s  %[^\n] %[\n]",response,junk,&newline);
+      AlbedoActive=DecodeString(response);
       fscanf(infile,"%s  %[^\n] %[\n]",response,junk,&newline);
       ComputeEnvTrq=DecodeString(response);
 /* .. Celestial Bodies */

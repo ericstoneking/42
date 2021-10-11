@@ -107,6 +107,7 @@ EXTERN GLuint AtmoVtxShader,AtmoFragShader,AtmoShaderProgram;
 EXTERN GLuint MapVtxShader,MapFragShader,MapShaderProgram;
 EXTERN GLuint BodyVtxShader,BodyFragShader,BodyShaderProgram;
 EXTERN GLuint MoonMapFragShader,MoonMapShaderProgram;
+EXTERN GLuint AlbedoVtxShader,AlbedoFragShader,AlbedoShaderProgram;
 
 
 void DrawBitmapString(void *font, const char *string);

@@ -1510,14 +1510,14 @@ void DrawNearAuxObjects(void)
                            glPointSize(20.0);
                            glColor4f(0.0,0.0,1.0,0.5);
                            glBegin(GL_POINTS);
-                              glVertex3dv(S->G[Ig].rin);
+                              glVertex3dv(S->G[Ig].ri);
                            glEnd();
                         }
                         if (Ib == S->G[Ig].Bout) {
                            glPointSize(10.0);
                            glColor4f(1.0,0.0,0.0,0.5);
                            glBegin(GL_POINTS);
-                              glVertex3dv(S->G[Ig].rout);
+                              glVertex3dv(S->G[Ig].ro);
                            glEnd();
                         }
                      }
@@ -3776,7 +3776,7 @@ void DrawUnitSphere(void)
       long MenuTop;
       double rad;
       double rmn[3],rmh[3];
-
+      
       glClear(GL_COLOR_BUFFER_BIT);
 
       FindSphereWindowAxes(CVB0);

@@ -433,12 +433,28 @@ void SplineToPosVel(struct OrbitType *O)
          v[j] = CubicSpline(DynTime,X,Y);
       }
 
-/* .. XYZ to Pos, Vel */
-      MTxV(LagSys[O->Sys].CLN,x,xn);
-      MTxV(LagSys[O->Sys].CLN,v,vn);
-      for(j=0;j<3;j++) {
-         O->PosN[j] = xn[j] + LagSys[O->Sys].LP[O->LP].PosN[j];
-         O->VelN[j] = vn[j] + LagSys[O->Sys].LP[O->LP].VelN[j];
+      if (O->Regime == ORB_CENTRAL) {
+         for(j=0;j<3;j++) {
+            O->PosN[j] = x[j];
+            O->VelN[j] = v[j];
+         }
+         RV2Eph(O->Epoch,O->mu,O->PosN,O->VelN,
+            &O->SMA,&O->ecc,&O->inc,&O->RAAN,
+            &O->ArgP,&O->anom,&O->tp,
+            &O->SLR,&O->alpha,&O->rmin,
+            &O->MeanMotion,&O->Period);
+      }
+      else if (O->Regime == ORB_THREE_BODY) {
+         MTxV(LagSys[O->Sys].CLN,x,xn);
+         MTxV(LagSys[O->Sys].CLN,v,vn);
+         for(j=0;j<3;j++) {
+            O->PosN[j] = xn[j] + LagSys[O->Sys].LP[O->LP].PosN[j];
+            O->VelN[j] = vn[j] + LagSys[O->Sys].LP[O->LP].VelN[j];
+         }
+      }
+      else {
+         printf("Invalid Orbit Regime in SplineToPosVel.\n");
+         exit(1);
       }
 }
 /**********************************************************************/
@@ -687,7 +703,7 @@ void Ephemerides(void)
       }
 
 /* .. Earth rotation is a special case */
-      GMST = JD2GMST(TT.JulDay);
+      GMST = JD2GMST(UTC.JulDay);
       World[EARTH].PriMerAng = TwoPi*GMST;
       SimpRot(ZAxis,World[EARTH].PriMerAng,World[EARTH].CWN);
 

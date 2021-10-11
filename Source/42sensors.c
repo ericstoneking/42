@@ -218,6 +218,17 @@ void CssModel(struct SCType *S)
                   CSS->Illum = 0.0;   
                }
             }
+
+            #ifdef _ENABLE_GUI_  
+            CSS->Albedo = 0.0;          
+            if (AlbedoActive) {
+               FindAlbedo(S,CSS);
+               Signal = CSS->Scale*CSS->Albedo;
+               Counts = (long) (Signal/CSS->Quant+0.5);
+               CSS->Illum += ((double) Counts)*CSS->Quant;
+               CSS->Illum = Limit(CSS->Illum,0.0,CSS->Scale);
+            }
+            #endif
          
             /* Copy into AC structure */
             S->AC.CSS[Icss].Valid = CSS->Valid;       

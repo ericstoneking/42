@@ -29,8 +29,8 @@ GUIFLAG = -D _ENABLE_GUI_
 
 # For graphics interface, choose GLUT or GLFW GUI libraries
 # GLUT is well known, but GLFW is better for newer Mac's hires displays
-#GLUT_OR_GLFW = _USE_GLFW_
-GLUT_OR_GLFW = _USE_GLUT_
+GLUT_OR_GLFW = _USE_GLFW_
+#GLUT_OR_GLFW = _USE_GLUT_
 
 SHADERFLAG = -D _USE_SHADERS_
 #SHADERFLAG =
@@ -41,8 +41,8 @@ CFDFLAG =
 FFTBFLAG =
 #FFTBFLAG = -D _ENABLE_FFTB_CODE_
 
-GSFCFLAG =
-#GSFCFLAG = -D _USE_GSFC_WATERMARK_
+#GSFCFLAG =
+GSFCFLAG = -D _USE_GSFC_WATERMARK_
 
 STANDALONEFLAG =
 #STANDALONEFLAG = -D _AC_STANDALONE_
@@ -91,11 +91,11 @@ ifeq ($(42PLATFORM),__APPLE__)
       GLINC = -I /System/Library/Frameworks/OpenGL.framework/Headers/ -I /System/Library/Frameworks/GLUT.framework/Headers/
       ifeq ($(strip $(GLUT_OR_GLFW)),_USE_GLUT_)
          LIBS = -framework System -framework Carbon -framework OpenGL -framework GLUT
-         GUIOBJ = $(OBJ)42gl.o $(OBJ)42glut.o $(OBJ)glkit.o
+         GUIOBJ = $(OBJ)42gl.o $(OBJ)42glut.o $(OBJ)glkit.o $(OBJ)42gpgpu.o
          GUI_LIB = -D _USE_GLUT_
       else
          LIBS = -lglfw -framework System -framework Carbon -framework OpenGL -framework GLUT
-         GUIOBJ = $(OBJ)42gl.o $(OBJ)42glfw.o $(OBJ)glkit.o
+         GUIOBJ = $(OBJ)42gl.o $(OBJ)42glfw.o $(OBJ)glkit.o $(OBJ)42gpgpu.o
          GUI_LIB = -D _USE_GLFW_
       endif
    else
@@ -117,12 +117,14 @@ ifeq ($(42PLATFORM),__linux__)
       #GLINC = -I /usr/include/
       GLINC = -I $(KITDIR)/include/GL/
       ifeq ($(strip $(GLUT_OR_GLFW)),_USE_GLUT_)
-         GUIOBJ = $(OBJ)42gl.o $(OBJ)42glut.o $(OBJ)glkit.o
+         GUIOBJ = $(OBJ)42gl.o $(OBJ)42glut.o $(OBJ)glkit.o $(OBJ)42gpgpu.o
          LIBS = -lglut -lGLU -lGL -ldl -lm -lpthread
          LFLAGS = -L $(KITDIR)/GL/lib/
+         GUI_LIB = -D _USE_GLUT_
       else
-         GUIOBJ = $(OBJ)42gl.o $(OBJ)42glut.o $(OBJ)glkit.o
+         GUIOBJ = $(OBJ)42gl.o $(OBJ)42glfw.o $(OBJ)glkit.o $(OBJ)42gpgpu.o
          LIBS = -lglfw -lglut -lGLU -lGL -ldl -lm -lpthread
+         GUI_LIB = -D _USE_GLFW_
       endif
    else
       GUIOBJ =
@@ -144,7 +146,7 @@ ifeq ($(42PLATFORM),__MSYS__)
       GLUT = $(EXTERNDIR)freeglut/
       LIBS =  -lopengl32 -lglu32 -lfreeglut -lws2_32 -lglew32
       LFLAGS = -L $(GLUT)lib/ -L $(GLEW)lib/
-      GUIOBJ = $(OBJ)42GlutGui.o $(OBJ)glkit.o
+      GUIOBJ = $(OBJ)42gl.o $(OBJ)42glut.o $(OBJ)glkit.o $(OBJ)42gpgpu.o
       GLINC = -I $(GLEW)include/GL/ -I $(GLUT)include/GL/
       ARCHFLAG = -D GLUT_NO_LIB_PRAGMA -D GLUT_NO_WARNING_DISABLE -D GLUT_DISABLE_ATEXIT_HACK
    else
@@ -267,6 +269,9 @@ $(OBJ)42glfw.o	: $(SRC)42glfw.c $(INC)42.h $(INC)42gl.h $(INC)42glfw.h
 
 $(OBJ)42glut.o      : $(SRC)42glut.c $(INC)42.h $(INC)42gl.h $(INC)42glut.h
 	$(CC) $(CFLAGS) -c $(SRC)42glut.c -o $(OBJ)42glut.o
+
+$(OBJ)42gpgpu.o      : $(SRC)42gpgpu.c $(INC)42.h $(INC)42gl.h $(INC)42glut.h
+	$(CC) $(CFLAGS) -c $(SRC)42gpgpu.c -o $(OBJ)42gpgpu.o
 
 $(OBJ)42init.o      : $(SRC)42init.c $(INC)42.h
 	$(CC) $(CFLAGS) -c $(SRC)42init.c -o $(OBJ)42init.o

@@ -196,7 +196,8 @@ void ThrusterPlumeFrcTrq(struct SCType *S)
                            VxV(r,FrcB,TrqB);
                            MTxV(B->CN,FrcB,FrcN);
                            for(i=0;i<3;i++) {
-                              B->Frc[i] += FrcN[i];
+                              B->FrcN[i] += FrcN[i];
+                              B->FrcB[i] += FrcB[i];
                               B->Trq[i] += TrqB[i];
                            }
                         }
@@ -216,7 +217,7 @@ void Actuators(struct SCType *S)
 
       struct FlexNodeType *FN;
       long i,j;
-      double FrcN[3];
+      double FrcN[3],FrcB[3];
       struct AcType *AC;
       struct JointType *G;
       struct AcJointType *AG;
@@ -225,8 +226,11 @@ void Actuators(struct SCType *S)
       AC = &S->AC;
 
       /* Ideal Actuators */
+      for(i=0;i<3;i++) FrcB[i] = S->IdealAct[i].Fcmd;
+      MTxV(S->B[0].CN,FrcB,FrcN);
       for(i=0;i<3;i++) {
-         S->B[0].Frc[i] += S->IdealAct[i].Fcmd;
+         S->B[0].FrcB[i] += FrcB[i];
+         S->B[0].FrcN[i] += FrcN[i];
          S->B[0].Trq[i] += S->IdealAct[i].Tcmd;
       }
       if (S->FlexActive) {
@@ -274,7 +278,8 @@ void Actuators(struct SCType *S)
          MTxV(S->B[Thr->Body].CN,Thr->Frc,FrcN);
          for(j=0;j<3;j++) {
             S->B[Thr->Body].Trq[j] += Thr->Trq[j];
-            S->B[Thr->Body].Frc[j] += FrcN[j];
+            S->B[Thr->Body].FrcN[j] += FrcN[j];
+            S->B[Thr->Body].FrcB[j] += Thr->Frc[j];
          }
       }
       if (ThrusterPlumesActive) {

@@ -300,6 +300,7 @@ long FswCmdInterpreter(char CmdLine[512],double *CmdTime)
          }
          UNITV(VecR);
          for(i=0;i<3;i++) CV->R[i] = VecR[i];
+         for(i=0;i<3;i++) CV->W[i] = 0.0;
       }
 
       else if (sscanf(CmdLine,"%lf Align SC[%ld].B[%ld] %s Vector [%lf %lf %lf] with SC[%ld].B[%ld] vector [%lf %lf %lf]",
@@ -999,9 +1000,9 @@ void FindAppendageInertia(long Ig, struct SCType *S,double Iapp[3])
             while (Jg > Ig) {
                G = &S->G[Jg];
                MxM(G->CBoGo,G->CGiBi,Coi);
-               for(k=0;k<3;k++) rho[k] -= G->rout[k];
+               for(k=0;k<3;k++) rho[k] -= G->ro[k];
                MTxV(Coi,rho,Cr);
-               for(k=0;k<3;k++) rho[k] = Cr[k] + G->rin[k];
+               for(k=0;k<3;k++) rho[k] = Cr[k] + G->ri[k];
                for(j=0;j<3;j++) {
                   for(k=0;k<3;k++) Csofar[j][k] = CBoBi[j][k];
                }
@@ -1009,7 +1010,7 @@ void FindAppendageInertia(long Ig, struct SCType *S,double Iapp[3])
                Jg = S->B[G->Bin].Gin;
             }
             G = &S->G[Ig];
-            for(k=0;k<3;k++) rho[k] -= G->rout[k];
+            for(k=0;k<3;k++) rho[k] -= G->ro[k];
             MTxV(G->CBoGo,rho,rhog);
             MTxM(CBoBi,G->CBoGo,CBoG);
             /* Parallel axis theorem */

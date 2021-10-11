@@ -68,7 +68,8 @@ void MainLoop(void)
                DrawUnitSphere();
                glfwSwapBuffers(SphereWindow);
             }
-         }
+            glfwMakeContextCurrent(NULL);
+          }
          else {
             POV.w[0] = 0.0;
             POV.w[1] = 0.0;
@@ -102,6 +103,7 @@ void MainLoop(void)
                   printf("Captured Cam Frame %ld\n",CamFrame);
                   if (CamFrame > MaxCamFrame) CamFrame = 0;
                }
+               glfwMakeContextCurrent(NULL);
             }
          }
 
@@ -1354,7 +1356,7 @@ void HandoffToGui(void)
       if (MapWindowExists) InitMapWindow();
       if (OrreryWindowExists) InitOrreryWindow();
       if (SphereWindowExists) InitSphereWindow();
-
+      
       /* Comment out when OpenGL installation is stable */
       /*CheckOpenGLProperties();*/
 

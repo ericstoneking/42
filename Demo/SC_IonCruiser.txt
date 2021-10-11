@@ -15,7 +15,7 @@ LAL                           ! Ang Vel wrt [NL], Att [QA] wrt [NLF]
 0.0    0.0    0.0    1.0      ! Quaternion
 0.0    0.0    0.0    213      ! Angles (deg) & Euler Sequence
 ***************************  Dynamics Flags  ***************************
-DYN_JOINT                     ! Rotation STEADY, KIN_JOINT, or DYN_JOINT
+GAUSS_ELIM                    ! Solve Dynamics by GAUSS_ELIM or ORDER_N
 FALSE                         ! Passive Joint Forces and Torques Enabled
 FALSE                         ! Compute Constraint Forces and Torques
 REFPT_CM                      ! Mass Props referenced to REFPT_CM or REFPT_JOINT
@@ -60,7 +60,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0                             ! Number of wheels
 =============================  Wheel 0  ================================
 0.0                           ! Initial Momentum, N-m-sec
-1.0   0.0   0.0               ! Wheel Axis Components, [X, Y, Z]
+0  1.0   0.0   0.0            ! Body, Wheel Axis Components, [X, Y, Z]
 0.14   50.0                   ! Max Torque (N-m), Momentum (N-m-sec)
 0.012                         ! Wheel Rotor Inertia, kg-m^2
 0.48                          ! Static Imbalance, g-cm

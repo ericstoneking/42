@@ -38,10 +38,10 @@ long SimCmdInterpreter(char CmdLine[512],double *CmdTime)
       struct OrbitType *O;
       struct SCType *S;
 
-      if (sscanf(CmdLine,"%lf SC[%ld].RotDOF %s",
+      if (sscanf(CmdLine,"%lf SC[%ld].DynMethod %s",
          CmdTime,&Isc,response) == 3) {
          NewCmdProcessed = TRUE;
-         SC[Isc].RotDOF = DecodeString(response);
+         SC[Isc].DynMethod = DecodeString(response);
       }
 
       if (sscanf(CmdLine,"%lf DTSIM = %lf",

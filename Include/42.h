@@ -84,6 +84,7 @@ EXTERN long ThrusterPlumesActive;
 EXTERN long RwaImbalanceActive;
 EXTERN long ContactActive;
 EXTERN long SloshActive;
+EXTERN long AlbedoActive; /* Affects CSS measurements */
 EXTERN long ComputeEnvTrq;
 EXTERN long EphemOption; /* MEAN or DE430 */
 
@@ -136,6 +137,7 @@ EXTERN struct MatlType *Matl;
 
 /* Framebuffer Objects for Shadows and Surface Forces */
 EXTERN struct FBOType ShadowMap;
+EXTERN struct FBOType AlbedoFBO;
 
 /* Minor Bodies (Asteroids and Comets) */
 EXTERN long Nmb;
@@ -190,6 +192,8 @@ void UpdateScBoundingBox(struct SCType *S);
 void FindUnshadedAreas(struct SCType *S, double DirVecN[3]);
 void RadBelt(float RadiusKm, float MagLatDeg, int NumEnergies, 
       float *ElectronEnergy, float *ProtonEnergy, double **Flux); 
+void FindAlbedo(struct SCType *S, struct CssType *CSS);
+
 
 /* Debug Function Prototypes */
 void EchoPVel(struct SCType *S);

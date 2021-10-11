@@ -250,7 +250,7 @@ void DOY2MD(long Year, long DayOfYear, long *Month, long *Day)
 /*  Find Greenwich Mean Sidereal Time (GMST)                          */
 /*  Ref. Jean Meeus, 'Astronomical Algorithms', QB51.3.E43M42, 1991.  */
 /*  GMST is output in units of days.                                  */
-/*  This function requires JD in TT                                   */
+/*  This function requires JD in UTC                                  */
 double JD2GMST(double JD)
 {
       double T,JD0,GMST0,GMST;

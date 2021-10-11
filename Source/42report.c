@@ -144,6 +144,7 @@ void Report(void)
       static FILE *RPYfile;
       static FILE *Hwhlfile;
       static FILE *MTBfile;
+      static FILE *AlbedoFile;
       //static FILE *ProjAreaFile;
       static FILE *AccFile;
       static char First = TRUE;
@@ -201,6 +202,8 @@ void Report(void)
          Hwhlfile = FileOpen(InOutPath,"Hwhl.42","w");
          MTBfile = FileOpen(InOutPath,"MTB.42","w");
          AccFile = FileOpen(InOutPath,"Acc.42","w");
+         
+         AlbedoFile = FileOpen(InOutPath,"Albedo.42","w");
       }
 
       if (OutFlag) {
@@ -209,19 +212,19 @@ void Report(void)
          for(Isc=0;Isc<Nsc;Isc++) {
             if (SC[Isc].Exists) {
                D = &SC[Isc].Dyn;
-               for(i=0;i<D->Nu;i++) fprintf(ufile[Isc],"% le ",D->u[i]);
+               for(i=0;i<D->Nu;i++) fprintf(ufile[Isc],"%18.12le ",D->u[i]);
                fprintf(ufile[Isc],"\n");
-               for(i=0;i<D->Nx;i++) fprintf(xfile[Isc],"% le ",D->x[i]);
+               for(i=0;i<D->Nx;i++) fprintf(xfile[Isc],"%18.12le ",D->x[i]);
                fprintf(xfile[Isc],"\n");
                if (SC[Isc].FlexActive) {
-                  for(i=0;i<D->Nf;i++) fprintf(uffile[Isc],"% le ",D->uf[i]);
+                  for(i=0;i<D->Nf;i++) fprintf(uffile[Isc],"%18.12le ",D->uf[i]);
                   fprintf(uffile[Isc],"\n");
-                  for(i=0;i<D->Nf;i++) fprintf(xffile[Isc],"% le ",D->xf[i]);
+                  for(i=0;i<D->Nf;i++) fprintf(xffile[Isc],"%18.12le ",D->xf[i]);
                   fprintf(xffile[Isc],"\n");
                }
                if (SC[Isc].ConstraintsRequested) {
                   for(i=0;i<D->Nc;i++)
-                     fprintf(ConstraintFile[Isc],"% le ",
+                     fprintf(ConstraintFile[Isc],"%18.12le ",
                              D->GenConstraintFrc[i]);
                   fprintf(ConstraintFile[Isc],"\n");
                }
@@ -287,6 +290,11 @@ void Report(void)
                for(i=0;i<SC[0].Nacc;i++) 
                   fprintf(AccFile,"%le %le ",SC[0].Accel[i].TrueAcc,SC[0].Accel[i].MeasAcc);
                fprintf(AccFile,"\n");
+            }
+            if (SC[0].Ncss > 0) {
+               for(i=0;i<SC[0].Ncss;i++) 
+                  fprintf(AlbedoFile,"%le ",SC[0].CSS[i].Albedo);
+               fprintf(AlbedoFile,"\n");
             }
             
             //MagReport();
