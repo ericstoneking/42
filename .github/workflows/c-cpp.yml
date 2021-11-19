@@ -9,17 +9,27 @@ on:
 jobs:
   build-ubuntu:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
     - uses: actions/checkout@v2
     - name: make
       run: make
-  build-ubuntu-no-graphics:
+      
+  build-ubuntu-glut:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
     - uses: actions/checkout@v2
     - name: make
-      run: make GUIFLAG= GLUT_OR_GLFW=_USE_GLUT_
+      run: make GLUT_OR_GLFW=_USE_GLUT_
+      
+  build-ubuntu-no-graphics:
+
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: make
+      run: make GUIFLAG=
