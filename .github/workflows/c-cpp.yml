@@ -1,0 +1,35 @@
+name: C/C++ CI
+
+# run only on pushes or pull requests to master
+# this way you can develop on and push to separate branches without
+# using up runner minutes
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-ubuntu:
+    # default Ubuntu build
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: make
+      run: make
+      
+  build-ubuntu-glut:
+    # Ubuntu build with GLUT graphics
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: make
+      run: make GLUT_OR_GLFW=_USE_GLUT_
+      
+  build-ubuntu-no-graphics:
+    # Ubuntu build with all graphics disabled
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: make
+      run: make GUIFLAG=
