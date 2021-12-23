@@ -576,7 +576,7 @@ void Ephemerides(void)
       double u,dudJD,T[20],U[20],P,dPdu;
       double EMRAT = 81.30056907419062; /* Earth-Moon mass ratio */
       double PosJ[3],VelJ[3];
-      double qJ2000H[4] = {-0.203123038887,  0.0,  0.0,  0.979153221449};
+      double C_W_TETE[3][3],C_TEME_TETE[3][3],C_TETE_J2000[3][3];
 
 /* .. Locate Planets and Luna */
       if (EphemOption == EPH_MEAN) {
@@ -672,6 +672,8 @@ void Ephemerides(void)
             World[EARTH].VelH[i] = World[EARTH].eph.VelN[i];
          }
          for(i=0;i<3;i++) {
+            rh[i] = World[LUNA].eph.PosN[i];
+            vh[i] = World[LUNA].eph.VelN[i];
             World[LUNA].PosH[i] = World[EARTH].PosH[i] + World[LUNA].eph.PosN[i];
             World[LUNA].VelH[i] = World[EARTH].VelH[i] + World[LUNA].eph.VelN[i];
          }
@@ -705,7 +707,9 @@ void Ephemerides(void)
 /* .. Earth rotation is a special case */
       GMST = JD2GMST(UTC.JulDay);
       World[EARTH].PriMerAng = TwoPi*GMST;
-      SimpRot(ZAxis,World[EARTH].PriMerAng,World[EARTH].CWN);
+      HiFiEarthPrecNute(UTC.JulDay,C_TEME_TETE,C_TETE_J2000);
+      SimpRot(ZAxis,World[EARTH].PriMerAng,C_W_TETE);
+      MxM(C_W_TETE,C_TETE_J2000,World[EARTH].CWN);
 
 /* .. Other planets' moons */
       for(Ip=MARS;Ip<=PLUTO;Ip++) {

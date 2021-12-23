@@ -1358,7 +1358,7 @@ void HandoffToGui(void)
       if (SphereWindowExists) InitSphereWindow();
       
       /* Comment out when OpenGL installation is stable */
-      /*CheckOpenGLProperties();*/
+      /* CheckOpenGLProperties(); */
 
 /* .. Dive into Event Loop */
       MainLoop();

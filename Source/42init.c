@@ -2704,6 +2704,8 @@ void LoadPlanets(void)
                                 &World[i].eph.rmin,
                                 &World[i].eph.MeanMotion,
                                 &World[i].eph.Period);
+         /* TODO: These ephems are expressed in mean-equinox-of-date (MEME) */
+         /* Would it be worthwhile to transform to J2000? */
       }
 
       /* Planetocentric Inertial Reference Frames */
@@ -3633,7 +3635,6 @@ long LoadDE430(char DE430Path[80],double JD)
       double EMRAT = 81.30056907419062; /* Earth-Moon mass ratio */
       double ZAxis[3] = {0.0,0.0,1.0}; 
       double PosJ[3],VelJ[3];
-      double qJ2000H[4] = {-0.203123038887,  0.0,  0.0,  0.979153221449};
 
 /* .. Select input file */
       if (JD < 2433264.5) {
@@ -4023,7 +4024,6 @@ void InitSim(int argc, char **argv)
          {{-0.054873956175539,-0.873437182224835,-0.483835031431981},
           { 0.494110775064704,-0.444828614979805, 0.746981957785302},
           {-0.867665382947348,-0.198076649977489, 0.455985113757595}};
-      double qJ2000h[4] = {-0.203123038887,  0.0,  0.0,  0.979153221449};
       double CJ2000H[3][3];
 
       Pi = 4.0*atan(1.0);
@@ -4034,6 +4034,11 @@ void InitSim(int argc, char **argv)
       R2D = 180.0/Pi;
       D2R = Pi/180.0;
       GoldenRatio = (1.0+sqrt(5.0))/2.0;
+      
+      qJ2000H[0] = -0.203123038887;
+      qJ2000H[1] = 0.0;
+      qJ2000H[2] = 0.0;
+      qJ2000H[3] = 0.979153221449;
 
       sprintf(InOutPath,"./InOut/");
       sprintf(ModelPath,"./Model/");
@@ -4237,7 +4242,7 @@ void InitSim(int argc, char **argv)
       LoadRegions();
 
 /* .. Galactic Frame */
-      Q2C(qJ2000h,CJ2000H);
+      Q2C(qJ2000H,CJ2000H);
       MxM(CGJ2000,CJ2000H,CGH);
 
 /* .. Ground Station Locations */

@@ -1714,7 +1714,7 @@ void DepthPass(void)
                         0.0,0.0,0.5,0.0 , 0.5,0.5,0.5,1.0 };
       GLfloat MPN[16];
       double CLN[3][3],rb[3],rn[3],rl[3],r;
-      struct FBOType *SM;
+      struct ShadowFBOType *SM;
       struct SCType *S;
       struct BodyType *B;
       struct GeomType *G;
@@ -1831,7 +1831,7 @@ void OpaquePass(void)
       struct BodyType *B;
       struct RegionType *R;
       struct GeomType *G;
-      struct FBOType *SM;
+      struct ShadowFBOType *SM;
       long Ir;
       double PosR[3];
 
@@ -1889,7 +1889,7 @@ void SeeThruPass(void)
       struct BodyType *B;
       struct GeomType *G;
       struct RegionType *R;
-      struct FBOType *SM;
+      struct ShadowFBOType *SM;
       double PosR[3];
 
       SM = &ShadowMap;
@@ -4868,7 +4868,7 @@ void LoadCamTextures(void)
 /**********************************************************************/
 void LoadShadowMapFBO(void)
 {
-      struct FBOType *S;
+      struct ShadowFBOType *S;
       GLenum Status;
 
       S = &ShadowMap;

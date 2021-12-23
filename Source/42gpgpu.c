@@ -37,14 +37,13 @@ void InitAlbedo(void)
       GLint UniLoc;
       GLenum Status;
       GLfloat Eye3x3[9] = {1.0,0.0,0.0, 0.0,1.0,0.0, 0.0,0.0,1.0};
-      struct FBOType *A;
-      GLuint Width = 256;
-      GLuint Height = 256;
+      struct AlbedoFBOType *A;
+      GLuint Width = 256; /* Must be power of 2 */
       
-      glutInitWindowSize(Width,Height);
+      glutInitWindowSize(Width,Width);
       AlbedoWindow = glutCreateWindow("Albedo Workspace");
       glutSetWindow(AlbedoWindow);
-      glViewport(0,0,Width,Height);
+      glViewport(0,0,Width,Width);
       glutDisplayFunc(NullDisplay);
 
 /* .. Create FBO */
@@ -52,26 +51,37 @@ void InitAlbedo(void)
       glGenFramebuffers(1,(GLuint *) &A->FrameTag);
       glBindFramebuffer(GL_FRAMEBUFFER,A->FrameTag);
       A->Height = Width;
-      A->Width = Height;
-      A->Tex = (float *) calloc(A->Height*A->Width*3,sizeof(float));
+      A->Width = Width;
+      A->Tex[0] = (float *) calloc(A->Height*A->Width*3,sizeof(float));
+      A->Tex[1] = (float *) calloc(A->Height*A->Width*3,sizeof(float));
 
-      /* Create Texture */
-      glGenTextures(1,(GLuint *) &A->TexTag);
-      glBindTexture(GL_TEXTURE_2D,A->TexTag);
+      /* Create Textures */
+      glGenTextures(1,(GLuint *) &A->TexTag[0]);
+      glBindTexture(GL_TEXTURE_2D,A->TexTag[0]);
       glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,A->Width,A->Height,0,
          GL_RGB,GL_FLOAT,NULL);
       glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
       glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
       glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
       glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-
+         
+      glGenTextures(1,(GLuint *) &A->TexTag[1]);
+      glBindTexture(GL_TEXTURE_2D,A->TexTag[1]);
+      glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,A->Width,A->Height,0,
+         GL_RGB,GL_FLOAT,NULL);
+      glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
+      glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
+      glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+         
       /* Create Render Buffer */
       glGenRenderbuffers(1,&A->RenderTag);
       glBindRenderbuffer(GL_RENDERBUFFER,A->RenderTag);
       glRenderbufferStorage(GL_RENDERBUFFER,
          GL_RGB,A->Width,A->Height);
 
-      glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,A->TexTag,0);
+      //glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,A->RenderTag,0);
+      glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,A->TexTag[0],0);
 
       Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
       if (Status != GL_FRAMEBUFFER_COMPLETE) {
@@ -86,7 +96,7 @@ void InitAlbedo(void)
       EarthAlbedoCubeTag = PpmToCubeTag("./World/","TOMS_Albedo",3); 
       GenericAlbedoCubeTag = PpmToCubeTag("./World/","WhiteBall",3);
 
-/* .. Load Shader */
+/* .. Load Shaders */
       FileToString("./Kit/Shaders/AlbedoVtx.glsl",&ShaderText,&StrLen);
       AlbedoVtxShader = TextToShader(ShaderText,GL_VERTEX_SHADER,"AlbedoVtx");
       free(ShaderText);
@@ -116,7 +126,6 @@ void InitAlbedo(void)
       ValidateShaderProgram(AlbedoShaderProgram,"Albedo");
 
       glUseProgram(0);
-
 }
 /**********************************************************************/
 /* Significant contributions to this algorithm were made by           */
@@ -126,7 +135,7 @@ void FindAlbedo(struct SCType *S, struct CssType *CSS)
 {
       struct BodyType *B;
       struct WorldType *W;
-      struct FBOType *A;
+      struct AlbedoFBOType *A;
       double CEB[3][3],CEN[3][3],CWE[3][3],PosEyeW[3],WorldVecN[3],WorldDist;
       double UnitWorldVecE[3],UnitWorldVecF[3],CosWorldAng,CWF[3][3];
       double SunVecE[3],SunVecF[3];
@@ -176,6 +185,8 @@ void FindAlbedo(struct SCType *S, struct CssType *CSS)
       if (Orb[S->RefOrb].World == EARTH) AlbedoCubeTag = EarthAlbedoCubeTag;
       else AlbedoCubeTag = GenericAlbedoCubeTag;
       
+      CSS->Albedo = 0.0;
+      
       glMatrixMode(GL_PROJECTION);
       glPushMatrix();
       glLoadIdentity();
@@ -183,7 +194,7 @@ void FindAlbedo(struct SCType *S, struct CssType *CSS)
       glMatrixMode(GL_MODELVIEW);
       glPushMatrix();
       glLoadIdentity();
-      
+   
       glActiveTexture(GL_TEXTURE0);
       glBindTexture(GL_TEXTURE_CUBE_MAP,AlbedoCubeTag);
       glActiveTexture(GL_TEXTURE1);
@@ -203,13 +214,13 @@ void FindAlbedo(struct SCType *S, struct CssType *CSS)
 
       UniLoc = glGetUniformLocation(AlbedoShaderProgram,"PosEyeW");
       glUniform3f(UniLoc,PosEyeW[0],PosEyeW[1],PosEyeW[2]);
-      
-      CSS->Albedo = 0.0;
+   
       glBindFramebuffer(GL_FRAMEBUFFER,A->FrameTag);
       glBindRenderbuffer(GL_RENDERBUFFER,A->RenderTag);
+
+      glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,A->TexTag[0],0);
       
       for(If=0;If<5;If++) {
-         
          MTxV(CEF[If],UnitWorldVecE,UnitWorldVecF);
          UniLoc = glGetUniformLocation(AlbedoShaderProgram,"UnitWorldVecF");
          glUniform3f(UniLoc,UnitWorldVecF[0],UnitWorldVecF[1],UnitWorldVecF[2]);
@@ -235,12 +246,11 @@ void FindAlbedo(struct SCType *S, struct CssType *CSS)
          glEnd();
          
          /* Readout from FBO */
-         /* TODO: Use shader to parallelize this summation */
-			glReadPixels(0,0,A->Width,A->Height,GL_RGB,GL_FLOAT,A->Tex);
-			//TexToPpm(InOutPath,PpmFileName[If],A->Height,A->Width,3,A->Tex);
+			glReadPixels(0,0,A->Width,A->Height,GL_RGB,GL_FLOAT,A->Tex[0]);
+			//TexToPpm(InOutPath,PpmFileName[If],A->Height,A->Width,3,A->Tex[0]);
          for(j=0;j<A->Height;j++) {
             for(i=0;i<A->Width;i++) {
-               CSS->Albedo += A->Tex[3*(A->Width*j+i)]; /* Scaled in shader */
+               CSS->Albedo += A->Tex[0][3*(A->Width*j+i)]; /* Scaled in shader */
             }
          }
       }

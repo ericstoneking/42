@@ -1388,10 +1388,6 @@ int HandoffToGui(int argc, char **argv)
          InitSphereWindow();
       }
       
-      glutInitWindowSize(256,256);
-      AlbedoWindow = glutCreateWindow("Albedo Scratchpad");
-
-
       /* Comment out when OpenGL installation is stable */
       /*CheckOpenGLProperties();*/
 

@@ -111,6 +111,9 @@ EXTERN struct LagrangeSystemType LagSys[3];
 /* Galactic Coordinate Frame */
 EXTERN double CGH[3][3];
 
+/* J2000 to Heliocentric Ecliptic */
+EXTERN double qJ2000H[4];
+
 /* SC structure manages attitude and translation wrt Reference Orbit */
 EXTERN struct SCType *SC;
 /* Orb structure manages Reference Orbits */
@@ -136,8 +139,8 @@ EXTERN struct FovType *FOV;
 EXTERN struct MatlType *Matl;
 
 /* Framebuffer Objects for Shadows and Surface Forces */
-EXTERN struct FBOType ShadowMap;
-EXTERN struct FBOType AlbedoFBO;
+EXTERN struct ShadowFBOType ShadowMap;
+EXTERN struct AlbedoFBOType AlbedoFBO;
 
 /* Minor Bodies (Asteroids and Comets) */
 EXTERN long Nmb;

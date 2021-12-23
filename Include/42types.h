@@ -846,13 +846,22 @@ struct GroundStationType {
 };
 
 /* Framebuffer Objects for Spacecraft Shadows */
-struct FBOType {
+struct ShadowFBOType {
    /*~ Internal Variables ~*/
    unsigned int FrameTag;
    unsigned int Height, Width;
    unsigned int RenderTag;
    unsigned int TexTag;
    float *Tex;
+};
+
+struct AlbedoFBOType {
+   /*~ Internal Variables ~*/
+   unsigned int FrameTag;
+   unsigned int Height, Width;
+   unsigned int RenderTag;
+   unsigned int TexTag[2];
+   float *Tex[2];
 };
 
 /* Orrery POV is different from POV */
