@@ -2560,7 +2560,7 @@ void FindJ2DriftParms(double mu, double J2, double Rw, struct OrbitType *O)
       O->J2Fh1 = -2.0*Coef*mu/p2*cos(O->inc)*sin(O->inc);
 
 /* .. Effective Mu */
-      O->MuPlusJ2 = O->mu - O->SMA*O->SMA*O->J2Fr0;
+      O->MuPlusJ2 = O->mu;
 
 /* .. Adjust mean motion, period */
       O->MeanMotion = sqrt(O->MuPlusJ2/O->SMA/O->SMA/O->SMA);
