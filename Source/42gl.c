@@ -1631,8 +1631,9 @@ void DrawNearAuxObjects(void)
                                   F->pb[1]-B->cm[1],
                                   F->pb[2]-B->cm[2]);
                      RotateR2L(F->CB);
-                     DrawNearFOV(F->Nv,F->Width,F->Height,
-                        F->Length,F->Type,F->Color);
+                     DrawNearFOV(F->Nv,F->Width,F->Height,F->Length,
+                        F->BoreAxis,F->H_Axis,F->V_Axis,
+                        F->Type,F->Color);
                      glPopMatrix();
                   }
                   if (F->FarExists) {
@@ -1642,6 +1643,7 @@ void DrawNearAuxObjects(void)
                      RotateR2L(B->CN);
                      RotateR2L(F->CB);
                      DrawFarFOV(F->Nv,F->Width,F->Height,
+                        F->BoreAxis,F->H_Axis,F->V_Axis,
                         F->Type,F->Color,F->Label,SkyDistance);
                      glPopMatrix();
                   }
@@ -3735,7 +3737,9 @@ void DrawUnitSphere(void)
       double lat,lng;
       long i,j,Im;
       char label[20];
-
+      
+      struct FssType *F;
+      struct StarTrackerType *ST;
 
       double CVB0[3][3]; /* DCM from Body0 frame to Viewing frame */
       double CVB[3][3];
@@ -3745,6 +3749,8 @@ void DrawUnitSphere(void)
       double CVG[3][3];
       double CVS[3][3];
       double CVJ[3][3];
+      double Cp[3][3]; /* Permute axes */
+      double CVSp[3][3];
       double ZAxis[3] = {0.0,0.0,1.0};
       double x,y;
 
@@ -3865,15 +3871,26 @@ void DrawUnitSphere(void)
       /* Fine Sun Sensors */
       if (W->Spot[1].Selected) {
          for (i=0; i<S->Nfss; i++) {
+            F = &S->FSS[i];
             sprintf(label,"FSS%ld",i);
 
-            if (S->FSS[i].Valid) glColor4fv(ValidFSSColor);
+            if (F->Valid) glColor4fv(ValidFSSColor);
             else glColor4fv(InvalidFSSColor);
 
-            MxMT(CVB0,S->FSS[i].CB,CVS);
-            DrawMercatorSquare(CVS,S->FSS[i].FovHalfAng);
+            MxMT(CVB0,F->CB,CVS);
+            Cp[F->BoreAxis][0] = 0.0;
+            Cp[F->BoreAxis][1] = 0.0;
+            Cp[F->BoreAxis][2] = 1.0;
+            Cp[F->H_Axis][0] = 1.0;
+            Cp[F->H_Axis][1] = 0.0;
+            Cp[F->H_Axis][2] = 0.0;
+            Cp[F->V_Axis][0] = 0.0;
+            Cp[F->V_Axis][1] = 1.0;
+            Cp[F->V_Axis][2] = 0.0;
+            MxM(CVS,Cp,CVSp);
+            DrawMercatorSquare(CVSp,F->FovHalfAng);
 
-            MxV(CVS,ZAxis,VecV);
+            MxV(CVSp,ZAxis,VecV);
             VecToLngLat(VecV,&lng,&lat);
 
             DrawMercatorVector(lng,lat,label);
@@ -3884,14 +3901,25 @@ void DrawUnitSphere(void)
       if (W->Spot[2].Selected) {
 
          for (i=0; i<S->Nst; i++) {
+            ST = &S->ST[i];
             sprintf(label,"ST%ld",i);
-            if (S->ST[i].Valid) glColor4fv(ValidStarTrackerColor);
+            if (ST->Valid) glColor4fv(ValidStarTrackerColor);
             else glColor4fv(InvalidStarTrackerColor);
 
-            MxMT(CVB0,S->ST[i].CB,CVS);
-            DrawMercatorSquare(CVS,S->ST[i].FovHalfAng);
+            MxMT(CVB0,ST->CB,CVS);
+            Cp[ST->BoreAxis][0] = 0.0;
+            Cp[ST->BoreAxis][1] = 0.0;
+            Cp[ST->BoreAxis][2] = 1.0;
+            Cp[ST->H_Axis][0] = 1.0;
+            Cp[ST->H_Axis][1] = 0.0;
+            Cp[ST->H_Axis][2] = 0.0;
+            Cp[ST->V_Axis][0] = 0.0;
+            Cp[ST->V_Axis][1] = 1.0;
+            Cp[ST->V_Axis][2] = 0.0;
+            MxM(CVS,Cp,CVSp);
+            DrawMercatorSquare(CVSp,ST->FovHalfAng);
 
-            MxV(CVS,ZAxis,VecV);
+            MxV(CVSp,ZAxis,VecV);
             VecToLngLat(VecV,&lng,&lat);
 
             DrawMercatorVector(lng,lat,label);
@@ -5338,7 +5366,6 @@ void LoadFOVs(void)
 
       infile = FileOpen(InOutPath,"Inp_FOV.txt","r");
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-      fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%ld %[^\n] %[\n]",&Nfov,junk,&newline);
       FOV = (struct FovType *) calloc(Nfov,sizeof(struct FovType));
       for(i=0;i<Nfov;i++) {
@@ -5389,6 +5416,10 @@ void LoadFOVs(void)
          fscanf(infile,"%lf %lf %lf %ld %[^\n] %[\n]",
             &Ang1,&Ang2,&Ang3,&Seq,junk,&newline);
             A2C(Seq,Ang1*D2R,Ang2*D2R,Ang3*D2R,FOV[i].CB);
+         fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+         FOV[i].BoreAxis = DecodeString(response);
+         FOV[i].H_Axis = (FOV[i].BoreAxis+1)%3;
+         FOV[i].V_Axis = (FOV[i].BoreAxis+2)%3;
       }
       fclose(infile);
 }

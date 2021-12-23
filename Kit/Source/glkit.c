@@ -489,7 +489,7 @@ void DrawArrowhead(double v[3],double scale)
 }
 /*********************************************************************/
 void DrawNearFOV(long Nv,double Width,double Height,double Length,
-   long Type,GLfloat Color[4])
+   long BoreAxis, long H_Axis, long V_Axis, long Type,GLfloat Color[4])
 {
       double c[13] = {1.0,0.866,0.5,0.0,-0.5,-0.866,-1.0,-0.866,-0.5,0.0,0.5,0.866,1.0};
       double s[13] = {0.0,0.5,0.866,1.0,0.866,0.5,0.0,-0.5,-0.866,-1.0,-0.866,-0.5,0.0};
@@ -503,7 +503,7 @@ void DrawNearFOV(long Nv,double Width,double Height,double Length,
       double a,b;
       long jmax;
 
-      r[2] = 1.0;
+      r[BoreAxis] = 1.0;
       ClampColor4fv(Color);
       glColor4fv(Color);
       glDisable(GL_CULL_FACE);
@@ -518,12 +518,12 @@ void DrawNearFOV(long Nv,double Width,double Height,double Length,
          glBegin(GL_TRIANGLE_FAN);
             glVertex4dv(Apex);
             for(az=az0;az<TwoPi;az+=daz) {
-               r[0] = a*cos(az);
-               r[1] = b*sin(az);
+               r[H_Axis] = a*cos(az);
+               r[V_Axis] = b*sin(az);
                glVertex4dv(r);
             }
-            r[0] = a*cos(az0);
-            r[1] = b*sin(az0);
+            r[H_Axis] = a*cos(az0);
+            r[V_Axis] = b*sin(az0);
             glVertex4dv(r);
          glEnd();
          glPolygonMode(GL_FRONT, GL_FILL);
@@ -533,12 +533,12 @@ void DrawNearFOV(long Nv,double Width,double Height,double Length,
          glBegin(GL_TRIANGLE_FAN);
             glVertex4dv(Apex);
             for(az=az0;az<TwoPi;az+=daz) {
-               r[0] = a*cos(az);
-               r[1] = b*sin(az);
+               r[H_Axis] = a*cos(az);
+               r[V_Axis] = b*sin(az);
                glVertex4dv(r);
             }
-            r[0] = a*cos(az0);
-            r[1] = b*sin(az0);
+            r[H_Axis] = a*cos(az0);
+            r[V_Axis] = b*sin(az0);
             glVertex4dv(r);
          glEnd();
       }
@@ -546,8 +546,8 @@ void DrawNearFOV(long Nv,double Width,double Height,double Length,
          glLineWidth(2.0);
          glBegin(GL_LINES);
             glVertex4dv(Apex);
-            r[0] = 0.0;
-            r[1] = 0.0;
+            r[H_Axis] = 0.0;
+            r[V_Axis] = 0.0;
             glVertex4dv(r);
          glEnd();
          glLineWidth(1.0);
@@ -565,14 +565,14 @@ void DrawNearFOV(long Nv,double Width,double Height,double Length,
          glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
          glBegin(GL_TRIANGLE_FAN);
             glVertex4dv(Apex);
-            r[2] = 0.0;
+            r[BoreAxis] = 0.0;
             for(az=az0;az<TwoPi;az+=daz) {
-               r[0] = cos(az);
-               r[1] = sin(az);
+               r[H_Axis] = cos(az);
+               r[V_Axis] = sin(az);
                glVertex4dv(r);
             }
-            r[0] = cos(az0);
-            r[1] = sin(az0);
+            r[H_Axis] = cos(az0);
+            r[V_Axis] = sin(az0);
             glVertex4dv(r);
          glEnd();
       }
@@ -584,7 +584,8 @@ void DrawNearFOV(long Nv,double Width,double Height,double Length,
       glEnable(GL_CULL_FACE);
 }
 /*********************************************************************/
-void DrawFarFOV(long Nv,double Width,double Height,long Type, GLfloat Color[4],
+void DrawFarFOV(long Nv,double Width,double Height, 
+   long BoreAxis, long H_Axis, long V_Axis, long Type, GLfloat Color[4],
                 const char Label[40], double SkyDistance)
 {
       double TwoPi = 6.28318530717959;
@@ -597,7 +598,7 @@ void DrawFarFOV(long Nv,double Width,double Height,long Type, GLfloat Color[4],
 
       ClampColor4fv(Color);
       glColor4fv(Color);
-      r[2] = 1.0;
+      r[BoreAxis] = 1.0;
       r[3] = 1.0/SkyDistance;
 
       jmax = (long) (Nv/4)+1;
@@ -608,15 +609,15 @@ void DrawFarFOV(long Nv,double Width,double Height,long Type, GLfloat Color[4],
          glLineWidth(2.0);
          glBegin(GL_LINE_LOOP);
             for(az=az0;az<TwoPi;az+=daz) {
-               r[0] = a*cos(az);
-               r[1] = b*sin(az);
+               r[H_Axis] = a*cos(az);
+               r[V_Axis] = b*sin(az);
                glVertex4dv(r);
             }
          glEnd();
          glLineWidth(1.0);
          /* Label */
-         r[0] = 0.0;
-         r[1] = 0.0;
+         r[H_Axis] = 0.0;
+         r[V_Axis] = 0.0;
          glRasterPos4dv(r);
          glBitmap(0,0,0,0,-4.0*strlen(Label),-5,0);
          DrawString8x11(Label);
@@ -624,13 +625,13 @@ void DrawFarFOV(long Nv,double Width,double Height,long Type, GLfloat Color[4],
       else if (Type == 2) { /* FOV_VECTOR */
          glPointSize(4.0);
          glBegin(GL_POINTS);
-            r[0] = 0.0;
-            r[1] = 0.0;
+            r[H_Axis] = 0.0;
+            r[V_Axis] = 0.0;
             glVertex4dv(r);
          glEnd();
          /* Label */
-         r[0] = 0.0;
-         r[1] = 0.0;
+         r[H_Axis] = 0.0;
+         r[V_Axis] = 0.0;
          glRasterPos4dv(r);
          glBitmap(0,0,0,0,-4.0*strlen(Label),-17,0);
          DrawString8x11(Label);
@@ -638,19 +639,19 @@ void DrawFarFOV(long Nv,double Width,double Height,long Type, GLfloat Color[4],
       }
       else if (Type == 3) { /* FOV_PLANE */
          glLineWidth(2.0);
-         r[2] = 0.0;
+         r[BoreAxis] = 0.0;
          glBegin(GL_LINE_LOOP);
             for(az=az0;az<TwoPi;az+=daz) {
-               r[0] = cos(az);
-               r[1] = sin(az);
+               r[H_Axis] = cos(az);
+               r[V_Axis] = sin(az);
                glVertex4dv(r);
             }
          glEnd();
          glLineWidth(1.0);
          /* Label */
          for(az=az0;az<TwoPi;az+=daz) {
-            r[0] = cos(az);
-            r[1] = sin(az);
+            r[H_Axis] = cos(az);
+            r[V_Axis] = sin(az);
             glRasterPos4dv(r);
             glBitmap(0,0,0,0,-4.0*strlen(Label),-5,0);
             DrawString8x11(Label);
