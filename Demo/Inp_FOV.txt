@@ -1,4 +1,3 @@
-/*                 Note: FOV Boresight is +Z Axis                 */
 ************************* Fields of View ***************************
 3                                  !  Number of FOVs
 --------------------------------------------------------------------
@@ -11,9 +10,10 @@ TRUE  TRUE                         !  Draw Near Field, Draw Far Field
 3  0                               !  SC, Body 
 0.0  0.0  1.0                      !  Position in Body [m]
 0.0  0.0  0.0  321                 !  Euler Angles [deg], Sequence
+Z_AXIS                             ! Boresight Axis X_AXIS, Y_AXIS, or Z_AXIS
 --------------------------------------------------------------------
 "WIRE"                             !  Label
-24   4.0                            !  Number of Sides, Length [m]
+24   4.0                           !  Number of Sides, Length [m]
 10.0  5.0                          !  X Width, Y Height [deg]
 1.0 1.0 0.0 0.5                    !  Color RGB+Alpha
 WIREFRAME                          !  WIREFRAME, SOLID, or VECTOR 
@@ -21,6 +21,7 @@ TRUE  TRUE                         !  Draw Near Field, Draw Far Field
 3  0                               !  SC, Body 
 1.0  0.0  0.0                      !  Position in Body [m]
 90.0  0.0  0.0  213                !  Euler Angles [deg], Sequence
+Z_AXIS                             ! Boresight Axis X_AXIS, Y_AXIS, or Z_AXIS
 --------------------------------------------------------------------
 "VECTOR"                           !  Label
 0   4.0                            !  Number of Sides, Length [m]
@@ -29,5 +30,7 @@ TRUE  TRUE                         !  Draw Near Field, Draw Far Field
 VECTOR                             !  WIREFRAME, SOLID, or VECTOR 
 TRUE  TRUE                         !  Draw Near Field, Draw Far Field
 3  0                               !  SC, Body 
--1.0  0.0  0.0                      !  Position in Body [m]
--45.0  0.0  0.0  213                 !  Euler Angles [deg], Sequence
+-1.0  0.0  0.0                     !  Position in Body [m]
+-45.0  0.0  0.0  213               !  Euler Angles [deg], Sequence
+Z_AXIS                             ! Boresight Axis X_AXIS, Y_AXIS, or Z_AXIS
+

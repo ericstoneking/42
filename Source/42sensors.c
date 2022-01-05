@@ -263,11 +263,11 @@ void FssModel(struct SCType *S)
             }
             else {
                MxV(FSS->CB,S->svb,svs);
-               SunAng[0] = atan2(svs[0],svs[2]);
-               SunAng[1] = atan2(svs[1],svs[2]);
+               SunAng[0] = atan2(svs[FSS->H_Axis],svs[FSS->BoreAxis]);
+               SunAng[1] = atan2(svs[FSS->V_Axis],svs[FSS->BoreAxis]);
                if (fabs(SunAng[0]) < FSS->FovHalfAng[0] && 
                    fabs(SunAng[1]) < FSS->FovHalfAng[1] &&
-                   svs[2] > 0.0) {
+                   svs[FSS->BoreAxis] > 0.0) {
                   FSS->Valid = TRUE;
                }
                else {
@@ -320,14 +320,14 @@ void StarTrackerModel(struct SCType *S)
          
             ST->Valid = TRUE;
             /* Sun Occultation? */
-            BoS = VoV(ST->CB[2],S->svb);
+            BoS = VoV(ST->CB[ST->BoreAxis],S->svb);
             if (BoS > ST->CosSunExclAng) ST->Valid = FALSE;
             /* Earth Occultation? (Generalized to whatever world we're orbiting) */
             W = &World[Orb[S->RefOrb].World];
             OrbRad = MAGV(S->PosN);
             LimbAng = asin(W->rad/OrbRad);
             MxV(S->B[0].CN,S->CLN[2],NadirVecB);
-            BoN = VoV(ST->CB[2],NadirVecB);
+            BoN = VoV(ST->CB[ST->BoreAxis],NadirVecB);
             if (BoN > cos(LimbAng + ST->EarthExclAng)) ST->Valid = FALSE;
             /* Moon Occultation? (Only worked out if orbiting Earth.  Customize as needed)*/
             if (Orb[S->RefOrb].World == EARTH) {
@@ -335,7 +335,7 @@ void StarTrackerModel(struct SCType *S)
                MoonDist = UNITV(mvn);
                LimbAng = asin(World[LUNA].rad/MoonDist);
                MxV(S->B[0].CN,mvn,mvb);
-               BoM = VoV(ST->CB[2],mvb);
+               BoM = VoV(ST->CB[ST->BoreAxis],mvb);
                if (BoM > cos(LimbAng+ST->MoonExclAng)) ST->Valid = FALSE;
             }
             if (ST->Valid) {

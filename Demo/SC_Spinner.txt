@@ -127,6 +127,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 =============================== FSS 0 ===================================
 0.2                           ! Sample Time,sec
 30.0  20.0  10.0  213         ! Mounting Angles (deg), Seq in Body
+Z_AXIS                        ! Boresight Axis X_AXIS, Y_AXIS, or Z_AXIS
 32.0   32.0                   ! X, Y FOV Size, deg
 0.1                           ! Noise Equivalent Angle, deg RMS
 0.5                           ! Quantization, deg
@@ -136,6 +137,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 =============================== ST 0 ====================================
 0.25                          ! Sample Time,sec
 30.0  20.0  10.0  213         ! Mounting Angles (deg), Seq in Body
+Z_AXIS                        ! Boresight Axis X_AXIS, Y_AXIS, or Z_AXIS
 8.0   8.0                     ! X, Y FOV Size, deg
 30.0  10.0  10.0              ! Sun, Earth, Moon Exclusion Angles, deg
 2.0  2.0  20.0                ! Noise Equivalent Angle, arcsec RMS

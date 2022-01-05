@@ -355,6 +355,9 @@ struct FssType {
    double NEA;
    double Quant;
    long FlexNode;
+   long BoreAxis; /* X_AXIS, Y_AXIS, Z_AXIS */
+   long H_Axis; /* (BoreAxis+1)%3 */
+   long V_Axis; /* (BoreAxis+2)%3 */
 
    /*~ Internal Variables ~*/
    long SampleCounter;
@@ -380,6 +383,9 @@ struct StarTrackerType {
    double CosMoonExclAng;
    double NEA[3];
    long FlexNode;
+   long BoreAxis; /* X_AXIS, Y_AXIS, Z_AXIS */
+   long H_Axis; /* (BoreAxis+1)%3 */
+   long V_Axis; /* (BoreAxis+2)%3 */
 
    /*~ Internal Variables ~*/
    long SampleCounter;
@@ -815,6 +821,9 @@ struct FovType {
    long Body;
    char Label[40];
    long Nv;
+   long BoreAxis; /* X_AXIS, Y_AXIS, Z_AXIS */
+   long H_Axis; /* (BoreAxis+1)%3 */
+   long V_Axis; /* (BoreAxis+2)%3 */
    double Width; /* X angular dimension, rad */
    double Height; /* Y angular dimension, rad */
    double Length;

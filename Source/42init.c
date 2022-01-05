@@ -2125,7 +2125,7 @@ void InitSpacecraft(struct SCType *S)
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nfss,junk,&newline);
       S->FSS = (struct FssType *) calloc(S->Nfss,sizeof(struct FssType));
       if (S->Nfss == 0) {
-         for(i=0;i<7;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(i=0;i<8;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
       else {
          for(Ifss=0;Ifss<S->Nfss;Ifss++) {
@@ -2143,6 +2143,10 @@ void InitSpacecraft(struct SCType *S)
                &Ang1,&Ang2,&Ang3,&Seq,junk,&newline);
             A2C(Seq,Ang1*D2R,Ang2*D2R,Ang3*D2R,FSS->CB);
             C2Q(FSS->CB,FSS->qb);
+            fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+            FSS->BoreAxis = DecodeString(response);
+            FSS->H_Axis = (FSS->BoreAxis+1)%3;
+            FSS->V_Axis = (FSS->BoreAxis+2)%3;
             fscanf(infile,"%lf %lf %[^\n] %[\n]",
                &FSS->FovHalfAng[0],&FSS->FovHalfAng[1],junk,&newline);
             for(i=0;i<2;i++) {
@@ -2161,7 +2165,7 @@ void InitSpacecraft(struct SCType *S)
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nst,junk,&newline);
       S->ST = (struct StarTrackerType *) calloc(S->Nst,sizeof(struct StarTrackerType));
       if (S->Nst == 0) {
-         for(i=0;i<7;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(i=0;i<8;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
       else {
          for(Ist=0;Ist<S->Nst;Ist++) {
@@ -2179,6 +2183,10 @@ void InitSpacecraft(struct SCType *S)
                &Ang1,&Ang2,&Ang3,&Seq,junk,&newline);
             A2C(Seq,Ang1*D2R,Ang2*D2R,Ang3*D2R,ST->CB);
             C2Q(ST->CB,ST->qb);
+            fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+            ST->BoreAxis = DecodeString(response);
+            ST->H_Axis = (ST->BoreAxis+1)%3;
+            ST->V_Axis = (ST->BoreAxis+2)%3;
             fscanf(infile,"%lf %lf %[^\n] %[\n]",
                &ST->FovHalfAng[0],&ST->FovHalfAng[1],junk,&newline);
             for(i=0;i<2;i++) {

@@ -121,8 +121,9 @@ void DrawSkyGrid(GLfloat MajColor[4], GLfloat MinColor[4], double C[3][3],
 void LoadSkyGrid(double MajGrid, double MinGrid, double SkyDistance,
                  GLuint *MajList, GLuint *MinList);
 void DrawNearFOV(long Nv,double Width,double Height,double Length,
-   long Type,GLfloat Color[4]);
-void DrawFarFOV(long Nv,double Width,double Height,long Type,GLfloat Color[4],
+   long BoreAxis, long H_Axis, long V_Axis, long Type,GLfloat Color[4]);
+void DrawFarFOV(long Nv,double Width,double Height, 
+   long BoreAxis, long H_Axis, long V_Axis, long Type, GLfloat Color[4],
                 const char Label[40], double SkyDistance);
 void RotateL2R(double C[3][3]);
 void RotateR2L(double C[3][3]);
