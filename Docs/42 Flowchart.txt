@@ -16,7 +16,7 @@ exec
    InitSpacecraft
    InitFSW
    CmdInterpreter
-   HandoffToGui
+   HandoffToGuiGlut
       ReadGraphicsInputFile
       InitColors
       SetPovOrientation

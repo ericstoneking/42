@@ -12,7 +12,7 @@
 /*    All Other Rights Reserved.                                      */
 
 
-#define EXTERN extern
+#define EXTERN
 #include "glkit.h"
 #undef EXTERN
 

@@ -24,6 +24,9 @@
    #define GL_GLEXT_PROTOTYPES
    #include <GL/glut.h>
    #include <GL/glu.h>
+   #ifdef _USE_GLFW_
+     #include <GLFW/glfw3.h>
+   #endif
 #elif defined __MINGW32__
    #define GLEW_BUILD
    #include "glew.h"

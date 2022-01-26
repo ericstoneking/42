@@ -13,8 +13,16 @@
 
 
 #include "42.h"
-#define EXTERN
+
+#define EXTERN extern
+#include "glkit.h"
+#undef EXTERN
+
+#define EXTERN extern
 #include "42gl.h"
+#undef EXTERN
+
+#define EXTERN
 #include "42glfw.h"
 #undef EXTERN
 
@@ -1335,7 +1343,7 @@ long GuiCmdInterpreter(char CmdLine[512], double *CmdTime)
       return(NewCmdProcessed);
 }
 /*********************************************************************/
-void HandoffToGui(void)
+void HandoffToGuiGlfw(int argc, char **argv)
 {
       PausedByMouse = 0;
 
@@ -1344,6 +1352,8 @@ void HandoffToGui(void)
       InitColors();
       SetPovOrientation();
       UpdatePOV();
+
+      glutInit(&argc, argv);
 
       printf("Initializing glfw\n");
       glfwSetErrorCallback(GlfwErrorHandler);
