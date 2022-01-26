@@ -13,6 +13,11 @@
 
 
 #include "42.h"
+
+#define EXTERN extern
+#include "glkit.h"
+#undef EXTERN
+
 #define EXTERN
 #include "42GlutGui.h"
 #undef EXTERN

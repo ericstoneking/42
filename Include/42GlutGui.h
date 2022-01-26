@@ -19,8 +19,6 @@
 #include <math.h>
 #include <stdio.h>
 
-#include "glkit.h"
-
 /*
 ** #ifdef __cplusplus
 ** namespace _42 {
