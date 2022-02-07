@@ -34,7 +34,7 @@ void EGM96(const char *ModelPath, long N, long M, double mass, double pbn[3],
       double r,theta,phi,Fr,Fth,Fph,Fe[3];
       double dum1,dum2;
       double Re = 6378.145E3;
-      double mu = 3.98604E14;
+      double mu = 3.986004E14;
       long i,n,m;
       static long First = 1;
       FILE *EGM96file;

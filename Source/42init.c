@@ -446,7 +446,7 @@ void InitOrbit(struct OrbitType *O)
       FILE *infile;
       char junk[120],newline,response[120];
       double Alt1,Alt2,MaxAnom;
-      double mu,rad;
+      double mu,rad,J2;
       double p[3],Ang1,Ang2,Ang3;
       char FrmExpressedIn;
       long Ir,i,j,k,Seq;
@@ -534,6 +534,7 @@ void InitOrbit(struct OrbitType *O)
          O->J2DriftEnabled = DecodeString(response);
          mu = World[O->World].mu;
          rad = World[O->World].rad;
+         J2 = World[O->World].J2;
          O->mu=mu;
          fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
          InputType = DecodeString(response);
@@ -571,6 +572,7 @@ void InitOrbit(struct OrbitType *O)
             O->RAAN *= D2R;
             O->ArgP *= D2R;
             O->anom *= D2R;
+            O->tp = O->Epoch - TimeSincePeriapsis(O->mu,O->SLR,O->ecc,O->anom);
 
             /* Some anomalies are unreachable for hyperbolic trajectories */
             if (O->ecc > 1.0) {
@@ -582,27 +584,11 @@ void InitOrbit(struct OrbitType *O)
             }
 
             if (O->J2DriftEnabled) {
-               FindJ2DriftParms(O->mu,World[O->World].J2,World[O->World].rad,O);
-               O->RAAN0 = O->RAAN;
-               O->ArgP0 = O->ArgP;
-               O->tp = O->Epoch - TimeSincePeriapsis(O->MuPlusJ2,O->SLR,O->ecc,O->anom);
-               Eph2RV(O->MuPlusJ2,O->SLR,O->ecc,O->inc,
-                      O->RAAN,O->ArgP,O->Epoch-O->tp,
-                      O->PosN,O->VelN,&O->anom);
+               OscEphToMeanEph(mu,J2,rad,DynTime0,O);
             }
-            else {
-               O->MuPlusJ2 = O->mu;
-               O->RAANdot = 0.0;
-               O->ArgPdot = 0.0;
-               O->J2Fr0 = 0.0;
-               O->J2Fh1 = 0.0;
-               O->MeanMotion = sqrt(O->mu/(O->SMA*O->SMA*O->SMA));
-               O->Period = TwoPi/O->MeanMotion;
-               O->tp = O->Epoch - TimeSincePeriapsis(O->mu,O->SLR,O->ecc,O->anom);
-               Eph2RV(O->mu,O->SLR,O->ecc,O->inc,
-                      O->RAAN,O->ArgP,O->Epoch-O->tp,
-                      O->PosN,O->VelN,&O->anom);
-            }
+            Eph2RV(O->mu,O->SLR,O->ecc,O->inc,
+                   O->RAAN,O->ArgP,O->Epoch-O->tp,
+                   O->PosN,O->VelN,&O->anom);
 
             /* Skip RV and FILE */
             for(j=0;j<5;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
@@ -620,27 +606,13 @@ void InitOrbit(struct OrbitType *O)
                O->PosN[j] *= 1.0E3;
                O->VelN[j] *= 1.0E3;
             }            
+            RV2Eph(O->Epoch,O->mu,O->PosN,O->VelN,
+               &O->SMA,&O->ecc,&O->inc,&O->RAAN,
+               &O->ArgP,&O->anom,&O->tp,
+               &O->SLR,&O->alpha,&O->rmin,
+               &O->MeanMotion,&O->Period);
             if (O->J2DriftEnabled) {
-               FindJ2DriftParms(O->mu,World[O->World].J2,World[O->World].rad,O);
-               RV2Eph(O->Epoch,O->MuPlusJ2,O->PosN,O->VelN,
-                  &O->SMA,&O->ecc,&O->inc,&O->RAAN,
-                  &O->ArgP,&O->anom,&O->tp,
-                  &O->SLR,&O->alpha,&O->rmin,
-                  &O->MeanMotion,&O->Period);
-               O->RAAN0 = O->RAAN;
-               O->ArgP0 = O->ArgP;
-            }
-            else {
-               O->MuPlusJ2 = O->mu;
-               O->RAANdot = 0.0;
-               O->ArgPdot = 0.0;
-               O->J2Fr0 = 0.0;
-               O->J2Fh1 = 0.0;
-               RV2Eph(O->Epoch,O->mu,O->PosN,O->VelN,
-                  &O->SMA,&O->ecc,&O->inc,&O->RAAN,
-                  &O->ArgP,&O->anom,&O->tp,
-                  &O->SLR,&O->alpha,&O->rmin,
-                  &O->MeanMotion,&O->Period);
+               OscEphToMeanEph(mu,J2,rad,DynTime0,O);
             }
             /* Skip FILE section */
             for(j=0;j<3;j++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
@@ -654,13 +626,18 @@ void InitOrbit(struct OrbitType *O)
             fscanf(infile,"\"%[^\"]\" %[^\n] %[\n]",ElementFileName,junk,&newline);
             fscanf(infile,"\"%[^\"]\" %[^\n] %[\n]",ElementLabel,junk,&newline);
             if (ElementType == INP_TLE) {
+               if (O->World != EARTH) {
+                  printf("TLEs are only defined for Earth-orbiting S/C.\n");
+                  exit(1);
+               }
                Success = LoadTleFromFile(InOutPath,ElementFileName,
-                  ElementLabel,TT.JulDay,O->mu,O);
+                  ElementLabel,DynTime,TT.JulDay,LeapSec,O);
                if (!Success) {
                   printf("Error loading TLE %s from file %s.\n",
                      ElementLabel,ElementFileName);
                   exit(1);
                }
+               MeanEph2RV(O,DynTime);
             }
             else if (ElementType == INP_TRV) {
                Success = LoadTRVfromFile(InOutPath, ElementFileName,
@@ -670,6 +647,15 @@ void InitOrbit(struct OrbitType *O)
                      ElementLabel,ElementFileName);
                   exit(1);
                }
+               //O->tp = O->Epoch - TimeSincePeriapsis(O->mu,O->SLR,O->ecc,O->anom);
+               //if (O->J2DriftEnabled) {
+               //   OscEphToMeanEph(O->mu,World[O->World].J2,World[O->World].rad,DynTime,O);
+               //}
+               //O->MeanMotion = sqrt(O->mu/(O->SMA*O->SMA*O->SMA));
+               //O->Period = TwoPi/O->MeanMotion;
+               //Eph2RV(O->mu,O->SLR,O->ecc,O->inc,
+               //       O->RAAN,O->ArgP,O->Epoch-O->tp,
+               //       O->PosN,O->VelN,&O->anom);
             }
             else if (ElementType == INP_SPLINE) {
                O->SplineFile = FileOpen(InOutPath,ElementFileName,"rt");
@@ -695,28 +681,6 @@ void InitOrbit(struct OrbitType *O)
             else {
                printf("Oops.  Unknown ElementType in InitOrbit.\n");
                exit(1);
-            }
-            if (O->J2DriftEnabled) {
-               FindJ2DriftParms(O->mu,World[O->World].J2,World[O->World].rad,O);
-               O->RAAN0 = O->RAAN + O->RAANdot*(DynTime-O->Epoch);
-               O->ArgP0 = O->ArgP + O->ArgPdot*(DynTime-O->Epoch);
-               O->tp = O->Epoch - TimeSincePeriapsis(O->MuPlusJ2,O->SLR,O->ecc,O->anom);
-               Eph2RV(O->MuPlusJ2,O->SLR,O->ecc,O->inc,
-                      O->RAAN,O->ArgP,O->Epoch-O->tp,
-                      O->PosN,O->VelN,&O->anom);
-            }
-            else {
-               O->MuPlusJ2 = O->mu;
-               O->RAANdot = 0.0;
-               O->ArgPdot = 0.0;
-               O->J2Fr0 = 0.0;
-               O->J2Fh1 = 0.0;
-               O->MeanMotion = sqrt(O->mu/(O->SMA*O->SMA*O->SMA));
-               O->Period = TwoPi/O->MeanMotion;
-               O->tp = O->Epoch - TimeSincePeriapsis(O->mu,O->SLR,O->ecc,O->anom);
-               Eph2RV(O->mu,O->SLR,O->ecc,O->inc,
-                      O->RAAN,O->ArgP,O->Epoch-O->tp,
-                      O->PosN,O->VelN,&O->anom);
             }
          }
          else {
@@ -1945,8 +1909,7 @@ void InitSpacecraft(struct SCType *S)
          for(Iw=0;Iw<S->Nw;Iw++) {
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&S->Whl[Iw].H,junk,&newline);
-            fscanf(infile,"%ld %lf %lf %lf %[^\n] %[\n]",
-                &S->Whl[Iw].Body,
+            fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
                 &S->Whl[Iw].A[0],&S->Whl[Iw].A[1],
                 &S->Whl[Iw].A[2],junk,&newline);
             UNITV(S->Whl[Iw].A);
@@ -2577,7 +2540,7 @@ void LoadPlanets(void)
                                 "Pluto"};
       char MapFileName[10][20] = {"NONE","Rockball","Venus.ppm","Earth.ppm","Mars.ppm",
          "Jupiter.ppm","Saturn.ppm","Uranus.ppm","Neptune.ppm","Iceball"};
-      double Mu[10] = {1.32715E20,2.18E13,3.2485E14,3.98604E14,
+      double Mu[10] = {1.32715E20,2.18E13,3.2485E14,3.986004E14,
                        4.293E13,1.2761E17,3.792E16,5.788E15,6.8E15,
                        3.2E14};
       double J2[10] = {0.0,0.0,0.0,1.08263E-3,1.96045E-3,0.0,0.0,0.0,0.0,0.0};

@@ -27,11 +27,6 @@ endif
 GUIFLAG = -D _ENABLE_GUI_
 #GUIFLAG =
 
-# For graphics interface, choose GLUT or GLFW GUI libraries
-# GLUT is well known, but GLFW is better for newer Mac's hires displays
-GLUT_OR_GLFW = _USE_GLFW_
-#GLUT_OR_GLFW = _USE_GLUT_
-
 SHADERFLAG = -D _USE_SHADERS_
 #SHADERFLAG =
 
@@ -41,12 +36,11 @@ CFDFLAG =
 FFTBFLAG =
 #FFTBFLAG = -D _ENABLE_FFTB_CODE_
 
-#GSFCFLAG =
-GSFCFLAG = -D _USE_GSFC_WATERMARK_
+GSFCFLAG =
+#GSFCFLAG = -D _USE_GSFC_WATERMARK_
 
 STANDALONEFLAG =
 #STANDALONEFLAG = -D _AC_STANDALONE_
-
 
 GMSECFLAG =
 #GMSECFLAG = -D _ENABLE_GMSEC_
@@ -85,6 +79,10 @@ ifeq ($(42PLATFORM),__APPLE__)
    EXTERNDIR =
    # ARCHFLAG = -arch i386
    ARCHFLAG = -arch x86_64
+   # For graphics interface, choose GLUT or GLFW GUI libraries
+   # GLUT is well known, but GLFW is better for newer Mac's hires displays
+   GLUT_OR_GLFW = _USE_GLFW_
+   #GLUT_OR_GLFW = _USE_GLUT_
 
    LFLAGS = -bind_at_load
    ifneq ($(strip $(GUIFLAG)),)
@@ -112,6 +110,10 @@ ifeq ($(42PLATFORM),__linux__)
    CINC =
    EXTERNDIR =
    ARCHFLAG =
+   # For graphics interface, choose GLUT or GLFW GUI libraries
+   # GLUT is well known, but GLFW is better for newer Mac's hires displays
+   #GLUT_OR_GLFW = _USE_GLFW_
+   GLUT_OR_GLFW = _USE_GLUT_
 
    ifneq ($(strip $(GUIFLAG)),)
       #GLINC = -I /usr/include/
@@ -139,6 +141,10 @@ endif
 ifeq ($(42PLATFORM),__MSYS__)
    CINC =
    EXTERNDIR = /c/42ExternalSupport/
+   # For graphics interface, choose GLUT or GLFW GUI libraries
+   # GLUT is well known, but GLFW is better for newer Mac's hires displays
+   #GLUT_OR_GLFW = _USE_GLFW_
+   GLUT_OR_GLFW = _USE_GLUT_
 
    ifneq ($(strip $(GUIFLAG)),)
       # TODO: Option to use GLFW instead of GLUT?

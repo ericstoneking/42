@@ -144,14 +144,14 @@ struct OrbitType {
    double MeanMotion;
    char FileName[20];
    long J2DriftEnabled;
-   double MuPlusJ2; /* Effective mu, adjusted for average J2 effect */
-   /* Initial values */
+   /* J2 Drift Parameters */
+   double MeanSMA;
    double RAAN0;
-   double ArgP0; 
+   double ArgP0;
+   double MeanAnom0;
    double RAANdot; /* Due to average J2 effect, rad/sec */
    double ArgPdot; /* Due to average J2 effect, rad/sec */
-   double J2Fr0; /* Orbit-average radial acceleration due to J2 */
-   double J2Fh1; /* Coefficient for orbit-rate normal acceleration due to J2 */ 
+   double J2Rw2bya;
    FILE *SplineFile;
 
    /*~ Internal Variables ~*/
@@ -164,6 +164,7 @@ struct OrbitType {
    double zdot;  
    
    /* For Central Orbit Description */
+   double MeanAnom;
    double anom; /* True Anomaly, rad */
    double PosN[3]; /* Position, [[m]], expressed in N [~=~] */
    double VelN[3]; /* Velocity, [[m/sec]], expressed in N [~=~] */
@@ -181,6 +182,7 @@ struct OrbitType {
 /*~ Prototypes ~*/
 struct OrbitType *CloneOrbit(struct OrbitType *OldOrb, long *Norb,
    long Iorb);
+double MeanAnomToTrueAnom(double MeanAnom, double ecc);
 double TrueAnomaly(double mu, double p, double e, double t);
 double atanh(double x);
 double TimeSincePeriapsis(double mu, double p, double e, double th);
@@ -193,12 +195,12 @@ void  RV2Eph(double time, double mu, double xr[3], double xv[3],
              double *ArgP, double *th, double *tp,
              double *SLR, double *alpha, double *rmin,
              double *MeanMotion, double *Period);
-void TLE2Eph(const char Line1[80], const char Line2[80], double JD,
-   double mu, double *Epoch, double *SMA, double *e, double *i, double *RAAN,
-   double *ArgP, double *th, double *tp, double *SLR,
-   double *alpha, double *rmin, double *Period, double *MeanMotion);
-long LoadTleFromFile(const char *Path, const char *TleFileName, const char *TleLabel,
-                      double JD, double mu, struct OrbitType *O);
+void TLE2MeanEph(const char Line1[80], const char Line2[80], double JD, 
+   double LeapSec, struct OrbitType *O);
+void MeanEph2RV(struct OrbitType *O, double DynTime);
+long LoadTleFromFile(const char *Path, const char *TleFileName,
+   const char *TleLabel, double DynTime, double JD, double LeapSec, 
+   struct OrbitType *O);
 double RV2RVp(double mu, double r[3], double v[3], double rp[3], double vp[3]);
 void PlanetEphemerides(long i, double JD, double mu,
        double *SMA, double *ecc, double *inc, double *RAAN, double *omg,
@@ -248,7 +250,9 @@ void PlanTwoImpulseRendezvous(double mu, double r1e[3], double v1e[3],
    double DV1[3], double DV2[3]);
 void FindLightLagOffsets(double DynTime, struct OrbitType *Observer,
    struct OrbitType *Target, double PastPos[3], double FuturePos[3]);
-void FindJ2DriftParms(double mu, double J2, double Rw, struct OrbitType *O);
+void OscEphToMeanEph(double mu, double J2, double Rw, double DynTime,
+   struct OrbitType *O);
+void MeanEphToOscEph(struct OrbitType *O, double DynTime);
 
 /*
 ** #ifdef __cplusplus

@@ -409,16 +409,6 @@ void ThirdBodyGravForce(double p[3],double s[3],double mu, double mass,
       for(j=0;j<3;j++) Frc[j] = mu*mass*(s[j]/s3-p[j]/p3);
 }
 /**********************************************************************/
-void J2Force(struct SCType *S, struct OrbitType *O, double FrcN[3])
-{
-      double Fh;
-      long i;
-      
-      Fh = S->mass*O->J2Fh1*sin(O->ArgP+O->anom);
-      
-      for(i=0;i<3;i++) FrcN[i] = -Fh*S->CLN[1][i];
-}
-/**********************************************************************/
 void GravPertForce(struct SCType *S)
 {
       struct OrbitType *O;
@@ -483,10 +473,6 @@ void GravPertForce(struct SCType *S)
          EGM96(ModelPath,EarthGravModel.N,EarthGravModel.M,S->mass,S->PosN,
                World[EARTH].PriMerAng,FgeoN);
          for(j=0;j<3;j++) S->FrcN[j] += FgeoN[j];
-         if (O->J2DriftEnabled) {
-            J2Force(S,O,FrcN);
-            for(j=0;j<3;j++) S->FrcN[j] -= FrcN[j];
-         }
       }
       else if (OrbCenter == MARS) {
          GMM2B(ModelPath,MarsGravModel.N,MarsGravModel.M,S->mass,S->PosN,

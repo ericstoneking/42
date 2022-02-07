@@ -3879,12 +3879,7 @@ void EnckeRK4(struct SCType *S)
       R[2] = O->PosN[2];
 
       magr = sqrt(R[0]*R[0]+R[1]*R[1]+R[2]*R[2]);
-      if (O->J2DriftEnabled) {
-         muR3 = O->MuPlusJ2/(magr*magr*magr);
-      }
-      else {
-         muR3 = O->mu/(magr*magr*magr);
-      }
+      muR3 = O->mu/(magr*magr*magr);
 
       u[0] = S->PosR[0];
       u[1] = S->PosR[1];

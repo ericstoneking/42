@@ -37,14 +37,34 @@ struct OrbitType *CloneOrbit(struct OrbitType *OldOrb, long *Norb,
       return(NewOrb);
 }
 /**********************************************************************/
+double MeanAnomToTrueAnom(double MeanAnom, double ecc)
+{
+      #define EPS (1.0E-12)
+      double E,f,fp,dE;
+      long i = 0;
+
+      E = MeanAnom;
+      do {
+         i++;
+         f = E - ecc*sin(E) - MeanAnom;
+         fp = 1.0 - ecc*cos(E);
+         dE = f/fp;
+         if (dE >  0.1) dE =  0.1;
+         if (dE < -0.1) dE = -0.1;
+         E -= dE;
+      } while (fabs(f) > EPS && fabs(dE) > EPS && i < 100);
+      return(2.0*atan(sqrt((1.0+ecc)/(1.0-ecc))*tan(0.5*E)));
+      #undef EPS
+}
+/**********************************************************************/
 double TrueAnomaly(double mu, double p, double e, double t)
 {
 #define EPS (1.0E-12)
 #define PI    (3.141592653589793)
 #define TWOPI (6.283185307179586)
 
-      double p3,B,x,f,fp,e1,N,H,M,E,a;
-      double Ne,dx,dH,dE,Anom;
+      double p3,B,x,f,fp,e1,N,H,M,a;
+      double Ne,dx,dH,Anom;
       long i;
 
       p3 = p*p*p;
@@ -80,21 +100,10 @@ double TrueAnomaly(double mu, double p, double e, double t)
          Anom = 2.0*atan(sqrt((e+1.0)/(e-1.0))*tanh(0.5*H));
       }
       else {
-         i = 0;
          a = p/(1.0-e*e);
          M = sqrt(mu/(a*a*a))*t;
          M = fmod(M+PI, TWOPI) - PI;
-         E = M;
-         do {
-            i++;
-            f = E - e*sin(E) - M;
-            fp = 1.0 - e*cos(E);
-            dE = f/fp;
-            if (dE >  0.1) dE =  0.1;
-            if (dE < -0.1) dE = -0.1;
-            E -= dE;
-         } while (fabs(f) > EPS && fabs(dE) > EPS && i < 100);
-         Anom = 2.0*atan(sqrt((1.0+e)/(1.0-e))*tan(0.5*E));
+         Anom = MeanAnomToTrueAnom(M,e);
       }
 
       return(Anom);
@@ -397,11 +406,10 @@ void  RV2Eph(double time, double mu, double xr[3], double xv[3],
 #undef TWOPI
 }
 /**********************************************************************/
-void TLE2Eph(const char Line1[80], const char Line2[80], double JD,
-   double mu, double *Epoch, double *SMA, double *e, double *i, double *RAAN,
-   double *ArgP, double *th, double *tp, double *SLR,
-   double *alpha, double *rmin, double *Period, double *MeanMotion)
+void TLE2MeanEph(const char Line1[80], const char Line2[80], double JD, 
+   double LeapSec, struct OrbitType *O)
 {
+#define EPS (1.0E-12)
 #define TWOPI (6.283185307179586)
 #define D2R (1.74532925199E-2)
 
@@ -414,8 +422,13 @@ void TLE2Eph(const char Line1[80], const char Line2[80], double JD,
       char MeanAnomString[9];
       char MeanMotionString[12];
       long year,DOY,Month,Day;
-      double FloatDOY,FracDay,MeanAnom,JDepoch;
+      double FloatDOY,FracDay,JDepoch;
       double DynTime;
+      /* Parameters quoted from SatelliteToolbox.jl's sgp4_model.jl */
+      double mu = 3.986005E14;
+      double Re = 6378.137E3;
+      double J2 = 1.08262998905E-3;
+      double Coef;
 
       strncpy(YearString,&Line1[18],2);
       YearString[2] = 0;
@@ -430,53 +443,150 @@ void TLE2Eph(const char Line1[80], const char Line2[80], double JD,
       DOY2MD(year,DOY,&Month,&Day);
       JDepoch = DateToJD(year,Month,Day,0,0,0.0);
       JDepoch += FracDay;
-      *Epoch = JDToTime(JDepoch);
+      O->Epoch = JDToTime(JDepoch);
+      /* Shift Epoch from UTC to TT */
+      O->Epoch += LeapSec + 32.184;
       DynTime = JDToTime(JD);
 
       strncpy(IncString,&Line2[8],8);
       IncString[8] = 0;
-      *i = ((double) atof(IncString))*D2R;
+      O->inc = ((double) atof(IncString))*D2R;
 
       strncpy(RAANstring,&Line2[17],9);
       RAANstring[9] = 0;
-      *RAAN = ((double) atof(RAANstring))*D2R;
+      O->RAAN = ((double) atof(RAANstring))*D2R;
 
       strncpy(EccString,&Line2[26],7);
       EccString[7] = 0;
-      *e = ((double) atof(EccString))*1.0E-7;
+      O->ecc = ((double) atof(EccString))*1.0E-7;
 
       strncpy(omgstring,&Line2[34],8);
       omgstring[8] = 0;
-      *ArgP = ((double) atof(omgstring))*D2R;
+      O->ArgP = ((double) atof(omgstring))*D2R;
 
       strncpy(MeanAnomString,&Line2[43],8);
       MeanAnomString[8] = 0;
-      MeanAnom = ((double) atof(MeanAnomString))*D2R;
+      O->MeanAnom = ((double) atof(MeanAnomString))*D2R;
 
       strncpy(MeanMotionString,&Line2[52],11);
       MeanMotionString[11] = 0;
-      *MeanMotion = ((double) atof(MeanMotionString))*TWOPI/86400.0;
-      *Period = TWOPI/(*MeanMotion);
+      O->MeanMotion = ((double) atof(MeanMotionString))*TWOPI/86400.0;
+      O->Period = TWOPI/(O->MeanMotion);
 
       /* Time of Periapsis passage given in seconds since J2000 */
-      *tp = *Epoch - MeanAnom/(*MeanMotion);
-      while ((*tp-DynTime) < -(*Period)) *tp += *Period;
-      while ((*tp-DynTime) >   *Period ) *tp -= *Period;
+      O->tp = O->Epoch - O->MeanAnom/(O->MeanMotion);
+      while ((O->tp-DynTime) < -(O->Period)) O->tp += O->Period;
+      while ((O->tp-DynTime) >   O->Period ) O->tp -= O->Period;
 
-      *SMA = pow(mu/(*MeanMotion)/(*MeanMotion),1.0/3.0);
-      *alpha = 1.0/(*SMA);
-      *SLR = (*SMA)*(1.0-(*e)*(*e));
-      *rmin = *SLR/(1.0 + *e);
+      O->MeanSMA = pow(mu/(O->MeanMotion*O->MeanMotion),1.0/3.0);
+      O->SMA = O->MeanSMA;
+      O->alpha = 1.0/(O->SMA);
+      O->SLR = O->SMA*(1.0 - O->ecc*O->ecc);
+      O->rmin = O->SLR/(1.0 + O->ecc);
 
-      *th = TrueAnomaly(mu, *SLR, *e, DynTime-(*tp));
+      O->anom = MeanAnomToTrueAnom(O->MeanAnom,O->ecc);
+            
+      /* Initialize J2 Drift Parameters (ref Markley and Crassidis, Ch. 10) */
+      /* 10.121 */
+      if (O->J2DriftEnabled) {
+         Coef = 1.5*J2*Re*Re/(O->SLR*O->SLR)*O->MeanMotion;
+         O->RAANdot = -Coef*cos(O->inc);
+         O->ArgPdot =  Coef*(2.0-2.5*sin(O->inc)*sin(O->inc));
+         O->RAAN0 = O->RAAN - O->RAANdot*(DynTime-O->Epoch);
+         O->ArgP0 = O->ArgP - O->ArgPdot*(DynTime-O->Epoch);
+         /* 10.122 */
+         O->MeanAnom0 = O->MeanAnom - O->MeanMotion*(DynTime-O->Epoch);
+         /* 10.126 */
+         O->J2Rw2bya = J2*Re*Re/O->MeanSMA;   
+      }
+      else {
+         O->RAANdot = 0.0;
+         O->ArgPdot = 0.0;
+         O->RAAN0 = O->RAAN;
+         O->ArgP0 = O->ArgP;
+         O->J2Rw2bya = 0.0;
+         /* 10.122 */
+         O->MeanAnom0 = O->MeanAnom - O->MeanMotion*(DynTime-O->Epoch);
+      }   
 
 #undef TWOPI
 #undef D2R
 }
 /**********************************************************************/
+/* Ref: Markley and Crassidis, 10.4.3                                 */
+/* Osculating elements drift from initial conditions due to J2        */
+void MeanEph2RV(struct OrbitType *O, double DynTime)
+{
+      double e,e2,sin2i,sinw,sin2w,cosnu,g;
+      double CPN[3][3],cth,sth,R,c2,pr[3],pv[3];
+      double C1,S1,C2,S2,C3,S3;
+      long i;
+
+      /* 10.121a,b */
+      if (O->J2DriftEnabled) {
+         O->ArgP = O->ArgP0 + O->ArgPdot*(DynTime-O->Epoch);
+         O->RAAN = O->RAAN0 + O->RAANdot*(DynTime-O->Epoch);
+      }
+
+      /* 10.122 */
+      O->MeanAnom = O->MeanAnom0 + O->MeanMotion*(DynTime - O->Epoch);
+      
+      O->anom = MeanAnomToTrueAnom(O->MeanAnom,O->ecc);
+      
+      e = O->ecc;
+      e2 = e*e;
+      sin2i = sin(O->inc)*sin(O->inc);
+      
+      /* 10.127 */
+      sinw = sin(O->ArgP+O->anom);
+      sin2w = sinw*sinw;
+      cosnu = cos(O->anom);
+      g = pow((1.0+e*cosnu)/(1.0-e2),3.0)*(1.0-3.0*sin2i*sin2w);
+
+      /* 10.126 */
+      O->SMA = O->MeanSMA + O->J2Rw2bya*g;
+      
+      O->SLR = O->SMA*(1.0-e2);
+      O->alpha = 1.0/O->SMA;
+      O->rmin = O->SLR/(1.0 + O->ecc);
+
+      sth = sin(O->anom);
+      cth = cos(O->anom);
+      R = O->SLR/(1.0+e*cth);
+
+      c2 = sqrt(O->mu/O->SLR);
+      pr[0] = R*cth;
+      pr[1] = R*sth;
+      pr[2] = 0.0;
+      pv[0] = -c2*sth;
+      pv[1] = c2*(e+cth);
+      pv[2] = 0.0;
+
+      C1=cos(O->RAAN);S1=sin(O->RAAN);
+      C2=cos(O->inc);S2=sin(O->inc);
+      C3=cos(O->ArgP);S3=sin(O->ArgP);
+
+      CPN[0][0]=-S1*C2*S3+C3*C1;
+      CPN[1][0]=-S1*C2*C3-S3*C1;
+      CPN[2][0]=S1*S2;
+      CPN[0][1]=C1*C2*S3+C3*S1;
+      CPN[1][1]=C1*C2*C3-S3*S1;
+      CPN[2][1]=-C1*S2;
+      CPN[0][2]=S2*S3;
+      CPN[1][2]=S2*C3;
+      CPN[2][2]=C2;
+
+      for(i=0;i<3;i++) {
+         O->PosN[i] = pr[0]*CPN[0][i] + pr[1]*CPN[1][i];
+         O->VelN[i] = pv[0]*CPN[0][i] + pv[1]*CPN[1][i];
+      }
+
+}
+/**********************************************************************/
+/* TLEs use UTC.  42 orbits use TT.  So LeapSec are needed.           */
 long LoadTleFromFile(const char *Path, const char *TleFileName,
-                      const char *TleLabel,
-                      double JD, double mu, struct OrbitType *O)
+   const char *TleLabel, double DynTime, double JD, double LeapSec, 
+   struct OrbitType *O)
 {
       FILE *infile;
       char line[80],line1[80],line2[80];
@@ -498,13 +608,8 @@ long LoadTleFromFile(const char *Path, const char *TleFileName,
             Success = 1;
             fgets(line1,80,infile);
             fgets(line2,80,infile);
-            O->mu = mu;
-            TLE2Eph(line1,line2,JD,O->mu,&O->Epoch,
-               &O->SMA,&O->ecc,&O->inc,&O->RAAN,&O->ArgP,&O->anom,
-               &O->tp,&O->SLR,&O->alpha,&O->rmin,
-               &O->Period,&O->MeanMotion);
-            Eph2RV(O->mu,O->SLR,O->ecc,O->inc,O->RAAN,O->ArgP,
-                   O->Epoch-O->tp,O->PosN,O->VelN,&O->anom);
+            TLE2MeanEph(line1,line2,JD,LeapSec,O);
+            MeanEph2RV(O,DynTime);
          }
       }
       fclose(infile);
@@ -2037,7 +2142,7 @@ void TDRSPosVel(double PriMerAng,double time,
          om = om0[j] + omdrift[j]*time;
          LAN = LAN0[j]*D2R + LANdrift[j]*time;
 
-         Eph2RV(3.98604E14,p[j],e[j],i[j]*D2R,LAN,
+         Eph2RV(3.986004E14,p[j],e[j],i[j]*D2R,LAN,
             om,time,ptn[j],vtn[j],&anom);
       }
 #undef D2R
@@ -2107,45 +2212,6 @@ void TETE2J2000(double JD,double CTJ[3][3])
 
 #undef D2R
 }
-/**********************************************************************/
-/*  Converts NORAD 2-line elements to Keplerian elements.
-
-void TwoLine2Eph(EpochYear,EpochDay,Inc,RA,
-     &   Ecc,omg,MeanAnom,MeanMotion,
-     &   JDepoch,orbaxis,orbecc,orbinc,orbLAN,orbomg,
-     &   orbtp)
-
-      IMPLICIT NONE
-
-      REAL*8 EpochDay,Inc,RA,Ecc,omg,MeanAnom
-      REAL*8 MeanMotion,JDepoch,orbaxis,orbecc
-      REAL*8 orbinc,orbLAN,orbomg,orbtp
-      REAL*8 EpochYear,Year,Mon
-      REAL*8 Day,w,TWOPI,D2R,mu
-
-      DATA TWOPI /6.28318530718d0/
-      DATA D2R /1.74532925199d-2/
-      DATA mu /3.98604D14/
-
-      IF (EpochYear .gt. 50.0d0) THEN
-         Year=1900.0d0+EpochYear
-      ELSE
-         Year=2000.0d0+EpochYear
-      ENDIF
-      CALL DOY2MD(Year,EpochDay,Mon,Day)
-      CALL YMD2JD(Year,Mon,Day,JDepoch)
-
-      w=MeanMotion*TWOPI/86400.0d0
-      orbaxis=(mu/w/w)**(1.0d0/3.0d0)
-      orbecc=Ecc*1.0d-7
-      orbinc=Inc*D2R
-      orbLAN=RA*D2R
-      orbomg=omg*D2R
-      orbtp=-MeanAnom*D2R/w
-
-      RETURN
-      END
-*/
 /**********************************************************************/
 /*  See Battin                                                        */
 double RadiusOfInfluence(double mu1, double mu2, double r)
@@ -2536,39 +2602,49 @@ void FindLightLagOffsets(double DynTime, struct OrbitType *Observer,
 #undef SPEED_OF_LIGHT
 }
 /**********************************************************************/
-void FindJ2DriftParms(double mu, double J2, double Rw, struct OrbitType *O)
+/* Ref: Markley and Crassidis, 10.4.3                                 */
+/* Osculating elements drift from initial conditions due to J2        */
+/* Use this function to initialize mean eph at sim start              */
+void OscEphToMeanEph(double mu, double J2, double Rw, double DynTime,
+   struct OrbitType *O)
 {
-#define TWOPI (6.283185307179586)
-      double p2,Coef,e2,e4,sin2i,n;
+      #define TWOPI (6.283185307179586)
+      double e,e2,sin2i,sinw,sin2w,cosnu,g;
+      double a,p,p2,Coef;
       
-      n = sqrt(mu/O->SMA/O->SMA/O->SMA);
-      p2 = O->SLR*O->SLR;
-      Coef = 1.5*J2*Rw*Rw/p2;
-      e2 = O->ecc*O->ecc;
-      e4 = e2*e2;
       sin2i = sin(O->inc)*sin(O->inc);
-
-/* .. Regression of Ascending Node */
-      O->RAANdot = -Coef*n*cos(O->inc);
-
-/* .. Precession of Periapsis */
-      O->ArgPdot = Coef*n*(2.0-2.5*sin2i);
       
-/* .. Avg Radial Accel (positive toward zenith) */
-      O->J2Fr0 = -Coef*mu/p2*(1.0+3.0*e2+0.375*e4-1.5*sin2i*(1.0-cos(2.0*O->ArgP)*(1.5*e2+0.25*e4)));
-/* .. Amplitude for orbit-rate orbit-normal accel */
-      O->J2Fh1 = -2.0*Coef*mu/p2*cos(O->inc)*sin(O->inc);
+      /* 10.127 */
+      e = O->ecc;
+      e2 = e*e;
+      sinw = sin(O->ArgP+O->anom);
+      sin2w = sinw*sinw;
+      cosnu = cos(O->anom);
+      g = pow((1.0+e*cosnu)/(1.0-e2),3.0)*(1.0-3.0*sin2i*sin2w);
+ 
+      /* 10.128 */
+      a = O->SMA;
+      O->MeanSMA = 0.5*(a + sqrt(a*a-4.0*J2*Rw*Rw*g));
 
-/* .. Effective Mu */
-      O->MuPlusJ2 = O->mu - O->SMA*O->SMA*O->J2Fr0;
-
-/* .. Adjust mean motion, period */
-      O->MeanMotion = sqrt(O->MuPlusJ2/O->SMA/O->SMA/O->SMA);
+      /* 10.123 */
+      O->MeanMotion = sqrt(mu/O->MeanSMA)/O->MeanSMA;
       O->Period = TWOPI/O->MeanMotion;
-      
-#undef TWOPI
-}
 
+      /* 10.121 */
+      p = O->MeanSMA*(1.0-O->ecc*O->ecc);
+      p2 = p*p;
+      Coef = 1.5*J2*Rw*Rw/p2*O->MeanMotion;
+      O->RAANdot = -Coef*cos(O->inc);
+      O->ArgPdot =  Coef*(2.0-2.5*sin2i);
+
+      O->RAAN0 = O->RAAN - O->RAANdot*(DynTime-O->Epoch);
+      O->ArgP0 = O->ArgP - O->ArgPdot*(DynTime-O->Epoch);
+      
+      /* 10.126 */
+      O->J2Rw2bya = J2*Rw*Rw/O->MeanSMA;      
+
+      #undef TWOPI
+}
 /* #ifdef __cplusplus
 ** }
 ** #endif
