@@ -116,16 +116,16 @@ ifeq ($(42PLATFORM),__linux__)
    GLUT_OR_GLFW = _USE_GLUT_
 
    ifneq ($(strip $(GUIFLAG)),)
-      #GLINC = -I /usr/include/
-      GLINC = -I $(KITDIR)/include/GL/
       ifeq ($(strip $(GLUT_OR_GLFW)),_USE_GLUT_)
          GUIOBJ = $(OBJ)42gl.o $(OBJ)42glut.o $(OBJ)glkit.o $(OBJ)42gpgpu.o
          LIBS = -lglut -lGLU -lGL -ldl -lm -lpthread
+         GLINC = -I /usr/include/GL/
          LFLAGS = -L $(KITDIR)/GL/lib/
          GUI_LIB = -D _USE_GLUT_
       else
          GUIOBJ = $(OBJ)42gl.o $(OBJ)42glfw.o $(OBJ)glkit.o $(OBJ)42gpgpu.o
          LIBS = -lglfw -lglut -lGLU -lGL -ldl -lm -lpthread
+         GLINC = -I /usr/include/GL/ -I /usr/include/GLFW
          GUI_LIB = -D _USE_GLFW_
       endif
    else

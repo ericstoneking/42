@@ -921,7 +921,9 @@ void InitCamWindow(void)
 
       int w,h;
 
+      #ifdef __APPLE__
       glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER,GLFW_FALSE);
+	  #endif
       CamWindow = glfwCreateWindow(CamWidth,CamHeight,CamTitle,NULL,NULL);
       #if (defined(GLEW_BUILD) || defined(GLEW_STATIC))
       if (GLEW_OK != glewInit()) {
@@ -1008,7 +1010,9 @@ void InitMapWindow(void)
       GLuint RockballMapTexTag;
       GLuint IceballMapTexTag;
 
+      #ifdef __APPLE__
       glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER,GLFW_FALSE);
+	  #endif
       MapWindow = glfwCreateWindow(MapWidth,MapHeight,MapTitle,NULL,NULL);
       glfwMakeContextCurrent(MapWindow);
       glfwSetWindowPos(MapWindow,CamWidth,30);
@@ -1113,7 +1117,9 @@ void InitOrreryWindow(void)
          strcpy(O->ScaleLabel[i],ScaleLabel[i]);
       }
 
+      #ifdef __APPLE__
       glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER,GLFW_FALSE);
+	  #endif
       OrreryWindow = glfwCreateWindow(OrreryWidth,OrreryHeight,OrreryTitle,NULL,NULL);
       glfwMakeContextCurrent(OrreryWindow);
       glfwSetWindowPos(OrreryWindow,CamWidth,MapHeight+66);
@@ -1170,7 +1176,9 @@ void InitSphereWindow(void)
 
       SphereWindowWidth = 512;
       SphereWindowHeight = 256 + 16*(NumSphereWindowMenuLines + 2);
+      #ifdef __APPLE__
       glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER,GLFW_FALSE);
+	  #endif
       SphereWindow = glfwCreateWindow(SphereWindowWidth,SphereWindowHeight,
             "42 Unit Sphere Viewer",NULL,NULL);
       glfwMakeContextCurrent(SphereWindow);

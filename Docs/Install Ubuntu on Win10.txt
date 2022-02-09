@@ -51,6 +51,7 @@ in to set your default display.  ETS]
 & DISPLAY=:1 gvim #check that opens a xming display window
 & sudo apt-cache search glut
 & sudo apt-get install freeglut3-dev
+& sudo apt-get install libglfw3-dev
 & sudo apt install make [[LWS]]
 & cd 42 #use the route where 42 folder is install
 & make
