@@ -554,6 +554,7 @@ void InitOrbit(struct OrbitType *O)
                O->SLR = O->SMA*(1.0-O->ecc*O->ecc);
                O->alpha = 1.0/O->SMA;
                O->rmin = rad+Alt1*1.0E3;
+               O->MeanMotion = sqrt(O->mu*O->alpha)*O->alpha;
             }
             else {
                fscanf(infile,"%[^\n] %[\n]",junk,&newline);
@@ -563,6 +564,8 @@ void InitOrbit(struct OrbitType *O)
                O->SLR = O->rmin*(1.0+O->ecc);
                O->alpha = (1.0-O->ecc)/O->rmin;
                if (O->alpha != 0.0) O->SMA = 1.0/O->alpha;
+               if (O->alpha > 0.0) O->MeanMotion = sqrt(O->mu*O->alpha)*O->alpha;
+               else O->MeanMotion = sqrt(-O->mu*O->alpha)*O->alpha;
             }
             fscanf(infile,"%lf %[^\n] %[\n]",&O->inc,junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&O->RAAN,junk,&newline);

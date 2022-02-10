@@ -70,9 +70,6 @@ INOUT = $(PROJDIR)InOut/
 GSFCSRC = $(PROJDIR)/GSFC/Source/
 IPCSRC = $(SRC)IPC/
 
-#EMBEDDED = -D EMBEDDED_MATLAB
-EMBEDDED =
-
 ifeq ($(42PLATFORM),__APPLE__)
    # Mac Macros
    CINC = -I /usr/include -I /usr/local/include
@@ -81,8 +78,8 @@ ifeq ($(42PLATFORM),__APPLE__)
    ARCHFLAG = -arch x86_64
    # For graphics interface, choose GLUT or GLFW GUI libraries
    # GLUT is well known, but GLFW is better for newer Mac's hires displays
-   GLUT_OR_GLFW = _USE_GLFW_
-   #GLUT_OR_GLFW = _USE_GLUT_
+   #GLUT_OR_GLFW = _USE_GLFW_
+   GLUT_OR_GLFW = _USE_GLUT_
 
    LFLAGS = -bind_at_load
    ifneq ($(strip $(GUIFLAG)),)

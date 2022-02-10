@@ -919,11 +919,9 @@ void SphereReshape(GLFWwindow *Window, int width, int height)
 void InitCamWindow(void)
 {
 
-      int w,h;
-
       #ifdef __APPLE__
       glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER,GLFW_FALSE);
-	  #endif
+	   #endif
       CamWindow = glfwCreateWindow(CamWidth,CamHeight,CamTitle,NULL,NULL);
       #if (defined(GLEW_BUILD) || defined(GLEW_STATIC))
       if (GLEW_OK != glewInit()) {
@@ -935,8 +933,7 @@ void InitCamWindow(void)
       glfwMakeContextCurrent(CamWindow);
       glfwSwapInterval(1); /* Vsync */
       glfwSetWindowPos(CamWindow,0,30);
-      glfwGetFramebufferSize(CamWindow,&w,&h);
-      glViewport(0,0,w,h);
+      glViewport(0,0,CamWidth,CamHeight);
 
 /* .. Set GL state variables */
       glClearColor(0.0,0.0,0.0,1.0);
@@ -1012,7 +1009,7 @@ void InitMapWindow(void)
 
       #ifdef __APPLE__
       glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER,GLFW_FALSE);
-	  #endif
+	   #endif
       MapWindow = glfwCreateWindow(MapWidth,MapHeight,MapTitle,NULL,NULL);
       glfwMakeContextCurrent(MapWindow);
       glfwSetWindowPos(MapWindow,CamWidth,30);
