@@ -13,8 +13,10 @@
 
 
 #include "42.h"
-#define EXTERN
+#define EXTERN extern
 #include "42gl.h"
+#undef EXTERN
+#define EXTERN 
 #include "42glut.h"
 #undef EXTERN
 
