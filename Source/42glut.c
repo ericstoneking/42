@@ -1366,7 +1366,7 @@ long GuiCmdInterpreter(char CmdLine[512], double *CmdTime)
       return(NewCmdProcessed);
 }
 /*********************************************************************/
-int HandoffToGui(int argc, char **argv)
+int HandoffToGuiGlut(int argc, char **argv)
 {
       PausedByMouse = 0;
 

@@ -24,9 +24,9 @@
 
 #ifdef _ENABLE_GUI_
    #ifdef _USE_GLUT_
-      extern int HandoffToGui(int argc, char **argv);
+      extern int HandoffToGuiGlut(int argc, char **argv);
    #else
-      extern int HandoffToGui(void);
+      extern int HandoffToGuiGlfw(int argc, char **argv);
    #endif
 #endif
 
@@ -403,9 +403,9 @@ int exec(int argc,char **argv)
       #ifdef _ENABLE_GUI_
          if (GLEnable) {
             #ifdef _USE_GLUT_
-               HandoffToGui(argc,argv);
+               HandoffToGuiGlut(argc,argv);
             #else
-               HandoffToGui();
+               HandoffToGuiGlfw(argc,argv);
             #endif
          }
          else {
