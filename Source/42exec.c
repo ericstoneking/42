@@ -23,11 +23,7 @@
 */
 
 #ifdef _ENABLE_GUI_
-   #ifdef _USE_GLUT_
-      extern int HandoffToGui(int argc, char **argv);
-   #else
-      extern int HandoffToGui(void);
-   #endif
+   extern int HandoffToGui(int argc, char **argv);
 #endif
 
 /**********************************************************************/
@@ -402,11 +398,7 @@ int exec(int argc,char **argv)
       InitInterProcessComm();
       #ifdef _ENABLE_GUI_
          if (GLEnable) {
-            #ifdef _USE_GLUT_
-               HandoffToGui(argc,argv);
-            #else
-               HandoffToGui();
-            #endif
+            HandoffToGui(argc,argv);
          }
          else {
             while(!Done) {
