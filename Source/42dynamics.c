@@ -3046,7 +3046,7 @@ void ScatterStates(struct JointType *G)
       double Pwu[3],Pvu[3],Pdwu[3];
       double pni[3],vi[3],Cvi[3],wxPvu[3],ai[3],Cai[3];
       double wxri[3],wxro[3],Calfri[3],wxPwu[3];
-      double axri[2],axro[3],wxwxri[3];
+      double axri[3],axro[3],wxwxri[3];
       double wxwxro[3],Cwi[3];
       double Iw[3],Ialfr[3],wxH[3];
       long i,j;
