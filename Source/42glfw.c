@@ -1342,7 +1342,7 @@ long GuiCmdInterpreter(char CmdLine[512], double *CmdTime)
       return(NewCmdProcessed);
 }
 /*********************************************************************/
-void HandoffToGui(void)
+void HandoffToGui(int argc, char **argv)
 {
       PausedByMouse = 0;
 
@@ -1353,6 +1353,7 @@ void HandoffToGui(void)
       UpdatePOV();
 
       printf("Initializing glfw\n");
+      glutInit(&argc,argv);
       glfwSetErrorCallback(GlfwErrorHandler);
       if (!glfwInit()) {
          printf("Error initializing glfw\n");
