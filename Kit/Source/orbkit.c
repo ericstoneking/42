@@ -2609,7 +2609,7 @@ void OscEphToMeanEph(double mu, double J2, double Rw, double DynTime,
    struct OrbitType *O)
 {
       #define TWOPI (6.283185307179586)
-      double e,e2,sin2i,sinw,sin2w,cosnu,g;
+      double e,e2,sin2i,sinw,sin2w,cosnu,g,E;
       double a,p,p2,Coef;
       
       sin2i = sin(O->inc)*sin(O->inc);
@@ -2643,6 +2643,10 @@ void OscEphToMeanEph(double mu, double J2, double Rw, double DynTime,
       /* 10.126 */
       O->J2Rw2bya = J2*Rw*Rw/O->MeanSMA;      
 
+      E = atan2(sqrt(1.0-O->ecc*O->ecc)*sin(O->anom), O->ecc + cos(O->anom)); 
+      O->MeanAnom = E - O->ecc*sin(E); 
+      O->MeanAnom0 = O->MeanAnom - O->MeanMotion*(DynTime-O->Epoch); 
+      
       #undef TWOPI
 }
 /* #ifdef __cplusplus
