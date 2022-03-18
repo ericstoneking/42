@@ -16,12 +16,14 @@
 
 uniform samplerCube AlbedoTexture;                                        
 uniform samplerCube CloudGlossTexture;                                 
-uniform vec3 UnitWorldVecF;  
-uniform vec3 SunVecF;                                                
+uniform vec3 UnitWorldVecE;  
+uniform vec3 SunVecE;                                                
 uniform float CosWorldAng;
+uniform float CosFov;
 uniform float WorldRad;
 uniform vec3 PosEyeW;
-uniform mat3 CWF;
+uniform mat3 CEF;
+uniform mat3 CWE;
 uniform float Width; 
                                                                        
 varying vec3 ViewVecInPlane;                                                
@@ -43,40 +45,45 @@ vec2 ProjectRayOntoSphere(vec3 Pos, vec3 Axis, float Rad)
 /**********************************************************************/
 void main(void)                                                        
 {                                                                      
-      float DiffIllum;                                                 
-      float SpecIllum;                                                 
-      vec3 HalfVec; 
-      vec3 GndPosW;
-      vec3 UnitGndPosW;
-      vec2 Intersect;                                                   
-      float NoH;
-      vec4 AlbedoColor;                                                       
-      vec4 MapColor;
-      vec4 Diffuse,Spec;
-      float SpecIntensity = 0.35; /* WAG */
       
-      vec3 ViewVecF = normalize(ViewVecInPlane);
+      gl_FragColor = vec4(0.0,0.0,0.0,1.0);
+
+      vec3 ViewVecF = normalize(ViewVecInPlane);      
+      vec3 ViewVecE = CEF*ViewVecF;
+      float EoW = dot(ViewVecE,UnitWorldVecE); 
+
+      if (EoW > CosWorldAng && ViewVecE.z < -CosFov) {
       
-      float FoW = dot(ViewVecF,UnitWorldVecF); 
-      vec3 ViewVecW =  CWF*ViewVecF;
-      vec3 SunVecW = CWF*SunVecF;
+         float DiffIllum;                                                 
+         float SpecIllum;                                                 
+         vec3 HalfVec; 
+         vec3 GndPosW;
+         vec3 UnitGndPosW;
+         vec2 Intersect;                                                   
+         float NoH;
+         vec4 AlbedoColor;                                                       
+         vec4 MapColor;
+         vec4 Diffuse,Spec;
+         float SpecIntensity = 0.35; /* WAG */
+
+         vec3 ViewVecW =  CWE*ViewVecE;
+         vec3 SunVecW = CWE*SunVecE;
       
-      float r = length(ViewVecInPlane);
-      float DistScale = 1.0/(r*r);
-      float CosScale = 1.0/r;
-      float CubeFaceAngle = 2.09439510239320; /* 4*pi/6 */
-      float AngleScale = DistScale*CosScale/CubeFaceAngle;
-      float dA = 4.0/Width/Width; 
-            
-      gl_FragColor = vec4(0.0,0.0,0.0,0.0);
+         float r = length(ViewVecInPlane);
+         float DistScale = 1.0/(r*r); /* Corner pixels look smaller due to distance */
+         float CosScale = 1.0/r; /* Pixel is tilted from LOS to F */
+         float PixelScale = 4.0/Width/Width; /* Face area is 4.0 */
+         float ViewScale = -ViewVecE.z; /* cos of angle from E axis */
+         float PiScale = 1.0/3.1415926535897; /* So integral over hemisphere = 1.0 */
+         float ScaleFactor = PixelScale*DistScale*CosScale*ViewScale*PiScale;
       
-      if (FoW > CosWorldAng) {
          Intersect = ProjectRayOntoSphere(PosEyeW,ViewVecW,WorldRad);
          /* Use nearest intersection with ground */
          GndPosW = PosEyeW + Intersect.x*ViewVecW;
          UnitGndPosW = normalize(GndPosW);
 
          AlbedoColor = vec4(vec3(textureCube(AlbedoTexture,UnitGndPosW)),1.0);
+         //AlbedoColor = vec4(1.0,1.0,1.0,1.0);
          
          /* Illumination */
          vec2 CloudGloss = vec2(textureCube(CloudGlossTexture,UnitGndPosW));
@@ -88,9 +95,9 @@ void main(void)
          SpecIllum = Gloss*pow(NoH,10.0);           
          Spec = SpecIllum*vec4(SpecIntensity,SpecIntensity,SpecIntensity,1.0);                    
       
-         gl_FragColor = DiffIllum*AlbedoColor+Spec; 
-         //gl_FragColor = DiffIllum*AlbedoColor; 
-         gl_FragColor *= dA*AngleScale;
+         //gl_FragColor = DiffIllum*AlbedoColor+Spec; 
+         gl_FragColor = DiffIllum*AlbedoColor; 
+         gl_FragColor *= ScaleFactor;
          gl_FragColor.a = 1.0;
       }
 }                                                                      

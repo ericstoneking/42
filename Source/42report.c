@@ -145,6 +145,7 @@ void Report(void)
       static FILE *Hwhlfile;
       static FILE *MTBfile;
       static FILE *AlbedoFile;
+      static FILE *IllumFile;
       //static FILE *ProjAreaFile;
       static FILE *AccFile;
       static char First = TRUE;
@@ -203,7 +204,10 @@ void Report(void)
          MTBfile = FileOpen(InOutPath,"MTB.42","w");
          AccFile = FileOpen(InOutPath,"Acc.42","w");
          
-         AlbedoFile = FileOpen(InOutPath,"Albedo.42","w");
+         if (SC[0].Ncss > 0) {
+            AlbedoFile = FileOpen(InOutPath,"Albedo.42","w");
+            IllumFile = FileOpen(InOutPath,"Illum.42","w");
+         }
       }
 
       if (OutFlag) {
@@ -292,8 +296,11 @@ void Report(void)
                fprintf(AccFile,"\n");
             }
             if (SC[0].Ncss > 0) {
-               for(i=0;i<SC[0].Ncss;i++) 
+               for(i=0;i<SC[0].Ncss;i++) {
+                  fprintf(IllumFile,"%le ",SC[0].CSS[i].Illum);
                   fprintf(AlbedoFile,"%le ",SC[0].CSS[i].Albedo);
+               }
+               fprintf(IllumFile,"\n");
                fprintf(AlbedoFile,"\n");
             }
             
