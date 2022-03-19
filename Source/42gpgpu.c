@@ -133,6 +133,7 @@ void InitAlbedo(void)
 
       glUseProgram(0);
 
+#if 0
       FileToString("./Kit/Shaders/TexReduceVtx.glsl",&ShaderText,&StrLen);
       TexReduceVtxShader = TextToShader(ShaderText,GL_VERTEX_SHADER,"TexReduceVtx");
       free(ShaderText);
@@ -147,6 +148,7 @@ void InitAlbedo(void)
       glUseProgram(TexReduceShaderProgram);
       ValidateShaderProgram(TexReduceShaderProgram,"TexReduce");
       glUseProgram(0);
+#endif
       
 }
 /**********************************************************************/
