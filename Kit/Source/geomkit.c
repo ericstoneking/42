@@ -173,6 +173,12 @@ void SurfaceForceProps(struct GeomType *G)
          VxV(nhat,uhat,vhat);
          UNITV(vhat);
          for(j=0;j<3;j++) P->Norm[j] = nhat[j];
+         if (MAGV(nhat) == 0.0) {
+            printf("Zero-length unit vector in SurfaceForceProps.\n");
+            printf("Check for zero-area polys or polys with three colinear vertices.\n");
+            printf("Tesselating your model to all triangles is highly recommended.\n");
+            exit(1);
+         }
 
          /* Compute in-plane basis vectors */
          PerpBasis(P->Norm,P->Uhat,P->Vhat);

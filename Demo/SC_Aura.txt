@@ -68,7 +68,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 3                             ! Number of wheels
 =============================  Wheel 0  ================================
 0.0                           ! Initial Momentum, N-m-sec
-1.0   0.0   0.0               ! Body, Wheel Axis Components, [X, Y, Z]
+1.0   0.0   0.0               ! Wheel Axis Components, [X, Y, Z]
 0.5   100.0                   ! Max Torque (N-m), Momentum (N-m-sec)
 0.2                           ! Wheel Rotor Inertia, kg-m^2
 0.2                           ! Static Imbalance, g-cm

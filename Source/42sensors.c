@@ -45,7 +45,7 @@ void AccelerometerModel(struct SCType *S)
 
       B = &S->B[0];
 
-     for(Ia=0;Ia<S->Nacc;Ia++) { 
+      for(Ia=0;Ia<S->Nacc;Ia++) { 
          A = &S->Accel[Ia];
          A->SampleCounter++; 
          if (A->SampleCounter >= A->MaxCounter) {

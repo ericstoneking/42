@@ -1,5 +1,6 @@
 <<<<<<<<<<<<<<<<<  42:  Command Script File  >>>>>>>>>>>>>>>>>
 0.0 SC[0] qrl = [0.0  0.0  0.0  1.0]
+
 EOF
 
 ##############################################################
@@ -69,8 +70,6 @@ EOF
 %lf Align SC[%ld].B[%ld] %s Vector [%lf %lf %lf] with %c-frame Vector [%lf %lf %lf]
    # %c-frame can be H, N, or L
 %lf Align SC[%ld].B[%ld] %s Vector [%lf %lf %lf] with SC[%ld].B[%ld] vector [%lf %lf %lf]
-%lf SC[%ld].Thr[%ld] %s
-   %s is OFF or ON
 Event Eclipse Entry SC[%ld] qrl = [%lf %lf %lf %lf]
 Event Eclipse Exit SC[%ld] qrl = [%lf %lf %lf %lf]
 Event Eclipse Entry SC[%ld] Cmd Angles = [%lf %lf %lf] deg, Seq = %ld wrt %c Frame

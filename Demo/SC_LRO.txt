@@ -224,7 +224,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 3                             ! Number of wheels
 =============================  Wheel 0  ================================
 0.0                           ! Initial Momentum, N-m-sec
-1.0   0.0   0.0               ! Body, Wheel Axis Components, [X, Y, Z]
+1.0   0.0   0.0               ! Wheel Axis Components, [X, Y, Z]
 0.14   50.0                   ! Max Torque (N-m), Momentum (N-m-sec)
 0.012                         ! Wheel Rotor Inertia, kg-m^2
 0.48                          ! Static Imbalance, g-cm
@@ -233,7 +233,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0                             ! Flex Node Index
 =============================  Wheel 1  ================================
 0.0                           ! Initial Momentum, N-m-sec
-0  0.0   1.0   0.0            ! Body, Wheel Axis Components, [X, Y, Z]
+0  0.0   1.0   0.0            ! Wheel Axis Components, [X, Y, Z]
 0.14   50.0                   ! Max Torque (N-m), Momentum (N-m-sec)
 0.012                         ! Wheel Rotor Inertia, kg-m^2
 0.48                          ! Static Imbalance, g-cm
@@ -242,7 +242,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0                             ! Flex Node Index
 =============================  Wheel 2  ================================
 0.0                           ! Initial Momentum, N-m-sec
-0  0.0   0.0   1.0            ! Body, Wheel Axis Components, [X, Y, Z]
+0  0.0   0.0   1.0            ! Wheel Axis Components, [X, Y, Z]
 0.14   50.0                   ! Max Torque (N-m), Momentum (N-m-sec)
 0.012                         ! Wheel Rotor Inertia, kg-m^2
 0.48                          ! Static Imbalance, g-cm

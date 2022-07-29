@@ -10,7 +10,7 @@
 \begin{tabular}{@{} rl @{}}
     {\bf To:} & 42 Users\\ 
     {\bf From:} & Eric Stoneking \\ 
-    {\bf Date:} & Oct 2017 \\ 
+    {\bf Date:} & July 2022 \\ 
     {\bf Subject:} & Getting Started with 42 Flight Software Models\\ 
 \hline
 \end{tabular}
@@ -22,11 +22,11 @@ Developing a control system is a laborious process.  42 has features that enable
 
 \section{Global Variables and the FSW Structure}
 
-42 makes heavy use of data structures to organize and segregate information.  Each spacecraft has an {\tt SC} structure, and within that there is an {\tt FSW} structure whose purpose is to contain all the data known to the spacecraft control flight software.  See {\tt 42types.h} and {\tt fswtypes.h} for the definitions of these structures.  
+42 makes heavy use of data structures to organize and segregate information.  Each spacecraft has an {\tt SC} structure, and within that there is an {\tt AC} structure whose purpose is to contain all the data known to the spacecraft control flight software.  See {\tt 42types.h} and {\tt AcTypes.h} for the definitions of these structures.  
 
-The {\tt FSW} structure is intended to contain all the data that the flight control software will need.  In the early going, it may be expedient to use a global truth variable in a control law (eg. {\tt SC.svn}) if the {\tt FSW} equivalent hasn't been coded yet.  42 allows this --- as shipped, {\tt 42fsw.c} includes {\tt 42.h}, which contains all the global variables.  As the project matures from concept study to implementation, however, the flight code needs to be limited to the information that it actually will have in flight.  To enforce this, comment out {\tt \#include "42.h"} and uncomment {\tt \#include "42fsw.h"}.  
+The {\tt AC} structure is intended to contain all the data that the flight control software will need.  In the early going, it may be expedient to use a global truth variable in a control law (eg. {\tt SC.svn}) if the {\tt AC} equivalent hasn't been coded yet.  42 allows this --- as shipped, {\tt 42fsw.c} includes {\tt 42.h}, which contains all the global variables.  As the project matures from concept study to implementation, however, the flight code needs to be limited to the information that it actually will have in flight.  To enforce this, use only variables from AcTypes.h in your flight software model, editing those structures to suit your needs.  
 
-To assist in rapid prototyping, the as-shipped FSW structure has variables to support a variety of control architectures.  The file {\tt 42fsw.c} also has a variety of notional control functions; some still run, some are prior exercises left in to be mined for ideas.
+To assist in rapid prototyping, the as-shipped AC structure has variables to support a variety of control architectures.  The file {\tt 42fsw.c} also has a variety of notional control functions; some still run, some are prior exercises left in to be mined for ideas.
 
 \section{Flight Software Models}
 
@@ -57,10 +57,10 @@ To add a new FSW tag, changes need to be made in four places:
 \item In your {\tt SC\_foo.txt}, introduce your new Flight Software Identifier, {\tt FOO\_FSW}.
 \item In {\tt 42defines.h}, find the list of FSW Tags, and add {\tt FOO\_FSW} to it, with a unique integer.
 \item In {\tt 42fsw.c:FlightSoftWare}, add a new case to call your new function, {\tt FooFSW}.
-\item In {\tt 42init.c:DecodeString}, there is a long {\tt if-elseif} tree.  This is how 42 turns strings read from input files into internally-useable constants.  Find the lines that interpret the existing FSW tag strings, and add another one to change the string {\tt "FOO\_FSW'"} into the constant {\tt FOO\_FSW}. 
+\item In {\tt 42init.c:DecodeString}, there is a long {\tt if-elseif} tree.  This is how 42 turns strings read from input files into internally-useable constants.  Find the lines that interpret the existing FSW tag strings, and add another one to change the string {\tt "FOO\_FSW"} into the constant {\tt FOO\_FSW}. 
 \end{enumerate}
 
-The FSW structure is defined in {\tt fswtypes.h}.  As shipped, it is populated with all the global variables needed for all the FSW models in {\tt 42fsw.c}.  As you customize your controller, you may add or delete variables as needed.  If you get to the point that your FSW model becomes flight software, you will probably either gut the FSW structure of everything extraneous or build up a separate, dedicated data structure that serves the same purpose.  As you get started, just be aware that the FSW structure has some pre-existing variables for you to grow into, but you shouldn't assume that they're all populated and maintained all the time.
+The AC structure is defined in {\tt AcTypes.h}.  As shipped, it is populated with all the global variables needed for all the FSW models in {\tt 42fsw.c}.  As you customize your controller, you may add or delete variables as needed.  If you get to the point that your FSW model becomes flight software, you will probably either gut the AC structure of everything extraneous or build up a separate, dedicated data structure that serves the same purpose.  As you get started, just be aware that the AC structure has some pre-existing variables for you to grow into, but you shouldn't assume that they're all populated and maintained all the time.
 
 \section{Sensor Models}
 

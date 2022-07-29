@@ -50,6 +50,12 @@ long SimCmdInterpreter(char CmdLine[512],double *CmdTime)
          DTSIM = Val;
       }
 
+      if (sscanf(CmdLine,"%lf DTOUT = %lf",
+         CmdTime,&Val) == 2) {
+         NewCmdProcessed = TRUE;
+         DTOUT = Val;
+      }
+
       if (sscanf(CmdLine,"%lf SC[%ld].G[%ld].RotLocked[%ld] %s",
          CmdTime,&Isc,&Ig,&Idof,response) == 5) {
          NewCmdProcessed = TRUE;

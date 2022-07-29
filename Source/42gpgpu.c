@@ -288,18 +288,32 @@ void FindAlbedo(struct SCType *S, struct CssType *CSS)
       }
 #else
       /* Not ready for prime time */
-      glUseProgram(TexReduceShaderProgram);
-      glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D,A->Tex[0]);
-      glBegin(GL_QUADS);
-         glVertex3d(-1.0,-1.0,-1.0);
-         glVertex3d( 1.0,-1.0,-1.0);
-         glVertex3d( 1.0, 1.0,-1.0);
-         glVertex3d(-1.0, 1.0,-1.0);
-      glEnd();
-      glUseProgram(0);
-      glReadPixels(0,0,1,1,GL_RGB,GL_FLOAT,A->Tex[0]);
-      CSS->Albedo = A->Tex[0][0];
+      glMatrixMode(GL_PROJECTION);
+      glPushMatrix();
+      glLoadIdentity();
+      gluOrtho2D(-0.5,((float) A->Width)-0.5,-0.5,((float) A->Height)-0.5);
+      glMatrixMode(GL_MODELVIEW);
+      /* Reduce Tex */
+      N = A->Width/2;
+      glUseProgram(TexReductionProgram);
+      do {
+         glActiveTexture(GL_TEXTURE0);
+         glBindTexture(GL_TEXTURE_2D,A->TexTag);
+         glClear(GL_COLOR_BUFFER_BIT);  
+         glBegin(GL_QUADS);
+            glVertex2i(0,0);
+            glVertex2i(N-1,0);
+            glVertex2i(N-1,N-1);
+            glVertex2i(0,N-1);
+         glEnd();
+         glReadPixels(0,0,N,N,GL_RGB,GL_FLOAT,A->Tex);
+         N /= 2;
+      } while(N > 1);
+      CSS->Albedo += A->Tex[0];
+      
+      glMatrixMode(GL_PROJECTION);
+      glPopMatrix();
+      glMatrixMode(GL_MODELVIEW);
 #endif      
 
       glBindRenderbuffer(GL_RENDERBUFFER,0);

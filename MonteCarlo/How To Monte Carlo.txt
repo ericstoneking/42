@@ -1,5 +1,10 @@
 How to set up, run, and archive a Monte Carlo simulation campaign.
 
+RunMC.m is a Matlab-style m-file, runnable either in Matlab or Octave.
+RunMC.jl is a julia program, runnable from the command line with 'julia RunMC.jl'.
+
+The instructions below refer to RunMC.m, but are easily adapted to RunMC.jl.
+
 1)  Copy desired InOut folder into the MonteCarlo folder.  I have renamed it 
     "Baseline", but you are free to rename it to anything.
 2)  Tailor RunMC.m to this campaign.
@@ -27,3 +32,4 @@ any input and output files you spared from deletion (we recommend saving the alt
 There is nothing special about the MonteCarlo folder itself.  Multiple campaigns may coexist, each in their own folder, e.g. "LVTipOffCampaign", "MC_SafeholdEntry", and "XprodSurvey".  If they are moved up or down in the directory structure, then some paths in RunMC.m must be modified appropriately.
 
 RunMC.m calls BatchRun.sh and OverwriteLineInFile.m.  Both are in 42/Utilities.
+RunMC.jl is self-contained, but assumes some packages have been installed.
