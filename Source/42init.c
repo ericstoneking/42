@@ -219,6 +219,16 @@ long DecodeString(char *s)
       else if (!strcmp(s,"MAJOR")) return MAJOR_CONSTELL;
       else if (!strcmp(s,"ZODIAC")) return ZODIAC_CONSTELL;
       else if (!strcmp(s,"MINOR")) return MINOR_CONSTELL;
+      
+      else if (!strcmp(s,"PASSIVE")) return PASSIVE_JOINT;
+      else if (!strcmp(s,"ACTUATED")) return ACTUATED_JOINT;
+      else if (!strcmp(s,"STEPPER_MOTOR")) return STEPPER_MOTOR_JOINT;
+      else if (!strcmp(s,"TVC_JOINT")) return TVC_JOINT;
+      else if (!strcmp(s,"VIBRATION_ISOLATOR")) return VIBRATION_ISOLATOR_JOINT;
+      else if (!strcmp(s,"SLOSH")) return SLOSH_JOINT;
+      else if (!strcmp(s,"STEERING_MIRROR")) return STEERING_MIRROR_JOINT;
+      else if (!strcmp(s,"AD_HOC_JOINT")) return AD_HOC_JOINT;
+
       else {
          printf("Bogus input %s in DecodeString (42init.c:%d)\n",s,__LINE__);
          exit(1);
@@ -1620,15 +1630,18 @@ void InitSpacecraft(struct SCType *S)
       fscanf(infile,"%lf %[^\n] %[\n]",&S->FswSampleTime,junk,&newline);
       S->FswMaxCounter = (long) (S->FswSampleTime/DTSIM+0.5);
       if (S->FswMaxCounter < 1) {
-         S->FswMaxCounter = 1;
-         S->FswSampleTime = DTSIM;
-         printf("Info:  FswSampleTime was smaller than DTSIM.  It has been adjusted to be DTSIM.\n");
+         printf("Error:  FswSampleTime smaller than DTSIM.\n");
+         exit(1);
       }
       S->FswSampleCounter = S->FswMaxCounter;
       S->InitAC = 1;
 
 /* .. Orbit Parameters */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      if (junk[0] != '*') {
+         printf("Error:  Malformed SC input file before Orbit Parameter section\n.");
+         exit(1);
+      }
       fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
       S->OrbDOF=DecodeString(response);
       fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
@@ -1640,6 +1653,10 @@ void InitSpacecraft(struct SCType *S)
 
 /* .. Initial Attitude */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      if (junk[0] != '*') {
+         printf("Error:  Malformed SC input file before Initial Attitude section\n.");
+         exit(1);
+      }
       fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
       RateFrame=response[0];
       AttParm=response[1];
@@ -1688,10 +1705,12 @@ void InitSpacecraft(struct SCType *S)
 
 /* .. Dynamics Flags */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      if (junk[0] != '*') {
+         printf("Error:  Malformed SC input file before Dynamics Flags section\n.");
+         exit(1);
+      }
       fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
       S->DynMethod=DecodeString(response);
-      fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
-      S->PassiveJointFrcTrqEnabled=DecodeString(response);
       fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
       S->ConstraintsRequested=DecodeString(response);
       fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
@@ -1706,6 +1725,10 @@ void InitSpacecraft(struct SCType *S)
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      if (junk[0] != '*') {
+         printf("Error:  Malformed SC input file before Body Parameters section\n.");
+         exit(1);
+      }
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nb,junk,&newline);
       S->Ng = S->Nb-1;
       S->B = (struct BodyType *) calloc(S->Nb,sizeof(struct BodyType));
@@ -1755,18 +1778,23 @@ void InitSpacecraft(struct SCType *S)
 
 /* .. Joint Parameters */
       SomeJointsLocked = FALSE;
-      /* Read Spacecraft input file */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      if (junk[0] != '*') {
+         printf("Error:  Malformed SC input file before Joint Parameters section\n.");
+         exit(1);
+      }
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       if (S->Ng == 0) {  /* Read and discard template */
-         for(i=0;i<18;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(i=0;i<19;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
       else {
          for(Ig=0;Ig<S->Ng;Ig++) {
             G = &S->G[Ig];
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+            fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+            G->Type = DecodeString(response);
             fscanf(infile,"%ld %ld %[^\n] %[\n]",
                    &G->Bin,&G->Bout,junk,&newline);
             if (G->Bin > G->Bout) {
@@ -1898,11 +1926,17 @@ void InitSpacecraft(struct SCType *S)
                    &G->TrnDampCoef[1],
                    &G->TrnDampCoef[2],
                    junk,&newline);
+                   
+            if (G->Type == ACTUATED_JOINT) InitActuatedJoint(G,S);
          }
       }
 
 /* .. Wheel parameters */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      if (junk[0] != '*') {
+         printf("Error:  Malformed SC input file before Wheel Parameters section\n.");
+         exit(1);
+      }
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nw,junk,&newline);
       S->Whl = (struct WhlType *) calloc(S->Nw,sizeof(struct WhlType));
       if (S->Nw == 0) {
@@ -1932,6 +1966,10 @@ void InitSpacecraft(struct SCType *S)
 
 /* .. MTB parameters */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      if (junk[0] != '*') {
+         printf("Error:  Malformed SC input file before MTB Parameters section\n.");
+         exit(1);
+      }
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nmtb,junk,&newline);
       S->MTB = (struct MTBType *) calloc(S->Nmtb,sizeof(struct MTBType));
       if (S->Nmtb == 0) {
@@ -1952,6 +1990,10 @@ void InitSpacecraft(struct SCType *S)
 
 /* .. Thruster parameters */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      if (junk[0] != '*') {
+         printf("Error:  Malformed SC input file before Thruster Parameters section\n.");
+         exit(1);
+      }
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nthr,junk,&newline);
       S->Thr = (struct ThrType *) calloc(S->Nthr,sizeof(struct ThrType));
       if (S->Nthr == 0) {
@@ -1978,6 +2020,10 @@ void InitSpacecraft(struct SCType *S)
 
 /* .. Gyro Parameters */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      if (junk[0] != '*') {
+         printf("Error:  Malformed SC input file before Gyro section\n.");
+         exit(1);
+      }
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Ngyro,junk,&newline);
       S->Gyro = (struct GyroType *) calloc(S->Ngyro,sizeof(struct GyroType));
       if (S->Ngyro == 0) {
@@ -1990,9 +2036,8 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%lf %[^\n] %[\n]",&Gyro->SampleTime,junk,&newline);
             Gyro->MaxCounter = (long) (Gyro->SampleTime/DTSIM+0.5);
             if (Gyro->MaxCounter < 1) {
-               Gyro->MaxCounter = 1;
-               Gyro->SampleTime = DTSIM;
-               printf("Info:  Gyro[%ld].SampleTime was smaller than DTSIM.  It has been adjusted to be DTSIM.\n",Ig);
+               printf("Error:  Gyro[%ld].SampleTime smaller than DTSIM.\n",Ig);
+               exit(1);
             }
             Gyro->SampleCounter = Gyro->MaxCounter;
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
@@ -2025,6 +2070,10 @@ void InitSpacecraft(struct SCType *S)
       
 /* .. Magnetometer Parameters */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      if (junk[0] != '*') {
+         printf("Error:  Malformed SC input file before Magnetometer section\n.");
+         exit(1);
+      }
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nmag,junk,&newline);
       S->MAG = (struct MagnetometerType *) calloc(S->Nmag,sizeof(struct MagnetometerType));
       if (S->Nmag == 0) {
@@ -2037,9 +2086,8 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%lf %[^\n] %[\n]",&MAG->SampleTime,junk,&newline);
             MAG->MaxCounter = (long) (MAG->SampleTime/DTSIM+0.5);
             if (MAG->MaxCounter < 1) {
-               MAG->MaxCounter = 1;
-               MAG->SampleTime = DTSIM;
-               printf("Info:  MAG[%ld].SampleTime was smaller than DTSIM.  It has been adjusted to be DTSIM.\n",Im);
+               printf("Error:  MAG[%ld].SampleTime smaller than DTSIM.\n",Im);
+               exit(1);
             }
             MAG->SampleCounter = MAG->MaxCounter;
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
@@ -2056,6 +2104,10 @@ void InitSpacecraft(struct SCType *S)
       
 /* .. Coarse Sun Sensors */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      if (junk[0] != '*') {
+         printf("Error:  Malformed SC input file before Coarse Sun Sensor section\n.");
+         exit(1);
+      }
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Ncss,junk,&newline);
       S->CSS = (struct CssType *) calloc(S->Ncss,sizeof(struct CssType));
       if (S->Ncss == 0) {
@@ -2068,9 +2120,8 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%lf %[^\n] %[\n]",&CSS->SampleTime,junk,&newline);
             CSS->MaxCounter = (long) (CSS->SampleTime/DTSIM+0.5);
             if (CSS->MaxCounter < 1) {
-               CSS->MaxCounter = 1;
-               CSS->SampleTime = DTSIM;
-               printf("Info:  CSS[%ld].SampleTime was smaller than DTSIM.  It has been adjusted to be DTSIM.\n",Ig);
+               printf("Error:  CSS[%ld].SampleTime smaller than DTSIM.\n",Ig);
+               exit(1);
             }
             CSS->SampleCounter = CSS->MaxCounter;
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
@@ -2088,6 +2139,10 @@ void InitSpacecraft(struct SCType *S)
 
 /* .. Fine Sun Sensors */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      if (junk[0] != '*') {
+         printf("Error:  Malformed SC input file before Fine Sun Sensor section\n.");
+         exit(1);
+      }
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nfss,junk,&newline);
       S->FSS = (struct FssType *) calloc(S->Nfss,sizeof(struct FssType));
       if (S->Nfss == 0) {
@@ -2100,9 +2155,8 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%lf %[^\n] %[\n]",&FSS->SampleTime,junk,&newline);
             FSS->MaxCounter = (long) (FSS->SampleTime/DTSIM+0.5);
             if (FSS->MaxCounter < 1) {
-               FSS->MaxCounter = 1;
-               FSS->SampleTime = DTSIM;
-               printf("Info:  FSS[%ld].SampleTime was smaller than DTSIM.  It has been adjusted to be DTSIM.\n",Ig);
+               printf("Error:  FSS[%ld].SampleTime smaller than DTSIM.\n",Ig);
+               exit(1);
             }
             FSS->SampleCounter = FSS->MaxCounter;
             fscanf(infile,"%lf %lf %lf %ld %[^\n] %[\n]",
@@ -2128,6 +2182,10 @@ void InitSpacecraft(struct SCType *S)
       
 /* .. Star Trackers */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      if (junk[0] != '*') {
+         printf("Error:  Malformed SC input file before Star Tracker section\n.");
+         exit(1);
+      }
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nst,junk,&newline);
       S->ST = (struct StarTrackerType *) calloc(S->Nst,sizeof(struct StarTrackerType));
       if (S->Nst == 0) {
@@ -2140,9 +2198,8 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%lf %[^\n] %[\n]",&ST->SampleTime,junk,&newline);
             ST->MaxCounter = (long) (ST->SampleTime/DTSIM+0.5);
             if (ST->MaxCounter < 1) {
-               ST->MaxCounter = 1;
-               ST->SampleTime = DTSIM;
-               printf("Info:  ST[%ld].SampleTime was smaller than DTSIM.  It has been adjusted to be DTSIM.\n",Ig);
+               printf("Error:  ST[%ld].SampleTime smaller than DTSIM.\n",Ig);
+               exit(1);
             }
             ST->SampleCounter = ST->MaxCounter;
             fscanf(infile,"%lf %lf %lf %ld %[^\n] %[\n]",
@@ -2177,6 +2234,10 @@ void InitSpacecraft(struct SCType *S)
       
 /* .. GPS Sensors */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      if (junk[0] != '*') {
+         printf("Error:  Malformed SC input file before GPS section\n.");
+         exit(1);
+      }
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Ngps,junk,&newline);
       S->GPS = (struct GpsType *) calloc(S->Ngps,sizeof(struct GpsType));
       if (S->Ngps == 0) {
@@ -2189,9 +2250,8 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%lf %[^\n] %[\n]",&GPS->SampleTime,junk,&newline);
             GPS->MaxCounter = (long) (GPS->SampleTime/DTSIM+0.5);
             if (GPS->MaxCounter < 1) {
-               GPS->MaxCounter = 1;
-               GPS->SampleTime = DTSIM;
-               printf("Info:  GPS[%ld].SampleTime was smaller than DTSIM.  It has been adjusted to be DTSIM.\n",Ig);
+               printf("Error:  GPS[%ld].SampleTime smaller than DTSIM.\n",Ig);
+               exit(1);
             }
             GPS->SampleCounter = GPS->MaxCounter;
             fscanf(infile,"%lf %[^\n] %[\n]",&GPS->PosNoise,junk,&newline);
@@ -2203,6 +2263,10 @@ void InitSpacecraft(struct SCType *S)
       
 /* .. Accelerometers */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      if (junk[0] != '*') {
+         printf("Error:  Malformed SC input file before Accelerometer section\n.");
+         exit(1);
+      }
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nacc,junk,&newline);
       S->Accel = (struct AccelType *) calloc(S->Nacc,sizeof(struct AccelType));
       if (S->Nacc == 0) {
@@ -2215,10 +2279,8 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%lf %[^\n] %[\n]",&Accel->SampleTime,junk,&newline);
             Accel->MaxCounter = (long) (Accel->SampleTime/DTSIM+0.5);
             if (Accel->MaxCounter < 1) {
-               Accel->MaxCounter = 1;
-               Accel->SampleTime = DTSIM;
-              
-               printf("Info:  Accel[%ld].SampleTime was smaller than DTSIM.  It has been adjusted to be DTSIM.\n",Ia);
+               printf("Error:  Accel[%ld].SampleTime smaller than DTSIM.\n",Ia);
+               exit(1);
             }
             Accel->SampleCounter = Accel->MaxCounter;
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",

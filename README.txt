@@ -32,7 +32,7 @@ The compiler will attempt to detect what platform you're on (Linux, OSX, or
 Msys), but its success rate isn't great. If you have errors on the first
 compile or run, try editing your Makefile to manually set your `42PLATFORM`.
 
-For OpenGL graphics, newer Macs with Retina displays will need the GLFW graphics libraries, available from MacPorts, Homebrew, and probably elsewhere.  Otherwise, you'll need the GLUT libraries, which are also readily available if not already installed on your system.  Graphics are optional, settable in the Makefile by GUIFLAG.
+42 supports both the GLUT and GLFW libraries, which handle the platform-specific parts of graphics processing.  There was a period of time when newer Macs with Retina displays needed the GLFW graphics libraries, but the problem with GLUT has since been fixed.  GLFW is available from MacPorts, Homebrew, and probably elsewhere.  The GLUT libraries are also readily available if not already installed on your system.  Graphics are optional, settable in the Makefile by GUIFLAG.
 
 ## Getting Started
 
@@ -65,3 +65,6 @@ throw things out of synch. Again, the most common symptom is the "Bogus input in
 DecodeString" error. Use your debugger to trace back where the error was
 generated. (The actual mistake may be at that line, or may be somewhere
 upstream.)
+
+3)  Line endings.  Natively, Windows uses CRLF, OSX uses CR, and *nix uses LF (I think I got those right...)  Text editors, etc, are better these days at tolerating unexpected line endings than they used to be, but this is something you should check if something goes awry.  For example, there are reports that git, in an effort to be helpful, might regularize your line endings.  This might cause some text files to fail being read in properly by 42 on other platforms.  One reported outcome is graphics shader code not compiling correctly, resulting in gray worlds or other graphics issues.  Something to watch for.
+

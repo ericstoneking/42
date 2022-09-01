@@ -40,6 +40,14 @@ void WriteToFile(FILE *StateFile, struct AcType *AC)
       if (AC->EchoEnabled) printf("%s",line);
 
       for(i=0;i<AC->Ng;i++) {
+         sprintf(line,"SC[%ld].AC.G[%ld].Cmd.AngRate = %18.12le %18.12le %18.12le\n",
+            Isc,i,
+            AC->G[i].Cmd.AngRate[0],
+            AC->G[i].Cmd.AngRate[1],
+            AC->G[i].Cmd.AngRate[2]);
+         fprintf(StateFile,"%s",line);
+         if (AC->EchoEnabled) printf("%s",line);
+
          sprintf(line,"SC[%ld].AC.G[%ld].Cmd.Ang = %18.12le %18.12le %18.12le\n",
             Isc,i,
             AC->G[i].Cmd.Ang[0],
@@ -76,6 +84,14 @@ void WriteToFile(FILE *StateFile, struct AcType *AC)
          if (AC->EchoEnabled) printf("%s",line);
 
       }
+
+      sprintf(line,"SC[%ld].AC.Cmd.AngRate = %18.12le %18.12le %18.12le\n",
+         Isc,
+         AC->Cmd.AngRate[0],
+         AC->Cmd.AngRate[1],
+         AC->Cmd.AngRate[2]);
+      fprintf(StateFile,"%s",line);
+      if (AC->EchoEnabled) printf("%s",line);
 
       sprintf(line,"SC[%ld].AC.Cmd.Ang = %18.12le %18.12le %18.12le\n",
          Isc,
@@ -176,6 +192,18 @@ void WriteToFile(FILE *StateFile, struct AcType *AC)
          fprintf(StateFile,"%s",line);
          if (AC->EchoEnabled) printf("%s",line);
 
+         sprintf(line,"SC[%ld].AC.Pi = %18.12le\n",
+            Isc,
+            AC->Pi);
+         fprintf(StateFile,"%s",line);
+         if (AC->EchoEnabled) printf("%s",line);
+
+         sprintf(line,"SC[%ld].AC.TwoPi = %18.12le\n",
+            Isc,
+            AC->TwoPi);
+         fprintf(StateFile,"%s",line);
+         if (AC->EchoEnabled) printf("%s",line);
+
          sprintf(line,"SC[%ld].AC.DT = %18.12le\n",
             Isc,
             AC->DT);
@@ -242,12 +270,6 @@ void WriteToFile(FILE *StateFile, struct AcType *AC)
          }
 
          for(i=0;i<AC->Ng;i++) {
-            sprintf(line,"SC[%ld].AC.G[%ld].IsUnderActiveControl = %ld\n",
-               Isc,i,
-               AC->G[i].IsUnderActiveControl);
-            fprintf(StateFile,"%s",line);
-            if (AC->EchoEnabled) printf("%s",line);
-
             sprintf(line,"SC[%ld].AC.G[%ld].IsSpherical = %ld\n",
                Isc,i,
                AC->G[i].IsSpherical);
@@ -489,6 +511,12 @@ void WriteToFile(FILE *StateFile, struct AcType *AC)
          }
 
          for(i=0;i<AC->Nwhl;i++) {
+            sprintf(line,"SC[%ld].AC.Whl[%ld].Body = %ld\n",
+               Isc,i,
+               AC->Whl[i].Body);
+            fprintf(StateFile,"%s",line);
+            if (AC->EchoEnabled) printf("%s",line);
+
             sprintf(line,"SC[%ld].AC.Whl[%ld].Axis = %18.12le %18.12le %18.12le\n",
                Isc,i,
                AC->Whl[i].Axis[0],
@@ -551,6 +579,12 @@ void WriteToFile(FILE *StateFile, struct AcType *AC)
          }
 
          for(i=0;i<AC->Nthr;i++) {
+            sprintf(line,"SC[%ld].AC.Thr[%ld].Body = %ld\n",
+               Isc,i,
+               AC->Thr[i].Body);
+            fprintf(StateFile,"%s",line);
+            if (AC->EchoEnabled) printf("%s",line);
+
             sprintf(line,"SC[%ld].AC.Thr[%ld].PosB = %18.12le %18.12le %18.12le\n",
                Isc,i,
                AC->Thr[i].PosB[0],

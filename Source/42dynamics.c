@@ -21,36 +21,6 @@
 */
 
 /**********************************************************************/
-void PassiveJointFrcTrq(double *u, double *x, struct SCType *S)
-{
-      long Ig,i;
-      struct JointType *G;
-      double a[3];
-
-      for(Ig=0;Ig<S->Ng;Ig++) {
-         G = &S->G[Ig];
-         if (G->IsSpherical) {
-            Q2AngleVec(&x[G->Rotx0],a);
-            for(i=0;i<3;i++) {
-               G->PassiveTrq[i] = -G->RotDampCoef[i]*u[G->Rotu0+i]
-                                 - G->RotSpringCoef[i]*a[i];
-            }
-         }
-         else {
-            for(i=0;i<G->RotDOF;i++) {
-               G->PassiveTrq[i] = -G->RotDampCoef[i]*u[G->Rotu0+i]
-                                  -G->RotSpringCoef[i]*x[G->Rotx0+i];
-            }
-         }
-
-         for(i=0;i<G->TrnDOF;i++) {
-            G->PassiveFrc[i] = -G->TrnDampCoef[i]*u[G->Trnu0+i]
-                               -G->TrnSpringCoef[i]*x[G->Trnx0+i];
-         }
-
-      }
-}
-/**********************************************************************/
 /*  Adjust body positions and velocities so that they are related to  */
 /*  those of the spacecraft center of mass.                           */
 void MotionConstraints(struct SCType *S)
@@ -171,10 +141,6 @@ void MapJointStatesToStateVector(struct SCType *S)
          JointPartials(TRUE,G->IsSpherical,G->RotSeq,G->TrnSeq,
             G->Ang,G->AngRate,G->Gamma,G->Gs,G->Gds,
             G->PosRate,G->Delta,G->Ds,G->Dds);
-         for(i=0;i<3;i++) {
-            G->PassiveTrq[i] = 0.0;
-            G->PassiveFrc[i] = 0.0;
-         }
          /* CTrqBo is constant for rigid body dynamics */
          /* It gets overwritten for flex */
          for(i=0;i<3;i++) {
@@ -248,11 +214,12 @@ void MapStateVectorToBodyStates(double *u, double *x, double *uf,
          Bi = &S->B[G->Bin];
          Bo = &S->B[G->Bout];
          if (G->IsSpherical) {
-            UNITQ(&x[G->Rotx0]);
+            for(i=0;i<4;i++) G->q[i] = x[G->Rotx0+i];
+            UNITQ(G->q);
             for(i=0;i<3;i++) {
                G->AngRate[i] = u[G->Rotu0+i];
             }
-            Q2C(&x[G->Rotx0],G->CGoGi);
+            Q2C(G->q,G->CGoGi);
             C2A(G->RotSeq,G->CGoGi,&G->Ang[0],&G->Ang[1],&G->Ang[2]);
          }
          else {
@@ -1764,8 +1731,10 @@ void KaneNBodyEOM(double *u, double *x, double *h,
       FindInertiaTrq(S);
       FindInertiaFrc(S);
 
-      /* Non-actuator-induced joint torques */
-      if(S->PassiveJointFrcTrqEnabled) PassiveJointFrcTrq(u,x,S);
+      /* Joint torques */
+      for(Ig=0;Ig<S->Ng;Ig++) {
+         JointFrcTrq(&S->G[Ig],S);
+      }
 
       /* "F-bendy" and "T-bendy", Spring/Damping, and nonlinear terms */
       if (S->FlexActive) {
@@ -1796,10 +1765,10 @@ void KaneNBodyEOM(double *u, double *x, double *h,
             FrcGi[i] = 0.0;
             TrqGo[i] = 0.0;
             for(j=0;j<G->RotDOF;j++) {
-               TrqGo[i] += G->Gamma[i][j]*(G->Trq[j]+G->PassiveTrq[j]);
+               TrqGo[i] += G->Gamma[i][j]*(G->Trq[j]);
             }
             for(j=0;j<G->TrnDOF;j++) {
-               FrcGi[i] += G->Delta[i][j]*(G->Frc[j]+G->PassiveFrc[j]);
+               FrcGi[i] += G->Delta[i][j]*(G->Frc[j]);
             }
          }
 
@@ -2087,7 +2056,9 @@ void KaneNBodyConstraints(struct SCType *S)
       FindInertiaFrc(S);
 
       /* Non-actuator-induced joint torques */
-      if(S->PassiveJointFrcTrqEnabled) PassiveJointFrcTrq(D->u,D->x,S);
+      for(Ig=0;Ig<S->Ng;Ig++) {
+         JointFrcTrq(&S->G[Ig],S);
+      }
 
       /* "F-bendy" and "T-bendy", Spring/Damping, and nonlinear terms */
       if (S->FlexActive) {
@@ -2118,10 +2089,10 @@ void KaneNBodyConstraints(struct SCType *S)
             FrcGi[i] = 0.0;
             TrqGo[i] = 0.0;
             for(j=0;j<G->RotDOF;j++) {
-               TrqGo[i] += G->Gamma[i][j]*(G->Trq[j]+G->PassiveTrq[j]);
+               TrqGo[i] += G->Gamma[i][j]*G->Trq[j];
             }
             for(j=0;j<G->TrnDOF;j++) {
-               FrcGi[i] += G->Delta[i][j]*(G->Frc[j]+G->PassiveFrc[j]);
+               FrcGi[i] += G->Delta[i][j]*G->Frc[j];
             }
          }
 
@@ -3009,36 +2980,6 @@ void OrderNJointCOI(struct JointType *G)
       MxM(G->CBoGo,G->CGoGi,CBoGi);
       MxM(CBoGi,G->CGiBi,G->COI);
 }
-/**********************************************************************/
-void OrderNPassiveJointFrcTrq(struct SCType *S)
-{
-      long Ig,i;
-      struct JointType *G;
-      double a[3];
-
-      for(Ig=0;Ig<S->Ng;Ig++) {
-         G = &S->G[Ig];
-         if (G->IsSpherical) {
-            Q2AngleVec(G->q,a);
-            for(i=0;i<3;i++) {
-               G->PassiveTrq[i] = -G->RotDampCoef[i]*G->AngRate[i]
-                                 - G->RotSpringCoef[i]*a[i];
-            }
-         }
-         else {
-            for(i=0;i<G->RotDOF;i++) {
-               G->PassiveTrq[i] = -G->RotDampCoef[i]*G->AngRate[i]
-                                  -G->RotSpringCoef[i]*G->Ang[i];
-            }
-         }
-
-         for(i=0;i<G->TrnDOF;i++) {
-            G->PassiveFrc[i] = -G->TrnDampCoef[i]*G->PosRate[i]
-                               -G->TrnSpringCoef[i]*G->Pos[i];
-         }
-
-      }
-}
 /******************************************************************************/
 void ScatterStates(struct JointType *G)
 {
@@ -3298,22 +3239,20 @@ void OrderNMultiBodyEOM(struct SCType *S)
          ScatterStates(G);
       }
       
-      if (S->PassiveJointFrcTrqEnabled) {
-         OrderNPassiveJointFrcTrq(S);
-      }
       /* Apply joint torques/forces to bodies */
       for(Ig=0;Ig<S->Ng;Ig++) {
          G = &S->G[Ig];
          Bi = G->Bi;
          Bo = G->Bo;
+         JointFrcTrq(G,S);
          for(i=0;i<3;i++) {
             FrcBi[i] = 0.0;
             TrqGo[i] = 0.0;
             for(j=0;j<G->RotDOF;j++) {
-               TrqGo[i] += G->Pw[i][j]*(G->Trq[j]+G->PassiveTrq[j]);
+               TrqGo[i] += G->Pw[i][j]*G->Trq[j];
             }
             for(j=0;j<G->TrnDOF;j++) {
-               FrcBi[i] += G->Pv[i][j]*(G->Frc[j]+G->PassiveFrc[j]);
+               FrcBi[i] += G->Pv[i][j]*G->Frc[j];
             }
          }
          /* Force Transformations*/

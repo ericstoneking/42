@@ -29,37 +29,6 @@ void WriteToGmsec(GMSEC_ConnectionMgr ConnMgr,GMSEC_Status status,  char **Prefi
       for(Ipfx=0;Ipfx<Nprefix;Ipfx++) {
          PfxLen = strlen(Prefix[Ipfx]);
 
-         for(Iorb=0;Iorb<Norb;Iorb++) {
-            if (Orb[Iorb].Exists) {
-               sprintf(line,"Orb[%ld].PosN = %18.12le %18.12le %18.12le\n",
-                  Iorb,
-                  Orb[Iorb].PosN[0],
-                  Orb[Iorb].PosN[1],
-                  Orb[Iorb].PosN[2]);
-               if (!strncmp(line,Prefix[Ipfx],PfxLen)) {
-                  LineLen = strlen(line);
-                  memcpy(&Msg[MsgLen],line,LineLen);
-                  MsgLen += LineLen;
-
-                  if (EchoEnabled) printf("%s",line);
-               }
-
-               sprintf(line,"Orb[%ld].VelN = %18.12le %18.12le %18.12le\n",
-                  Iorb,
-                  Orb[Iorb].VelN[0],
-                  Orb[Iorb].VelN[1],
-                  Orb[Iorb].VelN[2]);
-               if (!strncmp(line,Prefix[Ipfx],PfxLen)) {
-                  LineLen = strlen(line);
-                  memcpy(&Msg[MsgLen],line,LineLen);
-                  MsgLen += LineLen;
-
-                  if (EchoEnabled) printf("%s",line);
-               }
-
-            }
-         }
-
          for(Isc=0;Isc<Nsc;Isc++) {
             if (SC[Isc].Exists) {
                sprintf(line,"SC[%ld].PosR = %18.12le %18.12le %18.12le\n",
@@ -550,6 +519,58 @@ void WriteToGmsec(GMSEC_ConnectionMgr ConnMgr,GMSEC_Status status,  char **Prefi
 
                }
 
+               sprintf(line,"SC[%ld].GN.Pos = %18.12le %18.12le %18.12le\n",
+                  Isc,
+                  SC[Isc].GN.Pos[0],
+                  SC[Isc].GN.Pos[1],
+                  SC[Isc].GN.Pos[2]);
+               if (!strncmp(line,Prefix[Ipfx],PfxLen)) {
+                  LineLen = strlen(line);
+                  memcpy(&Msg[MsgLen],line,LineLen);
+                  MsgLen += LineLen;
+
+                  if (EchoEnabled) printf("%s",line);
+               }
+
+               sprintf(line,"SC[%ld].GN.PosRate = %18.12le %18.12le %18.12le\n",
+                  Isc,
+                  SC[Isc].GN.PosRate[0],
+                  SC[Isc].GN.PosRate[1],
+                  SC[Isc].GN.PosRate[2]);
+               if (!strncmp(line,Prefix[Ipfx],PfxLen)) {
+                  LineLen = strlen(line);
+                  memcpy(&Msg[MsgLen],line,LineLen);
+                  MsgLen += LineLen;
+
+                  if (EchoEnabled) printf("%s",line);
+               }
+
+               sprintf(line,"SC[%ld].GN.Ang = %18.12le %18.12le %18.12le\n",
+                  Isc,
+                  SC[Isc].GN.Ang[0],
+                  SC[Isc].GN.Ang[1],
+                  SC[Isc].GN.Ang[2]);
+               if (!strncmp(line,Prefix[Ipfx],PfxLen)) {
+                  LineLen = strlen(line);
+                  memcpy(&Msg[MsgLen],line,LineLen);
+                  MsgLen += LineLen;
+
+                  if (EchoEnabled) printf("%s",line);
+               }
+
+               sprintf(line,"SC[%ld].GN.AngRate = %18.12le %18.12le %18.12le\n",
+                  Isc,
+                  SC[Isc].GN.AngRate[0],
+                  SC[Isc].GN.AngRate[1],
+                  SC[Isc].GN.AngRate[2]);
+               if (!strncmp(line,Prefix[Ipfx],PfxLen)) {
+                  LineLen = strlen(line);
+                  memcpy(&Msg[MsgLen],line,LineLen);
+                  MsgLen += LineLen;
+
+                  if (EchoEnabled) printf("%s",line);
+               }
+
                for(i=0;i<SC[Isc].Nw;i++) {
                   sprintf(line,"SC[%ld].Whl[%ld].H = %18.12le\n",
                      Isc,i,
@@ -614,6 +635,37 @@ void WriteToGmsec(GMSEC_ConnectionMgr ConnMgr,GMSEC_Status status,  char **Prefi
                   World[Iw].eph.VelN[0],
                   World[Iw].eph.VelN[1],
                   World[Iw].eph.VelN[2]);
+               if (!strncmp(line,Prefix[Ipfx],PfxLen)) {
+                  LineLen = strlen(line);
+                  memcpy(&Msg[MsgLen],line,LineLen);
+                  MsgLen += LineLen;
+
+                  if (EchoEnabled) printf("%s",line);
+               }
+
+            }
+         }
+
+         for(Iorb=0;Iorb<Norb;Iorb++) {
+            if (Orb[Iorb].Exists) {
+               sprintf(line,"Orb[%ld].PosN = %18.12le %18.12le %18.12le\n",
+                  Iorb,
+                  Orb[Iorb].PosN[0],
+                  Orb[Iorb].PosN[1],
+                  Orb[Iorb].PosN[2]);
+               if (!strncmp(line,Prefix[Ipfx],PfxLen)) {
+                  LineLen = strlen(line);
+                  memcpy(&Msg[MsgLen],line,LineLen);
+                  MsgLen += LineLen;
+
+                  if (EchoEnabled) printf("%s",line);
+               }
+
+               sprintf(line,"Orb[%ld].VelN = %18.12le %18.12le %18.12le\n",
+                  Iorb,
+                  Orb[Iorb].VelN[0],
+                  Orb[Iorb].VelN[1],
+                  Orb[Iorb].VelN[2]);
                if (!strncmp(line,Prefix[Ipfx],PfxLen)) {
                   LineLen = strlen(line);
                   memcpy(&Msg[MsgLen],line,LineLen);
@@ -793,6 +845,28 @@ void WriteToGmsec(GMSEC_ConnectionMgr ConnMgr,GMSEC_Status status,  char **Prefi
                      if (EchoEnabled) printf("%s",line);
                   }
 
+                  sprintf(line,"SC[%ld].AC.Pi = %18.12le\n",
+                     Isc,
+                     SC[Isc].AC.Pi);
+                  if (!strncmp(line,Prefix[Ipfx],PfxLen)) {
+                     LineLen = strlen(line);
+                     memcpy(&Msg[MsgLen],line,LineLen);
+                     MsgLen += LineLen;
+
+                     if (EchoEnabled) printf("%s",line);
+                  }
+
+                  sprintf(line,"SC[%ld].AC.TwoPi = %18.12le\n",
+                     Isc,
+                     SC[Isc].AC.TwoPi);
+                  if (!strncmp(line,Prefix[Ipfx],PfxLen)) {
+                     LineLen = strlen(line);
+                     memcpy(&Msg[MsgLen],line,LineLen);
+                     MsgLen += LineLen;
+
+                     if (EchoEnabled) printf("%s",line);
+                  }
+
                   sprintf(line,"SC[%ld].AC.DT = %18.12le\n",
                      Isc,
                      SC[Isc].AC.DT);
@@ -894,17 +968,6 @@ void WriteToGmsec(GMSEC_ConnectionMgr ConnMgr,GMSEC_Status status,  char **Prefi
                   }
 
                   for(i=0;i<SC[Isc].AC.Ng;i++) {
-                     sprintf(line,"SC[%ld].AC.G[%ld].IsUnderActiveControl = %ld\n",
-                        Isc,i,
-                        SC[Isc].AC.G[i].IsUnderActiveControl);
-                     if (!strncmp(line,Prefix[Ipfx],PfxLen)) {
-                        LineLen = strlen(line);
-                        memcpy(&Msg[MsgLen],line,LineLen);
-                        MsgLen += LineLen;
-
-                        if (EchoEnabled) printf("%s",line);
-                     }
-
                      sprintf(line,"SC[%ld].AC.G[%ld].IsSpherical = %ld\n",
                         Isc,i,
                         SC[Isc].AC.G[i].IsSpherical);
@@ -1276,6 +1339,17 @@ void WriteToGmsec(GMSEC_ConnectionMgr ConnMgr,GMSEC_Status status,  char **Prefi
                   }
 
                   for(i=0;i<SC[Isc].AC.Nwhl;i++) {
+                     sprintf(line,"SC[%ld].AC.Whl[%ld].Body = %ld\n",
+                        Isc,i,
+                        SC[Isc].AC.Whl[i].Body);
+                     if (!strncmp(line,Prefix[Ipfx],PfxLen)) {
+                        LineLen = strlen(line);
+                        memcpy(&Msg[MsgLen],line,LineLen);
+                        MsgLen += LineLen;
+
+                        if (EchoEnabled) printf("%s",line);
+                     }
+
                      sprintf(line,"SC[%ld].AC.Whl[%ld].Axis = %18.12le %18.12le %18.12le\n",
                         Isc,i,
                         SC[Isc].AC.Whl[i].Axis[0],
@@ -1378,6 +1452,17 @@ void WriteToGmsec(GMSEC_ConnectionMgr ConnMgr,GMSEC_Status status,  char **Prefi
                   }
 
                   for(i=0;i<SC[Isc].AC.Nthr;i++) {
+                     sprintf(line,"SC[%ld].AC.Thr[%ld].Body = %ld\n",
+                        Isc,i,
+                        SC[Isc].AC.Thr[i].Body);
+                     if (!strncmp(line,Prefix[Ipfx],PfxLen)) {
+                        LineLen = strlen(line);
+                        memcpy(&Msg[MsgLen],line,LineLen);
+                        MsgLen += LineLen;
+
+                        if (EchoEnabled) printf("%s",line);
+                     }
+
                      sprintf(line,"SC[%ld].AC.Thr[%ld].PosB = %18.12le %18.12le %18.12le\n",
                         Isc,i,
                         SC[Isc].AC.Thr[i].PosB[0],

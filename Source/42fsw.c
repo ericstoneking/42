@@ -752,6 +752,10 @@ void InitAC(struct SCType *S)
       
       AC->ID = S->ID;
       
+      /* Fundamental Constants */
+      AC->Pi = Pi;
+      AC->TwoPi = TwoPi;
+      
       /* Time, Mass */
       AC->DT = S->FswSampleTime;
       AC->mass = S->mass;
@@ -782,7 +786,6 @@ void InitAC(struct SCType *S)
       if (AC->Ng > 0) {
          AC->G = (struct AcJointType *) calloc(AC->Ng,sizeof(struct AcJointType));
          for(Ig=0;Ig<AC->Ng;Ig++) {
-            AC->G[Ig].IsUnderActiveControl = TRUE;
             AC->G[Ig].IsSpherical = S->G[Ig].IsSpherical;
             AC->G[Ig].RotDOF = S->G[Ig].RotDOF;
             AC->G[Ig].TrnDOF = S->G[Ig].TrnDOF;
@@ -1310,6 +1313,7 @@ void ThreeAxisFSW(struct SCType *S)
       double qrn[4],qbr[4],svr[3];
       double Herr[3],HxB[3];
       double Zvec[3] = {0.0,0.0,1.0};
+      double AngErr;
       long i,j;
       struct AcType *AC;
       struct AcThreeAxisCtrlType *C;
@@ -1371,6 +1375,11 @@ void ThreeAxisFSW(struct SCType *S)
          AC->G[0].Cmd.Ang[0] += TwoPi;
       if (AC->G[0].Ang[0] - AC->G[0].Cmd.Ang[0] < -Pi)
          AC->G[0].Cmd.Ang[0] -= TwoPi;
+
+      AngErr = AC->G[0].Ang[0] - AC->G[0].Cmd.Ang[0];
+      AC->G[0].Cmd.AngRate[0] -= AC->G[0].AngGain[0]/AC->G[0].AngRateGain[0]*AngErr;
+      AC->G[0].Cmd.AngRate[0] = Limit(AC->G[0].Cmd.AngRate[0],
+         -AC->G[0].MaxAngRate[0],AC->G[0].MaxAngRate[0]);
 }
 /**********************************************************************/
 void IssFSW(struct SCType *S)
@@ -1381,6 +1390,7 @@ void IssFSW(struct SCType *S)
       double Identity[3][3] = {{1.0,0.0,0.0},{0.0,1.0,0.0},{0.0,0.0,1.0}};
       double Zvec[3] = {0.0,0.0,1.0};
       double GimCmd[3];
+      double AngErr;
       double svb[3];
       double Iapp[3];
       double r[3],rb[3],tvb[3],MinRoZ,RoZ;
@@ -1432,15 +1442,15 @@ void IssFSW(struct SCType *S)
       AC->G[0].Cmd.AngRate[0] = -S->wln[1];
       AC->G[1].Cmd.AngRate[0] = S->wln[1];
 
-      AC->G[2].Cmd.Ang[0] = -GimCmd[1];
-      AC->G[3].Cmd.Ang[0] =  GimCmd[1];
-      AC->G[4].Cmd.Ang[0] = -GimCmd[1];
-      AC->G[5].Cmd.Ang[0] =  GimCmd[1];
+      AC->G[2].Cmd.Ang[0] =  GimCmd[1];
+      AC->G[3].Cmd.Ang[0] = -GimCmd[1];
+      AC->G[4].Cmd.Ang[0] =  GimCmd[1];
+      AC->G[5].Cmd.Ang[0] = -GimCmd[1];
 
-      AC->G[6].Cmd.Ang[0] =  GimCmd[1];
-      AC->G[7].Cmd.Ang[0] = -GimCmd[1];
-      AC->G[8].Cmd.Ang[0] =  GimCmd[1];
-      AC->G[9].Cmd.Ang[0] = -GimCmd[1];
+      AC->G[6].Cmd.Ang[0] = -GimCmd[1];
+      AC->G[7].Cmd.Ang[0] =  GimCmd[1];
+      AC->G[8].Cmd.Ang[0] = -GimCmd[1];
+      AC->G[9].Cmd.Ang[0] =  GimCmd[1];
 
 /* .. Point SM Solar Array */
       AC->G[12].Cmd.Ang[0] = GimCmd[0];
@@ -1470,6 +1480,17 @@ void IssFSW(struct SCType *S)
 
       AC->G[14].Cmd.Ang[0] = Limit(GimCmd[0],-120.0*D2R,120.0*D2R);
       AC->G[14].Cmd.Ang[1] = Limit(GimCmd[1],-65.0*D2R,65.0*D2R);
+      
+      for(Ig=0;Ig<AC->Ng;Ig++) {
+         for(j=0;j<AC->G[Ig].RotDOF;j++) {
+            AngErr = AC->G[Ig].Ang[j] - AC->G[Ig].Cmd.Ang[j];
+            if (AngErr >  Pi) AngErr -= TwoPi;
+            if (AngErr < -Pi) AngErr += TwoPi;
+            AC->G[Ig].Cmd.AngRate[j] = -AC->G[Ig].AngGain[j]/AC->G[Ig].AngRateGain[j]*AngErr;
+            AC->G[Ig].Cmd.AngRate[j] = Limit(AC->G[Ig].Cmd.AngRate[j],
+               -AC->G[Ig].MaxAngRate[j],AC->G[Ig].MaxAngRate[j]);
+         }
+      }
 
 }
 /**********************************************************************/
@@ -1494,7 +1515,6 @@ void CmgFSW(struct SCType *S)
          C->Init = 0;
          for(i=0;i<3;i++) FindPDGains(AC->MOI[i][i],0.5,0.7,&C->Kr[i],&C->Kp[i]);
          for(i=0;i<4;i++) {
-            AC->G[i].IsUnderActiveControl = TRUE;
             AC->G[i].Cmd.Ang[0] = 0.0;
             AC->G[i].AngGain[0] = 0.0;
             AC->G[i].AngRateGain[0] = 100.0;
@@ -1681,6 +1701,11 @@ void CfsFSW(struct AcType *AC)
       
 /* .. Solar Array Steering */
       G->Cmd.Ang[0] = atan2(AC->svb[0],AC->svb[2]);
+      AngErr = fmod(G->Ang[0]-G->Cmd.Ang[0],TwoPi);
+      if (AngErr >  Pi) AngErr -= TwoPi;
+      if (AngErr < -Pi) AngErr += TwoPi;
+      G->Cmd.AngRate[0] = -G->AngGain[0]/G->AngRateGain[0]*AngErr;
+      G->Cmd.AngRate[0] = Limit(G->Cmd.AngRate[0],-G->MaxAngRate[0],G->MaxAngRate[0]);
       
 /* .. Actuator Processing */
       WheelProcessing(AC);

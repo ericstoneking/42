@@ -290,4 +290,14 @@
 #define ZODIAC_CONSTELL 1
 #define MINOR_CONSTELL 2
 
+/* Joint Types */
+#define PASSIVE_JOINT 0
+#define ACTUATED_JOINT 1
+#define STEPPER_MOTOR_JOINT 2
+#define TVC_JOINT 3
+#define VIBRATION_ISOLATOR_JOINT 4
+#define SLOSH_JOINT 5
+#define STEERING_MIRROR_JOINT 6
+#define AD_HOC_JOINT 7
+
 #endif /* __42DEFINES_H__ */

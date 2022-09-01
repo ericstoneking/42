@@ -16,7 +16,6 @@ LAL                           ! Ang Vel wrt [NL], Att [QA] wrt [NLF]
 0.0    0.0    0.0    123      ! Angles (deg) & Euler Sequence
 ***************************  Dynamics Flags  ***************************
 GAUSS_ELIM                    ! Solve Dynamics by GAUSS_ELIM or ORDER_N
-FALSE                         ! Passive Joint Forces and Torques Enabled
 FALSE                         ! Compute Constraint Forces and Torques
 REFPT_CM                      ! Mass Props referenced to REFPT_CM or REFPT_JOINT
 FALSE                         ! Flex Active
@@ -159,6 +158,7 @@ NONE                          ! Flex File Name
 ************************************************************************
         (Number of Joints is Number of Bodies minus one)
 =============================== Joint 0 ================================
+ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 0 1                           ! Inner, outer body indices
 1   213   GIMBAL              ! RotDOF, Seq, GIMBAL or SPHERICAL
 0   123                       ! TrnDOF, Seq
@@ -177,6 +177,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
 0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 1 ================================
+ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 0 2                           ! Inner, outer body indices
 1   213   GIMBAL              ! RotDOF, Seq, GIMBAL or SPHERICAL
 0   123                       ! TrnDOF, Seq
@@ -195,6 +196,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
 0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 2 ================================
+ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 1 3                           ! Inner, outer body indices
 1   123   GIMBAL              ! RotDOF, Seq, GIMBAL or SPHERICAL
 0   123                       ! TrnDOF, Seq
@@ -213,6 +215,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
 0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 3 ================================
+ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 1 4                           ! Inner, outer body indices
 1   123   GIMBAL              ! RotDOF, Seq, GIMBAL or SPHERICAL
 0   123                       ! TrnDOF, Seq
@@ -231,6 +234,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
 0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 4 ================================
+ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 1 5                           ! Inner, outer body indices
 1   123   GIMBAL              ! RotDOF, Seq, GIMBAL or SPHERICAL
 0   123                       ! TrnDOF, Seq
@@ -249,6 +253,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
 0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 5 ================================
+ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 1 6                           ! Inner, outer body indices
 1   123   GIMBAL              ! RotDOF, Seq, GIMBAL or SPHERICAL
 0   123                       ! TrnDOF, Seq
@@ -267,6 +272,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
 0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 6 ================================
+ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 2 7                           ! Inner, outer body indices
 1   123   GIMBAL              ! RotDOF, Seq, GIMBAL or SPHERICAL
 0   123                       ! TrnDOF, Seq
@@ -285,6 +291,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
 0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 7 ================================
+ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 2 8                           ! Inner, outer body indices
 1   123   GIMBAL              ! RotDOF, Seq, GIMBAL or SPHERICAL
 0   123                       ! TrnDOF, Seq
@@ -303,6 +310,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
 0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 8 ================================
+ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 2 9                           ! Inner, outer body indices
 1   123   GIMBAL              ! RotDOF, Seq, GIMBAL or SPHERICAL
 0   123                       ! TrnDOF, Seq
@@ -321,6 +329,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
 0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 9 ================================
+ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 2 10                          ! Inner, outer body indices
 1   123   GIMBAL              ! RotDOF, Seq, GIMBAL or SPHERICAL
 0   123                       ! TrnDOF, Seq
@@ -339,6 +348,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
 0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 10 ================================
+ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 0 11                          ! Inner, outer body indices
 1   123   GIMBAL              ! RotDOF, Seq, GIMBAL or SPHERICAL
 0   123                       ! TrnDOF, Seq
@@ -357,6 +367,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
 0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 11 ================================
+ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 0 12                          ! Inner, outer body indices
 1   123   GIMBAL              ! RotDOF, Seq, GIMBAL or SPHERICAL
 0   123                       ! TrnDOF, Seq
@@ -375,6 +386,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
 0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 12 ================================
+ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 0 13                          ! Inner, outer body indices
 1   213   GIMBAL              ! RotDOF, Seq, GIMBAL or SPHERICAL
 0   123                       ! TrnDOF, Seq
@@ -393,6 +405,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
 0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 13 ================================
+ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 0 14                          ! Inner, outer body indices
 1   213   GIMBAL              ! RotDOF, Seq, GIMBAL or SPHERICAL
 0   123                       ! TrnDOF, Seq
@@ -411,6 +424,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
 0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 14 ================================
+ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 0 15                          ! Inner, outer body indices
 2   123   GIMBAL              ! RotDOF, Seq, GIMBAL or SPHERICAL
 0   123                       ! TrnDOF, Seq

@@ -398,6 +398,7 @@ void AcFsw(struct AcType *AC)
       struct AcJointType *G;
       double L1[3],L2[3],L3[3];
       double HxB[3];
+      double AngErr;
       long i,j;
       
       C = &AC->CfsCtrl;
@@ -476,6 +477,11 @@ void AcFsw(struct AcType *AC)
       
 /* .. Solar Array Steering */
       G->Cmd.Ang[0] = atan2(AC->svb[0],AC->svb[2]);
+      AngErr = fmod(G->Ang[0]-G->Cmd.Ang[0],AC->TwoPi);
+      if (AngErr >  AC->Pi) AngErr -= AC->TwoPi;
+      if (AngErr < -AC->Pi) AngErr += AC->TwoPi;
+      G->Cmd.AngRate[0] = -G->AngGain[0]/G->AngRateGain[0]*AngErr;
+      G->Cmd.AngRate[0] = Limit(G->Cmd.AngRate[0],-G->MaxAngRate[0],G->MaxAngRate[0]);
       
 /* .. Actuator Processing */
       WheelProcessing(AC);

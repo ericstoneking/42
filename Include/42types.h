@@ -128,6 +128,7 @@ struct BodyType {
 
 struct JointType {
    /*~ Internal Variables ~*/
+   long Type;  /* LINEAR_PASSIVE_JOINT, SIMPLE_GIMBAL, etc */ 
    long Init;
    long IsSpherical;      /* TRUE or FALSE */
    long RotDOF;           /* 0,1,2,3 */
@@ -152,14 +153,18 @@ struct JointType {
    double xn[3];          /* translational displacement in the N frame */
    double Ang[3];         /* Joint Euler angles [~=~] */
    double AngRate[3];     /* Euler angle rates about gim axes [~=~] */
-   double AngCmd[3];      /* Euler angle commands, for kinematic joints */
-   double RateCmd[3];     /* Euler angle rate commands, for kinematic joints */
+   double AngRateCmd[3];     /* Euler angle rate commands, rad/sec */
+   double PosRateCmd[3];     /* Translation rate commands, m/sec */
+   double AngRateGain[3];
+   double PosRateGain[3];
+   double MaxAngRate[3];
+   double MaxPosRate[3];
+   double MaxTrq[3];
+   double MaxFrc[3];
    double RotSpringCoef[3];  /* For passive joint torques */
    double RotDampCoef[3];    /* For passive joint torques */
    double TrnSpringCoef[3];  /* For passive joint forces */
    double TrnDampCoef[3];    /* For passive joint forces */
-   double PassiveTrq[3];  /* Trq from passive spring, damper */
-   double PassiveFrc[3];  /* Frc from passive spring, damper in translational joint...still uses SpringCoef and DampCoef */
    /* Frames involved in a joint: Bo <-> (Bfo) <-> Go <-> Gi <-> (Bfi) <-> Bi */
    double CGiBi[3][3];    /* Constant orientation of joint in Bi (Bfi) */
    double CBoGo[3][3];    /* Constant orientation of joint in Bo (Bfo) */

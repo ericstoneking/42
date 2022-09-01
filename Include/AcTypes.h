@@ -48,7 +48,7 @@ struct CmdType {
    /*~ Internal Variables ~*/
    long Parm;
    long Frame;
-   double AngRate[3];
+   double AngRate[3]; /* [~<~] */
    double Ang[3]; /* [~<~] */
    double PosRate[3];
    double Pos[3];
@@ -75,7 +75,6 @@ struct AcBodyType {
 
 struct AcJointType {
    /*~ Parameters ~*/
-   long IsUnderActiveControl;
    long IsSpherical;
    long RotDOF;
    long TrnDOF;
@@ -367,6 +366,9 @@ struct AcType {
    long Nst;
    long Ngps;
    long Nacc;
+   
+   double Pi;
+   double TwoPi;
 
    double DT;
    double mass;

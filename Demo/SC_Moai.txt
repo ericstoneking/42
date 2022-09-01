@@ -16,7 +16,6 @@ LAL                           ! Ang Vel wrt [NL], Att [QA] wrt [NLF]
 165.0  90.0    70.0    321      ! Angles (deg) & Euler Sequence
 ***************************  Dynamics Flags  ***************************
 GAUSS_ELIM                    ! Solve Dynamics by GAUSS_ELIM or ORDER_N
-FALSE                         ! Passive Joint Forces and Torques Enabled
 FALSE                         ! Compute Constraint Forces and Torques
 REFPT_CM                      ! Mass Props referenced to REFPT_CM or REFPT_JOINT
 FALSE                         ! Flex Active
@@ -39,6 +38,7 @@ NONE                          ! Flex File Name
 ************************************************************************
          (Number of Joints is Number of Bodies minus one)
 ============================== Joint 0 ================================
+PASSIVE                       ! Type of joint (PASSIVE, ACTUATED, others)
 0 1                           ! Inner, outer body indices
 1   213   GIMBAL              ! RotDOF, Seq, GIMBAL or SPHERICAL
 0   123                       ! TrnDOF, Seq

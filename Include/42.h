@@ -196,7 +196,8 @@ void FindUnshadedAreas(struct SCType *S, double DirVecN[3]);
 void RadBelt(float RadiusKm, float MagLatDeg, int NumEnergies, 
       float *ElectronEnergy, float *ProtonEnergy, double **Flux); 
 void FindAlbedo(struct SCType *S, struct CssType *CSS);
-
+void JointFrcTrq(struct JointType *G, struct SCType *S);
+void InitActuatedJoint(struct JointType *G, struct SCType *S);
 
 /* Debug Function Prototypes */
 void EchoPVel(struct SCType *S);

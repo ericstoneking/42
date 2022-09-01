@@ -86,47 +86,6 @@ void MTBModel(struct MTBType *MTB,double bvb[3])
 
 }
 /**********************************************************************/
-void GimbalModel(long DOF,double Rate[3],double Ang[3],
-                 double RateCmd[3],double AngCmd[3],
-                 double RateGain[3],double AngGain[3],
-                 double MaxRate[3], double MaxTrq[3], double Trq[3])
-{
-      double DesiredRate,AngErr;
-      long i;
-
-      for(i=0;i<DOF;i++) {
-         AngErr = fmod(Ang[i] - AngCmd[i],TwoPi);
-         if (AngErr > Pi) AngErr -= TwoPi;
-         if (AngErr < -Pi) AngErr += TwoPi;
-         if (RateGain[i] != 0.0) {
-            DesiredRate = Limit(RateCmd[i] - AngGain[i]/RateGain[i]*AngErr,
-                                -MaxRate[i],MaxRate[i]);
-         }
-         else {
-            DesiredRate = Limit(RateCmd[i],-MaxRate[i],MaxRate[i]);
-         }
-         Trq[i] = Limit(-RateGain[i]*(Rate[i]-DesiredRate),
-                        -MaxTrq[i],MaxTrq[i]);
-      }
-}
-/**********************************************************************/
-void TranslationalModel(long DOF, double Rate[3], double Pos[3],
-                        double RateCmd[3], double PosCmd[3],
-                        double RateGain[3], double PosGain[3],
-                        double MaxRate[3], double MaxFrc[3], double Frc[3])
-{
-   double DesiredRate,PosErr;
-   long i;
-
-   for(i=0;i<DOF;i++) {
-      PosErr = Pos[i] - PosCmd[i];
-      DesiredRate = Limit(RateCmd[i] - PosGain[i]/RateGain[i]*PosErr,
-                          -MaxRate[i],MaxRate[i]);
-      Frc[i] = Limit(-RateGain[i]*(Rate[i]-DesiredRate),
-                     -MaxFrc[i],MaxFrc[i]);
-   }
-}
-/**********************************************************************/
 void ThrusterPlumeFrcTrq(struct SCType *S)
 {
       /* Plume Parameters */
@@ -257,16 +216,12 @@ void Actuators(struct SCType *S)
       for(i=0;i<AC->Ng;i++) {
          G = &S->G[i];
          AG = &AC->G[i];
-         if (AG->IsUnderActiveControl) {
-            /* PD Gimbal Control */
-            GimbalModel(G->RotDOF,AG->AngRate,AG->Ang,
-                        AG->Cmd.AngRate,AG->Cmd.Ang,
-                        AG->AngRateGain,AG->AngGain,
-                        AG->MaxAngRate,AG->MaxTrq,G->Trq);
-            /* Ideal Kinematic Gimbal Control */
+         if (G->Type == ACTUATED_JOINT) {
             for(j=0;j<G->RotDOF;j++) {
-               G->RateCmd[j] = AG->Cmd.AngRate[j];
-               G->AngCmd[j] = AG->Cmd.Ang[j];
+               G->AngRateCmd[j] = AG->Cmd.AngRate[j];
+            }
+            for(j=0;j<G->TrnDOF;j++) {
+               G->PosRateCmd[j] = AG->Cmd.PosRate[j];
             }
          }
       }

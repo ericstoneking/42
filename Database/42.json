@@ -1,6 +1,1629 @@
 {
    "Table Definition": [
       {
+         "Table Name": "SphereHarmType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "FormationType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "FlexNodeType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "BodyType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name":  "wn",
+               "Description":  "Angular Velocity of B wrt N expressed in B frame",
+               "Units":  "rad/sec",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "qn",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Array Size":  "4",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            }
+         ]
+      },
+      {
+         "Table Name": "JointType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name":  "Pos",
+               "Description":  "translational kinematic state variables",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "PosRate",
+               "Description":  "translational dynamic state variables",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "Ang",
+               "Description":  "Joint Euler angles",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "AngRate",
+               "Description":  "Euler angle rates about gim axes",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            }
+         ]
+      },
+      {
+         "Table Name": "IdealActType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "WhlType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name":  "H",
+               "Description":  "Angular Momentum,",
+               "Units":  "Nms",
+               "Data Type":  "double",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            }
+         ]
+      },
+      {
+         "Table Name": "MTBType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "ThrType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "GyroType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name":  "SampleTime",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "MaxCounter",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "long",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "Axis",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "MaxRate",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "Scale",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "Quant",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "SigV",
+               "Description":  "ARW, rad/rt-sec",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "SigU",
+               "Description":  "Bias Stability, rad/sec^1.5",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "SigE",
+               "Description":  "Angle Readout Noise, rad",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "FlexNode",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "long",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "BiasStabCoef",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "ARWCoef",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "AngNoiseCoef",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "CorrCoef",
+               "Description":  "Correlation Coef, exp(-SampleTime/BiasTime)",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "TrueRate",
+               "Description":  "rad/sec",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Sim Read/Write":   "WRITE",
+               "App Read/Write":   "READ",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            }
+         ]
+      },
+      {
+         "Table Name": "MagnetometerType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name":  "SampleTime",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "MaxCounter",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "long",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "Axis",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "Saturation",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "Scale",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "Quant",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "Noise",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "FlexNode",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "long",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            }
+         ]
+      },
+      {
+         "Table Name": "CssType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name":  "SampleTime",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "MaxCounter",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "long",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "Body",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "long",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "Axis",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "FovHalfAng",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "CosFov",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "Scale",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "Quant",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "FlexNode",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "long",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            }
+         ]
+      },
+      {
+         "Table Name": "FssType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name":  "SampleTime",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "MaxCounter",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "long",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "qb",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Array Size":  "4",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "CB",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Array Size":  "3,3",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "FovHalfAng",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Array Size":  "2",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "NEA",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "Quant",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "FlexNode",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "long",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "BoreAxis",
+               "Description":  "X_AXIS, Y_AXIS, Z_AXIS",
+               "Units":  "None",
+               "Data Type":  "long",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "H_Axis",
+               "Description":  "(BoreAxis+1)%3",
+               "Units":  "None",
+               "Data Type":  "long",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "V_Axis",
+               "Description":  "(BoreAxis+2)%3",
+               "Units":  "None",
+               "Data Type":  "long",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            }
+         ]
+      },
+      {
+         "Table Name": "StarTrackerType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name":  "SampleTime",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "MaxCounter",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "long",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "qb",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Array Size":  "4",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "CB",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Array Size":  "3,3",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "FovHalfAng",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Array Size":  "2",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "CosFov",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Array Size":  "2",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "SunExclAng",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "CosSunExclAng",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "EarthExclAng",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "CosEarthExclAng",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "MoonExclAng",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "CosMoonExclAng",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "NEA",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "FlexNode",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "long",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "BoreAxis",
+               "Description":  "X_AXIS, Y_AXIS, Z_AXIS",
+               "Units":  "None",
+               "Data Type":  "long",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "H_Axis",
+               "Description":  "(BoreAxis+1)%3",
+               "Units":  "None",
+               "Data Type":  "long",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "V_Axis",
+               "Description":  "(BoreAxis+2)%3",
+               "Units":  "None",
+               "Data Type":  "long",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            }
+         ]
+      },
+      {
+         "Table Name": "GpsType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name":  "SampleTime",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "MaxCounter",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "long",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "PosNoise",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "VelNoise",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "TimeNoise",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "FlexNode",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "long",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            }
+         ]
+      },
+      {
+         "Table Name": "AccelType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "JointPathTableType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "BodyPathTableType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "DynType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "EnvTrqType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "FreqNormEqType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "FreqRespType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "SCType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name":  "PosR",
+               "Description":  "Position of cm wrt Reference Orbit, expressed in N",
+               "Units":  "m",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "VelR",
+               "Description":  "Velocity of cm wrt R, expressed in N",
+               "Units":  "m/s",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "svb",
+               "Description":  "Sun-pointing unit vector, expressed in SC.B[0]",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "bvb",
+               "Description":  "Magfield, expressed in SC.B[0]",
+               "Units":  "Tesla",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "Hvb",
+               "Description":  "Total SC angular momentum, expressed in SC.B[0]",
+               "Units":  "Nms",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "AC",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "AcType",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "STRUCT"
+            },
+            {
+               "Variable Name":  "B",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "BodyType",
+               "Array Size":  "Nb",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "STRUCT"
+            },
+            {
+               "Variable Name":  "G",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "JointType",
+               "Array Size":  "Ng",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "STRUCT"
+            },
+            {
+               "Variable Name":  "GN",
+               "Description":  "Joint between N and B[0]",
+               "Units":  "None",
+               "Data Type":  "JointType",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "STRUCT"
+            },
+            {
+               "Variable Name":  "IdealAct",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "IdealActType",
+               "Array Size":  "3",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "STRUCT"
+            },
+            {
+               "Variable Name":  "Whl",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "WhlType",
+               "Array Size":  "Nw",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "STRUCT"
+            },
+            {
+               "Variable Name":  "MTB",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "MTBType",
+               "Array Size":  "Nmtb",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "STRUCT"
+            },
+            {
+               "Variable Name":  "Thr",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "ThrType",
+               "Array Size":  "Nthr",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "STRUCT"
+            },
+            {
+               "Variable Name":  "Gyro",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "GyroType",
+               "Array Size":  "Ngyro",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "STRUCT"
+            },
+            {
+               "Variable Name":  "MAG",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "MagnetometerType",
+               "Array Size":  "Nmag",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "STRUCT"
+            },
+            {
+               "Variable Name":  "CSS",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "CssType",
+               "Array Size":  "Ncss",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "STRUCT"
+            },
+            {
+               "Variable Name":  "FSS",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "FssType",
+               "Array Size":  "Nfss",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "STRUCT"
+            },
+            {
+               "Variable Name":  "ST",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "StarTrackerType",
+               "Array Size":  "Nst",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "STRUCT"
+            },
+            {
+               "Variable Name":  "GPS",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "GpsType",
+               "Array Size":  "Ngps",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "STRUCT"
+            },
+            {
+               "Variable Name":  "Accel",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "AccelType",
+               "Array Size":  "Nacc",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "STRUCT"
+            }
+         ]
+      },
+      {
+         "Table Name": "TargetType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "POVType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "RegionType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "AtmoType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "WorldType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name":  "Exists",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "long",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "Type",
+               "Description":  "STAR, PLANET, MOON, ASTEROID, COMET",
+               "Units":  "None",
+               "Data Type":  "long",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "Parent",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "long",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "Nsat",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "long",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "Sat",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "long",
+               "Array Size":  "Nsat",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "mu",
+               "Description":  "Gravitation constant",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "J2",
+               "Description":  "Gravitation oblateness parameter",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "rad",
+               "Description":  "Radius",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "w",
+               "Description":  "Spin Rate",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "PriMerAngJ2000",
+               "Description":  "Prime Meridian Angle at J2000 epoch, rad",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "RadOfInfluence",
+               "Description":  "Radius of Sphere of Influence",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "DipoleMoment",
+               "Description":  "Magnetic Field Dipole Moment, Wb-m",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "DipoleAxis",
+               "Description":  "Magnetic Field Dipole Axis",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "DipoleOffset",
+               "Description":  "Dipole Offset, m",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "RingInner,",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "Density",
+               "Description":  "For minor bodies, polyhedron gravity",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "HasRing",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "long",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "Name",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "char",
+               "Array Size":  "20",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "MapFileName",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "char",
+               "Array Size":  "40",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "GeomFileName",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "char",
+               "Array Size":  "40",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "ColTexFileName",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "char",
+               "Array Size":  "40",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "BumpTexFileName",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "char",
+               "Array Size":  "40",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "Color",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "float",
+               "Array Size":  "4",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "Glyph",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "unsigned char",
+               "Array Size":  "14",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "TexTag",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "unsigned int",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "MapTexTag",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "unsigned int",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "ColTexTag",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "unsigned int",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "BumpTexTag",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "unsigned int",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "ColCubeTag",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "unsigned int",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "BumpCubeTag",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "unsigned int",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "CloudGlossCubeTag",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "unsigned int",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "GeomTag",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "long",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "RingTexTag",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "unsigned int",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "NearExtent,FarExtent",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "CNH",
+               "Description":  "DCM from heliocentric ecliptic frame",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Array Size":  "3,3",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "qnh",
+               "Description":  "~",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Array Size":  "4",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "PosH",
+               "Description":  "Position in H frame",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ_WRITE",
+               "App Read/Write":   "READ_WRITE",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
+            {
+               "Variable Name":  "eph",
+               "Description":  "Ephemeris",
+               "Units":  "None",
+               "Data Type":  "OrbitType",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "STRUCT"
+            },
+            {
+               "Variable Name":  "Atmo",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "AtmoType",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "STRUCT"
+            }
+         ]
+      },
+      {
+         "Table Name": "SpotType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "WidgetType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "FovType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "TdrsType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "GroundStationType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "ShadowFBOType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "AlbedoFBOType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "OrreryPOVType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "ConstellationType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
+         "Table Name": "IpcType",
+         "Table Type": "Structure",
+         "Table Data": [
+
+         ]
+      },
+      {
          "Table Name": "LagrangePointType",
          "Table Type": "Structure",
          "Table Data": [
@@ -407,9 +2030,9 @@
                "Packet Role":   "PRM"
             },
             {
-               "Variable Name":  "MuPlusJ2",
-               "Description":  "Effective mu, adjusted for average J2 effect",
-               "Units":  "None",
+               "Variable Name":  "MeanSMA",
+               "Description":  "",
+               "Units":  "",
                "Data Type":  "double",
                "Sim Read/Write":   "",
                "App Read/Write":   "",
@@ -428,6 +2051,16 @@
             },
             {
                "Variable Name":  "ArgP0",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "MeanAnom0",
                "Description":  "",
                "Units":  "",
                "Data Type":  "double",
@@ -457,19 +2090,9 @@
                "Packet Role":   "PRM"
             },
             {
-               "Variable Name":  "J2Fr0",
-               "Description":  "Orbit-average radial acceleration due to J2",
-               "Units":  "None",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "J2Fh1",
-               "Description":  "Coefficient for orbit-rate normal acceleration due to J2",
-               "Units":  "None",
+               "Variable Name":  "J2Rw2bya",
+               "Description":  "",
+               "Units":  "",
                "Data Type":  "double",
                "Sim Read/Write":   "",
                "App Read/Write":   "",
@@ -522,6 +2145,17 @@
          "Table Name": "CmdType",
          "Table Type": "Structure",
          "Table Data": [
+            {
+               "Variable Name":  "AngRate",
+               "Description":  "",
+               "Units":  "None",
+               "Data Type":  "double",
+               "Array Size":  "3",
+               "Sim Read/Write":   "READ",
+               "App Read/Write":   "WRITE",
+               "Cmd Read":   "",
+               "Packet Role":   ""
+            },
             {
                "Variable Name":  "Ang",
                "Description":  "",
@@ -619,16 +2253,6 @@
          "Table Name": "AcJointType",
          "Table Type": "Structure",
          "Table Data": [
-            {
-               "Variable Name":  "IsUnderActiveControl",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "long",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
             {
                "Variable Name":  "IsSpherical",
                "Description":  "",
@@ -1221,6 +2845,16 @@
          "Table Type": "Structure",
          "Table Data": [
             {
+               "Variable Name":  "Body",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "long",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
                "Variable Name":  "Axis",
                "Description":  "",
                "Units":  "",
@@ -1346,6 +2980,16 @@
          "Table Name": "AcThrType",
          "Table Type": "Structure",
          "Table Data": [
+            {
+               "Variable Name":  "Body",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "long",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
             {
                "Variable Name":  "PosB",
                "Description":  "",
@@ -1941,6 +3585,26 @@
                "Packet Role":   "PRM"
             },
             {
+               "Variable Name":  "Pi",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
+               "Variable Name":  "TwoPi",
+               "Description":  "",
+               "Units":  "",
+               "Data Type":  "double",
+               "Sim Read/Write":   "",
+               "App Read/Write":   "",
+               "Cmd Read":   "",
+               "Packet Role":   "PRM"
+            },
+            {
                "Variable Name":  "DT",
                "Description":  "",
                "Units":  "",
@@ -2502,1520 +4166,6 @@
                "Cmd Read":   "",
                "Packet Role":   "STRUCT"
             }
-         ]
-      },
-      {
-         "Table Name": "SphereHarmType",
-         "Table Type": "Structure",
-         "Table Data": [
-
-         ]
-      },
-      {
-         "Table Name": "FormationType",
-         "Table Type": "Structure",
-         "Table Data": [
-
-         ]
-      },
-      {
-         "Table Name": "FlexNodeType",
-         "Table Type": "Structure",
-         "Table Data": [
-
-         ]
-      },
-      {
-         "Table Name": "BodyType",
-         "Table Type": "Structure",
-         "Table Data": [
-            {
-               "Variable Name":  "wn",
-               "Description":  "Angular Velocity of B expressed in B frame",
-               "Units":  "rad/sec",
-               "Data Type":  "double",
-               "Array Size":  "3",
-               "Sim Read/Write":   "READ_WRITE",
-               "App Read/Write":   "READ_WRITE",
-               "Cmd Read":   "",
-               "Packet Role":   ""
-            },
-            {
-               "Variable Name":  "qn",
-               "Description":  "",
-               "Units":  "None",
-               "Data Type":  "double",
-               "Array Size":  "4",
-               "Sim Read/Write":   "READ_WRITE",
-               "App Read/Write":   "READ_WRITE",
-               "Cmd Read":   "",
-               "Packet Role":   ""
-            }
-         ]
-      },
-      {
-         "Table Name": "JointType",
-         "Table Type": "Structure",
-         "Table Data": [
-            {
-               "Variable Name":  "Pos",
-               "Description":  "translational kinematic state variables",
-               "Units":  "None",
-               "Data Type":  "double",
-               "Array Size":  "3",
-               "Sim Read/Write":   "READ_WRITE",
-               "App Read/Write":   "READ_WRITE",
-               "Cmd Read":   "",
-               "Packet Role":   ""
-            },
-            {
-               "Variable Name":  "PosRate",
-               "Description":  "translational dynamic state variables",
-               "Units":  "None",
-               "Data Type":  "double",
-               "Array Size":  "3",
-               "Sim Read/Write":   "READ_WRITE",
-               "App Read/Write":   "READ_WRITE",
-               "Cmd Read":   "",
-               "Packet Role":   ""
-            },
-            {
-               "Variable Name":  "Ang",
-               "Description":  "Joint Euler angles",
-               "Units":  "None",
-               "Data Type":  "double",
-               "Array Size":  "3",
-               "Sim Read/Write":   "READ_WRITE",
-               "App Read/Write":   "READ_WRITE",
-               "Cmd Read":   "",
-               "Packet Role":   ""
-            },
-            {
-               "Variable Name":  "AngRate",
-               "Description":  "Euler angle rates about gim axes",
-               "Units":  "None",
-               "Data Type":  "double",
-               "Array Size":  "3",
-               "Sim Read/Write":   "READ_WRITE",
-               "App Read/Write":   "READ_WRITE",
-               "Cmd Read":   "",
-               "Packet Role":   ""
-            }
-         ]
-      },
-      {
-         "Table Name": "WhlType",
-         "Table Type": "Structure",
-         "Table Data": [
-            {
-               "Variable Name":  "H",
-               "Description":  "Angular Momentum,",
-               "Units":  "Nms",
-               "Data Type":  "double",
-               "Sim Read/Write":   "READ_WRITE",
-               "App Read/Write":   "READ_WRITE",
-               "Cmd Read":   "",
-               "Packet Role":   ""
-            }
-         ]
-      },
-      {
-         "Table Name": "MTBType",
-         "Table Type": "Structure",
-         "Table Data": [
-
-         ]
-      },
-      {
-         "Table Name": "ThrType",
-         "Table Type": "Structure",
-         "Table Data": [
-
-         ]
-      },
-      {
-         "Table Name": "GyroType",
-         "Table Type": "Structure",
-         "Table Data": [
-            {
-               "Variable Name":  "SampleTime",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "MaxCounter",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "long",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "Axis",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Array Size":  "3",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "MaxRate",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "Scale",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "Quant",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "SigV",
-               "Description":  "ARW, rad/rt-sec",
-               "Units":  "None",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "SigU",
-               "Description":  "Bias Stability, rad/sec^1.5",
-               "Units":  "None",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "SigE",
-               "Description":  "Angle Readout Noise, rad",
-               "Units":  "None",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "FlexNode",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "long",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "BiasStabCoef",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "ARWCoef",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "AngNoiseCoef",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "CorrCoef",
-               "Description":  "Correlation Coef, exp(-SampleTime/BiasTime)",
-               "Units":  "None",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "TrueRate",
-               "Description":  "rad/sec",
-               "Units":  "None",
-               "Data Type":  "double",
-               "Sim Read/Write":   "WRITE",
-               "App Read/Write":   "READ",
-               "Cmd Read":   "",
-               "Packet Role":   ""
-            }
-         ]
-      },
-      {
-         "Table Name": "MagnetometerType",
-         "Table Type": "Structure",
-         "Table Data": [
-            {
-               "Variable Name":  "SampleTime",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "MaxCounter",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "long",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "Axis",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Array Size":  "3",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "Saturation",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "Scale",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "Quant",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "Noise",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "FlexNode",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "long",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            }
-         ]
-      },
-      {
-         "Table Name": "CssType",
-         "Table Type": "Structure",
-         "Table Data": [
-            {
-               "Variable Name":  "SampleTime",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "MaxCounter",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "long",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "Body",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "long",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "Axis",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Array Size":  "3",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "FovHalfAng",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "CosFov",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "Scale",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "Quant",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "FlexNode",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "long",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            }
-         ]
-      },
-      {
-         "Table Name": "FssType",
-         "Table Type": "Structure",
-         "Table Data": [
-            {
-               "Variable Name":  "SampleTime",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "MaxCounter",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "long",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "qb",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Array Size":  "4",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "CB",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Array Size":  "3,3",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "FovHalfAng",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Array Size":  "2",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "NEA",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "Quant",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "FlexNode",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "long",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            }
-         ]
-      },
-      {
-         "Table Name": "StarTrackerType",
-         "Table Type": "Structure",
-         "Table Data": [
-            {
-               "Variable Name":  "SampleTime",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "MaxCounter",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "long",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "qb",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Array Size":  "4",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "CB",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Array Size":  "3,3",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "FovHalfAng",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Array Size":  "2",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "CosFov",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Array Size":  "2",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "SunExclAng",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "CosSunExclAng",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "EarthExclAng",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "CosEarthExclAng",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "MoonExclAng",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "CosMoonExclAng",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "NEA",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Array Size":  "3",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "FlexNode",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "long",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            }
-         ]
-      },
-      {
-         "Table Name": "GpsType",
-         "Table Type": "Structure",
-         "Table Data": [
-            {
-               "Variable Name":  "SampleTime",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "MaxCounter",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "long",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "PosNoise",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "VelNoise",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "TimeNoise",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "FlexNode",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "long",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            }
-         ]
-      },
-      {
-         "Table Name": "AccelType",
-         "Table Type": "Structure",
-         "Table Data": [
-
-         ]
-      },
-      {
-         "Table Name": "JointPathTableType",
-         "Table Type": "Structure",
-         "Table Data": [
-
-         ]
-      },
-      {
-         "Table Name": "BodyPathTableType",
-         "Table Type": "Structure",
-         "Table Data": [
-
-         ]
-      },
-      {
-         "Table Name": "DynType",
-         "Table Type": "Structure",
-         "Table Data": [
-
-         ]
-      },
-      {
-         "Table Name": "EnvTrqType",
-         "Table Type": "Structure",
-         "Table Data": [
-
-         ]
-      },
-      {
-         "Table Name": "SCType",
-         "Table Type": "Structure",
-         "Table Data": [
-            {
-               "Variable Name":  "PosR",
-               "Description":  "Position of cm wrt Reference Orbit, expressed in N",
-               "Units":  "m",
-               "Data Type":  "double",
-               "Array Size":  "3",
-               "Sim Read/Write":   "READ_WRITE",
-               "App Read/Write":   "READ_WRITE",
-               "Cmd Read":   "",
-               "Packet Role":   ""
-            },
-            {
-               "Variable Name":  "VelR",
-               "Description":  "Velocity of cm wrt R, expressed in N",
-               "Units":  "m/s",
-               "Data Type":  "double",
-               "Array Size":  "3",
-               "Sim Read/Write":   "READ_WRITE",
-               "App Read/Write":   "READ_WRITE",
-               "Cmd Read":   "",
-               "Packet Role":   ""
-            },
-            {
-               "Variable Name":  "svb",
-               "Description":  "Sun-pointing unit vector, expressed in SC.B[0]",
-               "Units":  "None",
-               "Data Type":  "double",
-               "Array Size":  "3",
-               "Sim Read/Write":   "READ_WRITE",
-               "App Read/Write":   "READ_WRITE",
-               "Cmd Read":   "",
-               "Packet Role":   ""
-            },
-            {
-               "Variable Name":  "bvb",
-               "Description":  "Magfield, expressed in SC.B[0]",
-               "Units":  "Tesla",
-               "Data Type":  "double",
-               "Array Size":  "3",
-               "Sim Read/Write":   "READ_WRITE",
-               "App Read/Write":   "READ_WRITE",
-               "Cmd Read":   "",
-               "Packet Role":   ""
-            },
-            {
-               "Variable Name":  "Hvb",
-               "Description":  "Total SC angular momentum, expressed in SC.B[0]",
-               "Units":  "Nms",
-               "Data Type":  "double",
-               "Array Size":  "3",
-               "Sim Read/Write":   "READ_WRITE",
-               "App Read/Write":   "READ_WRITE",
-               "Cmd Read":   "",
-               "Packet Role":   ""
-            },
-            {
-               "Variable Name":  "AC",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "AcType",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "STRUCT"
-            },
-            {
-               "Variable Name":  "B",
-               "Description":  "",
-               "Units":  "None",
-               "Data Type":  "BodyType",
-               "Array Size":  "Nb",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "STRUCT"
-            },
-            {
-               "Variable Name":  "G",
-               "Description":  "",
-               "Units":  "None",
-               "Data Type":  "JointType",
-               "Array Size":  "Ng",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "STRUCT"
-            },
-            {
-               "Variable Name":  "Whl",
-               "Description":  "",
-               "Units":  "None",
-               "Data Type":  "WhlType",
-               "Array Size":  "Nw",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "STRUCT"
-            },
-            {
-               "Variable Name":  "MTB",
-               "Description":  "",
-               "Units":  "None",
-               "Data Type":  "MTBType",
-               "Array Size":  "Nmtb",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "STRUCT"
-            },
-            {
-               "Variable Name":  "Thr",
-               "Description":  "",
-               "Units":  "None",
-               "Data Type":  "ThrType",
-               "Array Size":  "Nthr",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "STRUCT"
-            },
-            {
-               "Variable Name":  "Gyro",
-               "Description":  "",
-               "Units":  "None",
-               "Data Type":  "GyroType",
-               "Array Size":  "Ngyro",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "STRUCT"
-            },
-            {
-               "Variable Name":  "MAG",
-               "Description":  "",
-               "Units":  "None",
-               "Data Type":  "MagnetometerType",
-               "Array Size":  "Nmag",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "STRUCT"
-            },
-            {
-               "Variable Name":  "CSS",
-               "Description":  "",
-               "Units":  "None",
-               "Data Type":  "CssType",
-               "Array Size":  "Ncss",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "STRUCT"
-            },
-            {
-               "Variable Name":  "FSS",
-               "Description":  "",
-               "Units":  "None",
-               "Data Type":  "FssType",
-               "Array Size":  "Nfss",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "STRUCT"
-            },
-            {
-               "Variable Name":  "ST",
-               "Description":  "",
-               "Units":  "None",
-               "Data Type":  "StarTrackerType",
-               "Array Size":  "Nst",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "STRUCT"
-            },
-            {
-               "Variable Name":  "GPS",
-               "Description":  "",
-               "Units":  "None",
-               "Data Type":  "GpsType",
-               "Array Size":  "Ngps",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "STRUCT"
-            },
-            {
-               "Variable Name":  "Accel",
-               "Description":  "",
-               "Units":  "None",
-               "Data Type":  "AccelType",
-               "Array Size":  "Nacc",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "STRUCT"
-            }
-         ]
-      },
-      {
-         "Table Name": "TargetType",
-         "Table Type": "Structure",
-         "Table Data": [
-
-         ]
-      },
-      {
-         "Table Name": "POVType",
-         "Table Type": "Structure",
-         "Table Data": [
-
-         ]
-      },
-      {
-         "Table Name": "RegionType",
-         "Table Type": "Structure",
-         "Table Data": [
-
-         ]
-      },
-      {
-         "Table Name": "AtmoType",
-         "Table Type": "Structure",
-         "Table Data": [
-
-         ]
-      },
-      {
-         "Table Name": "WorldType",
-         "Table Type": "Structure",
-         "Table Data": [
-            {
-               "Variable Name":  "Exists",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "long",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "Type",
-               "Description":  "STAR, PLANET, MOON, ASTEROID, COMET",
-               "Units":  "None",
-               "Data Type":  "long",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "Parent",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "long",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "Nsat",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "long",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "Sat",
-               "Description":  "",
-               "Units":  "None",
-               "Data Type":  "long",
-               "Array Size":  "Nsat",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "mu",
-               "Description":  "Gravitation constant",
-               "Units":  "None",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "J2",
-               "Description":  "Gravitation oblateness parameter",
-               "Units":  "None",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "rad",
-               "Description":  "Radius",
-               "Units":  "None",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "w",
-               "Description":  "Spin Rate",
-               "Units":  "None",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "PriMerAngJ2000",
-               "Description":  "Prime Meridian Angle at J2000 epoch, rad",
-               "Units":  "None",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "RadOfInfluence",
-               "Description":  "Radius of Sphere of Influence",
-               "Units":  "None",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "DipoleMoment",
-               "Description":  "Magnetic Field Dipole Moment, Wb-m",
-               "Units":  "None",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "DipoleAxis",
-               "Description":  "Magnetic Field Dipole Axis",
-               "Units":  "None",
-               "Data Type":  "double",
-               "Array Size":  "3",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "DipoleOffset",
-               "Description":  "Dipole Offset, m",
-               "Units":  "None",
-               "Data Type":  "double",
-               "Array Size":  "3",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "RingInner,",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "Density",
-               "Description":  "For minor bodies, polyhedron gravity",
-               "Units":  "None",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "HasRing",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "long",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "Name",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "char",
-               "Array Size":  "20",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "MapFileName",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "char",
-               "Array Size":  "40",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "GeomFileName",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "char",
-               "Array Size":  "40",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "ColTexFileName",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "char",
-               "Array Size":  "40",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "BumpTexFileName",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "char",
-               "Array Size":  "40",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "Color",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "float",
-               "Array Size":  "4",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "Glyph",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "unsigned char",
-               "Array Size":  "14",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "TexTag",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "unsigned int",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "MapTexTag",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "unsigned int",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "ColTexTag",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "unsigned int",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "BumpTexTag",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "unsigned int",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "ColCubeTag",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "unsigned int",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "BumpCubeTag",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "unsigned int",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "CloudGlossCubeTag",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "unsigned int",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "GeomTag",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "long",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "RingTexTag",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "unsigned int",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "NearExtent,FarExtent",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "double",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "CNH",
-               "Description":  "DCM from heliocentric ecliptic frame",
-               "Units":  "None",
-               "Data Type":  "double",
-               "Array Size":  "3,3",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "qnh",
-               "Description":  "~",
-               "Units":  "None",
-               "Data Type":  "double",
-               "Array Size":  "4",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "PRM"
-            },
-            {
-               "Variable Name":  "PosH",
-               "Description":  "Position in H frame",
-               "Units":  "None",
-               "Data Type":  "double",
-               "Array Size":  "3",
-               "Sim Read/Write":   "READ_WRITE",
-               "App Read/Write":   "READ_WRITE",
-               "Cmd Read":   "",
-               "Packet Role":   ""
-            },
-            {
-               "Variable Name":  "eph",
-               "Description":  "Ephemeris",
-               "Units":  "None",
-               "Data Type":  "OrbitType",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "STRUCT"
-            },
-            {
-               "Variable Name":  "Atmo",
-               "Description":  "",
-               "Units":  "",
-               "Data Type":  "AtmoType",
-               "Sim Read/Write":   "",
-               "App Read/Write":   "",
-               "Cmd Read":   "",
-               "Packet Role":   "STRUCT"
-            }
-         ]
-      },
-      {
-         "Table Name": "SpotType",
-         "Table Type": "Structure",
-         "Table Data": [
-
-         ]
-      },
-      {
-         "Table Name": "WidgetType",
-         "Table Type": "Structure",
-         "Table Data": [
-
-         ]
-      },
-      {
-         "Table Name": "FovType",
-         "Table Type": "Structure",
-         "Table Data": [
-
-         ]
-      },
-      {
-         "Table Name": "TdrsType",
-         "Table Type": "Structure",
-         "Table Data": [
-
-         ]
-      },
-      {
-         "Table Name": "GroundStationType",
-         "Table Type": "Structure",
-         "Table Data": [
-
-         ]
-      },
-      {
-         "Table Name": "FBOType",
-         "Table Type": "Structure",
-         "Table Data": [
-
-         ]
-      },
-      {
-         "Table Name": "OrreryPOVType",
-         "Table Type": "Structure",
-         "Table Data": [
-
-         ]
-      },
-      {
-         "Table Name": "ConstellationType",
-         "Table Type": "Structure",
-         "Table Data": [
-
-         ]
-      },
-      {
-         "Table Name": "IpcType",
-         "Table Type": "Structure",
-         "Table Data": [
-
          ]
       }
    ]

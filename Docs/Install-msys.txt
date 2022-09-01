@@ -82,6 +82,9 @@ If 42 stops with an error dialog about "DLL not found", there is a problem with 
 d)  You may interrupt 42 at any time by hitting the 'q' key when the Cam window is active, or Ctrl-C when the terminal window is active.  42 will terminate on its own when the sim has run its course.
 
 
+
+
+
 *******************************
 *  Other Associated Software  *
 *******************************
