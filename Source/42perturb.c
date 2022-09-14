@@ -430,8 +430,8 @@ void GravPertForce(struct SCType *S)
       for(Iw=SOL;Iw<=PLUTO;Iw++) {
          if (World[Iw].Exists && !(Iw == OrbCenter || Iw == SecCenter)) {
             for(j=0;j<3;j++)
-               ph[j] = World[Iw].eph.PosN[j]
-                      -World[OrbCenter].eph.PosN[j];
+               ph[j] = World[Iw].PosH[j]
+                      -World[OrbCenter].PosH[j];
             MxV(World[OrbCenter].CNH,ph,p);
             for(j=0;j<3;j++) s[j] = p[j]-S->PosN[j];
             ThirdBodyGravForce(p,s,World[Iw].mu,S->mass,FrcN);
