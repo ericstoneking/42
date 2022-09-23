@@ -546,7 +546,8 @@ struct DelayType *ResizeDelay(struct DelayType *OldD, double DelayTime, double D
       }
       D->Idx = OldD->Idx % D->N;
       
-      /* TODO: Free OldD */
+      free(OldD->CircBuffer);
+      free(OldD);
       
       return(D);
 }

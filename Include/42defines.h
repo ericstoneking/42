@@ -300,4 +300,8 @@
 #define STEERING_MIRROR_JOINT 6
 #define AD_HOC_JOINT 7
 
+/* For Shakers */
+#define FORCE 0
+#define TORQUE 1
+
 #endif /* __42DEFINES_H__ */

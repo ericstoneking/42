@@ -1667,9 +1667,10 @@ void EchoRemAcc(struct SCType *S)
 
 }
 /**********************************************************************/
-void KaneNBodyEOM(double *u, double *x, double *h,
+void KaneNBodyEOM(double *u, double *x, double *h, double *xw,
                   double *uf, double *xf,
-                  double *udot, double *xdot, double *hdot,
+                  double *udot, double *xdot, 
+                  double *hdot, double *xwdot,
                   double *ufdot, double *xfdot,
                   struct SCType *S)
 {
@@ -1910,6 +1911,7 @@ void KaneNBodyEOM(double *u, double *x, double *h,
 /* .. Wheel-body interaction  */
       for (i=0;i<S->Nw;i++) {
          hdot[i] = S->Whl[i].Trq;
+         xwdot[i] = S->Whl[i].w;
       }
 }
 /**********************************************************************/
@@ -2174,6 +2176,7 @@ void KaneNBodyRK4(struct SCType *S)
       double *u,*uu,*du,*udot;
       double *x,*xx,*dx,*xdot;
       double *h,*hh,*dh,*hdot;
+      double *xw,*xxw,*dxw,*xwdot;
       double *uf,*uuf,*duf,*ufdot;
       double *xf,*xxf,*dxf,*xfdot;
       long i,iu,Ig;
@@ -2189,24 +2192,28 @@ void KaneNBodyRK4(struct SCType *S)
       u = D->u;
       x = D->x;
       h = D->h;
+      xw = D->xw;
       uf = D->uf;
       xf = D->xf;
 
       uu = D->uu;
       xx = D->xx;
       hh = D->hh;
+      xxw = D->xxw;
       uuf = D->uuf;
       xxf = D->xxf;
 
       du = D->du;
       dx = D->dx;
       dh = D->dh;
+      dxw = D->dxw;
       duf = D->duf;
       dxf = D->dxf;
 
       udot = D->udot;
       xdot = D->xdot;
       hdot = D->hdot;
+      xwdot = D->xwdot;
       ufdot = D->ufdot;
       xfdot = D->xfdot;
 
@@ -2256,7 +2263,7 @@ void KaneNBodyRK4(struct SCType *S)
 /* .. 4th order Runge Kutta */
 
       /* First Call */
-      KaneNBodyEOM(u,x,h,uf,xf,du,dx,dh,duf,dxf,S);
+      KaneNBodyEOM(u,x,h,xw,uf,xf,du,dx,dh,dxw,duf,dxf,S);
       for(i=0;i<Nu;i++)  {
          uu[i] = u[i] + 0.5*DTSIM*du[i];
          udot[i] = du[i]/6.0;
@@ -2268,6 +2275,8 @@ void KaneNBodyRK4(struct SCType *S)
       for(i=0;i<Nw;i++)  {
          hh[i] = h[i] + 0.5*DTSIM*dh[i];
          hdot[i] = dh[i]/6.0;
+         xxw[i] = xw[i] + 0.5*DTSIM*dxw[i];
+         xwdot[i] = dxw[i]/6.0;
       }
       for(i=0;i<Nf;i++)  {
          uuf[i] = uf[i] + 0.5*DTSIM*duf[i];
@@ -2284,7 +2293,7 @@ void KaneNBodyRK4(struct SCType *S)
       FindBodyAccelerations(S);
       
       /* Second Call */
-      KaneNBodyEOM(uu,xx,hh,uuf,xxf,du,dx,dh,duf,dxf,S);
+      KaneNBodyEOM(uu,xx,hh,xxw,uuf,xxf,du,dx,dh,dxw,duf,dxf,S);
 
       for(i=0;i<Nu;i++) {
          uu[i] = u[i] + 0.5*DTSIM*du[i];
@@ -2297,6 +2306,8 @@ void KaneNBodyRK4(struct SCType *S)
       for(i=0;i<Nw;i++) {
          hh[i] = h[i] + 0.5*DTSIM*dh[i];
          hdot[i] += dh[i]/3.0;
+         xxw[i] = xw[i] + 0.5*DTSIM*dxw[i];
+         xwdot[i] += dxw[i]/3.0;
       }
       for(i=0;i<Nf;i++)  {
          uuf[i] = uf[i] + 0.5*DTSIM*duf[i];
@@ -2306,7 +2317,7 @@ void KaneNBodyRK4(struct SCType *S)
       }
 
       /* Third Call */
-      KaneNBodyEOM(uu,xx,hh,uuf,xxf,du,dx,dh,duf,dxf,S);
+      KaneNBodyEOM(uu,xx,hh,xxw,uuf,xxf,du,dx,dh,dxw,duf,dxf,S);
 
       for(i=0;i<Nu;i++) {
          uu[i] = u[i] + DTSIM*du[i];
@@ -2319,6 +2330,8 @@ void KaneNBodyRK4(struct SCType *S)
       for(i=0;i<Nw;i++) {
          hh[i] = h[i] + DTSIM*dh[i];
          hdot[i] += dh[i]/3.0;
+         xxw[i] = xw[i] + DTSIM*dxw[i];
+         xwdot[i] += dxw[i]/3.0;
       }
       for(i=0;i<Nf;i++)  {
          uuf[i] = uf[i] + DTSIM*duf[i];
@@ -2328,11 +2341,14 @@ void KaneNBodyRK4(struct SCType *S)
       }
 
       /* Fourth Call */
-      KaneNBodyEOM(uu,xx,hh,uuf,xxf,du,dx,dh,duf,dxf,S);
+      KaneNBodyEOM(uu,xx,hh,xxw,uuf,xxf,du,dx,dh,dxw,duf,dxf,S);
 
       for(i=0;i<Nu;i++) udot[i] += du[i]/6.0;
       for(i=0;i<Nx;i++) xdot[i] += dx[i]/6.0;
-      for(i=0;i<Nw;i++) hdot[i] += dh[i]/6.0;
+      for(i=0;i<Nw;i++) {
+         hdot[i] += dh[i]/6.0;
+         xwdot[i] += dxw[i]/6.0;
+      }
       for(i=0;i<Nf;i++)  {
          ufdot[i] += duf[i]/6.0;
          xfdot[i] += dxf[i]/6.0;
@@ -2340,7 +2356,10 @@ void KaneNBodyRK4(struct SCType *S)
 
       for(i=0;i<Nu;i++) u[i] += udot[i]*DTSIM;
       for(i=0;i<Nx;i++) x[i] += xdot[i]*DTSIM;
-      for(i=0;i<Nw;i++) h[i] += hdot[i]*DTSIM;
+      for(i=0;i<Nw;i++) {
+         h[i] += hdot[i]*DTSIM;
+         xw[i] += xwdot[i]*DTSIM;
+      }
       for(i=0;i<Nf;i++)  {
          uf[i] += ufdot[i]*DTSIM;
          xf[i] += xfdot[i]*DTSIM;
@@ -2380,13 +2399,12 @@ void KaneNBodyRK4(struct SCType *S)
          W = &S->Whl[i];
          W->H = h[i];
          W->w = h[i]/W->J;
-         /* Hi-fi isn't needed for wheel rotor angle */
-         W->ang += W->w*DTSIM;
-         W->ang = fmod(W->ang,TwoPi);
+         xw[i] = fmod(xw[i],TwoPi);
+         W->ang = xw[i];
       }
 
 /* .. For Accelerometers */
-      KaneNBodyEOM(u,x,h,uf,xf,du,dx,dh,duf,dxf,S);
+      KaneNBodyEOM(u,x,h,xw,uf,xf,du,dx,dh,dxw,duf,dxf,S);
       for(i=0;i<3;i++) S->alfbn[i] = du[i];
       MxV(S->B[0].CN,&du[Nu-3],S->abs);
 
@@ -2397,9 +2415,11 @@ void KaneNBodyRK4(struct SCType *S)
 /* For spacecraft composed of a single body, with the reference point */
 /* placed at the CM, the EOM are vastly simplified.  KaneNBodyEOM     */
 /* will work, but this should be faster.                              */
-void OneBodyEOM(double *u, double *x, double *h,
+void OneBodyEOM(double *u, double *x, 
+                double *h, double *xw,
                 double *uf, double *xf,
-                double *udot, double *xdot, double *hdot,
+                double *udot, double *xdot, 
+                double *hdot, double *xwdot,
                 double *ufdot, double *xfdot,
                 struct SCType *S)
 {
@@ -2446,6 +2466,7 @@ void OneBodyEOM(double *u, double *x, double *h,
 /* .. Wheel-body interaction  */
       for (i=0;i<S->Nw;i++){
          hdot[i] = S->Whl[i].Trq;
+         xwdot[i] = h[i]/S->Whl[i].J;
       }
 
 /* .. Quaternion kinematics */
@@ -2497,6 +2518,7 @@ void OneBodyRK4(struct SCType *S)
       double *u,*uu,*du,*udot;
       double *x,*xx,*dx,*xdot;
       double *h,*hh,*dh,*hdot;
+      double *xw,*xxw,*dxw,*xwdot;
       double *uf,*uuf,*duf,*ufdot;
       double *xf,*xxf,*dxf,*xfdot;
       long i,In,If;
@@ -2511,24 +2533,28 @@ void OneBodyRK4(struct SCType *S)
       u = D->u;
       x = D->x;
       h = D->h;
+      xw = D->xw;
       uf = D->uf;
       xf = D->xf;
 
       uu = D->uu;
       xx = D->xx;
       hh = D->hh;
+      xxw = D->xxw;
       uuf = D->uuf;
       xxf = D->xxf;
 
       du = D->du;
       dx = D->dx;
       dh = D->dh;
+      dxw = D->dxw;
       duf = D->duf;
       dxf = D->dxf;
 
       udot = D->udot;
       xdot = D->xdot;
       hdot = D->hdot;
+      xwdot = D->xwdot;
       ufdot = D->ufdot;
       xfdot = D->xfdot;
 
@@ -2536,7 +2562,7 @@ void OneBodyRK4(struct SCType *S)
 
 /* .. 4th order Runge Kutta */
       /* First Call */
-      OneBodyEOM(u,x,h,uf,xf,du,dx,dh,duf,dxf,S);
+      OneBodyEOM(u,x,h,xw,uf,xf,du,dx,dh,dxw,duf,dxf,S);
 
       for(i=0;i<3;i++)  {
          uu[i] = u[i] + 0.5*DTSIM*du[i];
@@ -2549,6 +2575,8 @@ void OneBodyRK4(struct SCType *S)
       for(i=0;i<Nw;i++)  {
          hh[i] = h[i] + 0.5*DTSIM*dh[i];
          hdot[i] = dh[i]/6.0;
+         xxw[i] = xw[i] + 0.5*DTSIM*dxw[i];
+         xwdot[i] = dxw[i]/6.0;
       }
       for(i=0;i<Nf;i++)  {
          uuf[i] = uf[i] + 0.5*DTSIM*duf[i];
@@ -2558,7 +2586,7 @@ void OneBodyRK4(struct SCType *S)
       }
 
       /* Second Call */
-      OneBodyEOM(uu,xx,hh,uuf,xxf,du,dx,dh,duf,dxf,S);
+      OneBodyEOM(uu,xx,hh,xxw,uuf,xxf,du,dx,dh,dxw,duf,dxf,S);
 
       for(i=0;i<3;i++) {
          uu[i] = u[i] + 0.5*DTSIM*du[i];
@@ -2571,6 +2599,8 @@ void OneBodyRK4(struct SCType *S)
       for(i=0;i<Nw;i++) {
          hh[i] = h[i] + 0.5*DTSIM*dh[i];
          hdot[i] += dh[i]/3.0;
+         xxw[i] = xw[i] + 0.5*DTSIM*dxw[i];
+         xwdot[i] += dxw[i]/3.0;
       }
       for(i=0;i<Nf;i++)  {
          uuf[i] = uf[i] + 0.5*DTSIM*duf[i];
@@ -2580,7 +2610,7 @@ void OneBodyRK4(struct SCType *S)
       }
 
       /* Third Call */
-      OneBodyEOM(uu,xx,hh,uuf,xxf,du,dx,dh,duf,dxf,S);
+      OneBodyEOM(uu,xx,hh,xxw,uuf,xxf,du,dx,dh,dxw,duf,dxf,S);
 
       for(i=0;i<3;i++) {
          uu[i] = u[i] + DTSIM*du[i];
@@ -2593,6 +2623,8 @@ void OneBodyRK4(struct SCType *S)
       for(i=0;i<Nw;i++) {
          hh[i] = h[i] + DTSIM*dh[i];
          hdot[i] += dh[i]/3.0;
+         xxw[i] = xw[i] + DTSIM*dxw[i];
+         xwdot[i] += dxw[i]/3.0;
       }
       for(i=0;i<Nf;i++)  {
          uuf[i] = uf[i] + DTSIM*duf[i];
@@ -2602,7 +2634,7 @@ void OneBodyRK4(struct SCType *S)
       }
 
       /* Fourth Call */
-      OneBodyEOM(uu,xx,hh,uuf,xxf,du,dx,dh,duf,dxf,S);
+      OneBodyEOM(uu,xx,hh,xxw,uuf,xxf,du,dx,dh,dxw,duf,dxf,S);
 
       for(i=0;i<3;i++) {
          udot[i] += du[i]/6.0;
@@ -2615,6 +2647,8 @@ void OneBodyRK4(struct SCType *S)
       for(i=0;i<Nw;i++) {
          hdot[i] += dh[i]/6.0;
          h[i] += hdot[i]*DTSIM;
+         xwdot[i] += dxw[i]/6.0;
+         xw[i] += xwdot[i]*DTSIM;
       }
       for(i=0;i<Nf;i++)  {
          ufdot[i] += duf[i]/6.0;
@@ -2637,9 +2671,8 @@ void OneBodyRK4(struct SCType *S)
          W = &S->Whl[i];
          W->H = h[i];
          W->w = h[i]/W->J;
-         /* Hi-fi isn't needed for wheel rotor angle */
-         W->ang += W->w*DTSIM;
-         W->ang = fmod(W->ang,TwoPi);
+         xw[i] = fmod(xw[i],TwoPi);
+         W->ang = xw[i];
       }
 
 /* .. Flex */
@@ -3313,6 +3346,7 @@ void OrderNMultiBodyEOM(struct SCType *S)
       for(Iw=0;Iw<S->Nw;Iw++) {
          W = &S->Whl[Iw];
          W->Hdot = W->Trq;
+         W->qdot = W->w;
       }
       
 }
@@ -3362,6 +3396,7 @@ void OrderNMultiBodyRK4(struct SCType *S)
       for(Iw=0;Iw<S->Nw;Iw++) {
          W = &S->Whl[Iw];
          W->RKHm = D->h[Iw];
+         W->RKqm = D->xw[Iw];
       }
       
       /* Set up for First Call */
@@ -3406,6 +3441,8 @@ void OrderNMultiBodyRK4(struct SCType *S)
       for(Iw=0;Iw<S->Nw;Iw++) {
          W = &S->Whl[Iw];
          W->H = W->RKHm;
+         W->w = W->H/W->J;
+         W->ang = W->RKqm;
       }
       
       /* First Call */
@@ -3447,6 +3484,7 @@ void OrderNMultiBodyRK4(struct SCType *S)
       for(Iw=0;Iw<S->Nw;Iw++) {
          W = &S->Whl[Iw];
          W->RKdH = f*W->Hdot;
+         W->RKdq = f*W->qdot;
       }
 
       /* Set up for Second Call */
@@ -3492,6 +3530,8 @@ void OrderNMultiBodyRK4(struct SCType *S)
       for(Iw=0;Iw<S->Nw;Iw++) {
          W = &S->Whl[Iw];
          W->H = W->RKHm + dt*W->Hdot;
+         W->w = W->H/W->J;
+         W->ang = W->RKqm + dt*W->qdot;
       }
       
       /* Second Call */
@@ -3533,6 +3573,7 @@ void OrderNMultiBodyRK4(struct SCType *S)
       for(Iw=0;Iw<S->Nw;Iw++) {
          W = &S->Whl[Iw];
          W->RKdH += f*W->Hdot;
+         W->RKdq += f*W->qdot;
       }
             
       /* Set up for Third Call */
@@ -3578,6 +3619,8 @@ void OrderNMultiBodyRK4(struct SCType *S)
       for(Iw=0;Iw<S->Nw;Iw++) {
          W = &S->Whl[Iw];
          W->H = W->RKHm + dt*W->Hdot;
+         W->w = W->H/W->J;
+         W->ang = W->RKqm + dt*W->qdot;
       }
 
       /* Third Call */
@@ -3619,6 +3662,7 @@ void OrderNMultiBodyRK4(struct SCType *S)
       for(Iw=0;Iw<S->Nw;Iw++) {
          W = &S->Whl[Iw];
          W->RKdH += f*W->Hdot;
+         W->RKdq += f*W->qdot;
       }
             
       /* Set up for Fourth Call */
@@ -3664,6 +3708,8 @@ void OrderNMultiBodyRK4(struct SCType *S)
       for(Iw=0;Iw<S->Nw;Iw++) {
          W = &S->Whl[Iw];
          W->H = W->RKHm + dt*W->Hdot;
+         W->w = W->H/W->J;
+         W->ang = W->RKHm + dt*W->qdot;
       }
 
       /* Fourth Call */
@@ -3705,6 +3751,7 @@ void OrderNMultiBodyRK4(struct SCType *S)
       for(Iw=0;Iw<S->Nw;Iw++) {
          W = &S->Whl[Iw];
          W->RKdH += f*W->Hdot;
+         W->RKdq += f*W->qdot;
       }
       
       /* Update States */
@@ -3749,10 +3796,10 @@ void OrderNMultiBodyRK4(struct SCType *S)
       for(Iw=0;Iw<S->Nw;Iw++) {
          W = &S->Whl[Iw];
          D->h[Iw] = W->RKHm + dt*W->RKdH;
+         D->xw[i] = fmod(W->RKqm + dt*W->RKdq,TwoPi);
          W->H = D->h[Iw];
          W->w = W->H/W->J;
-         W->ang += W->w*DTSIM;
-         W->ang = fmod(W->ang,TwoPi);
+         W->ang = D->xw[Iw];
       }      
 
       FindTotalAngMom(S);
@@ -3843,9 +3890,6 @@ void EnckeRK4(struct SCType *S)
       S->VelR[0] = u[3];
       S->VelR[1] = u[4];
       S->VelR[2] = u[5];
-
-      RelRV2EHRV(O->SMA,O->MeanMotion,O->CLN,
-         S->PosR,S->VelR,S->PosEH,S->VelEH);
 }
 /**********************************************************************/
 void CowellEOM(double u[6], double udot[6], double mu,
@@ -3897,21 +3941,6 @@ void CowellRK4(struct SCType *S)
       S->VelN[0] = u[3];
       S->VelN[1] = u[4];
       S->VelN[2] = u[5];
-
-      if (O->Regime == ORB_CENTRAL) {
-         for(j=0;j<3;j++) {
-            S->PosR[j] = S->PosN[j] - O->PosN[j];
-            S->VelR[j] = S->VelN[j] - O->VelN[j];
-         }
-         RelRV2EHRV(O->SMA,O->MeanMotion,O->CLN,
-            S->PosR,S->VelR,S->PosEH,S->VelEH);
-      }
-      else {
-         for(j=0;j<3;j++) {
-            S->PosEH[j] = 0.0;
-            S->VelEH[j] = 0.0;
-         }
-      }
 }
 /**********************************************************************/
 void PolyhedronCowellEOM(double u[6], double udot[6],
@@ -4056,8 +4085,9 @@ void ThreeBodyEnckeRK4(struct SCType *S)
       S->VelR[1] = u[4];
       S->VelR[2] = u[5];
 
-      RelRV2EHRV(MagR1,sqrt(muR13),O->CLN,
-         S->PosR,S->VelR,S->PosEH,S->VelEH);
+      /* TODO: Move to 42ephem.c */
+      //RelRV2EHRV(MagR1,sqrt(muR13),O->CLN,
+      //   S->PosR,S->VelR,S->PosEH,S->VelEH);
 }
 /************************************************************/
 /*  Euler-Hill linearized EOM for near-circular orbits.     */

@@ -131,6 +131,32 @@ void FreqRespDiag(void)
          F->OutAng[0],F->OutAng[1],F->OutAng[2]);
 }
 /*********************************************************************/
+void OrbPropReport(void)
+{
+      static FILE *PosRLfile;
+      static FILE *PosNLfile;
+      double PosL[3];
+      long i;
+      static long First = 1;
+      
+      if (First) {
+         First = 0;
+         PosRLfile = FileOpen(InOutPath,"PosRL.42","w");
+         PosNLfile = FileOpen(InOutPath,"PosNL.42","w");
+      }
+      
+      if (OutFlag) {
+         for(i=0;i<3;i++) {
+            MxV(Orb[0].CLN,SC[i].PosN,PosL);
+            fprintf(PosNLfile,"%24.18le %24.18le %24.18le ",PosL[0],PosL[1],PosL[2]);
+            MxV(Orb[0].CLN,SC[i].PosR,PosL);
+            fprintf(PosRLfile,"%24.18le %24.18le %24.18le ",PosL[0],PosL[1],PosL[2]);
+         }
+         fprintf(PosNLfile,"\n");
+         fprintf(PosRLfile,"\n");
+      }
+}
+/*********************************************************************/
 void Report(void)
 {
       static FILE *timefile,*DynTimeFile;
@@ -303,6 +329,8 @@ void Report(void)
                fprintf(IllumFile,"\n");
                fprintf(AlbedoFile,"\n");
             }
+            
+            //OrbPropReport();
             
             //MagReport();
             //GyroReport();

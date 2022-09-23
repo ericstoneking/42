@@ -784,13 +784,23 @@ void Ephemerides(void)
                FindENU(S->PosN,W->w,S->CLN,S->wln);
             }
             else if (O->Regime == ORB_CENTRAL) {
-               for(j=0;j<3;j++) {
-                  S->PosN[j] = O->PosN[j] + S->PosR[j];
-                  S->VelN[j] = O->VelN[j] + S->VelR[j];
+               if (S->OrbDOF == ORBDOF_COWELL) {
+                  for(j=0;j<3;j++) {
+                     S->PosR[j] = S->PosN[j] - O->PosN[j];
+                     S->VelR[j] = S->VelN[j] - O->VelN[j];
+                  }
+               }
+               else {
+                  for(j=0;j<3;j++) {
+                     S->PosN[j] = O->PosN[j] + S->PosR[j];
+                     S->VelN[j] = O->VelN[j] + S->VelR[j];
+                  }
                }
                FindCLN(S->PosN,S->VelN,S->CLN,S->wln);
+               RelRV2EHRV(O->SMA,O->MeanMotion,O->CLN,
+                  S->PosR,S->VelR,S->PosEH,S->VelEH);
             }
-            else {
+            else { /* ORB_THREE_BODY */
                for(j=0;j<3;j++) {
                   S->PosN[j] = O->PosN[j] + S->PosR[j];
                   S->VelN[j] = O->VelN[j] + S->VelR[j];

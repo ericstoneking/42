@@ -208,8 +208,8 @@ endif
 
 42OBJ = $(OBJ)42main.o $(OBJ)42exec.o $(OBJ)42actuators.o $(OBJ)42cmd.o \
 $(OBJ)42dynamics.o $(OBJ)42environs.o $(OBJ)42ephem.o $(OBJ)42fsw.o \
-$(OBJ)42init.o $(OBJ)42ipc.o $(OBJ)42joints.o $(OBJ)42perturb.o \
-$(OBJ)42report.o $(OBJ)42sensors.o \
+$(OBJ)42init.o $(OBJ)42ipc.o $(OBJ)42jitter.o $(OBJ)42joints.o \
+$(OBJ)42perturb.o $(OBJ)42report.o $(OBJ)42sensors.o \
 $(OBJ)42nos3.o
 
 KITOBJ = $(OBJ)dcmkit.o $(OBJ)envkit.o $(OBJ)fswkit.o $(OBJ)geomkit.o \
@@ -285,6 +285,9 @@ $(OBJ)42init.o      : $(SRC)42init.c $(INC)42.h
 
 $(OBJ)42ipc.o       : $(SRC)42ipc.c $(INC)42.h
 	$(CC) $(CFLAGS) -c $(SRC)42ipc.c -o $(OBJ)42ipc.o
+
+$(OBJ)42jitter.o    : $(SRC)42jitter.c $(INC)42.h
+	$(CC) $(CFLAGS) -c $(SRC)42jitter.c -o $(OBJ)42jitter.o
 
 $(OBJ)42joints.o    : $(SRC)42joints.c $(INC)42.h
 	$(CC) $(CFLAGS) -c $(SRC)42joints.c -o $(OBJ)42joints.o

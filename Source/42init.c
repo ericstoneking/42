@@ -229,6 +229,9 @@ long DecodeString(char *s)
       else if (!strcmp(s,"STEERING_MIRROR")) return STEERING_MIRROR_JOINT;
       else if (!strcmp(s,"AD_HOC_JOINT")) return AD_HOC_JOINT;
 
+      else if (!strcmp(s,"FORCE")) return FORCE;
+      else if (!strcmp(s,"TORQUE")) return TORQUE;
+
       else {
          printf("Bogus input %s in DecodeString (42init.c:%d)\n",s,__LINE__);
          exit(1);
@@ -999,6 +1002,10 @@ void InitRigidDyn(struct SCType *S)
       D->hh = (double *) calloc(S->Nw,sizeof(double));
       D->dh = (double *) calloc(S->Nw,sizeof(double));
       D->hdot = (double *) calloc(S->Nw,sizeof(double));
+      D->xw = (double *) calloc(S->Nw,sizeof(double));
+      D->xxw = (double *) calloc(S->Nw,sizeof(double));
+      D->dxw = (double *) calloc(S->Nw,sizeof(double));
+      D->xwdot = (double *) calloc(S->Nw,sizeof(double));
 
       for(i=0;i<3;i++) {
          D->PAngVel[i][i] = 1.0;
@@ -1521,6 +1528,89 @@ void InitFlexModes(struct SCType *S)
       }
 }
 /**********************************************************************/
+void InitShakers(void)
+{
+      FILE *infile;
+      long Nsh,Ish,Isc,Ib,In,It;
+      struct SCType *S;
+      struct BodyType *B;
+      struct ShakerType *Sh;
+      char response[80],junk[80],newline;
+
+      infile = FileOpen(InOutPath,"Inp_Shaker.txt","r");
+      fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      fscanf(infile,"%ld %[^\n] %[\n]",&Nsh,junk,&newline);
+      for(Ish=0;Ish<Nsh;Ish++) {
+         fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         fscanf(infile,"%ld %ld %ld  %[^\n] %[\n]",&Isc,&Ib,&In,junk,&newline); 
+         if (Isc>=Nsc) {
+            printf("Shaker[%ld] assigned to non-existent SC[%ld].\n",Ish,Isc);
+            exit(1);
+         }
+         S = &SC[Isc];
+         if (Ib>=S->Nb) {
+            printf("Shaker[%ld] assigned to non-existent SC[%ld].Body[%ld].\n",
+               Ish,Isc,Ib);
+            exit(1);
+         }
+         B = &S->B[Ib];
+         if (B->Nshaker==0) {
+            B->Nshaker = 1;
+            B->Shaker = (struct ShakerType *) calloc(1,sizeof(struct ShakerType));
+         }
+         else {
+            B->Nshaker++;
+            B->Shaker = (struct ShakerType *) 
+               realloc(B->Shaker,B->Nshaker*sizeof(struct ShakerType));
+         }
+         Sh = &B->Shaker[B->Nshaker-1];
+         Sh->Body = Ib;
+         Sh->Node = In;
+         fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline); 
+         Sh->FrcTrq = DecodeString(response);
+         fscanf(infile,"%lf %lf %lf  %[^\n] %[\n]",
+            &Sh->Axis[0],&Sh->Axis[1],&Sh->Axis[2],junk,&newline); 
+         UNITV(Sh->Axis);
+         fscanf(infile,"%ld %[^\n] %[\n]",&Sh->Ntone,junk,&newline);
+         if (Sh->Ntone==0) {
+            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         }
+         else {
+            Sh->ToneAmp = (double *) calloc(Sh->Ntone,sizeof(double));
+            Sh->ToneFreq = (double *) calloc(Sh->Ntone,sizeof(double));
+            for(It=0;It<Sh->Ntone;It++) {
+               fscanf(infile,"%lf %[^\n] %[\n]",&Sh->ToneAmp[It],junk,&newline);
+               fscanf(infile,"%lf %[^\n] %[\n]",&Sh->ToneFreq[It],junk,&newline);
+               Sh->ToneFreq[It] *= TwoPi;
+            }
+         }
+         fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline); 
+         Sh->RandomActive = DecodeString(response);
+         if (!Sh->RandomActive) {
+            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         }
+         else {
+            fscanf(infile,"%lf %lf %[^\n] %[\n]",
+               &Sh->LowBandLimit,&Sh->HighBandLimit,junk,&newline);
+            fscanf(infile,"%lf %[^\n] %[\n]",&Sh->RandStd,junk,&newline);
+            Sh->RandStd /= Sh->HighBandLimit-Sh->LowBandLimit;
+            Sh->HighBandLimit *= TwoPi;
+            Sh->LowBandLimit *= TwoPi;
+            
+            /* Lowpass and Highpass overlap to form Bandpass */
+            Sh->Lowpass = CreateSecondOrderLowpassFilter(Sh->HighBandLimit,1.0,
+               DTSIM,1.0E6,1.0E-12);
+            if (Sh->LowBandLimit > 0.0) 
+               Sh->Highpass = CreateSecondOrderLowpassFilter(Sh->LowBandLimit,1.0,
+                  DTSIM,1.0E6,1.0E-12);
+         }
+      }
+      fclose(infile);            
+}
+/**********************************************************************/
 void InitOrderNDynamics(struct SCType *S)
 {
       struct BodyType *B;
@@ -1774,6 +1864,8 @@ void InitSpacecraft(struct SCType *S)
             for(i=0;i<3;i++) B->c[i] = B->mass*B->cm[i];
          else
             for(i=0;i<3;i++) B->c[i] = 0.0;
+         B->Nshaker = 0;
+         B->Shaker = NULL;
       }
 
 /* .. Joint Parameters */

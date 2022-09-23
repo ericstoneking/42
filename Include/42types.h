@@ -56,6 +56,29 @@ struct FlexNodeType {
    double TotTrnAcc[3];
 };
 
+struct ShakerType {
+   /*~ Parameters ~*/
+   long Body;
+   long Node;
+   long FrcTrq; /* SHAKER_FORCE or SHAKER_TORQUE */
+   double Axis[3];
+   long Ntone;
+   long RandomActive;
+   double *ToneAmp; /* N or Nm */
+   double *ToneFreq; /* For tonic, rad/sec */
+   struct RandomProcessType *RandomProc;
+   struct FilterType *Lowpass;
+   struct FilterType *Highpass;
+   double LowBandLimit; /* rad/sec */
+   double HighBandLimit; /* rad/sec */
+   double RandStd; /* Std Dev of band-limited random input, N or Nm */
+
+   /*~ Internal Variables ~*/
+   double Frc[3]; /* N, in B frame */
+   double Trq[3]; /* Nm, in B frame */
+   struct FilterType *Rand; /* White noise in, band-limited noise out */
+};
+
 struct BodyType {
    /*~ Internal Variables ~*/
    double mass;
@@ -124,11 +147,15 @@ struct BodyType {
    long NumFlexNodes;  /* Number of flex "analysis" nodes on Body */
    struct FlexNodeType *FlexNode;
    long MfIsDiagonal;  /* Simpler EOM for One-body case if Mf is diagonal */
+   
+   /* For jitter studies */
+   long Nshaker;
+   struct ShakerType *Shaker;
 };
 
 struct JointType {
    /*~ Internal Variables ~*/
-   long Type;  /* LINEAR_PASSIVE_JOINT, SIMPLE_GIMBAL, etc */ 
+   long Type;  /* PASSIVE_JOINT, ACTUATED_JOINT, etc */ 
    long Init;
    long IsSpherical;      /* TRUE or FALSE */
    long RotDOF;           /* 0,1,2,3 */
@@ -252,7 +279,7 @@ struct WhlType {
    double Tcmd;
    double Trq;  /* Exerted on wheel, expressed along wheel axis */
    long FlexNode;
-   double Uhat[3],Vhat[3]; /* Transverse basis vectors wrt Body */
+   double Uhat[3],Vhat[3]; /* Transverse basis vectors fixed in Body */
    double ang; /* Spin angle, rad */
    double Ks;  /* Static imbalance coefficient, [kg-m] */
    double Kd;  /* Dynamic imbalance coefficient, [kg-m^2] */
@@ -260,8 +287,11 @@ struct WhlType {
 
    /* For OrderN Dynamics */
    double Hdot;
+   double qdot; /* q as in generalized coordinate, not quaternion */
    double RKHm;
    double RKdH;
+   double RKqm;
+   double RKdq;
 };
 
 struct MTBType {
@@ -484,6 +514,7 @@ struct DynType {
    double *u,*uu,*du,*udot;  /* Nu  (Dynamic States) */
    double *x,*xx,*dx,*xdot;  /* Nx  (Kinematic States) */
    double *h,*hh,*dh,*hdot;  /* Nw  (Wheel Momentum States) */
+   double *xw,*xxw,*dxw,*xwdot; /* Nw (Wheel Kinematic States) */
    /* For Flex */
    long Nf;  /* Total Number of Flex Modes, Sum(B.Nf) */
    double **PAngVelf; /* 3*Nb x Nf */
