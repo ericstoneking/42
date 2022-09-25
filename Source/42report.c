@@ -146,7 +146,7 @@ void OrbPropReport(void)
       }
       
       if (OutFlag) {
-         for(i=0;i<3;i++) {
+         for(i=0;i<4;i++) {
             MxV(Orb[0].CLN,SC[i].PosN,PosL);
             fprintf(PosNLfile,"%24.18le %24.18le %24.18le ",PosL[0],PosL[1],PosL[2]);
             MxV(Orb[0].CLN,SC[i].PosR,PosL);

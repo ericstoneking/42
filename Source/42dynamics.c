@@ -4084,10 +4084,6 @@ void ThreeBodyEnckeRK4(struct SCType *S)
       S->VelR[0] = u[3];
       S->VelR[1] = u[4];
       S->VelR[2] = u[5];
-
-      /* TODO: Move to 42ephem.c */
-      //RelRV2EHRV(MagR1,sqrt(muR13),O->CLN,
-      //   S->PosR,S->VelR,S->PosEH,S->VelEH);
 }
 /************************************************************/
 /*  Euler-Hill linearized EOM for near-circular orbits.     */
@@ -4109,7 +4105,8 @@ void EulHillEOM(double u[6], double udot[6],
 /* State u[0:2] = r, u[3:5] = v                                       */
 void EulHillRK4(struct SCType *S)
 {
-      double accelN[3],accel[3],R;
+      double accelN[3],accel[3];
+      double CLprop[3][3],CLN[3][3];
       double u[6],uu[6],m1[6],m2[6],m3[6],m4[6];
       long j;
       struct OrbitType *O;
@@ -4125,15 +4122,19 @@ void EulHillRK4(struct SCType *S)
       }
       MxV(O->CLN,accelN,accel);
 
-      R = MAGV(O->PosN);
-
 /* .. 4th Order Runga-Kutta Integration */
       EulHillEOM( u, m1, O->MeanMotion, accel);
       for(j=0;j<6;j++) uu[j] = u[j] + 0.5*DTSIM*m1[j];
+      SimpRot(O->CLN[1],-O->MeanMotion*0.5*DTSIM,CLprop);
+      MxM(O->CLN,CLprop,CLN);
+      MxV(CLN,accelN,accel);
       EulHillEOM(uu, m2, O->MeanMotion, accel);
       for(j=0;j<6;j++) uu[j] = u[j] + 0.5*DTSIM*m2[j];
       EulHillEOM(uu, m3, O->MeanMotion, accel);
       for(j=0;j<6;j++) uu[j] = u[j] + DTSIM*m3[j];
+      SimpRot(O->CLN[1],-O->MeanMotion*DTSIM,CLprop);
+      MxM(O->CLN,CLprop,CLN);
+      MxV(CLN,accelN,accel);
       EulHillEOM(uu, m4, O->MeanMotion, accel);
       for(j=0;j<6;j++) u[j]+=DTSIM/6.0*(m1[j]+2.0*(m2[j]+m3[j])+m4[j]);
 
@@ -4142,7 +4143,7 @@ void EulHillRK4(struct SCType *S)
          S->VelEH[j] = u[3+j];
       }
 
-      EHRV2RelRV(R,O->MeanMotion,O->CLN,S->PosEH,S->VelEH,
+      EHRV2RelRV(O->SMA,O->MeanMotion,CLN,S->PosEH,S->VelEH,
          S->PosR,S->VelR);
 }
 /**********************************************************************/

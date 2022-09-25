@@ -343,8 +343,8 @@ long SimStep(void)
       for(Isc=0;Isc<Nsc;Isc++) {
          if (SC[Isc].Exists) Dynamics(&SC[Isc]);
       }
-      OrbitMotion(DynTime+DTSIM);
       SimComplete = AdvanceTime();
+      OrbitMotion(DynTime);
 
       /* Update SC Bounding Boxes occasionally */
       ManageBoundingBoxes();

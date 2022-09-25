@@ -570,6 +570,7 @@ void Ephemerides(void)
       double EMRAT = 81.30056907419062; /* Earth-Moon mass ratio */
       double PosJ[3],VelJ[3];
       double C_W_TETE[3][3],C_TEME_TETE[3][3],C_TETE_J2000[3][3];
+      double MagR1,MeanMotion;
 
 /* .. Locate Planets and Luna */
       if (EphemOption == EPH_MEAN) {
@@ -805,6 +806,10 @@ void Ephemerides(void)
                   S->PosN[j] = O->PosN[j] + S->PosR[j];
                   S->VelN[j] = O->VelN[j] + S->VelR[j];
                }
+               MagR1 = MAGV(O->PosN);
+               MeanMotion = sqrt(O->mu1/(MagR1*MagR1*MagR1));
+               RelRV2EHRV(MagR1,MeanMotion,O->CLN,
+                  S->PosR,S->VelR,S->PosEH,S->VelEH);
                FindCLN(S->PosN,S->VelN,S->CLN,S->wln);
             }
 
