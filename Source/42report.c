@@ -133,27 +133,29 @@ void FreqRespDiag(void)
 /*********************************************************************/
 void OrbPropReport(void)
 {
-      static FILE *PosRLfile;
-      static FILE *PosNLfile;
-      double PosL[3];
+      static FILE *FixedFile;
+      static FILE *EnckeFile;
+      static FILE *CowellFile;
       long i;
       static long First = 1;
       
       if (First) {
          First = 0;
-         PosRLfile = FileOpen(InOutPath,"PosRL.42","w");
-         PosNLfile = FileOpen(InOutPath,"PosNL.42","w");
+         FixedFile = FileOpen(InOutPath,"PosVelNfixed.42","w");
+         EnckeFile = FileOpen(InOutPath,"PosVelNencke.42","w");
+         CowellFile = FileOpen(InOutPath,"PosVelNcowell.42","w");
       }
       
       if (OutFlag) {
-         for(i=0;i<4;i++) {
-            MxV(Orb[0].CLN,SC[i].PosN,PosL);
-            fprintf(PosNLfile,"%24.18le %24.18le %24.18le ",PosL[0],PosL[1],PosL[2]);
-            MxV(Orb[0].CLN,SC[i].PosR,PosL);
-            fprintf(PosRLfile,"%24.18le %24.18le %24.18le ",PosL[0],PosL[1],PosL[2]);
-         }
-         fprintf(PosNLfile,"\n");
-         fprintf(PosRLfile,"\n");
+         fprintf(FixedFile,"%24.18le %24.18le %24.18le %24.18le %24.18le %24.18le\n",
+            SC[0].PosN[0],SC[0].PosN[1],SC[0].PosN[2],
+            SC[0].VelN[0],SC[0].VelN[1],SC[0].VelN[2]);
+         fprintf(EnckeFile,"%24.18le %24.18le %24.18le %24.18le %24.18le %24.18le\n",
+            SC[1].PosN[0],SC[1].PosN[1],SC[1].PosN[2],
+            SC[1].VelN[0],SC[1].VelN[1],SC[1].VelN[2]);
+         fprintf(CowellFile,"%24.18le %24.18le %24.18le %24.18le %24.18le %24.18le\n",
+            SC[2].PosN[0],SC[2].PosN[1],SC[2].PosN[2],
+            SC[2].VelN[0],SC[2].VelN[1],SC[2].VelN[2]);
       }
 }
 /*********************************************************************/
@@ -330,7 +332,7 @@ void Report(void)
                fprintf(AlbedoFile,"\n");
             }
             
-            //OrbPropReport();
+            OrbPropReport();
             
             //MagReport();
             //GyroReport();

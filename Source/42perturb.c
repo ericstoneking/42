@@ -605,74 +605,6 @@ void SolPressFrcTrq(struct SCType *S)
 
 }
 /**********************************************************************/
-/*  Static and dynamic imbalance may have any relative phasing.       */
-/*  This model makes the dynamic imbalance torque be in phase         */
-/*  with the torque due to static imbalance.                          */
-void RwaImbalance(struct SCType *S)
-{
-      struct BodyType *B;
-      struct WhlType *W;
-      struct FlexNodeType *FN;
-      double c,s,Coef,PosB[3],Fb[3],Fn[3],Tb[3],PoA;
-      long Iw,i;
-      double SincFactor;
-
-      for(Iw=0;Iw<S->Nw;Iw++) {
-         W = &S->Whl[Iw];
-         B = &S->B[W->Body];
-         if (S->FlexActive) {
-            FN = &B->FlexNode[W->FlexNode];
-         }
-         c = cos(W->ang);
-         s = sin(W->ang);
-
-         /* Position of Wheel wrt cm of Body */
-         if (S->FlexActive) {
-            for(i=0;i<3;i++) PosB[i] = FN->PosB[i] - B->cm[i];
-         }
-         else {
-            for(i=0;i<3;i++) PosB[i] = 0.0;
-         }
-
-         /* Averages wheel angle over relatively long DTSIM */
-         SincFactor = sinc(0.5*W->w*DTSIM);
-
-         /* Static Imbalance Force */
-         Coef = W->Ks*W->w*W->w*SincFactor;
-         for(i=0;i<3;i++) {
-            Fb[i] = Coef*(c*W->Uhat[i] + s*W->Vhat[i]);
-         }
-         MTxV(B->CN,Fb,Fn);
-         VxV(PosB,Fb,Tb);
-         for(i=0;i<3;i++) {
-            B->FrcN[i] += Fn[i];
-            B->FrcB[i] += Fb[i];
-            B->Trq[i] += Tb[i];
-         }
-         if (S->FlexActive) {
-            for(i=0;i<3;i++) {
-               FN->Frc[i] += Fb[i];
-               FN->Trq[i] += Tb[i];
-            }
-         }
-
-         /* Dynamic Imbalance Torque */
-         Coef = W->Kd*W->w*W->w*SincFactor;
-         /* This sign makes sure dyn imbalance trq is in phase with */
-         /* trq from static imbalance */
-         PoA = (VoV(PosB,W->A) > 0.0 ? 1.0 : -1.0);
-         for(i=0;i<3;i++) {
-            Tb[i] = Coef*PoA*(-s*W->Uhat[i]+c*W->Vhat[i]);
-            B->Trq[i] += Tb[i];
-         }
-         if (S->FlexActive) {
-            for(i=0;i<3;i++) {
-               FN->Trq[i] += Tb[i];
-            }
-         }
-      }
-}
-/**********************************************************************/
 /* A point is fixed in Body B of Spacecraft S.                        */
 /* Given its components in B, PosB, find its position and velocity    */
 /* wrt R, expressed in N.                                             */
@@ -1097,9 +1029,6 @@ void Perturbations(struct SCType *S)
 
 /* .. Solar Radiation Pressure Forces and Torques */
       if (SolPressActive) SolPressFrcTrq(S);
-
-/* .. Reaction Wheel Static and Dynamic Imbalance Torques */
-      if (RwaImbalanceActive) RwaImbalance(S);
 
 /* .. Contact Forces and Torques */
       if (ContactActive) ContactFrcTrq(S);

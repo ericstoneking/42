@@ -59,36 +59,15 @@ void WheelJitter(struct WhlType *W, struct SCType *S)
          W->JitFrcB[i] = 0.0;
          W->JitTrqB[i] = 0.0;
       }
-      w2 = W->w^2;
       
-      /* Radial Force (Static Imbalance) */
-      Fh = W->Ks*w2;
-      
-      /* Radial Torque (Dynamic Imbalance) */
-      Th = W->Kd*w2;
-
       for(Ih=0;Ih<W->NumHarm;Ih++) {
-         HarmRate = W->HarmRatio[Ih]*W->w;
-         StatAng = W->HarmRatio[Ih]*W->ang;
-         DynAng = W->HarmRatio[Ih]*(W->ang+W->DynPhase);
-         
-         /* Lateral Mode amplifies Radial Force */
-
-         /* Whirl Modes amplify Radial Moment */
-         
-         c = cos(StatAng);
-         s = sin(StatAng);
          for(i=0;i<3;i++)
-            W->JitFrcB[i] = -Fh*(c*W->Uhat[i]+s*W->Vhat[i]);
+            W->JitTrqB[i] = (c*W->Uhat[i]+s*W->Vhat[i]);
          }
-         c = cos(DynAng);
-         s = sin(DynAng);
-         for(i=0;i<3;i++)
-            W->JitTrqB[i] = -Th*(c*W->Uhat[i]+s*W->Vhat[i]);
-         }
-         
-
       }
+      
+      /* Forces also exert Trq about Body cm */
+      /* Forces and Torques contribute to flex */
 #endif
 }
 

@@ -267,6 +267,13 @@ struct IdealActType {
    struct DelayType *TrqDelay;
 };
 
+struct WhlHarmType {
+   double n;  /* Harmonic Number [none] */
+   double Ks;  /* Static imbalance coefficient, [kg-m] */
+   double Kd;  /* Dynamic imbalance coefficient, [kg-m^2] */
+   double phase; /* Phase angle of harmonic wrt dynamic imbalance, [rad] */
+};
+
 struct WhlType {
    /*~ Internal Variables ~*/
    long Body; /* Body that wheel is mounted in */
@@ -281,9 +288,21 @@ struct WhlType {
    long FlexNode;
    double Uhat[3],Vhat[3]; /* Transverse basis vectors fixed in Body */
    double ang; /* Spin angle, rad */
-   double Ks;  /* Static imbalance coefficient, [kg-m] */
-   double Kd;  /* Dynamic imbalance coefficient, [kg-m^2] */
    struct DelayType *Delay; /* For injecting delay into control loops */
+
+   /* For Jitter */
+   char JitterFileName[40];
+   double m; /* Rotor mass [kg] */
+   double gamma; /* 2*Jt/Jr (<1.0) */
+   double Jt; /* Transverse rotor inertia, [kg-m^2] */
+   double ImbPhase; /* Phase of static imbalance wrt dynamic imbalance [rad] */
+   double LatFreq; /* [rad/sec] */
+   double LatDamp;
+   double RockFreq; /* [rad/sec] */
+   double RockDamp;
+   long NumHarm;
+   struct WhlHarmType *Harm;
+
 
    /* For OrderN Dynamics */
    double Hdot;
@@ -642,6 +661,8 @@ struct SCType {
    long FlexActive;
    /* Include higher-order coupling terms in rigid-flex dynamics */
    long IncludeSecondOrderFlexTerms;
+   /* Wheel Imbalance Force and Torque Active */
+   long WhlJitterActive;
    /* Workspace for KaneNBody */
    struct DynType Dyn;
    /* Workspace for Actuator Sizing */

@@ -20,6 +20,7 @@ FALSE                         ! Compute Constraint Forces and Torques
 REFPT_CM                      ! Mass Props referenced to REFPT_CM or REFPT_JOINT
 FALSE                         ! Flex Active
 FALSE                         ! Include 2nd Order Flex Terms
+FALSE                         ! Wheel Jitter Active
 2.0                           ! Drag Coefficient
 ************************************************************************
 ************************* Body Parameters ******************************
@@ -71,28 +72,25 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 1.0   0.0   0.0               ! Wheel Axis Components, [X, Y, Z]
 0.5   100.0                   ! Max Torque (N-m), Momentum (N-m-sec)
 0.2                           ! Wheel Rotor Inertia, kg-m^2
-0.2                           ! Static Imbalance, g-cm
-10.0                          ! Dynamic Imbalance, g-cm^2
 0                             ! Body
 0                             ! Flex Node Index
+NONE                          ! Jitter Input File Name
 =============================  Wheel 1  ================================
 0.0                           ! Initial Momentum, N-m-sec
 0.0   1.0   0.0               ! Wheel Axis Components, [X, Y, Z]
 0.5   100.0                   ! Max Torque (N-m), Momentum (N-m-sec)
 0.2                           ! Wheel Rotor Inertia, kg-m^2
-0.2                           ! Static Imbalance, g-cm
-10.0                          ! Dynamic Imbalance, g-cm^2
 0                             ! Body
 0                             ! Flex Node Index
+NONE                          ! Jitter Input File Name
 =============================  Wheel 2  ================================
 0.0                           ! Initial Momentum, N-m-sec
 0.0   0.0   1.0               ! Wheel Axis Components, [X, Y, Z]
 0.5   100.0                   ! Max Torque (N-m), Momentum (N-m-sec)
 0.2                           ! Wheel Rotor Inertia, kg-m^2
-0.2                           ! Static Imbalance, g-cm
-10.0                          ! Dynamic Imbalance, g-cm^2
 0                             ! Body
 0                             ! Flex Node Index
+NONE                          ! Jitter Input File Name
 **************************** MTB Parameters ****************************
 3                                   ! Number of MTBs
 ==============================  MTB 0  =================================

@@ -30,7 +30,6 @@ FALSE   FALSE                   !  Solar Pressure Forces & Torques (Shadows)
 FALSE                           !  Gravity Perturbation Forces
 FALSE                           !  Passive Joint Forces & Torques
 FALSE                           !  Thruster Plume Forces & Torques
-FALSE                           !  RWA Imbalance Forces and Torques
 FALSE                           !  Contact Forces and Torques
 FALSE                           !  CFD Slosh Forces and Torques
 FALSE                           !  Albedo Effect on CSS Measurements

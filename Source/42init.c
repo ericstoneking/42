@@ -1611,6 +1611,45 @@ void InitShakers(void)
       fclose(infile);            
 }
 /**********************************************************************/
+void InitWhlJitter(struct WhlType *W)
+{
+      FILE *infile;
+      struct WhlHarmType *H;
+      char junk[80],newline;
+      long Ih;
+      
+      if (strcmp(W->JitterFileName,"NONE")) {
+         infile = FileOpen(InOutPath,W->JitterFileName,"r");
+         fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         fscanf(infile,"%lf  %[^\n] %[\n]",&W->m,junk,&newline);
+         fscanf(infile,"%lf  %[^\n] %[\n]",&W->gamma,junk,&newline);
+         W->Jt = 0.5*W->gamma*W->J;
+         fscanf(infile,"%lf  %[^\n] %[\n]",&W->ImbPhase,junk,&newline);
+         W->ImbPhase *= D2R;
+         fscanf(infile,"%lf %lf %[^\n] %[\n]",&W->LatFreq,&W->LatDamp,junk,&newline);
+         W->LatFreq *= TwoPi;
+         fscanf(infile,"%lf %lf %[^\n] %[\n]",&W->RockFreq,&W->RockDamp,junk,&newline);
+         W->RockFreq *= TwoPi;
+         fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         fscanf(infile,"%ld %[^\n] %[\n]",&W->NumHarm,junk,&newline);
+         if (W->NumHarm > 0) {
+            W->Harm = (struct WhlHarmType *) calloc(W->NumHarm,sizeof(struct WhlHarmType));
+            for(Ih=0;Ih<W->NumHarm;Ih++) {
+               H = &W->Harm[Ih];
+               fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+               fscanf(infile,"%lf  %[^\n] %[\n]",&H->n,junk,&newline);
+               fscanf(infile,"%lf  %[^\n] %[\n]",&H->Ks,junk,&newline);
+               H->Ks *= 1.0E-3*0.01;
+               fscanf(infile,"%lf  %[^\n] %[\n]",&H->Kd,junk,&newline);
+               H->Kd *= 1.0E-3*1.0E-4;
+               fscanf(infile,"%lf  %[^\n] %[\n]",&H->phase,junk,&newline);
+               H->phase *= D2R;
+            }
+         }
+         fclose(infile);
+      }
+}
+/**********************************************************************/
 void InitOrderNDynamics(struct SCType *S)
 {
       struct BodyType *B;
@@ -1809,6 +1848,8 @@ void InitSpacecraft(struct SCType *S)
       S->FlexActive=DecodeString(response);
       fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
       S->IncludeSecondOrderFlexTerms=DecodeString(response);
+      fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+      S->WhlJitterActive=DecodeString(response);
       fscanf(infile,"%lf %[^\n] %[\n]",&S->DragCoef,junk,&newline);
 
 /* .. Body parameters */
@@ -2032,7 +2073,7 @@ void InitSpacecraft(struct SCType *S)
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nw,junk,&newline);
       S->Whl = (struct WhlType *) calloc(S->Nw,sizeof(struct WhlType));
       if (S->Nw == 0) {
-         for(i=0;i<9;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(i=0;i<8;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
       else {
          for(Iw=0;Iw<S->Nw;Iw++) {
@@ -2046,13 +2087,10 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%lf %lf %[^\n] %[\n]",
                 &S->Whl[Iw].Tmax,&S->Whl[Iw].Hmax,junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&S->Whl[Iw].J,junk,&newline);
-            fscanf(infile,"%lf %[^\n] %[\n]",&S->Whl[Iw].Ks,junk,&newline);
-            fscanf(infile,"%lf %[^\n] %[\n]",&S->Whl[Iw].Kd,junk,&newline);
             fscanf(infile,"%ld %[^\n] %[\n]",&S->Whl[Iw].Body,junk,&newline);
             fscanf(infile,"%ld %[^\n] %[\n]",&S->Whl[Iw].FlexNode,junk,&newline);
-            /* Convert from g-cm and g-cm^2 to kg-m and kg-m^2 */
-            S->Whl[Iw].Ks *= 1.0E-5;
-            S->Whl[Iw].Kd *= 1.0E-7;
+            fscanf(infile,"%s %[^\n] %[\n]",S->Whl[Iw].JitterFileName,junk,&newline);
+            InitWhlJitter(&S->Whl[Iw]);
          }
       }
 
@@ -2885,7 +2923,7 @@ void LoadMoonOfEarth(void)
       char Name[Nm][40] = {"Luna"};
       char MapFileName[Nm][40] = {"Luna.ppm"};
       float Color[4] = {0.440417f, 0.441343f, 0.441084f,1.0f};
-      double mu[Nm] = {4.903E12};
+      double mu[Nm] = {4.902801E12};
       double J2[Nm] = {2.027E-4};
       double rad[Nm] = {1.738E6};
       double w[Nm] = {2.66E-6};
@@ -4272,8 +4310,6 @@ void InitSim(int argc, char **argv)
       JointTrqActive=DecodeString(response);
       fscanf(infile,"%s  %[^\n] %[\n]",response,junk,&newline);
       ThrusterPlumesActive=DecodeString(response);
-      fscanf(infile,"%s  %[^\n] %[\n]",response,junk,&newline);
-      RwaImbalanceActive=DecodeString(response);
       fscanf(infile,"%s  %[^\n] %[\n]",response,junk,&newline);
       ContactActive=DecodeString(response);
       fscanf(infile,"%s  %[^\n] %[\n]",response,junk,&newline);

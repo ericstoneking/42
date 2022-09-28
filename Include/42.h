@@ -81,7 +81,6 @@ EXTERN long SolPressShadowsActive;
 EXTERN long GravPertActive;
 EXTERN long JointTrqActive;
 EXTERN long ThrusterPlumesActive;
-EXTERN long RwaImbalanceActive;
 EXTERN long ContactActive;
 EXTERN long SloshActive;
 EXTERN long AlbedoActive; /* Affects CSS measurements */
