@@ -136,7 +136,7 @@ void OrbPropReport(void)
       static FILE *FixedFile;
       static FILE *EnckeFile;
       static FILE *CowellFile;
-      long i;
+      static FILE *EulHillFile;
       static long First = 1;
       
       if (First) {
@@ -144,6 +144,7 @@ void OrbPropReport(void)
          FixedFile = FileOpen(InOutPath,"PosVelNfixed.42","w");
          EnckeFile = FileOpen(InOutPath,"PosVelNencke.42","w");
          CowellFile = FileOpen(InOutPath,"PosVelNcowell.42","w");
+         EulHillFile = FileOpen(InOutPath,"PosVelNeulhill.42","w");
       }
       
       if (OutFlag) {
@@ -156,6 +157,33 @@ void OrbPropReport(void)
          fprintf(CowellFile,"%24.18le %24.18le %24.18le %24.18le %24.18le %24.18le\n",
             SC[2].PosN[0],SC[2].PosN[1],SC[2].PosN[2],
             SC[2].VelN[0],SC[2].VelN[1],SC[2].VelN[2]);
+         fprintf(EulHillFile,"%24.18le %24.18le %24.18le %24.18le %24.18le %24.18le\n",
+            SC[3].PosN[0],SC[3].PosN[1],SC[3].PosN[2],
+            SC[3].VelN[0],SC[3].VelN[1],SC[3].VelN[2]);
+      }
+}
+/*********************************************************************/
+void GmatReport(void)
+{
+      static FILE *LowIncFile;
+      static FILE *MidIncFile;
+      static FILE *PolarFile;
+      static long First = 1;
+      
+      if (First) {
+         First = 0;
+         LowIncFile = FileOpen(InOutPath,"PosNLowInc.42","w");
+         MidIncFile = FileOpen(InOutPath,"PosNMidInc.42","w");
+         PolarFile = FileOpen(InOutPath,"PosNPolar.42","w");
+      }
+      
+      if (OutFlag) {
+         fprintf(LowIncFile,"%24.18le %24.18le %24.18le\n",
+            SC[0].PosN[0],SC[0].PosN[1],SC[0].PosN[2]);
+         fprintf(MidIncFile,"%24.18le %24.18le %24.18le\n",
+            SC[1].PosN[0],SC[1].PosN[1],SC[1].PosN[2]);
+         fprintf(PolarFile,"%24.18le %24.18le %24.18le\n",
+            SC[2].PosN[0],SC[2].PosN[1],SC[2].PosN[2]);
       }
 }
 /*********************************************************************/
@@ -332,7 +360,8 @@ void Report(void)
                fprintf(AlbedoFile,"\n");
             }
             
-            OrbPropReport();
+            //OrbPropReport();
+            //GmatReport();
             
             //MagReport();
             //GyroReport();

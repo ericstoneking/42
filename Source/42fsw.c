@@ -946,7 +946,7 @@ void InitAC(struct SCType *S)
             AC->Thr[i].Fmax = S->Thr[i].Fmax;
             for(j=0;j<3;j++) {
                AC->Thr[i].Axis[j] = S->Thr[i].A[j];
-               AC->Thr[i].PosB[j] = S->Thr[i].PosB[j];
+               AC->Thr[i].PosB[j] = S->B[S->Thr[i].Body].Node[S->Thr[i].Node].PosB[j];
                r[j] = AC->Thr[i].PosB[j] - AC->cm[j];
             }
             VxV(r,AC->Thr[i].Axis,AC->Thr[i].rxA);

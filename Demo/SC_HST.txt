@@ -20,7 +20,6 @@ FALSE                         ! Compute Constraint Forces and Torques
 REFPT_CM                      ! Mass Props referenced to REFPT_CM or REFPT_JOINT
 FALSE                         ! Flex Active
 FALSE                         ! Include 2nd Order Flex Terms
-FALSE                         ! Wheel Jitter Active
 2.0                           ! Drag Coefficient
 ************************************************************************
 ************************* Body Parameters ******************************
@@ -33,6 +32,7 @@ FALSE                         ! Wheel Jitter Active
 0.0  0.0  6.0                 ! Location of mass center, m
 0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
 HST.obj                       ! Geometry Input File Name
+NONE                        ! Node File Name
 NONE                          ! Flex File Name
 ************************************************************************
 *************************** Joint Parameters ***************************
@@ -58,6 +58,8 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
 0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 *************************** Wheel Parameters ***************************
+FALSE                       ! Wheel Drag Active
+FALSE                       ! Wheel Jitter Active
 0                             ! Number of wheels
 =============================  Wheel 0  ================================
 0.0                           ! Initial Momentum, N-m-sec
@@ -78,7 +80,6 @@ NONE                          ! Jitter Input File Name
 ==============================  Thr 0  =================================
  1.0                          ! Thrust Force (N)
 -1.0  0.0  0.0                ! Thrust Axis 
- 1.0  1.0  1.0                ! Location in B0, m
 0                             ! Body
 0                             ! Flex Node Index
 ******************************* Gyro ************************************

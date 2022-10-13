@@ -254,7 +254,7 @@ void ZeroFrcTrq(void)
       struct SCType *S;
       struct BodyType *B;
       struct JointType *G;
-      struct FlexNodeType *FN;
+      struct NodeType *FN;
       long Isc,Ib,Ig,In;
 
       for(Isc=0;Isc<Nsc;Isc++) {
@@ -284,18 +284,16 @@ void ZeroFrcTrq(void)
             G->Trq[1] = 0.0;
             G->Trq[2] = 0.0;
          }
-         if (S->FlexActive) {
-            for(Ib=0;Ib<S->Nb;Ib++) {
-               B = &S->B[Ib];
-               for(In=0;In<B->NumFlexNodes;In++) {
-                 FN = &B->FlexNode[In];
-                 FN->Frc[0] = 0.0;
-                 FN->Frc[1] = 0.0;
-                 FN->Frc[2] = 0.0;
-                 FN->Trq[0] = 0.0;
-                 FN->Trq[1] = 0.0;
-                 FN->Trq[2] = 0.0;
-               }
+         for(Ib=0;Ib<S->Nb;Ib++) {
+            B = &S->B[Ib];
+            for(In=0;In<B->NumNodes;In++) {
+              FN = &B->Node[In];
+              FN->Frc[0] = 0.0;
+              FN->Frc[1] = 0.0;
+              FN->Frc[2] = 0.0;
+              FN->Trq[0] = 0.0;
+              FN->Trq[1] = 0.0;
+              FN->Trq[2] = 0.0;
             }
          }
       }

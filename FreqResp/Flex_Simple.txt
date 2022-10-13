@@ -4,10 +4,6 @@ Simple Flex Model                    ! Description
 ****************** Initial Modal States x, u  ******************
 1.0E-6  0.0                             ! Mode 0  x, u
 1.0E-6  0.0                             ! Mode 1  x, u
-****************** Analysis Node Locations *********************
-2                                    ! Number of Analysis Nodes
-500001     1.0 -1.0  1.5             ! Node ID, location, m
-500002    -1.0  0.0  2.5             ! Node ID, location, m
 ****************** Joint Node Mode Shapes *********************
 *******  Non-zero Translation Mode Shape (PSI) Elements ********
 0                                  ! Number of non-zero elements

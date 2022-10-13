@@ -20,7 +20,6 @@ FALSE                         ! Compute Constraint Forces and Torques
 REFPT_CM                      ! Mass Props referenced to REFPT_CM or REFPT_JOINT
 FALSE                         ! Flex Active
 FALSE                         ! Include 2nd Order Flex Terms
-FALSE                         ! Wheel Jitter Active
 2.0                           ! Drag Coefficient
 ************************************************************************
 ************************* Body Parameters ******************************
@@ -33,6 +32,7 @@ FALSE                         ! Wheel Jitter Active
 0.0  0.0  2.5                 ! Location of mass center, m
 0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
 TumbleSat0.obj                ! Geometry Input File Name
+NONE                        ! Node File Name
 NONE                          ! Flex File Name
 ================================ Body 1 ================================
 94.25                         ! Mass
@@ -41,6 +41,7 @@ NONE                          ! Flex File Name
 0.5  0.0  0.0                 ! Location of mass center, m
 0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
 TumbleSat1.obj                ! Geometry Input File Name
+NONE                        ! Node File Name
 NONE                          ! Flex File Name
 ================================ Body 2 ================================
 94.25                         ! Mass
@@ -49,6 +50,7 @@ NONE                          ! Flex File Name
 0.5  0.0  0.0                 ! Location of mass center, m
 0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
 TumbleSat1.obj                ! Geometry Input File Name
+NONE                        ! Node File Name
 NONE                          ! Flex File Name
 ================================ Body 3 ================================
 94.25                         ! Mass
@@ -57,6 +59,7 @@ NONE                          ! Flex File Name
 0.5  0.0  0.0                 ! Location of mass center, m
 0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
 TumbleSat1.obj                ! Geometry Input File Name
+NONE                        ! Node File Name
 NONE                          ! Flex File Name
 ================================ Body 4 ================================
 94.25                         ! Mass
@@ -65,6 +68,7 @@ NONE                          ! Flex File Name
 0.5  0.0  0.0                 ! Location of mass center, m
 0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
 TumbleSat1.obj                ! Geometry Input File Name
+NONE                        ! Node File Name
 NONE                          ! Flex File Name
 ************************************************************************
 *************************** Joint Parameters ***************************
@@ -147,6 +151,8 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
 0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 *************************** Wheel Parameters ***************************
+FALSE                       ! Wheel Drag Active
+FALSE                       ! Wheel Jitter Active
 0                             ! Number of wheels
 =============================  Wheel 0  ================================
 0.0                         ! Initial Momentum, N-m-sec
@@ -167,7 +173,6 @@ NONE                        ! Jitter Input File Name
 ==============================  Thr 0  =================================
  1.0                          ! Thrust Force (N)
 -1.0  0.0  0.0                ! Thrust Axis 
- 1.0  1.0  1.0                ! Location in Body, m
 0                             ! Body
 0                             ! Flex Node Index
 ******************************* Gyro ************************************

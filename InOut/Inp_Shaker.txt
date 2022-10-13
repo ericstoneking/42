@@ -2,7 +2,7 @@
 0                ! Number of Shakers
 ==============================  Shaker 0  ===============================
 Cryocooler X     ! Description
-0  0  0          ! S/C, Body, Flex Node
+0  0  0          ! S/C, Body, Node
 FORCE            ! Type (FORCE or TORQUE)
 1.0  0.0  0.0    ! Axis
 2                ! Number of Tonic Components
@@ -15,7 +15,7 @@ TRUE             ! Random Component Active
 0.5              ! RMS of random input over band
 ==============================  Shaker 1  ===============================
 Instrument Rotor ! Description
-0  0  0          ! S/C, Body, Flex Node
+0  0  0          ! S/C, Body, Node
 TORQUE           ! Type (FORCE or TORQUE)
 0.0  1.0  0.0    ! Axis
 0                ! Number of Tonic Components

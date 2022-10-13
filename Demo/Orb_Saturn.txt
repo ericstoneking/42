@@ -41,7 +41,7 @@ CW                            !  Sense (CW, CCW), viewed from +Z (L4, L5 only)
 TRV  "ORB_ID"                 !  TLE, TRV or SPLINE format, Label to find in file
 "TRV.txt"                     !  File name
 ******************* Formation Frame Parameters ************************
-L                             !  Formation Frame Fixed in [NL]
+N                             !  Formation Frame Fixed in [NL]
 0.0  0.0  0.0  123            !  Euler Angles (deg) and Sequence
-L                             !  Formation Origin expressed in [NL]
+N                             !  Formation Origin expressed in [NL]
 0.0  0.0  0.0                 !  Formation Origin wrt Ref Orbit (m)

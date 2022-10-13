@@ -553,7 +553,7 @@ void DrawPlanetLabels(GLfloat length)
       glEnable(GL_LIGHTING);
 }
 /*********************************************************************/
-void DrawThrusterPlume(struct ThrType *Thr)
+void DrawThrusterPlume(struct NodeType *N,struct ThrType *Thr)
 {
       GLfloat TipColor[4] = {0.918,0.67,0.25,0.3};
       GLfloat CoreColor[4] = {1.0,0.937,0.259,1.0};
@@ -575,12 +575,12 @@ void DrawThrusterPlume(struct ThrType *Thr)
          glColor4fv(CoreColor);
          glBegin(GL_TRIANGLE_FAN);
             glNormal3d(-Thr->A[0],-Thr->A[1],-Thr->A[2]);
-            for(j=0;j<3;j++) p[j] = Thr->PosB[j]-0.5*scl*f*Thr->A[j];
+            for(j=0;j<3;j++) p[j] = N->PosB[j]-0.5*scl*f*Thr->A[j];
             glVertex3dv(p);
             for(ang=0.0;ang<=360.0;ang+=30.0) {
                s=-sin(ang*D2R);
                c=cos(ang*D2R);
-               for(j=0;j<3;j++) p[j] = Thr->PosB[j] + Rad*(c*X[j]+s*Y[j]);
+               for(j=0;j<3;j++) p[j] = N->PosB[j] + Rad*(c*X[j]+s*Y[j]);
                glVertex3dv(p);
             }
          glEnd();
@@ -588,12 +588,12 @@ void DrawThrusterPlume(struct ThrType *Thr)
          glColor4fv(TipColor);
          glBegin(GL_TRIANGLE_FAN);
             glNormal3d(-Thr->A[0],-Thr->A[1],-Thr->A[2]);
-            for(j=0;j<3;j++) p[j] = Thr->PosB[j]-scl*f*Thr->A[j];
+            for(j=0;j<3;j++) p[j] = N->PosB[j]-scl*f*Thr->A[j];
             glVertex3dv(p);
             for(ang=0.0;ang<=360.0;ang+=30.0) {
                s=-sin(ang*D2R);
                c=cos(ang*D2R);
-               for(j=0;j<3;j++) p[j] = Thr->PosB[j] + Rad*(c*X[j]+s*Y[j]);
+               for(j=0;j<3;j++) p[j] = N->PosB[j] + Rad*(c*X[j]+s*Y[j]);
                glVertex3dv(p);
             }
          glEnd();
@@ -1435,6 +1435,7 @@ void DrawNearAuxObjects(void)
       long Isc,Ib,Ithr,i,Ig;
       struct SCType *S;
       struct BodyType *B;
+      struct NodeType *N;
       struct GeomType *G;
       struct FovType *F;
       float SvbColor[4] = {1.0,1.0,0.0,1.0};
@@ -1597,11 +1598,12 @@ void DrawNearAuxObjects(void)
                glTranslated(PosR[0],PosR[1],PosR[2]);
                for(Ithr=0;Ithr<S->Nthr;Ithr++) {
                   B = &S->B[S->Thr[Ithr].Body];
+                  N = &B->Node[S->Thr[Ithr].Node];
                   glPushMatrix();
                   glTranslated(B->pn[0],B->pn[1],B->pn[2]);
                   RotateR2L(B->CN);
                   glTranslated(-B->cm[0],-B->cm[1],-B->cm[2]);
-                  DrawThrusterPlume(&S->Thr[Ithr]);
+                  DrawThrusterPlume(N,&S->Thr[Ithr]);
                   glPopMatrix();
                }
             }

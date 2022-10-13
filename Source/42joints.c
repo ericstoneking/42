@@ -125,6 +125,11 @@ void JointFrcTrq(struct JointType *G, struct SCType *S)
          case ACTUATED_JOINT:
             ActuatedJoint(G,S);
             break;
+         case WHEEL_JOINT:
+            WheelJitter(G,S);
+            G->Frc[2] = 0.0;
+            G->Trq[2] = G->W->Trq;
+            break;
          //case STEPPER_MOTOR_JOINT:
          //   StepperMotorJoint(G,S);
          //   break;

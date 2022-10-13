@@ -42,10 +42,11 @@ struct FormationType {
    double PosR[3]; /* Position of F wrt R, expressed in N */
 };
 
-/* "Analysis" flex nodes, ("Force" nodes and "Measurement" nodes) */
-struct FlexNodeType {
+/* "Analysis" nodes, used both for Flex, ("Force" nodes and "Measurement" nodes) */
+/* and for more general purposes (sensor, actuator positions) */
+struct NodeType {
    /*~ Internal Variables ~*/
-   long ID; /* For referring back to Nastran */
+   char comment[80]; 
    double PosB[3];
    double **PSI, **THETA; /* Mode shapes, 3 x B.Nf */
    double Frc[3],Trq[3]; /* Both expressed in B */
@@ -96,6 +97,7 @@ struct BodyType {
    double alpha[3]; /* Angular acceleration of B wrt N, expressed in B */
    double accel[3]; /* Linear acceleration of B wrt N, expressed in N */
    char GeomFileName[40];
+   char NodeFileName[40];
    char FlexFileName[40];
    float ModelMatrix[16]; /* For OpenGL */
    long GeomTag;
@@ -144,8 +146,8 @@ struct BodyType {
    double **Rw;   /* Rf*w, 3 x Nf */
    double ***Sw;  /* Sf*w, 3 x Nf * Nf */
    double **Swe;  /* Sf*w*eta, 3 x Nf */
-   long NumFlexNodes;  /* Number of flex "analysis" nodes on Body */
-   struct FlexNodeType *FlexNode;
+   long NumNodes;  /* Number of flex "analysis" nodes on Body */
+   struct NodeType *Node;
    long MfIsDiagonal;  /* Simpler EOM for One-body case if Mf is diagonal */
    
    /* For jitter studies */
@@ -164,6 +166,7 @@ struct JointType {
    long Bout;             /* Index of outer body */
    struct BodyType *Bi;
    struct BodyType *Bo;
+   struct WhlType *W;     /* Used if Type is WHEEL_JOINT */
    long Nanc;             /* Number of "ancestor" joints: joints between this one and B[0] */
    long *Anc;             /* Indices of ancestor joints */
    double RigidRin[3];    /* Position wrt inner body ref pt (rigid) */
@@ -285,9 +288,7 @@ struct WhlType {
    double Hmax;
    double Tcmd;
    double Trq;  /* Exerted on wheel, expressed along wheel axis */
-   long FlexNode;
-   double Uhat[3],Vhat[3]; /* Transverse basis vectors fixed in Body */
-   double ang; /* Spin angle, rad */
+   long Node;
    struct DelayType *Delay; /* For injecting delay into control loops */
 
    /* For Jitter */
@@ -300,17 +301,15 @@ struct WhlType {
    double LatDamp;
    double RockFreq; /* [rad/sec] */
    double RockDamp;
+   double Ks;  /* Static imbalance coefficient of fundamental harmonic, [kg-m] */
+   double Kd;  /* Dynamic imbalance coefficient of fundamental harmonic, [kg-m^2] */
    long NumHarm;
    struct WhlHarmType *Harm;
 
-
    /* For OrderN Dynamics */
    double Hdot;
-   double qdot; /* q as in generalized coordinate, not quaternion */
    double RKHm;
    double RKdH;
-   double RKqm;
-   double RKdq;
 };
 
 struct MTBType {
@@ -320,7 +319,7 @@ struct MTBType {
    double Mmax;
    double Mcmd;
    double Trq[3]; /* Exerted on Body 0, expressed in B[0] frame */
-   long FlexNode;
+   long Node;
    struct DelayType *Delay; /* For injecting delay into control loops */
 };
 
@@ -329,12 +328,11 @@ struct ThrType {
    double Fmax;
    double F;
    long Body; /* Body that thruster is mounted on */
+   long Node;
    double A[3]; /* Axis vector wrt Body 0 */
-   double PosB[3]; /* Position vector in Body 0 */
    double PulseWidthCmd;
    double Frc[3]; /* Force exerted */
    double Trq[3]; /* Torque exerted */
-   long FlexNode;
    struct DelayType *Delay; /* For injecting delay into control loops */
 };
 
@@ -349,7 +347,7 @@ struct GyroType {
    double SigV; /* ARW, rad/rt-sec */
    double SigU; /* Bias Stability, rad/sec^1.5 */
    double SigE; /* Angle Readout Noise, rad */
-   long FlexNode;
+   long Node;
    
    double BiasStabCoef;
    double ARWCoef;
@@ -373,7 +371,7 @@ struct MagnetometerType {
    double Scale;
    double Quant;
    double Noise;
-   long FlexNode;
+   long Node;
 
    /*~ Internal Variables ~*/
    long SampleCounter;
@@ -390,7 +388,7 @@ struct CssType {
    double CosFov;
    double Scale;
    double Quant;
-   long FlexNode;
+   long Node;
 
    /*~ Internal Variables ~*/
    long SampleCounter;
@@ -408,7 +406,7 @@ struct FssType {
    double FovHalfAng[2];
    double NEA;
    double Quant;
-   long FlexNode;
+   long Node;
    long BoreAxis; /* X_AXIS, Y_AXIS, Z_AXIS */
    long H_Axis; /* (BoreAxis+1)%3 */
    long V_Axis; /* (BoreAxis+2)%3 */
@@ -436,7 +434,7 @@ struct StarTrackerType {
    double MoonExclAng;
    double CosMoonExclAng;
    double NEA[3];
-   long FlexNode;
+   long Node;
    long BoreAxis; /* X_AXIS, Y_AXIS, Z_AXIS */
    long H_Axis; /* (BoreAxis+1)%3 */
    long V_Axis; /* (BoreAxis+2)%3 */
@@ -454,7 +452,7 @@ struct GpsType {
    double PosNoise;
    double VelNoise;
    double TimeNoise;
-   long FlexNode;
+   long Node;
    
    /*~ Internal Variables ~*/
    long SampleCounter;
@@ -475,7 +473,7 @@ struct AccelType {
    double SampleTime;
    long SampleCounter;
    long MaxCounter;
-   long FlexNode;
+   long Node;
    double PosB[3];  /* Position in B[0] */
    double Axis[3]; /* Mounting matrix */
    double Quant;
@@ -533,7 +531,6 @@ struct DynType {
    double *u,*uu,*du,*udot;  /* Nu  (Dynamic States) */
    double *x,*xx,*dx,*xdot;  /* Nx  (Kinematic States) */
    double *h,*hh,*dh,*hdot;  /* Nw  (Wheel Momentum States) */
-   double *xw,*xxw,*dxw,*xwdot; /* Nw (Wheel Kinematic States) */
    /* For Flex */
    long Nf;  /* Total Number of Flex Modes, Sum(B.Nf) */
    double **PAngVelf; /* 3*Nb x Nf */
@@ -661,7 +658,7 @@ struct SCType {
    long FlexActive;
    /* Include higher-order coupling terms in rigid-flex dynamics */
    long IncludeSecondOrderFlexTerms;
-   /* Wheel Imbalance Force and Torque Active */
+   long WhlDragActive;
    long WhlJitterActive;
    /* Workspace for KaneNBody */
    struct DynType Dyn;

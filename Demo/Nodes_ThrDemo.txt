@@ -1,0 +1,8 @@
+<<<<<<<<<<<<<<<<  Body Node Inputs for 42  >>>>>>>>>>>>>>>>>>>>>
+Nodes for ThrDemo               ! Description
+4                               ! Number of Nodes
+******************* Node Location, Comment *********************
+ 1.0  1.0  1.0        "Thr Pod 0"
+ 1.0 -1.0 -1.0        "Thr Pod 1"
+-1.0  1.0 -1.0        "Thr Pod 2"
+-1.0 -1.0  1.0        "Thr Pod 3"

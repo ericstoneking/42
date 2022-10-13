@@ -1002,10 +1002,6 @@ void InitRigidDyn(struct SCType *S)
       D->hh = (double *) calloc(S->Nw,sizeof(double));
       D->dh = (double *) calloc(S->Nw,sizeof(double));
       D->hdot = (double *) calloc(S->Nw,sizeof(double));
-      D->xw = (double *) calloc(S->Nw,sizeof(double));
-      D->xxw = (double *) calloc(S->Nw,sizeof(double));
-      D->dxw = (double *) calloc(S->Nw,sizeof(double));
-      D->xwdot = (double *) calloc(S->Nw,sizeof(double));
 
       for(i=0;i<3;i++) {
          D->PAngVel[i][i] = 1.0;
@@ -1136,7 +1132,7 @@ void InitFlexModes(struct SCType *S)
       double value,wf;
       char junk[80],newline;
       double ***L,****N;
-      struct FlexNodeType *FN;
+      struct NodeType *FN;
 
       D = &S->Dyn;
       D->Nf = 0;
@@ -1234,20 +1230,9 @@ void InitFlexModes(struct SCType *S)
                D->uf[B->f0+If] = B->xi[If];
             }
 
-            /* Analysis Node Locations */
-            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-            fscanf(infile,"%ld %[^\n] %[\n]",
-               &B->NumFlexNodes,junk,&newline);
-            B->FlexNode = (struct FlexNodeType *)
-               calloc(B->NumFlexNodes,sizeof(struct FlexNodeType));
-            for(In=0;In<B->NumFlexNodes;In++) {
-               FN = &B->FlexNode[In];
-               fscanf(infile,"%ld %lf %lf %lf %[^\n] %[\n]",
-                  &FN->ID,&FN->PosB[0],&FN->PosB[1],&FN->PosB[2],
-                  junk,&newline);
-            }
-            for(In=0;In<B->NumFlexNodes;In++) {
-               FN = &B->FlexNode[In];
+            /* Node-related matrices */
+            for(In=0;In<B->NumNodes;In++) {
+               FN = &B->Node[In];
                FN->PSI = CreateMatrix(3,B->Nf);
                FN->THETA = CreateMatrix(3,B->Nf);
                for(i=0;i<3;i++) {
@@ -1319,7 +1304,7 @@ void InitFlexModes(struct SCType *S)
             for(Iz=0;Iz<Nnonzero;Iz++) {
                fscanf(infile,"%ld %ld %ld %lf %[^\n] %[\n]",
                   &Im,&In,&Ia,&value,junk,&newline);
-               FN = &B->FlexNode[In];
+               FN = &B->Node[In];
                if (Ia > 2) {
                   printf("Error in InitFlexModes (PSI): Axis %ld out of range\n",Ia);
                   exit(1);
@@ -1337,7 +1322,7 @@ void InitFlexModes(struct SCType *S)
             for(Iz=0;Iz<Nnonzero;Iz++) {
                fscanf(infile,"%ld %ld %ld %lf %[^\n] %[\n]",
                   &Im,&In,&Ia,&value,junk,&newline);
-               FN = &B->FlexNode[In];
+               FN = &B->Node[In];
                if (Ia > 2) {
                   printf("Error in InitFlexModes (THETA): Axis %ld out of range\n",Ia);
                   exit(1);
@@ -1528,6 +1513,36 @@ void InitFlexModes(struct SCType *S)
       }
 }
 /**********************************************************************/
+void InitNodes(struct BodyType *B)
+{
+      struct NodeType *N;
+      FILE *infile;
+      char junk[80],newline;
+      long i;
+      
+      if (strcmp(B->NodeFileName,"NONE")) {
+         infile = FileOpen(InOutPath,B->NodeFileName,"r");
+         fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         fscanf(infile,"%ld %[^\n] %[\n]",&B->NumNodes,junk,&newline);
+         B->Node = (struct NodeType *) calloc(B->NumNodes,sizeof(struct NodeType));
+         fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(i=0;i<B->NumNodes;i++) {
+            N = &B->Node[i];
+            fscanf(infile,"%lf %lf %lf \"%[^\"]\" %[\n]",
+               &N->PosB[0],&N->PosB[1],&N->PosB[2],N->comment,&newline);
+         }
+         fclose(infile);
+      }
+      else {
+         /* Default to one node at B.cm */
+         B->NumNodes = 1;
+         B->Node = (struct NodeType *) calloc(1,sizeof(struct NodeType));
+         for(i=0;i<3;i++) B->Node[0].PosB[i] = B->cm[i];
+         strcpy(B->Node[0].comment,"Mass Center");
+      }
+}
+/**********************************************************************/
 void InitShakers(void)
 {
       FILE *infile;
@@ -1611,6 +1626,95 @@ void InitShakers(void)
       fclose(infile);            
 }
 /**********************************************************************/
+void InitWhlBodiesAndJoints(struct SCType *S)
+{
+      struct WhlType *W;
+      struct BodyType *B;
+      struct JointType *G;
+      struct NodeType *N;
+      long Iw,Ib,Ig,i,j;
+
+      S->Nb += S->Nw;
+      S->Ng += S->Nw;
+      S->B = (struct BodyType *) realloc(S->B,S->Nb*sizeof(struct BodyType));
+      S->G = (struct JointType *) realloc(S->G,S->Ng*sizeof(struct JointType));
+      
+      for(Iw=0;Iw<S->Nw;Iw++) {
+         Ib = S->Nb-S->Nw+Iw;
+         Ig = S->Ng-S->Nw+Iw;
+         W = &S->Whl[Iw];
+         B = &S->B[Ib];
+         B->mass = W->m;
+         for(i=0;i<3;i++) {
+            B->c[i] = 0.0;
+            for(j=0;j<3;j++) B->I[i][j] = 0.0;
+            B->EmbeddedMom[i] = 0.0;
+         }
+         strcpy(B->GeomFileName,"NONE");
+         strcpy(B->NodeFileName,"NONE");
+         strcpy(B->FlexFileName,"NONE");
+         B->I[0][0] = W->Jt;
+         B->I[1][1] = W->Jt;
+         B->I[2][2] = W->J;
+         B->I[1][2] = -W->Kd;
+         B->I[2][1] = -W->Kd;
+         B->cm[0] = W->Ks/W->m*cos(W->ImbPhase);
+         B->cm[1] = W->Ks/W->m*sin(W->ImbPhase);
+         B->cm[2] = 0.0;
+         B->Nshaker = 0; /* TODO: Refactor shakers */
+         B->Shaker = NULL;         
+         InitNodes(B);
+         B->Gin = Ig;
+         
+         G = &S->G[Ig];
+         G->Type = WHEEL_JOINT;
+         G->IsSpherical = FALSE;
+         G->RotDOF = 3;
+         G->TrnDOF = 2;
+         G->RotSeq = 123;
+         G->TrnSeq = 123;
+         for(i=0;i<3;i++) {
+            G->RotLocked[i] = FALSE;
+            G->TrnLocked[i] = FALSE;
+            G->Ang[i] = 0.0;
+            G->AngRate[i] = 0.0;
+            G->Pos[i] = 0.0;
+            G->PosRate[i] = 0.0;
+         }
+         G->AngRate[2] = W->H/W->J;
+         G->Bin = W->Body;
+         G->Bout = Ib;
+         G->Bi = &S->B[G->Bin];
+         G->Bo = &S->B[G->Bout];
+         G->W = W;
+         for(i=0;i<3;i++) G->CGiBi[2][i] = W->A[i];
+         PerpBasis(G->CGiBi[2],G->CGiBi[0],G->CGiBi[1]);
+         for(i=0;i<3;i++) {
+            for(j=0;j<3;j++) G->CBoGo[i][j] = 0.0;
+            G->CBoGo[i][i] = 1.0;
+            G->RigidRout[i] = 0.0;
+         }
+         N = &S->B[W->Body].Node[W->Node];
+         for(i=0;i<3;i++) {
+            G->RigidRin[i] = N->PosB[i] - S->B[W->Body].cm[i];
+            G->RigidRout[i] = -B->cm[i];
+         }
+         
+         G->RotSpringCoef[0] = W->Jt*W->RockFreq*W->RockFreq;
+         G->RotSpringCoef[1] = W->Jt*W->RockFreq*W->RockFreq;
+         G->RotSpringCoef[2] = 0.0;
+         G->RotDampCoef[0] = 2.0*W->Jt*W->RockDamp*W->RockFreq;
+         G->RotDampCoef[1] = 2.0*W->Jt*W->RockDamp*W->RockFreq;
+         G->RotDampCoef[2] = 0.0;
+         G->TrnSpringCoef[0] = W->Jt*W->LatFreq*W->LatFreq;
+         G->TrnSpringCoef[1] = W->Jt*W->LatFreq*W->LatFreq;
+         G->TrnSpringCoef[2] = 0.0;
+         G->TrnDampCoef[0] = 2.0*W->Jt*W->LatDamp*W->LatFreq;
+         G->TrnDampCoef[1] = 2.0*W->Jt*W->LatDamp*W->LatFreq;
+         G->TrnDampCoef[2] = 0.0;         
+      }
+}
+/**********************************************************************/
 void InitWhlJitter(struct WhlType *W)
 {
       FILE *infile;
@@ -1630,6 +1734,10 @@ void InitWhlJitter(struct WhlType *W)
          W->LatFreq *= TwoPi;
          fscanf(infile,"%lf %lf %[^\n] %[\n]",&W->RockFreq,&W->RockDamp,junk,&newline);
          W->RockFreq *= TwoPi;
+         fscanf(infile,"%lf  %[^\n] %[\n]",&W->Ks,junk,&newline);
+         W->Ks *= 1.0E-3*0.01;
+         fscanf(infile,"%lf  %[^\n] %[\n]",&W->Kd,junk,&newline);
+         W->Kd *= 1.0E-3*1.0E-4;
          fscanf(infile,"%[^\n] %[\n]",junk,&newline);
          fscanf(infile,"%ld %[^\n] %[\n]",&W->NumHarm,junk,&newline);
          if (W->NumHarm > 0) {
@@ -1737,6 +1845,7 @@ void InitSpacecraft(struct SCType *S)
       long SomeJointsLocked;
       struct JointType *G;
       struct BodyType *B;
+      struct WhlType *W;
       struct OrbitType *O;
       struct FormationType *Fr;
       struct DynType *D;
@@ -1848,8 +1957,6 @@ void InitSpacecraft(struct SCType *S)
       S->FlexActive=DecodeString(response);
       fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
       S->IncludeSecondOrderFlexTerms=DecodeString(response);
-      fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
-      S->WhlJitterActive=DecodeString(response);
       fscanf(infile,"%lf %[^\n] %[\n]",&S->DragCoef,junk,&newline);
 
 /* .. Body parameters */
@@ -1900,6 +2007,7 @@ void InitSpacecraft(struct SCType *S)
          fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",&B->EmbeddedMom[0],
                   &B->EmbeddedMom[1],&B->EmbeddedMom[2],junk,&newline);
          fscanf(infile,"%s %[^\n] %[\n]",B->GeomFileName,junk,&newline);
+         fscanf(infile,"%s %[^\n] %[\n]",B->NodeFileName,junk,&newline);
          fscanf(infile,"%s %[^\n] %[\n]",B->FlexFileName,junk,&newline);
          if (S->RefPt == REFPT_JOINT)
             for(i=0;i<3;i++) B->c[i] = B->mass*B->cm[i];
@@ -1907,6 +2015,8 @@ void InitSpacecraft(struct SCType *S)
             for(i=0;i<3;i++) B->c[i] = 0.0;
          B->Nshaker = 0;
          B->Shaker = NULL;
+         
+         InitNodes(B);
       }
 
 /* .. Joint Parameters */
@@ -2061,6 +2171,7 @@ void InitSpacecraft(struct SCType *S)
                    junk,&newline);
                    
             if (G->Type == ACTUATED_JOINT) InitActuatedJoint(G,S);
+            G->W = NULL;
          }
       }
 
@@ -2070,6 +2181,10 @@ void InitSpacecraft(struct SCType *S)
          printf("Error:  Malformed SC input file before Wheel Parameters section\n.");
          exit(1);
       }
+      fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+      S->WhlDragActive=DecodeString(response);
+      fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+      S->WhlJitterActive=DecodeString(response);
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nw,junk,&newline);
       S->Whl = (struct WhlType *) calloc(S->Nw,sizeof(struct WhlType));
       if (S->Nw == 0) {
@@ -2077,21 +2192,25 @@ void InitSpacecraft(struct SCType *S)
       }
       else {
          for(Iw=0;Iw<S->Nw;Iw++) {
+            W = &S->Whl[Iw];
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-            fscanf(infile,"%lf %[^\n] %[\n]",&S->Whl[Iw].H,junk,&newline);
+            fscanf(infile,"%lf %[^\n] %[\n]",&W->H,junk,&newline);
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
-                &S->Whl[Iw].A[0],&S->Whl[Iw].A[1],
-                &S->Whl[Iw].A[2],junk,&newline);
-            UNITV(S->Whl[Iw].A);
-            PerpBasis(S->Whl[Iw].A,S->Whl[Iw].Uhat,S->Whl[Iw].Vhat);
+                &W->A[0],&W->A[1],&W->A[2],junk,&newline);
+            UNITV(W->A);
             fscanf(infile,"%lf %lf %[^\n] %[\n]",
-                &S->Whl[Iw].Tmax,&S->Whl[Iw].Hmax,junk,&newline);
-            fscanf(infile,"%lf %[^\n] %[\n]",&S->Whl[Iw].J,junk,&newline);
-            fscanf(infile,"%ld %[^\n] %[\n]",&S->Whl[Iw].Body,junk,&newline);
-            fscanf(infile,"%ld %[^\n] %[\n]",&S->Whl[Iw].FlexNode,junk,&newline);
-            fscanf(infile,"%s %[^\n] %[\n]",S->Whl[Iw].JitterFileName,junk,&newline);
-            InitWhlJitter(&S->Whl[Iw]);
+                &W->Tmax,&W->Hmax,junk,&newline);
+            fscanf(infile,"%lf %[^\n] %[\n]",&W->J,junk,&newline);
+            fscanf(infile,"%ld %[^\n] %[\n]",&W->Body,junk,&newline);
+            fscanf(infile,"%ld %[^\n] %[\n]",&W->Node,junk,&newline);
+            if (W->Node >= S->B[W->Body].NumNodes) {
+               printf("SC[%ld].Whl[%ld] Node out of range\n",S->ID,Iw);
+               exit(1);
+            } 
+            fscanf(infile,"%s %[^\n] %[\n]",W->JitterFileName,junk,&newline);
+            InitWhlJitter(W);
          }
+         if (S->WhlJitterActive) InitWhlBodiesAndJoints(S);
       }
 
 /* .. MTB parameters */
@@ -2114,7 +2233,12 @@ void InitSpacecraft(struct SCType *S)
                &S->MTB[Im].A[0],&S->MTB[Im].A[1],&S->MTB[Im].A[2],
                    junk,&newline);
             UNITV(S->MTB[Im].A);
-            fscanf(infile,"%ld %[^\n] %[\n]",&S->MTB[Im].FlexNode,junk,&newline);
+            fscanf(infile,"%ld %[^\n] %[\n]",&S->MTB[Im].Node,junk,&newline);
+            if (S->MTB[Im].Node >= S->B[0].NumNodes) {
+               printf("SC[%ld].MTB[%ld] Node out of range\n",S->ID,Im);
+               exit(1);
+            } 
+
          }
       }
 
@@ -2127,7 +2251,7 @@ void InitSpacecraft(struct SCType *S)
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nthr,junk,&newline);
       S->Thr = (struct ThrType *) calloc(S->Nthr,sizeof(struct ThrType));
       if (S->Nthr == 0) {
-         for(i=0;i<6;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(i=0;i<5;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
       else {
          for(It=0;It<S->Nthr;It++) {
@@ -2139,12 +2263,13 @@ void InitSpacecraft(struct SCType *S)
                    &S->Thr[It].A[1],
                    &S->Thr[It].A[2],junk,&newline);
             UNITV(S->Thr[It].A);
-            fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
-                   &S->Thr[It].PosB[0],
-                   &S->Thr[It].PosB[1],
-                   &S->Thr[It].PosB[2],junk,&newline);
             fscanf(infile,"%ld %[^\n] %[\n]",&S->Thr[It].Body,junk,&newline);
-            fscanf(infile,"%ld %[^\n] %[\n]",&S->Thr[It].FlexNode,junk,&newline);
+            fscanf(infile,"%ld %[^\n] %[\n]",&S->Thr[It].Node,junk,&newline);
+            if (S->Thr[It].Node >= S->B[S->Thr[It].Body].NumNodes) {
+               printf("SC[%ld].Thr[%ld] Node out of range\n",S->ID,It);
+               exit(1);
+            } 
+
          }
       }
 
@@ -2187,7 +2312,11 @@ void InitSpacecraft(struct SCType *S)
             Gyro->SigE *= D2R/3600.0;
             fscanf(infile,"%lf %[^\n] %[\n]",&Gyro->Bias,junk,&newline);
             Gyro->Bias *= D2R/3600.0;
-            fscanf(infile,"%ld %[^\n] %[\n]",&Gyro->FlexNode,junk,&newline);
+            fscanf(infile,"%ld %[^\n] %[\n]",&Gyro->Node,junk,&newline);
+            if (Gyro->Node >= S->B[0].NumNodes) {
+               printf("SC[%ld].Gyro Node out of range\n",S->ID);
+               exit(1);
+            } 
             
             Gyro->BiasStabCoef = Gyro->SigU*sqrt(Gyro->SampleTime);
             Gyro->ARWCoef = sqrt(Gyro->SigV*Gyro->SigV/Gyro->SampleTime 
@@ -2228,7 +2357,11 @@ void InitSpacecraft(struct SCType *S)
             MAG->Scale = 1.0+1.0E-6*MAG->Scale;
             fscanf(infile,"%lf %[^\n] %[\n]",&MAG->Quant,junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&MAG->Noise,junk,&newline);
-            fscanf(infile,"%ld %[^\n] %[\n]",&MAG->FlexNode,junk,&newline);
+            fscanf(infile,"%ld %[^\n] %[\n]",&MAG->Node,junk,&newline);
+            if (MAG->Node >= S->B[0].NumNodes) {
+               printf("SC[%ld].MAG[%ld] Node out of range\n",S->ID,Im);
+               exit(1);
+            } 
          }
       }
       
@@ -2263,7 +2396,11 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%lf %[^\n] %[\n]",&CSS->Scale,junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&CSS->Quant,junk,&newline);
             fscanf(infile,"%ld %[^\n] %[\n]",&CSS->Body,junk,&newline);
-            fscanf(infile,"%ld %[^\n] %[\n]",&CSS->FlexNode,junk,&newline);
+            fscanf(infile,"%ld %[^\n] %[\n]",&CSS->Node,junk,&newline);
+            if (CSS->Node >= S->B[CSS->Body].NumNodes) {
+               printf("SC[%ld].CSS[%ld] Node out of range\n",S->ID,Ic);
+               exit(1);
+            } 
          }
       }
 
@@ -2306,7 +2443,11 @@ void InitSpacecraft(struct SCType *S)
             FSS->NEA *= D2R;
             fscanf(infile,"%lf %[^\n] %[\n]",&FSS->Quant,junk,&newline);
             FSS->Quant *= D2R;
-            fscanf(infile,"%ld %[^\n] %[\n]",&FSS->FlexNode,junk,&newline);
+            fscanf(infile,"%ld %[^\n] %[\n]",&FSS->Node,junk,&newline);
+            if (FSS->Node >= S->B[0].NumNodes) {
+               printf("SC[%ld].FSS[%ld] Node out of range\n",S->ID,Ifss);
+               exit(1);
+            } 
          }
       }
       
@@ -2358,7 +2499,11 @@ void InitSpacecraft(struct SCType *S)
                &ST->NEA[0],&ST->NEA[1],&ST->NEA[2],junk,&newline);
             for(i=0;i<3;i++) ST->NEA[i] *= D2R/3600.0;
             fscanf(infile,"%ld %[^\n] %[\n]",
-               &ST->FlexNode,junk,&newline);
+               &ST->Node,junk,&newline);
+            if (ST->Node >= S->B[0].NumNodes) {
+               printf("SC[%ld].ST[%ld] Node out of range\n",S->ID,Ist);
+               exit(1);
+            } 
          }
       }
       
@@ -2387,7 +2532,11 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%lf %[^\n] %[\n]",&GPS->PosNoise,junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&GPS->VelNoise,junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&GPS->TimeNoise,junk,&newline);
-            fscanf(infile,"%ld %[^\n] %[\n]",&GPS->FlexNode,junk,&newline);
+            fscanf(infile,"%ld %[^\n] %[\n]",&GPS->Node,junk,&newline);
+            if (GPS->Node >= S->B[0].NumNodes) {
+               printf("SC[%ld].GPS[%ld] Node out of range\n",S->ID,Ig);
+               exit(1);
+            } 
          }
       }
       
@@ -2428,7 +2577,11 @@ void InitSpacecraft(struct SCType *S)
             Accel->SigU /= sqrt(BiasTime*3600.0);
             fscanf(infile,"%lf %[^\n] %[\n]",&Accel->SigE,junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&Accel->Bias,junk,&newline);
-            fscanf(infile,"%ld %[^\n] %[\n]",&Accel->FlexNode,junk,&newline);
+            fscanf(infile,"%ld %[^\n] %[\n]",&Accel->Node,junk,&newline);
+            if (Accel->Node >= S->B[0].NumNodes) {
+               printf("SC[%ld].Accel[%ld] Node out of range\n",S->ID,Ia);
+               exit(1);
+            } 
             Accel->BiasStabCoef = Accel->SigU*sqrt(Accel->SampleTime);
             Accel->DVRWCoef = sqrt(Accel->SigV*Accel->SigV/Accel->SampleTime 
                                + Accel->SigU*Accel->SigU*Accel->SampleTime/12.0);
@@ -2585,7 +2738,7 @@ void InitSpacecraft(struct SCType *S)
       D->COEF = CreateMatrix(D->Nu+D->Nf,D->Nu+D->Nf);
       D->RHS = (double *) calloc(D->Nu+D->Nf,sizeof(double));
 
-      MapStateVectorToBodyStates(D->u,D->x,D->uf,D->xf,S);
+      MapStateVectorToBodyStates(D->u,D->x,D->h,D->uf,D->xf,S);
       MotionConstraints(S);
       SCMassProps(S);
       FindTotalAngMom(S);

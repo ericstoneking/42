@@ -1212,7 +1212,7 @@ void ReadFromFile(FILE *StateFile, long EchoEnabled)
                /* Update Dyn */
                MapJointStatesToStateVector(S);
                D = &S->Dyn;
-               MapStateVectorToBodyStates(D->u,D->x,D->uf,D->xf,S);
+               MapStateVectorToBodyStates(D->u,D->x,D->h,D->uf,D->xf,S);
                MotionConstraints(S);
             }
          }

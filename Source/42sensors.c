@@ -38,7 +38,7 @@ void AccelerometerModel(struct SCType *S)
       double accb[3],asnb[3];
       long j;
       struct BodyType *B; 
-      struct FlexNodeType *FN;
+      struct NodeType *FN;
       long Ia;
       double PrevBias,PrevDV,AccError;
       long Counts,PrevCounts;
@@ -86,7 +86,7 @@ void AccelerometerModel(struct SCType *S)
 
              
             if (S->FlexActive) {
-               FN = &S->B[0].FlexNode[A->FlexNode];  
+               FN = &S->B[0].Node[A->Node];  
                A->TrueAcc = VoV(FN->TotTrnVel,A->Axis); /* TODO: Fix this */
             }
             else {
@@ -117,7 +117,7 @@ void AccelerometerModel(struct SCType *S)
 void GyroModel(struct SCType *S)
 {
       struct GyroType *G;
-      struct FlexNodeType *FN;
+      struct NodeType *FN;
       long Ig;
       double PrevBias,RateError,PrevAngle;
       long Counts,PrevCounts;
@@ -130,7 +130,7 @@ void GyroModel(struct SCType *S)
             G->SampleCounter = 0;
             
             if (S->FlexActive) {
-               FN = &S->B[0].FlexNode[G->FlexNode];
+               FN = &S->B[0].Node[G->Node];
                G->TrueRate = VoV(FN->TotAngVel,G->Axis);
             }
             else {
@@ -296,7 +296,7 @@ void FssModel(struct SCType *S)
 void StarTrackerModel(struct SCType *S)
 {
       struct StarTrackerType *ST;
-      struct FlexNodeType *FN;
+      struct NodeType *FN;
       static struct RandomProcessType *StNoise;
       struct WorldType *W;
       double qsn[4],Qnoise[4];
@@ -340,7 +340,7 @@ void StarTrackerModel(struct SCType *S)
             }
             if (ST->Valid) {
                if (S->FlexActive) {
-                  FN = &S->B[0].FlexNode[ST->FlexNode];
+                  FN = &S->B[0].Node[ST->Node];
                   for(i=0;i<3;i++) qfb[i] = 0.5*FN->ang[i];
                   qfb[3] = sqrt(1.0-qfb[0]*qfb[0]-qfb[1]*qfb[1]-qfb[2]*qfb[2]);
                   QxQ(qfb,S->B[0].qn,qfn);
@@ -443,7 +443,7 @@ void Sensors(struct SCType *S)
       long i,j,k,DOF;
       struct AcType *AC;
       struct JointType *G;
-      struct FlexNodeType *FN;
+      struct NodeType *FN;
 
       AC = &S->AC;
       
@@ -501,7 +501,7 @@ void Sensors(struct SCType *S)
       /* Star Tracker */
       if (S->Nst == 0) {
          if (S->FlexActive) {
-            FN = &S->B[0].FlexNode[0]; /* Arbitrarily use FlexNode[0] */
+            FN = &S->B[0].Node[0]; /* Arbitrarily use Node[0] */
             for(i=0;i<3;i++) qfb[i] = 0.5*FN->ang[i];
             qfb[3] = sqrt(1.0-qfb[0]*qfb[0]-qfb[1]*qfb[1]-qfb[2]*qfb[2]);
             QxQ(qfb,S->B[0].qn,AC->qbn);

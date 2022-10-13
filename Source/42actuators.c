@@ -23,7 +23,8 @@
 /**********************************************************************/
 void ThrModel(struct ThrType *Thr,struct SCType *S,double DT)
 {
-      struct FlexNodeType *FN;
+      struct BodyType *B;
+      struct NodeType *FN;
       double r[3];
       long i;
 
@@ -43,11 +44,13 @@ void ThrModel(struct ThrType *Thr,struct SCType *S,double DT)
       Thr->Frc[1] = Thr->F*Thr->A[1];
       Thr->Frc[2] = Thr->F*Thr->A[2];
 
-      for(i=0;i<3;i++) r[i] = Thr->PosB[i] - S->B[Thr->Body].cm[i];
+      B = &S->B[Thr->Body];
+      FN = &B->Node[Thr->Node];
+
+      for(i=0;i<3;i++) r[i] = FN->PosB[i] - B->cm[i];
       VxV(r,Thr->Frc,Thr->Trq);
 
       if (S->FlexActive) {
-         FN = &S->B[0].FlexNode[Thr->FlexNode];
          for(i=0;i<3;i++) {
             FN->Trq[i] += Thr->Trq[i];
             FN->Frc[i] += Thr->Frc[i];
@@ -57,7 +60,8 @@ void ThrModel(struct ThrType *Thr,struct SCType *S,double DT)
 /**********************************************************************/
 void WhlModel(struct WhlType *W,struct SCType *S)
 {
-      struct FlexNodeType *FN;
+      struct BodyType *B;
+      struct NodeType *FN;
       long i;
 
       W->Trq = W->Tcmd;
@@ -67,7 +71,8 @@ void WhlModel(struct WhlType *W,struct SCType *S)
       if (W->Trq > 0.0 && W->H >=  W->Hmax) W->Trq = 0.0;
 
       if (S->FlexActive) {
-         FN = &S->B[0].FlexNode[W->FlexNode];
+         B = &S->B[W->Body];
+         FN = &B->Node[W->Node];
          for(i=0;i<3;i++) FN->Trq[i] += W->Trq*W->A[i];
       }
 
@@ -100,7 +105,8 @@ void ThrusterPlumeFrcTrq(struct SCType *S)
       double Coef = mdot/(Beta*A1*Pi);
       /* Other variables */
       struct ThrType *T;
-      struct BodyType *B;
+      struct BodyType *B,*Bt;
+      struct NodeType *Nt;
       struct GeomType *G;
       struct PolyType *P;
       double PosThrN[3],PosThrB[3],AxisN[3],CPB[3][3];
@@ -110,6 +116,9 @@ void ThrusterPlumeFrcTrq(struct SCType *S)
 
       for(Ithr=0;Ithr<S->Nthr;Ithr++) {
          T = &S->Thr[Ithr];
+         Bt = &S->B[T->Body];
+         Nt = &Bt->Node[T->Node];
+         
          if (T->F > 0.0) { /* Check that this is legit */
 
             /* Find Force and Torque on each Body */
@@ -118,12 +127,12 @@ void ThrusterPlumeFrcTrq(struct SCType *S)
                G = &Geom[B->GeomTag];
 
                /* Find thruster location, axis in B */
-               MTxV(S->B[0].CN,T->PosB,PosThrN);
-               for(i=0;i<3;i++) PosThrN[i] += S->B[0].pn[i] - B->pn[i];
+               MTxV(Bt->CN,Nt->PosB,PosThrN);
+               for(i=0;i<3;i++) PosThrN[i] += Bt->pn[i] - B->pn[i];
                MxV(B->CN,PosThrN,PosThrB);
                /* Note that plume axis is opposite T->A */
                /* CPB is DCM from B to Plume (P) frame */
-               MTxV(S->B[0].CN,T->A,AxisN);
+               MTxV(Bt->CN,T->A,AxisN);
                MxV(B->CN,AxisN,CPB[0]);
                for(i=0;i<3;i++) CPB[0][i] = -CPB[0][i];
                PerpBasis(CPB[0],CPB[1],CPB[2]);
@@ -174,7 +183,7 @@ void ThrusterPlumeFrcTrq(struct SCType *S)
 void Actuators(struct SCType *S)
 {
 
-      struct FlexNodeType *FN;
+      struct NodeType *FN;
       long i,j;
       double FrcN[3],FrcB[3];
       struct AcType *AC;
@@ -193,7 +202,7 @@ void Actuators(struct SCType *S)
          S->B[0].Trq[i] += S->IdealAct[i].Tcmd;
       }
       if (S->FlexActive) {
-         FN = &S->B[0].FlexNode[0]; /* Arbitrarily put ideal actuators at FN 0 */
+         FN = &S->B[0].Node[0]; /* Arbitrarily put ideal actuators at FN 0 */
          for(i=0;i<3;i++) {
             FN->Trq[i] += S->IdealAct[i].Tcmd;
             FN->Frc[i] += S->IdealAct[i].Fcmd;

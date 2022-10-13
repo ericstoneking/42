@@ -342,7 +342,7 @@ def StateRefreshCode():
       outfile.write("               /* Update Dyn */\n")
       outfile.write("               MapJointStatesToStateVector(S);\n")
       outfile.write("               D = &S->Dyn;\n")
-      outfile.write("               MapStateVectorToBodyStates(D->u,D->x,D->uf,D->xf,S);\n")
+      outfile.write("               MapStateVectorToBodyStates(D->u,D->x,D->h,D->uf,D->xf,S);\n")
       outfile.write("               MotionConstraints(S);\n")
       outfile.write("            }\n")
       outfile.write("         }\n")

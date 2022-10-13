@@ -1,0 +1,8 @@
+<<<<<<<<<<<<<<<<  Body Node Inputs for 42  >>>>>>>>>>>>>>>>>>>>>
+Simple Nodes                    ! Description
+4                               ! Number of Nodes
+******************* Node Location, Comment *********************
+-1.0  0.0  2.5        "Wheels"
+ 1.0 -1.0  1.5        "Gyro"
+0.0  0.0  1.0         "Fwd Thrusters"
+0.0  0.0 -1.0         "Aft Thrusters"
