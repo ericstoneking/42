@@ -83,28 +83,25 @@ NONE                          ! Jitter Input File Name
 -1.0  1.0   1.0               ! Wheel Axis Components, [X, Y, Z]
 0.14   40.0                   ! Max Torque (N-m), Momentum (N-m-sec)
 0.012                         ! Wheel Rotor Inertia, kg-m^2
-0.48                          ! Static Imbalance, g-cm
-13.7                          ! Dynamic Imbalance, g-cm^2
 0                             ! Body
-0                             ! Flex Node Index
+0                             ! Node
+NONE                          ! Drag/Jitter Input File Name
 =============================  Wheel 2  ================================
 0.0                           ! Initial Momentum, N-m-sec
 -1.0 -1.0   1.0               ! Wheel Axis Components, [X, Y, Z]
 0.14   40.0                   ! Max Torque (N-m), Momentum (N-m-sec)
 0.012                         ! Wheel Rotor Inertia, kg-m^2
-0.48                          ! Static Imbalance, g-cm
-13.7                          ! Dynamic Imbalance, g-cm^2
 0                             ! Body
-0                             ! Flex Node Index
+0                             ! Node
+NONE                          ! Drag/Jitter Input File Name
 =============================  Wheel 3  ================================
 0.0                           ! Initial Momentum, N-m-sec
 1.0  -1.0   1.0               ! Wheel Axis Components, [X, Y, Z]
 0.14   40.0                   ! Max Torque (N-m), Momentum (N-m-sec)
 0.012                         ! Wheel Rotor Inertia, kg-m^2
-0.48                          ! Static Imbalance, g-cm
-13.7                          ! Dynamic Imbalance, g-cm^2
 0                             ! Body
-0                             ! Flex Node Index
+0                             ! Node
+NONE                          ! Drag/Jitter Input File Name
 **************************** MTB Parameters ****************************
 3                             ! Number of MTBs
 ==============================  MTB 0  =================================
