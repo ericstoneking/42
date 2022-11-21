@@ -21,6 +21,71 @@
 */
 
 /**********************************************************************/
+double ViscousFriction(struct WhlType *W)
+{
+      return(-W->ViscCoef*W->w);
+}
+/**********************************************************************/
+/* Ref: Lugre Friction Model.pdf                                      */
+void WhlDrag(struct WhlType *W)
+{
+      double v0,g,m,vd,zdot;
+      
+      v0 = W->w/W->StribeckZone;
+      g = W->CoulCoef + W->StribeckCoef*exp(-(v0*v0));
+      m = W->LugreSpringCoef*fabs(W->w)/g;
+      if (m*DTSIM > 1.0) {
+         zdot = (g*signum(W->w)/W->LugreSpringCoef - W->z)/DTSIM;
+         W->FricTrq = -g*signum(W->w) + ViscousFriction(W);
+      }
+      else {
+         zdot = W->w - m*W->z;
+         vd = W->w/W->LugreDampZone;
+         W->FricTrq = -W->LugreSpringCoef*W->z 
+            - W->LugreDampCoef*exp(-vd*vd)*zdot
+            + ViscousFriction(W);
+      }
+      
+      W->z += zdot*DTSIM;
+}
+/**********************************************************************/
+void WhlModel(struct WhlType *W,struct SCType *S)
+{
+      struct BodyType *B;
+      struct NodeType *FN;
+      long i;
+
+      W->Trq = W->Tcmd;
+      if (S->WhlDragActive) {
+         WhlDrag(W);
+         W->Trq += W->FricTrq;
+      }
+      if (W->Trq < -W->Tmax) W->Trq = -W->Tmax;
+      if (W->Trq >  W->Tmax) W->Trq =  W->Tmax;
+      if (W->Trq < 0.0 && W->H <= -W->Hmax) W->Trq = 0.0;
+      if (W->Trq > 0.0 && W->H >=  W->Hmax) W->Trq = 0.0;
+
+      if (S->FlexActive) {
+         B = &S->B[W->Body];
+         FN = &B->Node[W->Node];
+         for(i=0;i<3;i++) FN->Trq[i] += W->Trq*W->A[i];
+      }
+
+}
+/**********************************************************************/
+void MTBModel(struct MTBType *MTB,double bvb[3])
+{
+
+      MTB->M = MTB->Mcmd;
+      if(MTB->M < -MTB->Mmax) MTB->M = -MTB->Mmax;
+      if(MTB->M >  MTB->Mmax) MTB->M =  MTB->Mmax;
+
+      MTB->Trq[0] = MTB->M * (MTB->A[1]*bvb[2]-MTB->A[2]*bvb[1]);
+      MTB->Trq[1] = MTB->M * (MTB->A[2]*bvb[0]-MTB->A[0]*bvb[2]);
+      MTB->Trq[2] = MTB->M * (MTB->A[0]*bvb[1]-MTB->A[1]*bvb[0]);
+
+}
+/**********************************************************************/
 void ThrModel(struct ThrType *Thr,struct SCType *S,double DT)
 {
       struct BodyType *B;
@@ -56,39 +121,6 @@ void ThrModel(struct ThrType *Thr,struct SCType *S,double DT)
             FN->Frc[i] += Thr->Frc[i];
          }
       }
-}
-/**********************************************************************/
-void WhlModel(struct WhlType *W,struct SCType *S)
-{
-      struct BodyType *B;
-      struct NodeType *FN;
-      long i;
-
-      W->Trq = W->Tcmd;
-      if (W->Trq < -W->Tmax) W->Trq = -W->Tmax;
-      if (W->Trq >  W->Tmax) W->Trq =  W->Tmax;
-      if (W->Trq < 0.0 && W->H <= -W->Hmax) W->Trq = 0.0;
-      if (W->Trq > 0.0 && W->H >=  W->Hmax) W->Trq = 0.0;
-
-      if (S->FlexActive) {
-         B = &S->B[W->Body];
-         FN = &B->Node[W->Node];
-         for(i=0;i<3;i++) FN->Trq[i] += W->Trq*W->A[i];
-      }
-
-}
-/**********************************************************************/
-void MTBModel(struct MTBType *MTB,double bvb[3])
-{
-
-      MTB->M = MTB->Mcmd;
-      if(MTB->M < -MTB->Mmax) MTB->M = -MTB->Mmax;
-      if(MTB->M >  MTB->Mmax) MTB->M =  MTB->Mmax;
-
-      MTB->Trq[0] = MTB->M * (MTB->A[1]*bvb[2]-MTB->A[2]*bvb[1]);
-      MTB->Trq[1] = MTB->M * (MTB->A[2]*bvb[0]-MTB->A[0]*bvb[2]);
-      MTB->Trq[2] = MTB->M * (MTB->A[0]*bvb[1]-MTB->A[1]*bvb[0]);
-
 }
 /**********************************************************************/
 void ThrusterPlumeFrcTrq(struct SCType *S)

@@ -1715,15 +1715,41 @@ void InitWhlBodiesAndJoints(struct SCType *S)
       }
 }
 /**********************************************************************/
-void InitWhlJitter(struct WhlType *W)
+void InitWhlDragAndJitter(struct WhlType *W)
 {
       FILE *infile;
       struct WhlHarmType *H;
       char junk[80],newline;
+      double Stiction,LugrePeriod,w;
       long Ih;
       
-      if (strcmp(W->JitterFileName,"NONE")) {
-         infile = FileOpen(InOutPath,W->JitterFileName,"r");
+      if (strcmp(W->DragJitterFileName,"NONE")) {
+         infile = FileOpen(InOutPath,W->DragJitterFileName,"r");
+         fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         /* Drag Parameters */
+         fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         fscanf(infile,"%lf  %[^\n] %[\n]",&W->CoulCoef,junk,&newline);
+         fscanf(infile,"%lf  %[^\n] %[\n]",&Stiction,junk,&newline);
+         W->StribeckCoef = Stiction - W->CoulCoef;
+         if (W->StribeckCoef < 0.0) {
+            printf("Error: Stiction < Coulomb friction in %s.  Better fix that.\n",
+               W->DragJitterFileName);
+            exit(1);
+         }
+         fscanf(infile,"%lf  %[^\n] %[\n]",&W->ViscCoef,junk,&newline);
+         fscanf(infile,"%lf  %[^\n] %[\n]",&W->StribeckZone,junk,&newline);
+         fscanf(infile,"%lf  %[^\n] %[\n]",&LugrePeriod,junk,&newline);
+         w = TwoPi/LugrePeriod;
+         W->LugreSpringCoef = W->J*w*w;
+         W->LugreDampCoef = 2.0*W->J*w; /* Critical damping assumed */
+         fscanf(infile,"%lf  %[^\n] %[\n]",&W->LugreDampZone,junk,&newline);
+         W->z = 0.0;
+         
+         /* Jitter Parameters */
+         fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         fscanf(infile,"%[^\n] %[\n]",junk,&newline);
          fscanf(infile,"%[^\n] %[\n]",junk,&newline);
          fscanf(infile,"%lf  %[^\n] %[\n]",&W->m,junk,&newline);
          fscanf(infile,"%lf  %[^\n] %[\n]",&W->gamma,junk,&newline);
@@ -2207,8 +2233,8 @@ void InitSpacecraft(struct SCType *S)
                printf("SC[%ld].Whl[%ld] Node out of range\n",S->ID,Iw);
                exit(1);
             } 
-            fscanf(infile,"%s %[^\n] %[\n]",W->JitterFileName,junk,&newline);
-            InitWhlJitter(W);
+            fscanf(infile,"%s %[^\n] %[\n]",W->DragJitterFileName,junk,&newline);
+            InitWhlDragAndJitter(W);
          }
          if (S->WhlJitterActive) InitWhlBodiesAndJoints(S);
       }

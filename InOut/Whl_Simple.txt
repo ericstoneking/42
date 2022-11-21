@@ -1,4 +1,16 @@
-<<<<<<<<<<<<<<  Wheel Jitter Inputs for 42  >>>>>>>>>>>>>>>>>>>
+<<<<<<<<<<<<<<  Wheel Drag and Jitter Inputs for 42  >>>>>>>>>>>>>>
+*************************************************
+***************  Drag Parameters  ***************
+*************************************************
+0.01            ! Coulomb Friction, Nm
+0.015           ! Stiction, Nm
+1.6E-5          ! Viscous Coefficient, Nm/(r/s)
+6.28            ! Stribeck Zone, rad/sec
+10.0            ! Lugre Time Constant, sec
+31.4            ! Lugre Damping Zone, rad/sec
+*************************************************
+**************  Jitter Parameters  **************
+*************************************************
 10.0            ! Wheel Rotor Mass, kg
 0.9             ! 2*Jt/Jr Ratio (<1.0)
 0.0             ! Phase of Static vs. Dyn Imbalance, deg

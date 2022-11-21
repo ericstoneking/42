@@ -167,8 +167,7 @@ void MapStateVectorToBodyStates(double *u, double *x, double *h,
       struct BodyType *Bi, *Bo, *B;
       struct JointType *G;
       struct WhlType *W;
-      struct NodeType *FN;
-      long Ig,i,j,Nu,Nx,Ng,If,Ib,In,Iw;
+      long Ig,i,j,Nu,Nx,Ng,If,Ib,Iw;
 
       Nu = S->Dyn.Nu;
       Nx = S->Dyn.Nx;
@@ -189,23 +188,6 @@ void MapStateVectorToBodyStates(double *u, double *x, double *h,
             for(If=0;If<B->Nf;If++) {
                B->xi[If] = uf[B->f0+If];
                B->eta[If] = xf[B->f0+If];
-            }
-            for(In=0;In<B->NumNodes;In++) {
-               FN = &B->Node[In];
-               for(i=0;i<3;i++) {
-                  FN->pos[i] = 0.0;
-                  FN->vel[i] = 0.0;
-                  FN->ang[i] = 0.0;
-                  FN->angrate[i] = 0.0;
-                  for(If=0;If<B->Nf;If++) {
-                     FN->pos[i] += FN->PSI[i][If]*B->eta[If];
-                     FN->vel[i] += FN->PSI[i][If]*B->xi[If];
-                     FN->ang[i] += FN->THETA[i][If]*B->eta[If];
-                     FN->angrate[i] += FN->THETA[i][If]*B->xi[If];
-                  }
-                  FN->TotAngVel[i] = B->wn[i] + FN->angrate[i];
-                  /* TODO: FN->TotTrnAcc = ... */
-               }
             }
          }
       }
@@ -342,12 +324,52 @@ void MapStateVectorToBodyStates(double *u, double *x, double *h,
                Bo->vn[i] += fvi[i] - fvo[i];
          }
       }
-      
+            
       /* Wheels */
       for(Iw=0;Iw<S->Nw;Iw++) {
          W = &S->Whl[Iw];
          W->H = h[Iw];
          W->w = W->H/W->J;
+      }
+}
+/**********************************************************************/
+void BodyStatesToNodeStates(struct SCType *S)
+{
+      struct BodyType *B;
+      struct NodeType *N;
+      double wxr[3];
+      long Ib,In,If,i;
+      
+      for(Ib=0;Ib<S->Nb;Ib++) {
+         B = &S->B[Ib];
+         for(In=0;In<B->NumNodes;In++) {
+            N = &B->Node[In];
+            VxV(B->wn,N->PosCm,wxr);
+            MxV(B->CN,B->vn,N->TotVelB);
+            for(i=0;i<3;i++) {
+               N->TotPosB[i] = N->PosB[i];
+               N->TotVelB[i] += wxr[i];
+               N->TotQB[i] = 0.0;
+               N->TotAngVelB[i] = B->wn[i];
+            }
+            N->TotQB[3] = 1.0;
+            if (S->FlexActive) {
+               for(i=0;i<3;i++) {
+                  for(If=0;If<B->Nf;If++) {
+                     N->FlexPos[i] += N->PSI[i][If]*B->eta[If];
+                     N->FlexVel[i] += N->PSI[i][If]*B->xi[If];
+                     N->FlexAng[i] += N->THETA[i][If]*B->eta[If];
+                     N->FlexAngRate[i] += N->THETA[i][If]*B->xi[If];
+                  } 
+                  N->TotPosB[i] += N->FlexPos[i];
+                  N->TotVelB[i] += N->FlexVel[i];
+                  N->TotQB[i] = 0.5*N->FlexAng[i];   
+                  N->TotAngVelB[i] += N->FlexAngRate[i];              
+               }
+               UNITQ(N->TotQB);
+            }
+            MTxV(B->CN,N->TotVelB,N->TotVelN);
+         }
       }
 }
 /**********************************************************************/
@@ -380,7 +402,7 @@ void FindTotalAngMom(struct SCType *S) {
       if (!S->WhlJitterActive) {
          for(Iwhl=0;Iwhl<S->Nw;Iwhl++) {
             W = &S->Whl[Iwhl];
-            for(i=0;i<3;i++) Hwb[i] += W->A[i]*W->H;
+            for(i=0;i<3;i++) Hwb[i] = W->A[i]*W->H;
             MTxV(S->B[W->Body].CN,Hwb,Hwn);
             for(i=0;i<3;i++) S->Hvn[i] += Hwn[i];
          }
@@ -2383,13 +2405,8 @@ void KaneNBodyRK4(struct SCType *S)
 /* .. Map out state variables */
       MapStateVectorToBodyStates(u,x,h,uf,xf,S);
       MotionConstraints(S);
+      BodyStatesToNodeStates(S);
       SCMassProps(S);
-      
-/* .. For Accelerometers */
-      KaneNBodyEOM(u,x,h,uf,xf,du,dx,dh,duf,dxf,S);
-      for(i=0;i<3;i++) S->alfbn[i] = du[i];
-      MxV(S->B[0].CN,&du[Nu-3],S->abs);
-
       FindTotalAngMom(S);
 
 }
@@ -2493,14 +2510,13 @@ void OneBodyRK4(struct SCType *S)
 {
       struct BodyType *B;
       struct DynType *D;
-      struct NodeType *FN;
       struct WhlType *W;
       double *u,*uu,*du,*udot;
       double *x,*xx,*dx,*xdot;
       double *h,*hh,*dh,*hdot;
       double *uf,*uuf,*duf,*ufdot;
       double *xf,*xxf,*dxf,*xfdot;
-      long i,In,If;
+      long i;
       long Nf,Nw;
 
       /* Save some typing (and dereferencing) */
@@ -2640,38 +2656,11 @@ void OneBodyRK4(struct SCType *S)
          W->w = h[i]/W->J;
       }
 
-/* .. Flex */
-      if (S->FlexActive) {
-         for(If=0;If<B->Nf;If++) {
-            B->xi[If] = uf[B->f0+If];
-            B->eta[If] = xf[B->f0+If];
-         }
-         for(In=0;In<B->NumNodes;In++) {
-            FN = &B->Node[In];
-            for(i=0;i<3;i++) {
-               FN->pos[i] = 0.0;
-               FN->vel[i] = 0.0;
-               FN->ang[i] = 0.0;
-               FN->angrate[i] = 0.0;
-               for(If=0;If<B->Nf;If++) {
-                  FN->pos[i] += FN->PSI[i][If]*B->eta[If];
-                  FN->vel[i] += FN->PSI[i][If]*B->xi[If];
-                  FN->ang[i] += FN->THETA[i][If]*B->eta[If];
-                  FN->angrate[i] += FN->THETA[i][If]*B->xi[If];
-               }
-               FN->TotAngVel[i] = B->wn[i] + FN->angrate[i];
-            }
-         }
-      }
-
+      BodyStatesToNodeStates(S);
+      
 /* .. Find Total Angular Momentum */
       FindTotalAngMom(S);
 
-/* .. For Accelerometers */
-      for(i=0;i<3;i++) {
-         S->alfbn[i] = udot[i];
-         S->abs[i] = 0.0;
-      }
 }
 /******************************************************************************/
 /*  Finds rotational and translational joint partials                         */
@@ -4193,9 +4182,6 @@ void PartitionForces(struct SCType *S)
       for(Ib=0;Ib<Nb;Ib++) {
          for(i=0;i<3;i++) FextN[i] += S->B[Ib].FrcN[i];
       }
-
-      /* Non-grav acceleration of SC.cm, for accelerometer */
-      for(i=0;i<3;i++) S->asn[i] = FextN[i]/S->mass;
 
       S->FrcN[0] += FextN[0];
       S->FrcN[1] += FextN[1];

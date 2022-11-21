@@ -33,81 +33,65 @@
 void AccelerometerModel(struct SCType *S)
 {
       struct AccelType *A;
-      double p[3],wxp[3],wxwxp[3],axp[3],ab[3];
-      double r,Coef,rhatn[3],rhat[3],rhatop;
-      double accb[3],asnb[3];
-      long j;
       struct BodyType *B; 
-      struct NodeType *FN;
+      struct NodeType *N;
+      double p[3];
+      double r,Coef,rhatn[3],rhat[3],rhatop;
+      double AccGGB[3],AccGG,TotAxis[3];
+      double dvn[3],dvb[3],AvgAcc;
+      long i;
       long Ia;
-      double PrevBias,PrevDV,AccError;
-      long Counts,PrevCounts;
-
-      B = &S->B[0];
+      double PrevBias;
 
       for(Ia=0;Ia<S->Nacc;Ia++) { 
          A = &S->Accel[Ia];
          A->SampleCounter++; 
          if (A->SampleCounter >= A->MaxCounter) {
             A->SampleCounter = 0;
-
-            /* Vector from cm of B0 to A */
-            for(j=0;j<3;j++) 
-               p[j] = A->PosB[j] - B->cm[j];
-
-            /* abs and alfbn are byproducts of NbodyAttitudeRK4 */
-            VxV(B->wn,p,wxp);
-            VxV(B->wn,wxp,wxwxp);
-            VxV(S->alfbn,p,axp);
-            MxV(B->CN,S->abs,ab);
-
-            /* Acceleration of a point fixed in an accelerating, rotating body */
-            for(j=0;j<3;j++) accb[j] = ab[j]+axp[j]+wxwxp[j];
+            B = &S->B[0];
+            N = &B->Node[A->Node];
 
             /* Grav-grad force (see Hughes, p.246, eq (56)) */
+            AccGG = 0.0;
             if (GGActive) {
                r = MAGV(S->PosN);
                Coef = -3.0*Orb[S->RefOrb].mu/(r*r*r);
                CopyUnitV(S->PosN,rhatn);
                MxV(B->CN,rhatn,rhat);
+               MxV(B->CN,B->pn,p);
+               for(i=0;i<3;i++) p[i] += N->TotPosB[i];
                rhatop = VoV(rhat,p);
-               for(j=0;j<3;j++) {
-                  accb[j] += Coef*(p[j]-3.0*rhat[j]*rhatop);
+               for(i=0;i<3;i++) {
+                  AccGGB[i] = Coef*(p[i]-3.0*rhat[i]*rhatop);
                }
             }
-
-            /* Add acceleration of SC cm from external surface forces */
-            MxV(B->CN,S->asn,asnb);
-            for(j=0;j<3;j++) accb[j] += asnb[j];
-
-
-            /* .. Add noise, etc. */
-            /* this is the noise added for the accelerometer ( the Edited ) */
-
-             
-            if (S->FlexActive) {
-               FN = &S->B[0].Node[A->Node];  
-               A->TrueAcc = VoV(FN->TotTrnVel,A->Axis); /* TODO: Fix this */
-            }
-            else {
-               A->TrueAcc = VoV(accb,A->Axis); 
-            }                                        
+                       
+            QTxV(N->TotQB,A->Axis,TotAxis);
+            AccGG = VoV(AccGGB,TotAxis);
             
+            A->PrevCounts = A->Counts;
+            for(i=0;i<3;i++) {
+               dvn[i] = N->TotVelN[i] - A->PrevVelN[i];
+               A->PrevVelN[i] = N->TotVelN[i];
+            }
+            MxV(B->CN,dvn,dvb);  
+            A->DV = VoV(dvb,TotAxis);
+            AvgAcc = A->DV/A->SampleTime;
+            A->TrueAcc = AvgAcc + AccGG;          
+                         
             PrevBias = A->CorrCoef*A->Bias;
             A->Bias = PrevBias + A->BiasStabCoef*GaussianRandom(RNG);
-            AccError = 0.5*(A->Bias+PrevBias) + A->DVRWCoef*GaussianRandom(RNG);
+            A->AccError = 0.5*(A->Bias+PrevBias) + A->DVRWCoef*GaussianRandom(RNG);
          
-            A->MeasAcc = Limit(A->Scale*A->TrueAcc + AccError,
+            A->MeasAcc = Limit(A->Scale*A->TrueAcc + A->AccError,
                -A->MaxAcc,A->MaxAcc); 
          
-            PrevDV = A->DV; 
-            A->DV = PrevDV + A->MeasAcc*A->SampleTime 
+            A->DV += A->MeasAcc*A->SampleTime 
                + A->DVNoiseCoef*GaussianRandom(RNG);
          
-            PrevCounts = (long) (PrevDV/A->Quant+0.5);
-            Counts = (long) (A->DV/A->Quant+0.5);
+            A->Counts = (long) (A->DV/A->Quant+0.5);
 
-            A->MeasAcc = ((double) (Counts - PrevCounts))*A->Quant/A->SampleTime;
+            A->MeasAcc = ((double) (A->Counts - A->PrevCounts))*A->Quant/A->SampleTime;
             
             S->AC.Accel[Ia].Acc = A->MeasAcc;
          }
@@ -117,8 +101,10 @@ void AccelerometerModel(struct SCType *S)
 void GyroModel(struct SCType *S)
 {
       struct GyroType *G;
-      struct NodeType *FN;
+      struct BodyType *B;
+      struct NodeType *N;
       long Ig;
+      double TotAxis[3];
       double PrevBias,RateError,PrevAngle;
       long Counts,PrevCounts;
       
@@ -128,14 +114,10 @@ void GyroModel(struct SCType *S)
          G->SampleCounter++;
          if (G->SampleCounter >= G->MaxCounter) {
             G->SampleCounter = 0;
-            
-            if (S->FlexActive) {
-               FN = &S->B[0].Node[G->Node];
-               G->TrueRate = VoV(FN->TotAngVel,G->Axis);
-            }
-            else {
-               G->TrueRate = VoV(S->B[0].wn,G->Axis);
-            }
+            B = &S->B[0];
+            N = &B->Node[G->Node];
+            QTxV(N->TotQB,G->Axis,TotAxis);
+            G->TrueRate = VoV(N->TotAngVelB,TotAxis);
             
             PrevBias = G->CorrCoef*G->Bias;
             G->Bias = PrevBias + G->BiasStabCoef*GaussianRandom(RNG);
@@ -296,13 +278,13 @@ void FssModel(struct SCType *S)
 void StarTrackerModel(struct SCType *S)
 {
       struct StarTrackerType *ST;
-      struct NodeType *FN;
+      struct NodeType *N;
       static struct RandomProcessType *StNoise;
       struct WorldType *W;
       double qsn[4],Qnoise[4];
       double BoS,OrbRad,LimbAng,NadirVecB[3],BoN;
       double mvn[3],MoonDist,mvb[3],BoM;
-      double qfb[4],qfn[4];
+      double qsb[4];
       static long First = 1;
       long Ist,i;
       
@@ -317,6 +299,7 @@ void StarTrackerModel(struct SCType *S)
          ST->SampleCounter++;
          if (ST->SampleCounter >= ST->MaxCounter) {
             ST->SampleCounter = 0;
+            N = &S->B[0].Node[ST->Node];
          
             ST->Valid = TRUE;
             /* Sun Occultation? */
@@ -339,16 +322,8 @@ void StarTrackerModel(struct SCType *S)
                if (BoM > cos(LimbAng+ST->MoonExclAng)) ST->Valid = FALSE;
             }
             if (ST->Valid) {
-               if (S->FlexActive) {
-                  FN = &S->B[0].Node[ST->Node];
-                  for(i=0;i<3;i++) qfb[i] = 0.5*FN->ang[i];
-                  qfb[3] = sqrt(1.0-qfb[0]*qfb[0]-qfb[1]*qfb[1]-qfb[2]*qfb[2]);
-                  QxQ(qfb,S->B[0].qn,qfn);
-                  QxQ(ST->qb,qfn,qsn);
-               }
-               else {
-                  QxQ(ST->qb,S->B[0].qn,qsn);
-               }
+               QxQ(ST->qb,N->TotQB,qsb);
+               QxQ(qsb,S->B[0].qn,qsn);
                /* Add Noise in ST frame */
                for(i=0;i<3;i++) Qnoise[i] = 0.5*ST->NEA[i]*GaussianRandom(StNoise);
                Qnoise[3] = 1.0;
@@ -439,11 +414,10 @@ void GpsModel(struct SCType *S)
 void Sensors(struct SCType *S)
 {
 
-      double evn[3],evb[3],qfb[4];
+      double evn[3],evb[3];
       long i,j,k,DOF;
       struct AcType *AC;
       struct JointType *G;
-      struct NodeType *FN;
 
       AC = &S->AC;
       
@@ -500,15 +474,7 @@ void Sensors(struct SCType *S)
       
       /* Star Tracker */
       if (S->Nst == 0) {
-         if (S->FlexActive) {
-            FN = &S->B[0].Node[0]; /* Arbitrarily use Node[0] */
-            for(i=0;i<3;i++) qfb[i] = 0.5*FN->ang[i];
-            qfb[3] = sqrt(1.0-qfb[0]*qfb[0]-qfb[1]*qfb[1]-qfb[2]*qfb[2]);
-            QxQ(qfb,S->B[0].qn,AC->qbn);
-         }
-         else {
-            for (i=0;i<4;i++) AC->qbn[i] = S->B[0].qn[i];
-         }
+         for(i=0;i<4;i++) AC->qbn[i] = S->B[0].qn[i];
       }
       else {
          StarTrackerModel(S);
@@ -566,14 +532,6 @@ void Sensors(struct SCType *S)
          AC->Whl[i].H = S->Whl[i].H;
          AC->Whl[i].w = S->Whl[i].w;
       }
-      
-//      /* Formation Sensors */
-//      for (i=0;i<3;i++) {
-//         for (j=0;j<3;j++) FSW->CSF[i][j] = S->CF[i][j];
-//         FSW->PosF[i] = S->PosF[i];
-//         FSW->VelF[i] = S->VelF[i];
-//      }
-
 }
 
 /* #ifdef __cplusplus

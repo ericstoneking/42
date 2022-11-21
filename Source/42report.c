@@ -165,25 +165,21 @@ void OrbPropReport(void)
 /*********************************************************************/
 void GmatReport(void)
 {
-      static FILE *LowIncFile;
-      static FILE *MidIncFile;
-      static FILE *PolarFile;
+      static FILE *outfile;
       static long First = 1;
+      long i;
       
       if (First) {
          First = 0;
-         LowIncFile = FileOpen(InOutPath,"PosNLowInc.42","w");
-         MidIncFile = FileOpen(InOutPath,"PosNMidInc.42","w");
-         PolarFile = FileOpen(InOutPath,"PosNPolar.42","w");
+         outfile = FileOpen(InOutPath,"PosN9sc.42","w");
       }
       
       if (OutFlag) {
-         fprintf(LowIncFile,"%24.18le %24.18le %24.18le\n",
-            SC[0].PosN[0],SC[0].PosN[1],SC[0].PosN[2]);
-         fprintf(MidIncFile,"%24.18le %24.18le %24.18le\n",
-            SC[1].PosN[0],SC[1].PosN[1],SC[1].PosN[2]);
-         fprintf(PolarFile,"%24.18le %24.18le %24.18le\n",
-            SC[2].PosN[0],SC[2].PosN[1],SC[2].PosN[2]);
+         for(i=0;i<9;i++) {
+            fprintf(outfile,"%24.18le %24.18le %24.18le ",
+            SC[i].PosN[0],SC[i].PosN[1],SC[i].PosN[2]);
+         }
+         fprintf(outfile,"\n");
       }
 }
 /*********************************************************************/

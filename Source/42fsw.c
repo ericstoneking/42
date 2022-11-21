@@ -1740,8 +1740,8 @@ void AdHocFSW(struct SCType *S)
       FindCLN(AC->PosN,AC->VelN,CLN,wln);
       MxM(CRL,CLN,CRN);
       C2Q(CRN,qrn);
-      //QxQT(AC->qbn,qrn,AC->qbr);
-      for(i=0;i<4;i++) AC->qbr[i] = AC->qbn[i];
+      QxQT(AC->qbn,qrn,AC->qbr);
+      //for(i=0;i<4;i++) AC->qbr[i] = AC->qbn[i];
       RECTIFYQ(AC->qbr);
       for(i=0;i<3;i++) {
          C->therr[i] = 2.0*AC->qbr[i];

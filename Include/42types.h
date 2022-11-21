@@ -48,13 +48,12 @@ struct NodeType {
    /*~ Internal Variables ~*/
    char comment[80]; 
    double PosB[3];
+   double PosCm[3]; /* Pos wrt B's cm, expressed in B */
    double **PSI, **THETA; /* Mode shapes, 3 x B.Nf */
    double Frc[3],Trq[3]; /* Both expressed in B */
    double *FlexFrc;  /* "Fbendy + Tbendy", B.Nf x 1 */
-   double pos[3],vel[3],ang[3],angrate[3]; /* Deflection variables */
-   double TotAngVel[3];
-   double TotTrnVel[3];
-   double TotTrnAcc[3];
+   double FlexPos[3],FlexVel[3],FlexAng[3],FlexAngRate[3]; /* Deflection variables */
+   double TotPosB[3],TotVelB[3],TotVelN[3],TotQB[4],TotAngVelB[3];
 };
 
 struct ShakerType {
@@ -290,9 +289,21 @@ struct WhlType {
    double Trq;  /* Exerted on wheel, expressed along wheel axis */
    long Node;
    struct DelayType *Delay; /* For injecting delay into control loops */
+   
+   char DragJitterFileName[40];
+
+   /* For Drag */
+   double CoulCoef; /* Coulomb friction, Nm */
+   double StribeckCoef; /* Stiction - Coulomb, Nm */
+   double ViscCoef; /* Viscous friction coefficient, Nm/(rad/sec) */
+   double StribeckZone; /* Stribeck zone, rad/sec */
+   double LugreSpringCoef; /* Lugre stiffness, Nm/rad */
+   double LugreDampCoef; /* Lugre damping, Nm/(rad/sec) */
+   double LugreDampZone; /* Lugre damping zone, rad/sec */
+   double z; /* Lugre internal state, rad */
+   double FricTrq; /* Friction Torque, Nm */
 
    /* For Jitter */
-   char JitterFileName[40];
    double m; /* Rotor mass [kg] */
    double gamma; /* 2*Jt/Jr (<1.0) */
    double Jt; /* Transverse rotor inertia, [kg-m^2] */
@@ -469,7 +480,7 @@ struct GpsType {
 };
 
 struct AccelType {
-   /* Parameters */
+   /*~ Parameters ~*/
    double SampleTime;
    long SampleCounter;
    long MaxCounter;
@@ -483,12 +494,15 @@ struct AccelType {
    double SigE; /* DV Readout Noise, m/s  */
    
    /*~ Internal Variables ~*/
-   double TrueAcc; /* the true acceleration m/s^2 */
    double Bias; /* m/s^2 */
+   double PrevVelN[3]; /* m/s */
    double DV; /* Change in velocity m/s */
+   double TrueAcc; /* m/s^2 */
    double MeasAcc; /* m/s^2 */
    double MaxAcc; /* m/s^2 max acceleration */
    double AccError;
+   long Counts;
+   long PrevCounts;
 
    /* Coef */
    double BiasStabCoef;
@@ -644,10 +658,6 @@ struct SCType {
    double PosF[3]; /* Position of B0 origin wrt F, expressed in F */
    double VelF[3]; /* Velocity of B0 origin wrt F, expressed in F */
    double CF[3][3];  /* Attitude of B0 wrt F */
-   /* These are computed in dynamics, used in accelerometer models */
-   double asn[3];  /* Non-gravitational accel of SC.cm in N */
-   double alfbn[3]; /* Angular accel of B wrt N, expressed in B */
-   double abs[3];  /* Non-grav accel of B[0].cm, wrt SC.cm, in N */
    /* Enable/Disable Passive Joint Forces or Torques (i.e. spring/damper) */
    long PassiveJointFrcTrqEnabled;
    /* Constraint forces and torques are computed if requested */
