@@ -37,7 +37,8 @@ void AccelerometerModel(struct SCType *S)
       struct NodeType *N;
       double p[3];
       double r,Coef,rhatn[3],rhat[3],rhatop;
-      double AccGGB[3],AccGG,TotAxis[3];
+      double AccGGB[3],AccGG,Axis[3];
+      double NodeQN[4],AvgQN[4];
       double dvn[3],dvb[3],AvgAcc;
       long i;
       long Ia;
@@ -52,30 +53,33 @@ void AccelerometerModel(struct SCType *S)
             N = &B->Node[A->Node];
 
             /* Grav-grad force (see Hughes, p.246, eq (56)) */
-            AccGG = 0.0;
+            for(i=0;i<3;i++) AccGGB[i] = 0.0;
             if (GGActive) {
                r = MAGV(S->PosN);
                Coef = -3.0*Orb[S->RefOrb].mu/(r*r*r);
                CopyUnitV(S->PosN,rhatn);
                MxV(B->CN,rhatn,rhat);
                MxV(B->CN,B->pn,p);
-               for(i=0;i<3;i++) p[i] += N->TotPosB[i];
+               for(i=0;i<3;i++) p[i] += N->PosB[i];
                rhatop = VoV(rhat,p);
                for(i=0;i<3;i++) {
                   AccGGB[i] = Coef*(p[i]-3.0*rhat[i]*rhatop);
                }
             }
                        
-            QTxV(N->TotQB,A->Axis,TotAxis);
-            AccGG = VoV(AccGGB,TotAxis);
+            QTxV(N->qb,A->Axis,Axis);
+            AccGG = VoV(AccGGB,Axis);
             
-            A->PrevCounts = A->Counts;
             for(i=0;i<3;i++) {
-               dvn[i] = N->TotVelN[i] - A->PrevVelN[i];
-               A->PrevVelN[i] = N->TotVelN[i];
+               dvn[i] = N->VelN[i] - A->PrevVelN[i];
+               A->PrevVelN[i] = N->VelN[i];
             }
-            MxV(B->CN,dvn,dvb);  
-            A->DV = VoV(dvb,TotAxis);
+            QxQ(N->qb,B->qn,NodeQN);
+            for(i=0;i<4;i++) AvgQN[i] = A->PrevQN[i] + NodeQN[i];
+            UNITQ(AvgQN);
+            for(i=0;i<4;i++) A->PrevQN[i] = NodeQN[i];
+            QxV(AvgQN,dvn,dvb);  
+            A->DV = VoV(dvb,Axis);
             AvgAcc = A->DV/A->SampleTime;
             A->TrueAcc = AvgAcc + AccGG;          
                          
@@ -86,12 +90,12 @@ void AccelerometerModel(struct SCType *S)
             A->MeasAcc = Limit(A->Scale*A->TrueAcc + A->AccError,
                -A->MaxAcc,A->MaxAcc); 
          
-            A->DV += A->MeasAcc*A->SampleTime 
+            A->DV = A->MeasAcc*A->SampleTime 
                + A->DVNoiseCoef*GaussianRandom(RNG);
          
-            A->Counts = (long) (A->DV/A->Quant+0.5);
+            A->Counts = (long) (A->DV/A->SampleTime/A->Quant+0.5);
 
-            A->MeasAcc = ((double) (A->Counts - A->PrevCounts))*A->Quant/A->SampleTime;
+            A->MeasAcc = ((double) A->Counts)*A->Quant;
             
             S->AC.Accel[Ia].Acc = A->MeasAcc;
          }
@@ -104,7 +108,7 @@ void GyroModel(struct SCType *S)
       struct BodyType *B;
       struct NodeType *N;
       long Ig;
-      double TotAxis[3];
+      double Axis[3];
       double PrevBias,RateError,PrevAngle;
       long Counts,PrevCounts;
       
@@ -116,8 +120,8 @@ void GyroModel(struct SCType *S)
             G->SampleCounter = 0;
             B = &S->B[0];
             N = &B->Node[G->Node];
-            QTxV(N->TotQB,G->Axis,TotAxis);
-            G->TrueRate = VoV(N->TotAngVelB,TotAxis);
+            QTxV(N->qb,G->Axis,Axis);
+            G->TrueRate = VoV(N->AngVelB,Axis);
             
             PrevBias = G->CorrCoef*G->Bias;
             G->Bias = PrevBias + G->BiasStabCoef*GaussianRandom(RNG);
@@ -322,7 +326,7 @@ void StarTrackerModel(struct SCType *S)
                if (BoM > cos(LimbAng+ST->MoonExclAng)) ST->Valid = FALSE;
             }
             if (ST->Valid) {
-               QxQ(ST->qb,N->TotQB,qsb);
+               QxQ(ST->qb,N->qb,qsb);
                QxQ(qsb,S->B[0].qn,qsn);
                /* Add Noise in ST frame */
                for(i=0;i<3;i++) Qnoise[i] = 0.5*ST->NEA[i]*GaussianRandom(StNoise);

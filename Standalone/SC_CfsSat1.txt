@@ -107,22 +107,22 @@ NONE                          ! Drag/Jitter Input File Name
 ==============================  MTB 0  =================================
 180.0                         ! Saturation (A-m^2)
 1.0   0.0   0.0               ! MTB Axis Components, [X, Y, Z]
-0                             ! Flex Node Index
+0                             ! Node
 ==============================  MTB 1  =================================
 180.0                         ! Saturation (A-m^2)
 0.0   1.0   0.0               ! MTB Axis Components, [X, Y, Z]
-0                             ! Flex Node Index
+0                             ! Node
 ==============================  MTB 2  =================================
 180.0                         ! Saturation (A-m^2)
 0.0   0.0   1.0               ! MTB Axis Components, [X, Y, Z]
-0                             ! Flex Node Index
+0                             ! Node
 ************************* Thruster Parameters **************************
 0                             ! Number of Thrusters
 ==============================  Thr 0  =================================
  1.0                          ! Thrust Force (N)
 -1.0  0.0  0.0                ! Thrust Axis 
 0                             ! Body
-0                             ! Flex Node Index
+0                             ! Node
 ******************************* Gyro ************************************
 3                                ! Number of Gyro Axes
 ============================== Axis 0 ===================================
@@ -135,7 +135,7 @@ NONE                          ! Drag/Jitter Input File Name
 0.1  1.0                      ! Bias Stability (deg/hr) over timespan (hr)
 0.1                           ! Angle Noise, arcsec RMS
 0.1                           ! Initial Bias (deg/hr)
-0                             ! Flex Node Index
+0                             ! Node
 ============================== Axis 1 ===================================
 0.1                           ! Sample Time,sec
 0.0  1.0  0.0                 ! Axis expressed in Body Frame
@@ -146,7 +146,7 @@ NONE                          ! Drag/Jitter Input File Name
 0.1  1.0                      ! Bias Stability (deg/hr) over timespan (hr)
 0.1                           ! Angle Noise, arcsec RMS
 0.1                           ! Initial Bias (deg/hr)
-0                             ! Flex Node Index
+0                             ! Node
 ============================== Axis 2 ===================================
 0.1                           ! Sample Time,sec
 0.0  0.0  1.0                 ! Axis expressed in Body Frame
@@ -157,7 +157,7 @@ NONE                          ! Drag/Jitter Input File Name
 0.1  1.0                      ! Bias Stability (deg/hr) over timespan (hr)
 0.1                           ! Angle Noise, arcsec RMS
 0.1                           ! Initial Bias (deg/hr)
-0                             ! Flex Node Index
+0                             ! Node
 *************************** Magnetometer ********************************
 3                             ! Number of Magnetometer Axes
 ============================== Axis 0 ===================================
@@ -167,7 +167,7 @@ NONE                          ! Drag/Jitter Input File Name
 0.0                           ! Scale Factor Error, ppm
 1.0E-6                        ! Quantization, Tesla 
 1.0E-6                        ! Noise, Tesla RMS
-0                             ! Flex Node Index
+0                             ! Node
 ============================== Axis 1 ===================================
 0.1                           ! Sample Time,sec
 0.0  1.0  0.0                 ! Axis expressed in Body Frame
@@ -175,7 +175,7 @@ NONE                          ! Drag/Jitter Input File Name
 0.0                           ! Scale Factor Error, ppm
 1.0E-6                        ! Quantization, Tesla 
 1.0E-6                        ! Noise, Tesla RMS
-0                             ! Flex Node Index
+0                             ! Node
 ============================== Axis 2 ===================================
 0.1                           ! Sample Time,sec
 0.0  0.0  1.0                 ! Axis expressed in Body Frame
@@ -183,7 +183,7 @@ NONE                          ! Drag/Jitter Input File Name
 0.0                           ! Scale Factor Error, ppm
 1.0E-6                        ! Quantization, Tesla 
 1.0E-6                        ! Noise, Tesla RMS
-0                             ! Flex Node Index
+0                             ! Node
 *********************** Coarse Sun Sensor *******************************
 8                             ! Number of Coarse Sun Sensors
 ============================== CSS 0 ====================================
@@ -193,7 +193,7 @@ NONE                          ! Drag/Jitter Input File Name
 1.0                           ! Scale Factor
 0.001                         ! Quantization
 0                             ! Body
-0                             ! Flex Node Index
+0                             ! Node
 ============================== CSS 1 ====================================
 0.1                           ! Sample Time,sec
 1.0  1.0 -1.0                 ! Axis expressed in Body Frame
@@ -201,7 +201,7 @@ NONE                          ! Drag/Jitter Input File Name
 1.0                           ! Scale Factor
 0.001                         ! Quantization
 0                             ! Body
-0                             ! Flex Node Index
+0                             ! Node
 ============================== CSS 2 ====================================
 0.1                           ! Sample Time,sec
 1.0 -1.0  1.0                 ! Axis expressed in Body Frame
@@ -209,7 +209,7 @@ NONE                          ! Drag/Jitter Input File Name
 1.0                           ! Scale Factor
 0.001                         ! Quantization
 0                             ! Body
-0                             ! Flex Node Index
+0                             ! Node
 ============================== CSS 3 ====================================
 0.1                           ! Sample Time,sec
 1.0 -1.0 -1.0                 ! Axis expressed in Body Frame
@@ -217,7 +217,7 @@ NONE                          ! Drag/Jitter Input File Name
 1.0                           ! Scale Factor
 0.001                         ! Quantization
 0                             ! Body
-0                             ! Flex Node Index
+0                             ! Node
 ============================== CSS 4 ====================================
 0.1                           ! Sample Time,sec
 -1.0  1.0  1.0                ! Axis expressed in Body Frame
@@ -225,7 +225,7 @@ NONE                          ! Drag/Jitter Input File Name
 1.0                           ! Scale Factor
 0.001                         ! Quantization
 0                             ! Body
-0                             ! Flex Node Index
+0                             ! Node
 ============================== CSS 5 ====================================
 0.1                           ! Sample Time,sec
 -1.0  1.0 -1.0                ! Axis expressed in Body Frame
@@ -233,7 +233,7 @@ NONE                          ! Drag/Jitter Input File Name
 1.0                           ! Scale Factor
 0.001                         ! Quantization
 0                             ! Body
-0                             ! Flex Node Index
+0                             ! Node
 ============================== CSS 6 ====================================
 0.1                           ! Sample Time,sec
 -1.0 -1.0  1.0                ! Axis expressed in Body Frame
@@ -241,7 +241,7 @@ NONE                          ! Drag/Jitter Input File Name
 1.0                           ! Scale Factor
 0.001                         ! Quantization
 0                             ! Body
-0                             ! Flex Node Index
+0                             ! Node
 ============================== CSS 7 ====================================
 0.1                           ! Sample Time,sec
 -1.0 -1.0 -1.0                ! Axis expressed in Body Frame
@@ -249,7 +249,7 @@ NONE                          ! Drag/Jitter Input File Name
 1.0                           ! Scale Factor
 0.001                         ! Quantization
 0                             ! Body
-0                             ! Flex Node Index
+0                             ! Node
 ************************* Fine Sun Sensor *******************************
 1                             ! Number of Fine Sun Sensors
 =============================== FSS 0 ===================================
@@ -259,7 +259,7 @@ Z_AXIS                        ! Boresight Axis X_AXIS, Y_AXIS, or Z_AXIS
 32.0   32.0                   ! X, Y FOV Size, deg
 0.1                           ! Noise Equivalent Angle, deg RMS
 0.5                           ! Quantization, deg
-0                             ! Flex Node Index
+0                             ! Node
 ************************** Star Tracker *********************************
 1                             ! Number of Star Trackers
 =============================== ST 0 ====================================
@@ -269,7 +269,7 @@ Z_AXIS                        ! Boresight Axis X_AXIS, Y_AXIS, or Z_AXIS
 8.0   8.0                     ! X, Y FOV Size, deg
 30.0  10.0  10.0              ! Sun, Earth, Moon Exclusion Angles, deg
 2.0  2.0  20.0                ! Noise Equivalent Angle, arcsec RMS
-0                             ! Flex Node Index
+0                             ! Node
 ****************************** GPS **************************************
 1                             ! Number of GPS Receivers
 ============================= GPSR 0 ====================================
@@ -277,12 +277,11 @@ Z_AXIS                        ! Boresight Axis X_AXIS, Y_AXIS, or Z_AXIS
 4.0                           ! Position Noise, m RMS
 0.02                          ! Velocity Noise, m/sec RMS
 20.0E-9                       ! Time Noise, sec RMS
-0                             ! Flex Node Index
+0                             ! Node
 *************************** Accelerometer *******************************
 0                             ! Number of Accel Axes
 ============================== Axis 0 ===================================
 0.1                           ! Sample Time,sec
-0.5  1.0  1.5                 ! Position in B[0] (m)
 1.0  0.0  0.0                 ! Axis expressed in Body Frame
 1.0                           ! Max Acceleration (m/s^2)
 0.0                           ! Scale Factor Error, ppm
@@ -291,4 +290,4 @@ Z_AXIS                        ! Boresight Axis X_AXIS, Y_AXIS, or Z_AXIS
 0.0 1.0                       ! Bias Stability (m/s^2) over timespan (hr)
 0.0                           ! DV Noise, m/s
 0.5                           ! Initial Bias (m/s^2)
-0                             ! Flex Node Index
+0                             ! Node

@@ -47,13 +47,13 @@ struct FormationType {
 struct NodeType {
    /*~ Internal Variables ~*/
    char comment[80]; 
-   double PosB[3];
+   double NomPosB[3];
    double PosCm[3]; /* Pos wrt B's cm, expressed in B */
    double **PSI, **THETA; /* Mode shapes, 3 x B.Nf */
    double Frc[3],Trq[3]; /* Both expressed in B */
    double *FlexFrc;  /* "Fbendy + Tbendy", B.Nf x 1 */
    double FlexPos[3],FlexVel[3],FlexAng[3],FlexAngRate[3]; /* Deflection variables */
-   double TotPosB[3],TotVelB[3],TotVelN[3],TotQB[4],TotAngVelB[3];
+   double PosB[3],VelB[3],VelN[3],qb[4],AngVelB[3];
 };
 
 struct ShakerType {
@@ -485,7 +485,6 @@ struct AccelType {
    long SampleCounter;
    long MaxCounter;
    long Node;
-   double PosB[3];  /* Position in B[0] */
    double Axis[3]; /* Mounting matrix */
    double Quant;
    double Scale;
@@ -496,13 +495,13 @@ struct AccelType {
    /*~ Internal Variables ~*/
    double Bias; /* m/s^2 */
    double PrevVelN[3]; /* m/s */
+   double PrevQN[4];
    double DV; /* Change in velocity m/s */
    double TrueAcc; /* m/s^2 */
    double MeasAcc; /* m/s^2 */
    double MaxAcc; /* m/s^2 max acceleration */
    double AccError;
    long Counts;
-   long PrevCounts;
 
    /* Coef */
    double BiasStabCoef;

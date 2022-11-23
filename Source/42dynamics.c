@@ -337,22 +337,21 @@ void BodyStatesToNodeStates(struct SCType *S)
 {
       struct BodyType *B;
       struct NodeType *N;
-      double wxr[3];
+      double vb[3],wxr[3];
+      double SumQ2;
       long Ib,In,If,i;
       
       for(Ib=0;Ib<S->Nb;Ib++) {
          B = &S->B[Ib];
          for(In=0;In<B->NumNodes;In++) {
             N = &B->Node[In];
-            VxV(B->wn,N->PosCm,wxr);
-            MxV(B->CN,B->vn,N->TotVelB);
             for(i=0;i<3;i++) {
-               N->TotPosB[i] = N->PosB[i];
-               N->TotVelB[i] += wxr[i];
-               N->TotQB[i] = 0.0;
-               N->TotAngVelB[i] = B->wn[i];
+               N->PosB[i] = N->NomPosB[i];
+               N->VelB[i] = 0.0;
+               N->qb[i] = 0.0;
+               N->AngVelB[i] = B->wn[i];
             }
-            N->TotQB[3] = 1.0;
+            N->qb[3] = 1.0;
             if (S->FlexActive) {
                for(i=0;i<3;i++) {
                   for(If=0;If<B->Nf;If++) {
@@ -361,14 +360,19 @@ void BodyStatesToNodeStates(struct SCType *S)
                      N->FlexAng[i] += N->THETA[i][If]*B->eta[If];
                      N->FlexAngRate[i] += N->THETA[i][If]*B->xi[If];
                   } 
-                  N->TotPosB[i] += N->FlexPos[i];
-                  N->TotVelB[i] += N->FlexVel[i];
-                  N->TotQB[i] = 0.5*N->FlexAng[i];   
-                  N->TotAngVelB[i] += N->FlexAngRate[i];              
+                  N->PosB[i] += N->FlexPos[i];
+                  N->VelB[i] += N->FlexVel[i];
+                  N->qb[i] = 0.5*N->FlexAng[i];
+                  SumQ2 += N->qb[i]*N->qb[i];   
+                  N->AngVelB[i] += N->FlexAngRate[i];              
                }
-               UNITQ(N->TotQB);
+               N->qb[3] = sqrt(1.0-SumQ2);
             }
-            MTxV(B->CN,N->TotVelB,N->TotVelN);
+            MxV(B->CN,B->vn,vb);
+            for(i=0;i<3;i++) N->PosCm[i] = N->PosB[i]-B->cm[i];
+            VxV(N->AngVelB,N->PosCm,wxr);
+            for(i=0;i<3;i++) N->VelB[i] += vb[i] + wxr[i];
+            MTxV(B->CN,N->VelB,N->VelN);
          }
       }
 }

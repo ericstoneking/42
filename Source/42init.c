@@ -1518,7 +1518,7 @@ void InitNodes(struct BodyType *B)
       struct NodeType *N;
       FILE *infile;
       char junk[80],newline;
-      long i;
+      long In,i;
       
       if (strcmp(B->NodeFileName,"NONE")) {
          infile = FileOpen(InOutPath,B->NodeFileName,"r");
@@ -1527,10 +1527,10 @@ void InitNodes(struct BodyType *B)
          fscanf(infile,"%ld %[^\n] %[\n]",&B->NumNodes,junk,&newline);
          B->Node = (struct NodeType *) calloc(B->NumNodes,sizeof(struct NodeType));
          fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-         for(i=0;i<B->NumNodes;i++) {
-            N = &B->Node[i];
+         for(In=0;In<B->NumNodes;In++) {
+            N = &B->Node[In];
             fscanf(infile,"%lf %lf %lf \"%[^\"]\" %[\n]",
-               &N->PosB[0],&N->PosB[1],&N->PosB[2],N->comment,&newline);
+               &N->NomPosB[0],&N->NomPosB[1],&N->NomPosB[2],N->comment,&newline);
          }
          fclose(infile);
       }
@@ -2575,7 +2575,7 @@ void InitSpacecraft(struct SCType *S)
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nacc,junk,&newline);
       S->Accel = (struct AccelType *) calloc(S->Nacc,sizeof(struct AccelType));
       if (S->Nacc == 0) {
-         for(i=0;i<11;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(i=0;i<10;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
       else {
          for(Ia=0;Ia<S->Nacc;Ia++) {
@@ -2588,8 +2588,6 @@ void InitSpacecraft(struct SCType *S)
                exit(1);
             }
             Accel->SampleCounter = Accel->MaxCounter;
-            fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
-               &Accel->PosB[0],&Accel->PosB[1],&Accel->PosB[2],junk,&newline);
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
                &Accel->Axis[0],&Accel->Axis[1],&Accel->Axis[2],junk,&newline);
             UNITV(Accel->Axis);
@@ -2766,6 +2764,7 @@ void InitSpacecraft(struct SCType *S)
 
       MapStateVectorToBodyStates(D->u,D->x,D->h,D->uf,D->xf,S);
       MotionConstraints(S);
+      BodyStatesToNodeStates(S);
       SCMassProps(S);
       FindTotalAngMom(S);
       EchoDyn(S);

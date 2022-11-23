@@ -147,7 +147,6 @@ Z_AXIS                      ! Boresight Axis X_AXIS, Y_AXIS, or Z_AXIS
 0                           ! Number of Accel Axes
 ============================== Axis 0 ===================================
 0.1                         ! Sample Time,sec
-0.5  1.0  1.5               ! Position in B[0] (m)
 1.0  0.0  0.0               ! Axis expressed in Body Frame
 1.0                         ! Max Acceleration (m/s^2)
 0.0                         ! Scale Factor Error, ppm

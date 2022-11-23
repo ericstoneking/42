@@ -52,7 +52,7 @@ void WhlDrag(struct WhlType *W)
 void WhlModel(struct WhlType *W,struct SCType *S)
 {
       struct BodyType *B;
-      struct NodeType *FN;
+      struct NodeType *N;
       long i;
 
       W->Trq = W->Tcmd;
@@ -67,8 +67,8 @@ void WhlModel(struct WhlType *W,struct SCType *S)
 
       if (S->FlexActive) {
          B = &S->B[W->Body];
-         FN = &B->Node[W->Node];
-         for(i=0;i<3;i++) FN->Trq[i] += W->Trq*W->A[i];
+         N = &B->Node[W->Node];
+         for(i=0;i<3;i++) N->Trq[i] += W->Trq*W->A[i];
       }
 
 }
@@ -89,8 +89,7 @@ void MTBModel(struct MTBType *MTB,double bvb[3])
 void ThrModel(struct ThrType *Thr,struct SCType *S,double DT)
 {
       struct BodyType *B;
-      struct NodeType *FN;
-      double r[3];
+      struct NodeType *N;
       long i;
 
       if (Thr->PulseWidthCmd > DT) {
@@ -110,15 +109,14 @@ void ThrModel(struct ThrType *Thr,struct SCType *S,double DT)
       Thr->Frc[2] = Thr->F*Thr->A[2];
 
       B = &S->B[Thr->Body];
-      FN = &B->Node[Thr->Node];
+      N = &B->Node[Thr->Node];
 
-      for(i=0;i<3;i++) r[i] = FN->PosB[i] - B->cm[i];
-      VxV(r,Thr->Frc,Thr->Trq);
+      VxV(N->PosCm,Thr->Frc,Thr->Trq);
 
       if (S->FlexActive) {
          for(i=0;i<3;i++) {
-            FN->Trq[i] += Thr->Trq[i];
-            FN->Frc[i] += Thr->Frc[i];
+            N->Trq[i] += Thr->Trq[i];
+            N->Frc[i] += Thr->Frc[i];
          }
       }
 }
@@ -215,7 +213,7 @@ void ThrusterPlumeFrcTrq(struct SCType *S)
 void Actuators(struct SCType *S)
 {
 
-      struct NodeType *FN;
+      struct NodeType *N;
       long i,j;
       double FrcN[3],FrcB[3];
       struct AcType *AC;
@@ -234,10 +232,10 @@ void Actuators(struct SCType *S)
          S->B[0].Trq[i] += S->IdealAct[i].Tcmd;
       }
       if (S->FlexActive) {
-         FN = &S->B[0].Node[0]; /* Arbitrarily put ideal actuators at FN 0 */
+         N = &S->B[0].Node[0]; /* Arbitrarily put ideal actuators at Node 0 */
          for(i=0;i<3;i++) {
-            FN->Trq[i] += S->IdealAct[i].Tcmd;
-            FN->Frc[i] += S->IdealAct[i].Fcmd;
+            N->Trq[i] += S->IdealAct[i].Tcmd;
+            N->Frc[i] += S->IdealAct[i].Fcmd;
          }
       }
 

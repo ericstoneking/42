@@ -183,6 +183,7 @@ void SCMassProps(struct SCType *S);
 void MapJointStatesToStateVector(struct SCType *S);
 void MapStateVectorToBodyStates(double *u, double *x, double *h,
    double *uf, double *xf, struct SCType *S);
+void BodyStatesToNodeStates(struct SCType *S);
 void PartitionForces(struct SCType *S);
 void Dynamics(struct SCType *S);
 void Cleanup(void);
