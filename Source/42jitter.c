@@ -21,19 +21,14 @@
 */
 /*********************************************************************/
 /* Generic force/torque source, with harmonics or spread-spectrum    */
-void ShakerFrcTrq(struct ShakerType *Sh, struct SCType *S)
+double ShakerFrcTrq(struct ShakerType *Sh, struct SCType *S)
 {
-      long i,It;
-      double Sum,Signal;
+      long It;
+      double Signal;
 
-      for(i=0;i<3;i++) {
-         Sh->Frc[i] = 0.0;
-         Sh->Trq[i] = 0.0;
-      }
-      
-      Sum = 0.0;
+      Sh->Output = 0.0;
       for(It=0;It<Sh->Ntone;It++) {
-         Sum += Sh->ToneAmp[It]*sin(Sh->ToneFreq[It]*SimTime);
+         Sh->Output += Sh->ToneAmp[It]*cos(Sh->ToneFreq[It]*SimTime+Sh->TonePhase[It]);
       }
       
       if (Sh->RandomActive) {
@@ -41,15 +36,9 @@ void ShakerFrcTrq(struct ShakerType *Sh, struct SCType *S)
          Signal = SecondOrderLowpassFilter(Sh->Lowpass,Signal);
          if (Sh->LowBandLimit > 0.0) 
             Signal = SecondOrderHighpassFilter(Sh->Highpass,Signal);
-         Sum += Sh->RandStd*Signal;
+         Sh->Output += Sh->RandStd*Signal;
       }
-      
-      if (Sh->FrcTrq == FORCE) {
-         for(i=0;i<3;i++) Sh->Frc[i] = Sum*Sh->Axis[i];
-      }
-      else {
-         for(i=0;i<3;i++) Sh->Trq[i] = Sum*Sh->Axis[i];
-      }
+      return(Sh->Output);      
 }
 /*********************************************************************/
 /* Ref "Wheel Jitter.ipynb" */

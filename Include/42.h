@@ -157,6 +157,7 @@ EXTERN struct IpcType *IPC;
 
 /* Master Random Process */
 EXTERN struct RandomProcessType *RNG;
+EXTERN long RngSeed;
 
 EXTERN double MapTime,JointTime,PathTime,PVelTime,FrcTrqTime;
 EXTERN double AssembleTime,LockTime,TriangleTime,SubstTime,SolveTime;
@@ -199,6 +200,7 @@ void FindAlbedo(struct SCType *S, struct CssType *CSS);
 void JointFrcTrq(struct JointType *G, struct SCType *S);
 void InitActuatedJoint(struct JointType *G, struct SCType *S);
 void WheelJitter(struct JointType *G, struct SCType *S);
+double ShakerFrcTrq(struct ShakerType *Sh, struct SCType *S);
 
 /* Debug Function Prototypes */
 void EchoPVel(struct SCType *S);

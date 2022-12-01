@@ -1026,6 +1026,10 @@ void FindAppendageInertia(long Ig, struct SCType *S,double Iapp[3])
 /**********************************************************************/
 void MapCmdsToActuators(struct SCType *S)
 {
+      struct IdealActType *I;
+      struct WhlType *W;
+      struct MTBType *M;
+      struct ThrType *T;
       struct AcType *AC;
       long i,Iw,Im,It;
 
@@ -1033,18 +1037,22 @@ void MapCmdsToActuators(struct SCType *S)
       
       if (S->GainAndDelayActive) {
          for(i=0;i<3;i++) {
-            S->IdealAct[i].Fcmd = Delay(S->IdealAct[i].FrcDelay,S->LoopGain*AC->IdealFrc[i]);
-            S->IdealAct[i].Tcmd = Delay(S->IdealAct[i].TrqDelay,S->LoopGain*AC->IdealTrq[i]);
+            I = &S->IdealAct[i];
+            I->Fcmd = Delay(I->FrcDelay,S->LoopGain*AC->IdealFrc[i]);
+            I->Tcmd = Delay(I->TrqDelay,S->LoopGain*AC->IdealTrq[i]);
          }
             
          for(Iw=0;Iw<AC->Nwhl;Iw++) {
-            S->Whl[Iw].Tcmd = Delay(S->Whl[Iw].Delay,S->LoopGain*AC->Whl[Iw].Tcmd);
+            W = &S->Whl[Iw];
+            W->Tcmd = Delay(W->Delay,S->LoopGain*AC->Whl[Iw].Tcmd);
          }
          for(Im=0;Im<AC->Nmtb;Im++) {
-            S->MTB[Im].Mcmd = Delay(S->MTB[Im].Delay,S->LoopGain*AC->MTB[Im].Mcmd);
+            M = &S->MTB[Im];
+            M->Mcmd = Delay(M->Delay,S->LoopGain*AC->MTB[Im].Mcmd);
          }
          for(It=0;It<AC->Nthr;It++) {
-            S->Thr[It].PulseWidthCmd = Delay(S->Thr[It].Delay,S->LoopGain*AC->Thr[It].PulseWidthCmd);
+            T = &S->Thr[It];
+            T->PulseWidthCmd = Delay(T->Delay,S->LoopGain*AC->Thr[It].PulseWidthCmd);
          }         
       }
       else {      

@@ -80,6 +80,30 @@ void ActuatedJoint(struct JointType *G, struct SCType *S)
 
 }
 /**********************************************************************/
+void ShakerJoint(struct JointType *G, struct SCType *S)
+{
+      struct ShakerType *Sh;
+      long i;
+      
+      for(i=0;i<G->RotDOF;i++) {
+         G->Trq[i] = -G->RotDampCoef[i]*G->AngRate[i]
+                     -G->RotSpringCoef[i]*G->Ang[i];
+         if (G->Shaker[i]) {
+            Sh = G->Shaker[i];
+            G->Trq[i] += ShakerFrcTrq(Sh,S);
+         }
+      }
+
+      for(i=0;i<G->TrnDOF;i++) {
+         G->Frc[i] = -G->TrnDampCoef[i]*G->PosRate[i]
+                     -G->TrnSpringCoef[i]*G->Pos[i];
+         if (G->Shaker[3+i]) {
+            Sh = G->Shaker[3+i];
+            G->Frc[i] += ShakerFrcTrq(Sh,S);
+         }
+      }
+}
+/**********************************************************************/
 void StepperMotorJoint(struct JointType *G, struct SCType *S)
 {
 }
@@ -129,6 +153,9 @@ void JointFrcTrq(struct JointType *G, struct SCType *S)
             WheelJitter(G,S);
             G->Frc[2] = 0.0;
             G->Trq[2] = G->W->Trq;
+            break;
+         case SHAKER_JOINT:
+            ShakerJoint(G,S);
             break;
          //case STEPPER_MOTOR_JOINT:
          //   StepperMotorJoint(G,S);

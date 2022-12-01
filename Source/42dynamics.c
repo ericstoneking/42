@@ -338,7 +338,7 @@ void BodyStatesToNodeStates(struct SCType *S)
       struct BodyType *B;
       struct NodeType *N;
       double vb[3],wxr[3];
-      double SumQ2;
+      double SumQ2 = 0.0;
       long Ib,In,If,i;
       
       for(Ib=0;Ib<S->Nb;Ib++) {
@@ -1311,7 +1311,7 @@ void FindFlexTerms(struct SCType *S)
             for(i=0;i<3;i++) {
                for(j=0;j<Nf;j++) {
                   for(k=0;k<Nf;k++) {
-                     B->HplusQeta[i][j] += B->Qf[i][j][k]*B->eta[k];
+                     B->HplusQeta[i][j] += B->Qf[IDX3(i,j,k,Nf,Nf)]*B->eta[k];
                   }
                }
             }
@@ -1431,7 +1431,7 @@ void FindFlexInertiaFrc(struct SCType *S)
                for(j=0;j<Nf;j++) {
                   B->Qxi[i][j] = 0.0;
                   for(k=0;k<Nf;k++) {
-                     B->Qxi[i][j] += B->Qf[i][j][k]*B->xi[k];
+                     B->Qxi[i][j] += B->Qf[IDX3(i,j,k,Nf,Nf)]*B->xi[k];
                   }
                }
             }
@@ -1439,9 +1439,9 @@ void FindFlexInertiaFrc(struct SCType *S)
             /* Rw */
             for(i=0;i<3;i++) {
                for(j=0;j<Nf;j++) {
-                  B->Rw[i][j] = 0.0;
-                  for(k=0;k<3;k++)
-                     B->Rw[i][j] += B->Rf[i][j][k]*B->wn[k];
+                  B->Rw[i][j] = B->Rf[IDX3(i,j,0,Nf,3)]*B->wn[0]+
+                                B->Rf[IDX3(i,j,1,Nf,3)]*B->wn[1]+
+                                B->Rf[IDX3(i,j,2,Nf,3)]*B->wn[2];
                }
             }
 
@@ -1449,9 +1449,10 @@ void FindFlexInertiaFrc(struct SCType *S)
             for(i=0;i<3;i++) {
                for(j=0;j<Nf;j++) {
                   for(k=0;k<Nf;k++) {
-                     B->Sw[i][j][k] = B->Sf[i][j][k][0]*B->wn[0]+
-                                      B->Sf[i][j][k][1]*B->wn[1]+
-                                      B->Sf[i][j][k][2]*B->wn[2];
+                     B->Sw[IDX3(i,j,k,Nf,Nf)] = 
+                        B->Sf[IDX4(i,j,k,0,Nf,Nf,3)]*B->wn[0]+
+                        B->Sf[IDX4(i,j,k,1,Nf,Nf,3)]*B->wn[1]+
+                        B->Sf[IDX4(i,j,k,2,Nf,Nf,3)]*B->wn[2];
                   }
                }
             }
@@ -1459,7 +1460,7 @@ void FindFlexInertiaFrc(struct SCType *S)
                for(j=0;j<Nf;j++) {
                   B->Swe[i][j] = 0.0;
                   for(k=0;k<Nf;k++)
-                     B->Swe[i][j] += B->Sw[i][j][k]*B->eta[k];
+                     B->Swe[i][j] += B->Sw[IDX3(i,j,k,Nf,Nf)]*B->eta[k];
                }
             }
 

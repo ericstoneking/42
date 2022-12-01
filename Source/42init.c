@@ -222,6 +222,7 @@ long DecodeString(char *s)
       
       else if (!strcmp(s,"PASSIVE")) return PASSIVE_JOINT;
       else if (!strcmp(s,"ACTUATED")) return ACTUATED_JOINT;
+      else if (!strcmp(s,"SHAKER")) return SHAKER_JOINT;
       else if (!strcmp(s,"STEPPER_MOTOR")) return STEPPER_MOTOR_JOINT;
       else if (!strcmp(s,"TVC_JOINT")) return TVC_JOINT;
       else if (!strcmp(s,"VIBRATION_ISOLATOR")) return VIBRATION_ISOLATOR_JOINT;
@@ -1163,19 +1164,10 @@ void InitFlexModes(struct SCType *S)
             B->Rw = CreateMatrix(3,B->Nf);
             B->Swe = CreateMatrix(3,B->Nf);
             /* Allocate higher-order tensors */
-            B->Qf = (double ***) calloc(3,sizeof(double **));
-            B->Rf = (double ***) calloc(3,sizeof(double **));
-            B->Sf = (double ****) calloc(3,sizeof(double ***));
-            B->Sw = (double ***) calloc(3,sizeof(double **));
-            for(i=0;i<3;i++) {
-               B->Qf[i] = CreateMatrix(B->Nf,B->Nf);
-               B->Rf[i] = CreateMatrix(B->Nf,3);
-               B->Sf[i] = (double ***) calloc(B->Nf,sizeof(double **));
-               for(j=0;j<B->Nf;j++) {
-                  B->Sf[i][j] = CreateMatrix(B->Nf,3);
-               }
-               B->Sw[i] = CreateMatrix(B->Nf,B->Nf);
-            }
+            B->Qf = (double *) calloc(3*B->Nf*B->Nf,sizeof(double));
+            B->Rf = (double *) calloc(3*B->Nf*3,sizeof(double));
+            B->Sf = (double *) calloc(3*B->Nf*B->Nf*3,sizeof(double));
+            B->Sw = (double *) calloc(3*B->Nf*B->Nf,sizeof(double));
             fclose(infile);
          }
       }
@@ -1421,15 +1413,15 @@ void InitFlexModes(struct SCType *S)
             }
             /* B->Rf, 3 x Nf x 3 */
             for(i=0;i<B->Nf;i++) {
-               B->Rf[0][i][0] = -L[1][1][i]-L[2][2][i];
-               B->Rf[1][i][1] = -L[2][2][i]-L[0][0][i];
-               B->Rf[2][i][2] = -L[0][0][i]-L[1][1][i];
-               B->Rf[0][i][1] = L[1][0][i];
-               B->Rf[0][i][2] = L[2][0][i];
-               B->Rf[1][i][0] = L[0][1][i];
-               B->Rf[1][i][2] = L[2][1][i];
-               B->Rf[2][i][0] = L[0][2][i];
-               B->Rf[2][i][1] = L[1][2][i];
+               B->Rf[IDX3(0,i,0,B->Nf,3)] = -L[1][1][i]-L[2][2][i];
+               B->Rf[IDX3(1,i,1,B->Nf,3)] = -L[2][2][i]-L[0][0][i];
+               B->Rf[IDX3(2,i,2,B->Nf,3)] = -L[0][0][i]-L[1][1][i];
+               B->Rf[IDX3(0,i,1,B->Nf,3)] = L[1][0][i];
+               B->Rf[IDX3(0,i,2,B->Nf,3)] = L[2][0][i];
+               B->Rf[IDX3(1,i,0,B->Nf,3)] = L[0][1][i];
+               B->Rf[IDX3(1,i,2,B->Nf,3)] = L[2][1][i];
+               B->Rf[IDX3(2,i,0,B->Nf,3)] = L[0][2][i];
+               B->Rf[IDX3(2,i,1,B->Nf,3)] = L[1][2][i];
             }
             for(i=0;i<3;i++) DestroyMatrix(L[i],3);
             free(L);
@@ -1456,19 +1448,19 @@ void InitFlexModes(struct SCType *S)
             for(i=0;i<B->Nf;i++) {
                for(j=0;j<B->Nf;j++) {
                   /* B->Qf, 3 x Nf x Nf */
-                  B->Qf[0][i][j] = N[2][1][i][j]-N[1][2][i][j];
-                  B->Qf[1][i][j] = N[0][2][i][j]-N[2][0][i][j];
-                  B->Qf[2][i][j] = N[1][0][i][j]-N[0][1][i][j];
+                  B->Qf[IDX3(0,i,j,B->Nf,B->Nf)] = N[2][1][i][j]-N[1][2][i][j];
+                  B->Qf[IDX3(1,i,j,B->Nf,B->Nf)] = N[0][2][i][j]-N[2][0][i][j];
+                  B->Qf[IDX3(2,i,j,B->Nf,B->Nf)] = N[1][0][i][j]-N[0][1][i][j];
                   /* B->Sf, 3 x Nf x Nf x 3 */
-                  B->Sf[0][i][j][0] = -N[1][1][i][j]-N[2][2][i][j];
-                  B->Sf[1][i][j][1] = -N[2][2][i][j]-N[0][0][i][j];
-                  B->Sf[2][i][j][2] = -N[0][0][i][j]-N[1][1][i][j];
-                  B->Sf[0][i][j][1] = N[1][0][i][j];
-                  B->Sf[0][i][j][2] = N[2][0][i][j];
-                  B->Sf[1][i][j][0] = N[0][1][i][j];
-                  B->Sf[1][i][j][2] = N[2][1][i][j];
-                  B->Sf[2][i][j][0] = N[0][2][i][j];
-                  B->Sf[2][i][j][1] = N[1][2][i][j];
+                  B->Sf[IDX4(0,i,j,0,B->Nf,B->Nf,3)] = -N[1][1][i][j]-N[2][2][i][j];
+                  B->Sf[IDX4(1,i,j,1,B->Nf,B->Nf,3)] = -N[2][2][i][j]-N[0][0][i][j];
+                  B->Sf[IDX4(2,i,j,2,B->Nf,B->Nf,3)] = -N[0][0][i][j]-N[1][1][i][j];
+                  B->Sf[IDX4(0,i,j,1,B->Nf,B->Nf,3)] = N[1][0][i][j];
+                  B->Sf[IDX4(0,i,j,2,B->Nf,B->Nf,3)] = N[2][0][i][j];
+                  B->Sf[IDX4(1,i,j,0,B->Nf,B->Nf,3)] = N[0][1][i][j];
+                  B->Sf[IDX4(1,i,j,2,B->Nf,B->Nf,3)] = N[2][1][i][j];
+                  B->Sf[IDX4(2,i,j,0,B->Nf,B->Nf,3)] = N[0][2][i][j];
+                  B->Sf[IDX4(2,i,j,1,B->Nf,B->Nf,3)] = N[1][2][i][j];
                }
             }
             for(i=0;i<3;i++) {
@@ -1546,9 +1538,10 @@ void InitNodes(struct BodyType *B)
 void InitShakers(void)
 {
       FILE *infile;
-      long Nsh,Ish,Isc,Ib,In,It;
+      long Nsh,Ish,Isc,Ig,Id,It;
+      long FrcTrq;
       struct SCType *S;
-      struct BodyType *B;
+      struct JointType *G;
       struct ShakerType *Sh;
       char response[80],junk[80],newline;
 
@@ -1558,47 +1551,58 @@ void InitShakers(void)
       for(Ish=0;Ish<Nsh;Ish++) {
          fscanf(infile,"%[^\n] %[\n]",junk,&newline);
          fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-         fscanf(infile,"%ld %ld %ld  %[^\n] %[\n]",&Isc,&Ib,&In,junk,&newline); 
-         if (Isc>=Nsc) {
+         fscanf(infile,"%ld %ld  %[^\n] %[\n]",&Isc,&Ig,junk,&newline); 
+         if (Isc>=Nsc || !SC[Isc].Exists) {
             printf("Shaker[%ld] assigned to non-existent SC[%ld].\n",Ish,Isc);
             exit(1);
          }
          S = &SC[Isc];
-         if (Ib>=S->Nb) {
-            printf("Shaker[%ld] assigned to non-existent SC[%ld].Body[%ld].\n",
-               Ish,Isc,Ib);
+         if (Ig>=S->Ng) {
+            printf("Shaker[%ld] assigned to non-existent SC[%ld].G[%ld].\n",
+               Ish,Isc,Ig);
             exit(1);
          }
-         B = &S->B[Ib];
-         if (B->Nshaker==0) {
-            B->Nshaker = 1;
-            B->Shaker = (struct ShakerType *) calloc(1,sizeof(struct ShakerType));
+         G = &S->G[Ig];
+         if (G->Type != SHAKER_JOINT) {
+            printf("SC[%ld].G[%ld] is not a SHAKER_JOINT.\n",Isc,Ig);
+            exit(1);
+         }
+         fscanf(infile,"%s %ld %[^\n] %[\n]",response,&Id,junk,&newline); 
+         FrcTrq = DecodeString(response);
+         if (FrcTrq == TORQUE && Id >= G->RotDOF) {
+            printf("Torque DOF %ld is greater than SC[%ld].G[%ld].RotDOF (%ld).\n",
+               Id,Isc,Ig,G->RotDOF);
+            exit(1);
+         }
+         if (FrcTrq == FORCE && Id >= G->TrnDOF) {
+            printf("Force DOF %ld is greater than SC[%ld].G[%ld].TrnDOF (%ld).\n",
+               Id,Isc,Ig,G->TrnDOF);
+            exit(1);
+         }
+         if (FrcTrq == FORCE) {
+            G->Shaker[3+Id] = (struct ShakerType *) calloc(1,sizeof(struct ShakerType));
+            Sh = G->Shaker[3+Id];
          }
          else {
-            B->Nshaker++;
-            B->Shaker = (struct ShakerType *) 
-               realloc(B->Shaker,B->Nshaker*sizeof(struct ShakerType));
+            G->Shaker[Id] = (struct ShakerType *) calloc(1,sizeof(struct ShakerType));
+            Sh = G->Shaker[Id];
          }
-         Sh = &B->Shaker[B->Nshaker-1];
-         Sh->Body = Ib;
-         Sh->Node = In;
-         fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline); 
-         Sh->FrcTrq = DecodeString(response);
-         fscanf(infile,"%lf %lf %lf  %[^\n] %[\n]",
-            &Sh->Axis[0],&Sh->Axis[1],&Sh->Axis[2],junk,&newline); 
-         UNITV(Sh->Axis);
          fscanf(infile,"%ld %[^\n] %[\n]",&Sh->Ntone,junk,&newline);
          if (Sh->Ntone==0) {
+            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
          }
          else {
             Sh->ToneAmp = (double *) calloc(Sh->Ntone,sizeof(double));
             Sh->ToneFreq = (double *) calloc(Sh->Ntone,sizeof(double));
+            Sh->TonePhase = (double *) calloc(Sh->Ntone,sizeof(double));
             for(It=0;It<Sh->Ntone;It++) {
                fscanf(infile,"%lf %[^\n] %[\n]",&Sh->ToneAmp[It],junk,&newline);
                fscanf(infile,"%lf %[^\n] %[\n]",&Sh->ToneFreq[It],junk,&newline);
+               fscanf(infile,"%lf %[^\n] %[\n]",&Sh->TonePhase[It],junk,&newline);
                Sh->ToneFreq[It] *= TwoPi;
+               Sh->TonePhase[It] *= D2R;
             }
          }
          fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline); 
@@ -1606,6 +1610,9 @@ void InitShakers(void)
          if (!Sh->RandomActive) {
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+            Sh->RandomProc = NULL;
+            Sh->Lowpass = NULL;
+            Sh->Highpass = NULL;
          }
          else {
             fscanf(infile,"%lf %lf %[^\n] %[\n]",
@@ -1616,6 +1623,7 @@ void InitShakers(void)
             Sh->LowBandLimit *= TwoPi;
             
             /* Lowpass and Highpass overlap to form Bandpass */
+            Sh->RandomProc = CreateRandomProcess(RngSeed+Ish);
             Sh->Lowpass = CreateSecondOrderLowpassFilter(Sh->HighBandLimit,1.0,
                DTSIM,1.0E6,1.0E-12);
             if (Sh->LowBandLimit > 0.0) 
@@ -1661,8 +1669,6 @@ void InitWhlBodiesAndJoints(struct SCType *S)
          B->cm[0] = W->Ks/W->m*cos(W->ImbPhase);
          B->cm[1] = W->Ks/W->m*sin(W->ImbPhase);
          B->cm[2] = 0.0;
-         B->Nshaker = 0; /* TODO: Refactor shakers */
-         B->Shaker = NULL;         
          InitNodes(B);
          B->Gin = Ig;
          
@@ -2039,8 +2045,6 @@ void InitSpacecraft(struct SCType *S)
             for(i=0;i<3;i++) B->c[i] = B->mass*B->cm[i];
          else
             for(i=0;i<3;i++) B->c[i] = 0.0;
-         B->Nshaker = 0;
-         B->Shaker = NULL;
          
          InitNodes(B);
       }
@@ -2198,6 +2202,7 @@ void InitSpacecraft(struct SCType *S)
                    
             if (G->Type == ACTUATED_JOINT) InitActuatedJoint(G,S);
             G->W = NULL;
+            for(i=0;i<6;i++) G->Shaker[i] = NULL;
          }
       }
 
@@ -2791,12 +2796,20 @@ void InitSpacecraft(struct SCType *S)
       S->GainAndDelayActive = FALSE;
       S->LoopGain = 1.0;
       S->LoopDelay = 0.0;
-      for(i=0;i<3;i++) S->IdealAct[i].FrcDelay = NULL;
-      for(i=0;i<3;i++) S->IdealAct[i].TrqDelay = NULL;
-      for(Iw=0;Iw<S->Nw;Iw++) S->Whl[Iw].Delay = NULL;
-      for(Im=0;Im<S->Nmtb;Im++) S->MTB[Im].Delay = NULL;
-      for(It=0;It<S->Nthr;It++) S->Thr[It].Delay = NULL;
-      
+      for(i=0;i<3;i++) {
+         S->IdealAct[i].FrcDelay = NULL;
+         S->IdealAct[i].TrqDelay = NULL;
+      }
+      for(Iw=0;Iw<S->Nw;Iw++) {
+         S->Whl[Iw].Delay = NULL;
+      }
+      for(Im=0;Im<S->Nmtb;Im++) {
+         S->MTB[Im].Delay = NULL;
+      }
+      for(It=0;It<S->Nthr;It++) {
+         S->Thr[It].Delay = NULL;
+      }
+
       S->FreqRespActive = FALSE;
       S->FreqResp.State = 0;
 
@@ -4401,6 +4414,8 @@ void InitSim(int argc, char **argv)
       fscanf(infile,"%lf %lf %[^\n] %[\n]",&STOPTIME,&DTSIM,junk,&newline);
 /* .. File output interval */
       fscanf(infile,"%lf %[^\n] %[\n]",&DTOUT,junk,&newline);
+/* .. RNG Seed */
+      fscanf(infile,"%ld %[^\n] %[\n]",&RngSeed,junk,&newline);
 /* .. Graphics Front End? */
       fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
       GLEnable = DecodeString(response);
@@ -4668,10 +4683,11 @@ void InitSim(int argc, char **argv)
             InitSpacecraft(&SC[Isc]);
          }
       }
+      InitShakers();
 
       LoadTdrs();
       
-      RNG = CreateRandomProcess(1);
+      RNG = CreateRandomProcess(RngSeed);
 
       LoadConstellations();
       

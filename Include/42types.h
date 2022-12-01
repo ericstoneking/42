@@ -58,14 +58,11 @@ struct NodeType {
 
 struct ShakerType {
    /*~ Parameters ~*/
-   long Body;
-   long Node;
-   long FrcTrq; /* SHAKER_FORCE or SHAKER_TORQUE */
-   double Axis[3];
    long Ntone;
    long RandomActive;
    double *ToneAmp; /* N or Nm */
    double *ToneFreq; /* For tonic, rad/sec */
+   double *TonePhase; /* For tonic, rad */
    struct RandomProcessType *RandomProc;
    struct FilterType *Lowpass;
    struct FilterType *Highpass;
@@ -74,8 +71,7 @@ struct ShakerType {
    double RandStd; /* Std Dev of band-limited random input, N or Nm */
 
    /*~ Internal Variables ~*/
-   double Frc[3]; /* N, in B frame */
-   double Trq[3]; /* Nm, in B frame */
+   double Output;
    struct FilterType *Rand; /* White noise in, band-limited noise out */
 };
 
@@ -133,9 +129,9 @@ struct BodyType {
    double **Cf;   /* Flex Damping Matrix, Nf x Nf */
    double **Pf;   /* Flex tensor, 3 x Nf */
    double **Hf;   /* Flex tensor, 3 x Nf */
-   double ***Qf;  /* Flex tensor, 3 x Nf x Nf */
-   double ***Rf;  /* Flex tensor, 3 x Nf x 3 */
-   double ****Sf; /* flex tensor, 3 x Nf x Nf x 3 */
+   double *Qf;  /* Flex tensor, 3 x Nf x Nf */
+   double *Rf;  /* Flex tensor, 3 x Nf x 3 */
+   double *Sf; /* Flex tensor, 3 x Nf x Nf x 3 */
    long f0;      /* Index of first element in uf */
    double Peta[3]; /* Pf*eta */
    double cplusPeta[3][3]; /* SkewMatrix of (c + Pf*eta) */
@@ -143,15 +139,12 @@ struct BodyType {
    double **HplusQeta; /* Hf + Qf*eta, 3 x Nf */
    double **Qxi;  /* Qf*xi, 3 x Nf */
    double **Rw;   /* Rf*w, 3 x Nf */
-   double ***Sw;  /* Sf*w, 3 x Nf * Nf */
+   double *Sw;  /* Sf*w, 3 x Nf * Nf */
    double **Swe;  /* Sf*w*eta, 3 x Nf */
    long NumNodes;  /* Number of flex "analysis" nodes on Body */
    struct NodeType *Node;
    long MfIsDiagonal;  /* Simpler EOM for One-body case if Mf is diagonal */
    
-   /* For jitter studies */
-   long Nshaker;
-   struct ShakerType *Shaker;
 };
 
 struct JointType {
@@ -259,6 +252,8 @@ struct JointType {
    /* For Constraints */
    long Rotc0;
    long Trnc0;
+   
+   struct ShakerType *Shaker[6];
 };
 
 struct IdealActType {
@@ -657,8 +652,6 @@ struct SCType {
    double PosF[3]; /* Position of B0 origin wrt F, expressed in F */
    double VelF[3]; /* Velocity of B0 origin wrt F, expressed in F */
    double CF[3][3];  /* Attitude of B0 wrt F */
-   /* Enable/Disable Passive Joint Forces or Torques (i.e. spring/damper) */
-   long PassiveJointFrcTrqEnabled;
    /* Constraint forces and torques are computed if requested */
    long ConstraintsRequested;
    /* Mass and flex properties referred to REFPT_CM or REFPT_JOINT */
@@ -680,8 +673,8 @@ struct SCType {
    
    /* For stability analysis */
    long GainAndDelayActive;
-   double LoopGain; /* [[None]] */
-   double LoopDelay; /* [[sec]] */
+   double LoopGain;
+   double LoopDelay;
    
    long FreqRespActive;
    struct FreqRespType FreqResp;
