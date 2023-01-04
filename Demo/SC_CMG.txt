@@ -20,6 +20,7 @@ FALSE                         ! Compute Constraint Forces and Torques
 REFPT_CM                      ! Mass Props referenced to REFPT_CM or REFPT_JOINT
 FALSE                         ! Flex Active
 FALSE                         ! Include 2nd Order Flex Terms
+NONE                        ! Shaker File Name
 2.0                           ! Drag Coefficient
 ************************************************************************
 ************************* Body Parameters ******************************
@@ -89,10 +90,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0  312           ! Go to Bo Static Angles [deg] & Seq
 0.5   0.0  1.5                ! Position wrt inner body origin, m
 0.00  0.00  0.00              ! Position wrt outer body origin, m
-0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
-0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
-0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
-0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
+NONE                          ! Parameter File Name
 ============================== Joint 1 ================================
 ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 0 2                           ! Inner, outer body indices
@@ -108,10 +106,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0  312           ! Go to Bo Static Angles [deg] & Seq
 0.0   0.5  1.5                ! Position wrt inner body origin, m
 0.00  0.00  0.00              ! Position wrt outer body origin, m
-0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
-0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
-0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
-0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
+NONE                          ! Parameter File Name
 ============================== Joint 2 ================================
 ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 0 3                           ! Inner, outer body indices
@@ -127,10 +122,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0  312           ! Go to Bo Static Angles [deg] & Seq
 -0.5  0.0  1.5                ! Position wrt inner body origin, m
 0.00  0.00  0.00              ! Position wrt outer body origin, m
-0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
-0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
-0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
-0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
+NONE                          ! Parameter File Name
 ============================== Joint 3 ================================
 ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 0 4                           ! Inner, outer body indices
@@ -146,10 +138,7 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0  312           ! Go to Bo Static Angles [deg] & Seq
 0.0  -0.5  1.5                ! Position wrt inner body origin, m
 0.00  0.00  0.00              ! Position wrt outer body origin, m
-0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
-0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
-0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
-0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
+NONE                          ! Parameter File Name
 *************************** Wheel Parameters ***************************
 FALSE                       ! Wheel Drag Active
 FALSE                       ! Wheel Jitter Active

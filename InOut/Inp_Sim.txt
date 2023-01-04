@@ -2,7 +2,7 @@
 ************************** Simulation Control **************************
 FAST                            !  Time Mode (FAST, REAL, EXTERNAL, or NOS3)
 5000.0   0.1                    !  Sim Duration, Step Size [sec]
-0.1                             !  File Output Interval [sec]
+5.0                             !  File Output Interval [sec]
 0                               !  RNG Seed
 TRUE                            !  Graphics Front End?
 Inp_Cmd.txt                     !  Command Script File Name

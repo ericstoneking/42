@@ -182,7 +182,7 @@ void ThreeBodyOrbitRK4(struct OrbitType *O);
 void MotionConstraints(struct SCType *S);
 void SCMassProps(struct SCType *S);
 void MapJointStatesToStateVector(struct SCType *S);
-void MapStateVectorToBodyStates(double *u, double *x, double *h,
+void MapStateVectorToBodyStates(double *u, double *x, double *h, double *a,
    double *uf, double *xf, struct SCType *S);
 void BodyStatesToNodeStates(struct SCType *S);
 void PartitionForces(struct SCType *S);
@@ -199,8 +199,8 @@ void RadBelt(float RadiusKm, float MagLatDeg, int NumEnergies,
 void FindAlbedo(struct SCType *S, struct CssType *CSS);
 void JointFrcTrq(struct JointType *G, struct SCType *S);
 void InitActuatedJoint(struct JointType *G, struct SCType *S);
-void WheelJitter(struct JointType *G, struct SCType *S);
-double ShakerFrcTrq(struct ShakerType *Sh, struct SCType *S);
+void WheelJitter(struct WhlType *W, struct SCType *S);
+void ShakerJitter(struct ShakerType *Sh, struct SCType *S);
 
 /* Debug Function Prototypes */
 void EchoPVel(struct SCType *S);

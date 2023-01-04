@@ -14,6 +14,10 @@
 
 #include "42.h"
 
+#ifdef _ENABLE_RBT_
+   #include "../../../GSFC/RBT/Source/Rbt.h"
+#endif
+
 void AcFsw(struct AcType *AC);
 void WriteToSocket(SOCKET Socket, char **Prefix, long Nprefix, long EchoEnabled);
 void ReadFromSocket(SOCKET Socket, long EchoEnabled);
@@ -1727,9 +1731,9 @@ void AdHocFSW(struct SCType *S)
       struct AcType *AC;
       struct AcAdHocCtrlType *C;
       double CLN[3][3],CRN[3][3],qrn[4],wln[3];
-      double CRL[3][3] = {{ 1.0, 0.0, 0.0}, 
-                          { 0.0, 1.0, 0.0},
-                          { 0.0, 0.0, 1.0}}; /* Point +Z to antivelocity */
+      double CRL[3][3] = {{ 0.0, 1.0, 0.0}, 
+                          { 0.0, 0.0,-1.0},
+                          {-1.0, 0.0, 0.0}}; 
       long i;
 
       AC = &S->AC;
@@ -1752,8 +1756,8 @@ void AdHocFSW(struct SCType *S)
       //for(i=0;i<4;i++) AC->qbr[i] = AC->qbn[i];
       RECTIFYQ(AC->qbr);
       for(i=0;i<3;i++) {
-         C->therr[i] = 2.0*AC->qbr[i];
-         C->werr[i] = AC->wbn[i]; // - wln[i];
+         C->therr[i] = Limit(2.0*AC->qbr[i],-0.01,0.01);
+         C->werr[i] = AC->wbn[i] - wln[i];
       }
 
 /* .. Closed-loop attitude control */
@@ -1764,239 +1768,6 @@ void AdHocFSW(struct SCType *S)
 
       for(i=0;i<3;i++) AC->IdealTrq[i] = C->Tcmd[i];
       //for(i=0;i<3;i++) AC->Whl[i].Tcmd = -C->Tcmd[i];
-}
-/**********************************************************************/
-/* Learning about finding frequency response in time domain           */
-void FreqRespFSW(struct SCType *S)
-{
-      struct AcType *AC;
-      struct AcAdHocCtrlType *C;
-      long i;
-
-      AC = &S->AC;
-      C = &AC->AdHocCtrl;
-
-      if (C->Init) {
-         C->Init = 0;
-         for(i=0;i<3;i++) {
-            FindPDGains(AC->MOI[i][i],0.1*TwoPi,0.7,&C->Kr[i],&C->Kp[i]);
-            AC->qrn[i] = 0.0;
-            AC->wrn[i] = 0.0;
-         }
-         AC->qrn[3] = 1.0;
-      }
-
-/* .. Form attitude error signals */
-      QxQT(AC->qbn,AC->qrn,AC->qbr);
-      RECTIFYQ(AC->qbr);
-      for(i=0;i<3;i++) {
-         C->therr[i] = 2.0*AC->qbr[i];
-         C->werr[i] = AC->wbn[i]-AC->wrn[i];
-      }
-
-/* .. Closed-loop attitude control */
-      for(i=0;i<3;i++) {
-         C->Tcmd[i] =
-         -C->Kr[i]*C->werr[i]-C->Kp[i]*C->therr[i];
-      }
-
-      for(i=0;i<3;i++) AC->IdealTrq[i] = C->Tcmd[i];
-}
-/**********************************************************************/
-#define FREQ_INIT 0
-#define FREQ_WARMUP 1
-#define FREQ_SWEEP 2
-#define FREQ_DONE 3
-void FreqResp(struct SCType *S)
-{
-      struct AcType *AC;
-      struct FreqRespType *F;
-      struct FreqNormEqType *NE;
-      double dec,t,c,s,Mag,dB[3],Phase[3];
-      double AtAi[4][4],Soln[4];
-      double A1,B1;
-      double TotTime,f,P;
-      long Ia,i,j;
-      char str[80];
-      
-      AC = &S->AC;
-      F = &S->FreqResp;
-      
-      if (F->State == FREQ_INIT) {
-         sprintf(str,"FreqResp%02ld.42",S->ID);
-         F->outfile = FileOpen(InOutPath,str,"w");
-         
-         F->MinDecade = -1.0;
-         F->MaxDecade =  2.0;
-         F->Nf = 201;
-         F->RefAmp = 1.0/3600.0*D2R;
-               
-         f = pow(10.0,F->MaxDecade);
-         P = 1.0/f;
-         if (DTSIM > 0.1*P) {
-            printf("Warning: DTSIM is too large for FreqResp max freq.  Suggest DTSIM < %lf\n",0.1*P);
-         }
-         for(i=0;i<3;i++) {
-            AC->qrn[i] = 0.0;
-         }
-         AC->qrn[3] = 1.0;
-         
-         F->Np = (double *) calloc(F->Nf,sizeof(double));
-         TotTime = 0.0;
-         for(i=0;i<F->Nf;i++) {
-            dec = F->MinDecade+(F->MaxDecade-F->MinDecade)*
-               ((double) i)/((double) (F->Nf-1));
-            f = pow(10.0,dec);            
-            P = 1.0/f;
-            F->SettleTime = ceil(30.0/P)*P;
-            F->ReadTime = F->SettleTime + F->SettleTime;
-            F->EndTime = F->ReadTime + 10.0*F->RefPeriod;
-            TotTime += F->EndTime;
-         }
-         printf("Expected FreqResp End Time: %lf sec\n",SimTime+TotTime);
-         
-         F->If = 0;
-         F->InitFreq = 1;
-         F->Time = 0.0;
-         F->State = FREQ_SWEEP;
-      }
-      else if (F->State == FREQ_SWEEP) {
-         /* Sweep over frequencies */
-         if (F->If < F->Nf) {
-            if (F->InitFreq) {
-               F->InitFreq = 0;
-               F->Time = 0.0;
-               dec = F->MinDecade+(F->MaxDecade-F->MinDecade)*
-                  ((double) F->If)/((double) (F->Nf-1));
-               F->RefFreq = TwoPi*pow(10.0,dec);            
-               F->RefPeriod = TwoPi/F->RefFreq;
-               F->SettleTime = ceil(30.0/F->RefPeriod)*F->RefPeriod;
-               F->ReadTime = F->SettleTime + F->SettleTime;
-               F->EndTime = F->ReadTime + 10.0*F->RefPeriod;
-            
-               for(Ia=0;Ia<3;Ia++) {
-                  for(i=0;i<4;i++) {
-                     for(j=0;j<4;j++) F->NormEq[Ia].AtA[i][j] = 0.0;
-                     F->NormEq[Ia].Atb[i] = 0.0;
-                  }
-               }
-               
-            }
-            else {            
-               /* Fit response to sinusoid */
-               Q2AngleVec(AC->qbn,F->OutAng);
-               if (F->Time > F->ReadTime) {
-                  t = F->Time;
-                  c = cos(F->RefFreq*F->Time);
-                  s = sin(F->RefFreq*F->Time);
-                  for(Ia=0;Ia<3;Ia++) {
-                     NE = &F->NormEq[Ia];
-                     NE->AtA[0][0] += 1.0;
-                     NE->AtA[0][1] += t;
-                     NE->AtA[0][2] += c;
-                     NE->AtA[0][3] += s;
-                     NE->AtA[1][0] += t;
-                     NE->AtA[1][1] += t*t;
-                     NE->AtA[1][2] += t*c;
-                     NE->AtA[1][3] += t*s;
-                     NE->AtA[2][0] += c;
-                     NE->AtA[2][1] += c*t;
-                     NE->AtA[2][2] += c*c;
-                     NE->AtA[2][3] += c*s;
-                     NE->AtA[3][0] += s;
-                     NE->AtA[3][1] += s*t;
-                     NE->AtA[3][2] += s*c;
-                     NE->AtA[3][3] += s*s;
-                     NE->Atb[0] +=   F->OutAng[Ia];
-                     NE->Atb[1] += t*F->OutAng[Ia];
-                     NE->Atb[2] += c*F->OutAng[Ia];
-                     NE->Atb[3] += s*F->OutAng[Ia];
-                  }
-               }
-            
-               if (F->Time < F->SettleTime) {
-                  for(i=0;i<3;i++) {
-                     F->RefAng[i] = 0.0;
-                     F->RefRate[i] = 0.0;
-                     AC->qrn[i] = 0.0;
-                     AC->wrn[i] = 0.0;
-                  }
-                  AC->qrn[3] = 1.0;
-               }
-               else if (F->Time < F->ReadTime) {
-                  /* Generate Reference Signal */
-                  for(i=0;i<3;i++) {
-                     F->RefAng[i] = F->RefAmp;
-                     F->RefRate[i] = 0.0;
-                     AC->qrn[i] = 0.5*F->RefAng[i];
-                     AC->wrn[i] = F->RefRate[i];
-                  }
-                  AC->qrn[3] = 1.0;
-                  UNITQ(AC->qrn);
-               }
-               else {
-                  /* Generate Reference Signal */
-                  for(i=0;i<3;i++) {
-                     F->RefAng[i] = F->RefAmp*cos(F->RefFreq*F->Time);
-                     F->RefRate[i] = -F->RefAmp*F->RefFreq*sin(F->RefFreq*F->Time);
-                     AC->qrn[i] = 0.5*F->RefAng[i];
-                     AC->wrn[i] = F->RefRate[i];
-                  }
-                  AC->qrn[3] = 1.0;
-                  UNITQ(AC->qrn);
-               
-                  /* Overwrite qbn, wbn */
-                  for(i=0;i<3;i++) {
-                     AC->qbn[i] = 0.0;
-                     AC->wbn[i] = 0.0;
-                  }
-                  AC->qbn[3] = 1.0;
-               }
-
-               /* Record magnitude, phase */
-               F->Time += DTSIM;
-               if (F->Time > F->EndTime) {
-                  F->Time = 0.0;
-                  F->If++;
-                  F->InitFreq = 1;
-               
-                  for(Ia=0;Ia<3;Ia++) {
-                     MINV4(NE->AtA,AtAi);
-                     for(i=0;i<4;i++) {
-                        Soln[i] = 0.0;
-                        for(j=0;j<4;j++) {
-                           Soln[i] += AtAi[i][j]*NE->Atb[j];
-                        }
-                     }
-                     A1 = Soln[2];
-                     B1 = Soln[3];
-                     Mag = sqrt(A1*A1+B1*B1)/F->RefAmp;
-                     dB[Ia] = 20.0*log10(Mag);
-                     Phase[Ia] = -atan2(B1,A1)*R2D;
-                  }
-                  fprintf(F->outfile,"%le %lf %lf %lf %lf %lf %lf\n",
-                     F->RefFreq/TwoPi,dB[0],dB[1],dB[2],Phase[0],Phase[1],Phase[2]);
-               }
-            }
-         }
-         else {
-            F->State = FREQ_DONE;
-         }
-      }
-      else { /* FREQ_DONE */
-         fclose(F->outfile);
-         for(i=0;i<3;i++) {
-            F->RefAng[i] = 0.0;
-            F->RefRate[i] = 0.0;
-            AC->qrn[i] = 0.0;
-            AC->wrn[i] = 0.0;
-         }
-         AC->qrn[3] = 1.0;
-         S->FreqRespActive = FALSE;
-         printf("Frequency Response Complete at Time = %lf\n",SimTime);
-      }
-
-      
 }
 /**********************************************************************/
 /*  This function is called at the simulation rate.  Sub-sampling of  */
@@ -2011,10 +1782,6 @@ void FlightSoftWare(struct SCType *S)
       struct IpcType *I;
       long Iipc;
       #endif
-
-      if (S->FreqRespActive) {
-         FreqResp(S);
-      }
             
       S->FswSampleCounter++;
       if (S->FswSampleCounter >= S->FswMaxCounter) {
@@ -2074,9 +1841,11 @@ void FlightSoftWare(struct SCType *S)
                   AcFsw(&S->AC);
                #endif
                break;
-            case FREQRESP_FSW:
-               FreqRespFSW(S);
-               break;
+            #ifdef _ENABLE_RBT_
+               case RBT_FSW:
+                  RbtFSW(S);
+                  break;
+            #endif
          }
          
       }

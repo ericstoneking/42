@@ -526,7 +526,7 @@ void AeroFrcTrq(struct SCType *S)
          G = &Geom[B->GeomTag];
          for(Ipoly=0;Ipoly<G->Npoly;Ipoly++) {
             P = &G->Poly[Ipoly];
-            if (strcmp(Matl[P->Matl].Label,"INTERIOR")) { /* Aero doesn't see interior polys */
+               if (strncmp(Matl[P->Matl].Label,"SHADED",6)) { /* Aero doesn't see shaded polys */
                WoN = VoV(VrelB,P->Norm);
                if (WoN > 0.0) {
                   PolyArea = WoN*P->UnshadedArea;
@@ -579,7 +579,7 @@ void SolPressFrcTrq(struct SCType *S)
             /* Find force and torque on each illuminated polygon */
             for(Ipoly=0;Ipoly<G->Npoly;Ipoly++) {
                P = &G->Poly[Ipoly];
-               if (strcmp(Matl[P->Matl].Label,"INTERIOR")) { /* SRP doesn't see interior polys */
+               if (strncmp(Matl[P->Matl].Label,"SHADED",6)) { /* SRP doesn't see shaded polys */
                   MxV(B->CN,S->svn,svb);
                   SoN = VoV(svb,P->Norm);
                   if (SoN > 0.0) {
