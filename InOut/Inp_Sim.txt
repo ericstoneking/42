@@ -2,7 +2,7 @@
 ************************** Simulation Control **************************
 FAST                            !  Time Mode (FAST, REAL, EXTERNAL, or NOS3)
 5000.0   0.1                    !  Sim Duration, Step Size [sec]
-0.1                             !  File Output Interval [sec]
+5.0                             !  File Output Interval [sec]
 0                               !  RNG Seed
 TRUE                            !  Graphics Front End?
 Inp_Cmd.txt                     !  Command Script File Name
@@ -28,7 +28,6 @@ FALSE   FALSE                   !  Aerodynamic Forces & Torques (Shadows)
 FALSE                           !  Gravity Gradient Torques
 FALSE   FALSE                   !  Solar Pressure Forces & Torques (Shadows)
 FALSE                           !  Gravity Perturbation Forces
-FALSE                           !  Passive Joint Forces & Torques
 FALSE                           !  Thruster Plume Forces & Torques
 FALSE                           !  Contact Forces and Torques
 FALSE                           !  CFD Slosh Forces and Torques

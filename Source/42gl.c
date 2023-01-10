@@ -1984,13 +1984,13 @@ void SetPovOrientation(void)
 {
       double Axis[6][3] = {{ 1.0,0.0,0.0},{0.0, 1.0,0.0},{0.0,0.0, 1.0},
                            {-1.0,0.0,0.0},{0.0,-1.0,0.0},{0.0,0.0,-1.0}};
-      double Qfixed[10][4] = {{0.0,-1.0,0.0,1.0}, /* Down */
+      double Qfixed[10][4] = {{0.0,-SqrtHalf,0.0,SqrtHalf}, /* Down */
                               {0.0,0.0,-0.9239,0.3827}, /* Rear Left */
                               {0.0,0.0,1.0,0.0}, /* Rear */
                               {0.0,0.0,0.9239,0.3827}, /* Rear Right */
-                              {0.0,0.0,-1.0,1.0}, /* Left */
-                              {0.0,1.0,0.0,1.0}, /* Up */
-                              {0.0,0.0,1.0,1.0}, /* Right */
+                              {0.0,0.0,-SqrtHalf,SqrtHalf}, /* Left */
+                              {0.0,SqrtHalf,0.0,SqrtHalf}, /* Up */
+                              {0.0,0.0,SqrtHalf,SqrtHalf}, /* Right */
                               {0.0,0.0,-0.3827,0.9239}, /* Front Left */
                               {0.0,0.0,0.0,1.0}, /* Front */
                               {0.0,0.0,0.3827,0.9239} /* Front Right */};

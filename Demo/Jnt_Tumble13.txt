@@ -1,0 +1,7 @@
+<<<<<<<<<<<<<<<<  Passive Joint Parameters for 42  >>>>>>>>>>>>>>>>>>>>>
+TumbleSat Joints 1,3          ! Description
+************************************************************************
+0.2   9.8E-3  0.0             ! Rot Passive Spring Coefficients (Nm/rad)
+5.0   1.1  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
+0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
+0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)

@@ -242,7 +242,7 @@
 #define CMG_FSW 7
 #define THR_FSW 8
 #define CFS_FSW 9
-#define FREQRESP_FSW 10
+#define RBT_FSW 10
 
 /* Command Types */
 #define CMD_DIRECTION 0
@@ -293,14 +293,12 @@
 /* Joint Types */
 #define PASSIVE_JOINT 0
 #define ACTUATED_JOINT 1
-#define WHEEL_JOINT 2
-#define SHAKER_JOINT 3
-#define STEPPER_MOTOR_JOINT 4
-#define VIBRATION_ISOLATOR_JOINT 5
-#define SLOSH_JOINT 6
-#define STEERING_MIRROR_JOINT 7
-#define TVC_JOINT 8
-#define AD_HOC_JOINT 9
+#define STEPPER_MOTOR_JOINT 2
+#define VIBRATION_ISOLATOR_JOINT 3
+#define SLOSH_JOINT 4
+#define STEERING_MIRROR_JOINT 5
+#define TVC_JOINT 6
+#define AD_HOC_JOINT 7
 
 /* For Shakers */
 #define FORCE 0
