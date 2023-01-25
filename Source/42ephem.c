@@ -613,9 +613,10 @@ void Ephemerides(void)
             }
          }
       }
-      else if (EphemOption == EPH_DE430) {
+      else if (EphemOption == EPH_DE430 || EphemOption == EPH_DE440) {
          /* Update DE430 block if needed */
-         if (TT.JulDay > World[SOL].eph.Cheb[1].JD2) LoadDE430(ModelPath,TT.JulDay);
+         if (TT.JulDay > World[SOL].eph.Cheb[1].JD2) 
+            LoadJplEphems(ModelPath,TT.JulDay);
          for(Iw=SOL;Iw<=LUNA;Iw++) {
             W = &World[Iw];
             Eph = &W->eph;

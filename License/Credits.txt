@@ -41,6 +41,4 @@ The radiation belt models (ae8min,ap8min,ae8max,ap8max) are courtesy of the Nati
 DE430 planetery ephemerides courtesy of JPL:
 ftp://ssd.jpl.nasa.gov/pub/eph/planets/ascii/de430/
 
-Substantial contributions to the accelerometer model were provided by Jeffrey Calixto, 2019 summer intern.
-
 Constellation visualizations derived from the Yale Bright Star Catalog, and based on pictures in https://www.iau.org/public/themes/constellations/.
