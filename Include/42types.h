@@ -86,6 +86,7 @@ struct BodyType {
    double c[3]; /* First mass moment about ref pt, expressed in B */
    double I[3][3]; /* Moment of Inertia, about ref pt, expressed in B frame */
    double EmbeddedMom[3]; /* Constant embedded momentum, for CMGs and rotating instruments */
+   double EmbeddedDipole[3]; /* Constant embedded magnetic moment [[A-m^2]] */
    double wn[3]; /* Angular Velocity of B wrt N expressed in B frame [[rad/sec]] [~=~] */
    double qn[4]; /* [~=~] */
    double vn[3]; /* velocity of B ref pt expressed in N frame */
@@ -336,12 +337,14 @@ struct MTBType {
 
 struct ThrType {
    /*~ Internal Variables ~*/
+   long Mode; /* THR_PULSED or THR_PROPORTIONAL */
    double Fmax;
    double F;
    long Body; /* Body that thruster is mounted on */
    long Node;
    double A[3]; /* Axis vector wrt Body 0 */
-   double PulseWidthCmd;
+   double PulseWidthCmd;  /* [[sec]], for THR_PULSED */
+   double ThrustLevelCmd; /* [{0.0:1.0}], for THR_PROPORTIONAL */
    double Frc[3]; /* Force exerted */
    double Trq[3]; /* Torque exerted */
    struct DelayType *Delay; /* For injecting delay into control loops */

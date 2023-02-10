@@ -1056,7 +1056,10 @@ void MapCmdsToActuators(struct SCType *S)
          }
          for(It=0;It<AC->Nthr;It++) {
             T = &S->Thr[It];
-            T->PulseWidthCmd = Delay(T->Delay,S->LoopGain*AC->Thr[It].PulseWidthCmd);
+            if (T->Mode == THR_PULSED) 
+               T->PulseWidthCmd = Delay(T->Delay,S->LoopGain*AC->Thr[It].PulseWidthCmd);
+            else
+               T->ThrustLevelCmd = Delay(T->Delay,S->LoopGain*AC->Thr[It].ThrustLevelCmd);
          }         
       }
       else if (S->FswSampleCounter == 0) {      

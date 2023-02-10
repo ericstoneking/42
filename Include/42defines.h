@@ -305,4 +305,8 @@
 #define FORCE 0
 #define TORQUE 1
 
+/* Thruster Command Modes */
+#define THR_PULSED 0
+#define THR_PROPORTIONAL 1
+
 #endif /* __42DEFINES_H__ */

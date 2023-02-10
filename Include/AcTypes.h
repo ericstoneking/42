@@ -221,7 +221,8 @@ struct AcThrType {
 
    /*~ Internal Variables ~*/
    double Fcmd;
-   double PulseWidthCmd; /* [[sec]] [~<~] */
+   double PulseWidthCmd; /* for PULSED [[sec]] [~<~] */
+   double ThrustLevelCmd; /* for PROPORTIONAL [[None]] [~<~] */
 };
 
 struct AcPrototypeCtrlType {

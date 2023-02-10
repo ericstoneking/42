@@ -92,13 +92,18 @@ void ThrModel(struct ThrType *Thr,struct SCType *S,double DT)
       struct NodeType *N;
       long i;
 
-      if (Thr->PulseWidthCmd > DT) {
-         Thr->F = Thr->Fmax;
-         Thr->PulseWidthCmd -= DT;
+      if (Thr->Mode == THR_PULSED) {
+         if (Thr->PulseWidthCmd > DT) {
+            Thr->F = Thr->Fmax;
+            Thr->PulseWidthCmd -= DT;
+         }
+         else {
+            Thr->F = (Thr->PulseWidthCmd/DT)*Thr->Fmax;
+            Thr->PulseWidthCmd = 0.0;
+         }
       }
-      else {
-         Thr->F = (Thr->PulseWidthCmd/DT)*Thr->Fmax;
-         Thr->PulseWidthCmd = 0.0;
+      else { /* THR_PROPORTIONAL */
+         Thr->F = Thr->ThrustLevelCmd*Thr->Fmax;
       }
 
       if (Thr->F < 0.0) Thr->F = 0.0;

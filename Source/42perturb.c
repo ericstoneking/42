@@ -605,6 +605,20 @@ void SolPressFrcTrq(struct SCType *S)
 
 }
 /**********************************************************************/
+void ResidualDipoleTrq(struct SCType *S)
+{
+      struct BodyType *B;
+      double bvb[3],Trq[3];
+      long Ib,i;
+
+      for(Ib=0;Ib<S->Nb;Ib++) {
+         B = &S->B[Ib];
+         MxV(B->CN,S->bvn,bvb);
+         VxV(B->EmbeddedDipole,bvb,Trq);
+         for(i=0;i<3;i++) B->Trq[i] += Trq[i];
+      }
+}
+/**********************************************************************/
 /* A point is fixed in Body B of Spacecraft S.                        */
 /* Given its components in B, PosB, find its position and velocity    */
 /* wrt R, expressed in N.                                             */
@@ -1029,6 +1043,9 @@ void Perturbations(struct SCType *S)
 
 /* .. Solar Radiation Pressure Forces and Torques */
       if (SolPressActive) SolPressFrcTrq(S);
+      
+/* .. Embedded Magnetic Dipole Torque */
+      if (ResidualDipoleActive) ResidualDipoleTrq(S);
 
 /* .. Contact Forces and Torques */
       if (ContactActive) ContactFrcTrq(S);

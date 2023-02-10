@@ -233,6 +233,9 @@ long DecodeString(char *s)
       else if (!strcmp(s,"FORCE")) return FORCE;
       else if (!strcmp(s,"TORQUE")) return TORQUE;
 
+      else if (!strcmp(s,"PULSED")) return THR_PULSED;
+      else if (!strcmp(s,"PROPORTIONAL")) return THR_PROPORTIONAL;
+
       else {
          printf("Bogus input %s in DecodeString (42init.c:%d)\n",s,__LINE__);
          exit(1);
@@ -1991,6 +1994,8 @@ void InitSpacecraft(struct SCType *S)
                   &B->cm[1],&B->cm[2],junk,&newline);
          fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",&B->EmbeddedMom[0],
                   &B->EmbeddedMom[1],&B->EmbeddedMom[2],junk,&newline);
+         fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",&B->EmbeddedDipole[0],
+                  &B->EmbeddedDipole[1],&B->EmbeddedDipole[2],junk,&newline);
          fscanf(infile,"%s %[^\n] %[\n]",B->GeomFileName,junk,&newline);
          fscanf(infile,"%s %[^\n] %[\n]",B->NodeFileName,junk,&newline);
          fscanf(infile,"%s %[^\n] %[\n]",B->FlexFileName,junk,&newline);
@@ -2215,11 +2220,13 @@ void InitSpacecraft(struct SCType *S)
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nthr,junk,&newline);
       S->Thr = (struct ThrType *) calloc(S->Nthr,sizeof(struct ThrType));
       if (S->Nthr == 0) {
-         for(i=0;i<5;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(i=0;i<6;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
       else {
          for(It=0;It<S->Nthr;It++) {
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+            fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+            S->Thr[It].Mode = DecodeString(response);
             fscanf(infile,"%lf %[^\n] %[\n]",&S->Thr[It].Fmax,
                    junk,&newline);
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
@@ -4463,6 +4470,8 @@ void InitSim(int argc, char **argv)
       fscanf(infile,"%s %s %[^\n] %[\n]",response1,response2,junk,&newline);
       SolPressActive=DecodeString(response1);
       SolPressShadowsActive=DecodeString(response2);
+      fscanf(infile,"%s  %[^\n] %[\n]",response,junk,&newline);
+      ResidualDipoleActive=DecodeString(response);
       fscanf(infile,"%s  %[^\n] %[\n]",response,junk,&newline);
       GravPertActive=DecodeString(response);
       fscanf(infile,"%s  %[^\n] %[\n]",response,junk,&newline);

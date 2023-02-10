@@ -80,6 +80,7 @@ EXTERN long SolPressActive;
 EXTERN long SolPressShadowsActive;
 EXTERN long GravPertActive;
 EXTERN long ThrusterPlumesActive;
+EXTERN long ResidualDipoleActive;
 EXTERN long ContactActive;
 EXTERN long SloshActive;
 EXTERN long AlbedoActive; /* Affects CSS measurements */
