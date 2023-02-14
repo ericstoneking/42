@@ -46,6 +46,7 @@ long FswCmdInterpreter(char CmdLine[512],double *CmdTime)
       long RotSeq;
       char VecString[20],TargetString[20];
       double ThrPulseCmd;
+      double ThrLevelCmd;
 
       if (sscanf(CmdLine,"%lf SC[%ld] qrn = [%lf %lf %lf %lf]",
          CmdTime,&Isc,&q[0],&q[1],&q[2],&q[3]) == 6) {
@@ -363,10 +364,16 @@ long FswCmdInterpreter(char CmdLine[512],double *CmdTime)
          }
       }
 
-      else if (sscanf(CmdLine,"%lf SC[%ld].Thr[%ld].PulseWidthCmd = %lf",
+      else if (sscanf(CmdLine,"%lf SC[%ld].AC.Thr[%ld].PulseWidthCmd = %lf",
          CmdTime,&Isc,&Ithr,&ThrPulseCmd) == 4) {
          NewCmdProcessed = TRUE;
          SC[Isc].AC.Thr[Ithr].PulseWidthCmd = ThrPulseCmd;
+      }
+
+      else if (sscanf(CmdLine,"%lf SC[%ld].AC.Thr[%ld].ThrustLevelCmd = %lf",
+         CmdTime,&Isc,&Ithr,&ThrLevelCmd) == 4) {
+         NewCmdProcessed = TRUE;
+         SC[Isc].AC.Thr[Ithr].ThrustLevelCmd = ThrLevelCmd;
       }
 
       else if (sscanf(CmdLine,"Event Eclipse Entry SC[%ld] qrl = [%lf %lf %lf %lf]",
@@ -1075,7 +1082,10 @@ void MapCmdsToActuators(struct SCType *S)
             S->MTB[Im].Mcmd = AC->MTB[Im].Mcmd;
          }
          for(It=0;It<AC->Nthr;It++) {
-            S->Thr[It].PulseWidthCmd = AC->Thr[It].PulseWidthCmd;
+            if (S->Thr[It].Mode == THR_PULSED) 
+               S->Thr[It].PulseWidthCmd = AC->Thr[It].PulseWidthCmd;
+            else
+               S->Thr[It].ThrustLevelCmd = AC->Thr[It].ThrustLevelCmd;            
          }
       } 
               

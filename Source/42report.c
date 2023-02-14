@@ -179,6 +179,7 @@ void Report(void)
       static FILE *RPYfile;
       static FILE *Hwhlfile;
       static FILE *MTBfile;
+      static FILE *Thrfile;
       static FILE *AlbedoFile;
       static FILE *IllumFile;
       //static FILE *ProjAreaFile;
@@ -240,6 +241,10 @@ void Report(void)
 
          if (SC[0].Nmtb > 0) {
             MTBfile = FileOpen(InOutPath,"MTB.42","w");
+         }
+         
+         if (SC[0].Nthr > 0) {
+            Thrfile = FileOpen(InOutPath,"Thr.42","w");
          }
          
          if (SC[0].Nacc > 0) {
@@ -334,6 +339,10 @@ void Report(void)
             if (SC[0].Nmtb > 0) {
                for(i=0;i<SC[0].Nmtb;i++) fprintf(MTBfile,"%lf ",SC[0].MTB[i].M);
                fprintf(MTBfile,"\n");
+            }
+            if (SC[0].Nthr > 0) {
+               for(i=0;i<SC[0].Nthr;i++) fprintf(Thrfile,"%lf ",SC[0].Thr[i].F);
+               fprintf(Thrfile,"\n");
             }
             if (SC[0].Nacc > 0) {
                for(i=0;i<SC[0].Nacc;i++) 
