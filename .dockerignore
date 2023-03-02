@@ -1,0 +1,14 @@
+# example files
+Demo/
+InOut/
+# Standalone/
+Tx/
+Rx/
+
+# extranneous files
+Screenshots/
+Docs/
+
+# graphics files
+# Model/
+World/
