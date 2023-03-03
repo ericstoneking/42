@@ -6,6 +6,7 @@ RUN apt -y install make gcc g++ freeglut3-dev libglfw3-dev
 COPY . /42/
 RUN cd /42 && make
 
-COPY /Standalone/ /42/TestCase/
+RUN mkdir -p /42/testcase
 
-CMD cd 42 && ./42 TestCase
+ENTRYPOINT ["cd 42 && ./42"]
+CMD ["testcase"]
