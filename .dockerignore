@@ -12,3 +12,7 @@ Docs/
 # graphics files
 # Model/
 World/
+
+# dockerfile
+Dockerfile
+.dockerignore
