@@ -1,0 +1,7 @@
+<<<<<<<<<<<<<<<<  Passive Joint Parameters for 42  >>>>>>>>>>>>>>>>>>>>>
+Passive Joint                 ! Description
+************************************************************************
+0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
+0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
+0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
+0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)

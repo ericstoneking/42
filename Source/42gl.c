@@ -73,7 +73,7 @@ void DrawWorldAsBackdrop(struct WorldType *W,double PosN[3],double svn[3])
       glBindTexture(GL_TEXTURE_CUBE_MAP,W->CloudGlossCubeTag);
       glActiveTexture(GL_TEXTURE3);
       glBindTexture(GL_TEXTURE_1D,W->RingTexTag);
-
+      
       glUseProgram(WorldShaderProgram);
 
       UniLoc = glGetUniformLocation(WorldShaderProgram,"HasAtmo");
@@ -134,6 +134,7 @@ void DrawWorldAsBackdrop(struct WorldType *W,double PosN[3],double svn[3])
       glUseProgram(0);
 
       glPopMatrix();
+      
 }
 /**********************************************************************/
 void DrawSunAsBackdrop(void)
@@ -1269,6 +1270,7 @@ void DrawFarScene(void)
          }
       }
       glEnable(GL_LIGHTING);
+      
 }
 /**********************************************************************/
 void DrawProxOps(void)
@@ -1984,13 +1986,13 @@ void SetPovOrientation(void)
 {
       double Axis[6][3] = {{ 1.0,0.0,0.0},{0.0, 1.0,0.0},{0.0,0.0, 1.0},
                            {-1.0,0.0,0.0},{0.0,-1.0,0.0},{0.0,0.0,-1.0}};
-      double Qfixed[10][4] = {{0.0,-1.0,0.0,1.0}, /* Down */
+      double Qfixed[10][4] = {{0.0,-SqrtHalf,0.0,SqrtHalf}, /* Down */
                               {0.0,0.0,-0.9239,0.3827}, /* Rear Left */
                               {0.0,0.0,1.0,0.0}, /* Rear */
                               {0.0,0.0,0.9239,0.3827}, /* Rear Right */
-                              {0.0,0.0,-1.0,1.0}, /* Left */
-                              {0.0,1.0,0.0,1.0}, /* Up */
-                              {0.0,0.0,1.0,1.0}, /* Right */
+                              {0.0,0.0,-SqrtHalf,SqrtHalf}, /* Left */
+                              {0.0,SqrtHalf,0.0,SqrtHalf}, /* Up */
+                              {0.0,0.0,SqrtHalf,SqrtHalf}, /* Right */
                               {0.0,0.0,-0.3827,0.9239}, /* Front Left */
                               {0.0,0.0,0.0,1.0}, /* Front */
                               {0.0,0.0,0.3827,0.9239} /* Front Right */};
@@ -2670,7 +2672,7 @@ void DrawMap(void)
       float OldLng,OldLat;
       long i,k,Im,Isc;
       double rmh[3],rmn[3];
-
+      
       glClear(GL_COLOR_BUFFER_BIT);
       glMaterialfv(GL_FRONT,GL_DIFFUSE,Black);
 
@@ -4465,6 +4467,7 @@ void InitSphereWidgets(void)
       }
 
       SphereShowWidget.Spot[0].Selected = 1;
+      SphereShowWidget.Spot[1].Selected = 1;
 
       for (i=0; i<SphereShowWidget.Nspot; i++) {
 
@@ -4527,7 +4530,10 @@ void InitSphereWidgets(void)
          FOVsWidget.Spot[i].Visible = 1;
          FOVsWidget.Spot[i].Selected = 0;
       }
-
+      
+      FOVsWidget.Spot[0].Selected = 1;
+      FOVsWidget.Spot[1].Selected = 1;
+      
       for (i=0; i<FOVsWidget.Nspot; i++) {
 
          x = x0+3;
@@ -4776,6 +4782,7 @@ void LoadCamTextures(void)
       NullColCubeTag = PpmToCubeTag("./World/","NullCol",3);
       NullBumpCubeTag = PpmToCubeTag("./World/","NullBump",3);
       NullCloudGlossCubeTag = PpmToCubeTag("./World/","NullCloudGloss",3);
+      NullRingTexTag = PpmToRingTexTag("./World/","NullRing.ppm");
       for(Ip=MERCURY;Ip<=PLUTO; Ip++) {
          if (World[Ip].Exists) {
             Iw = Ip;
@@ -4833,18 +4840,21 @@ void LoadCamTextures(void)
                MB->ColCubeTag = NullColCubeTag;
                MB->BumpCubeTag = NullBumpCubeTag;
                MB->CloudGlossCubeTag = NullCloudGlossCubeTag;
+               MB->RingTexTag = NullRingTexTag;
             }
             else if (!strcmp(MB->MapFileName,"Rockball")) {
                MB->TexTag = RockballTexTag;
                MB->ColCubeTag = RockballColCubeTag;
                MB->BumpCubeTag = RockballBumpCubeTag;
                MB->CloudGlossCubeTag = NullCloudGlossCubeTag;
+               MB->RingTexTag = NullRingTexTag;
             }
             else if (!strcmp(MB->MapFileName,"Iceball")) {
                MB->TexTag = IceballTexTag;
                MB->ColCubeTag = IceballColCubeTag;
                MB->BumpCubeTag = NullBumpCubeTag;
                MB->CloudGlossCubeTag = NullCloudGlossCubeTag;
+               MB->RingTexTag = NullRingTexTag;
             }
             else {
                sprintf(s,"%sCol",MB->Name);
@@ -4853,6 +4863,7 @@ void LoadCamTextures(void)
                sprintf(s,"%sBump",MB->Name);
                MB->BumpCubeTag = PpmToCubeTag("./World/",s,3);
                MB->CloudGlossCubeTag = NullCloudGlossCubeTag;
+               MB->RingTexTag = NullRingTexTag;
             }
 
             if (!strcmp(MB->ColTexFileName,"NONE")) {

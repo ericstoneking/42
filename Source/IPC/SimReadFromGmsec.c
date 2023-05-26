@@ -1236,7 +1236,7 @@ void ReadFromGmsec(GMSEC_ConnectionMgr ConnMgr,GMSEC_Status status, long EchoEna
                /* Update Dyn */
                MapJointStatesToStateVector(S);
                D = &S->Dyn;
-               MapStateVectorToBodyStates(D->u,D->x,D->h,D->uf,D->xf,S);
+               MapStateVectorToBodyStates(D->u,D->x,D->h,D->a,D->uf,D->xf,S);
                MotionConstraints(S);
             }
          }

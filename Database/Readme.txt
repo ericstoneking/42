@@ -56,7 +56,7 @@ Only one variable definition per line, please.
 
 By custom, I use only a limited subset of C variable types.  If you add a variable that is not in the following list, you'll need to add it to the list of recognized types in HeadersToJson.py: long, double, char, float, unsigned char, unsigned int, FILE, struct.
 
-The section partitions (Parameters, Inputs, Outputs, Diagnostics, and Internal Variables) correspond to traditional command/telemetry packet roles.  I don't use them (much) myself, but CCDD and its adherents do.  The Prototypes tag is to signal to the python script that all structure definitions have been read.
+The section partitions (Parameters, Inputs, Outputs, Diagnostics, and Internal Variables) correspond to traditional command/telemetry packet roles.  I don't use them (much) myself, but other folks do.  The Prototypes tag is to signal to the python script that all structure definitions have been read.
 
 Any trailing comment gets copied into the dictionary as a description.  Some key 
 character combinations have special meaning:

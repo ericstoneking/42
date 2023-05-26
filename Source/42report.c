@@ -114,23 +114,6 @@ void GyroReport(void)
       
 }
 /*********************************************************************/
-void FreqRespDiag(void)
-{
-      static FILE *outfile;
-      struct FreqRespType *F;
-      static long First = 1;
-      
-      if (First) {
-         First = 0;
-         outfile = FileOpen(InOutPath,"FreqRespDiag.42","wt");
-      }
-      
-      F = &SC[0].FreqResp;
-      fprintf(outfile,"%le %le %le %le %le %le\n",
-         F->RefAng[0],F->RefAng[1],F->RefAng[2],
-         F->OutAng[0],F->OutAng[1],F->OutAng[2]);
-}
-/*********************************************************************/
 void OrbPropReport(void)
 {
       static FILE *FixedFile;
@@ -185,7 +168,7 @@ void GmatReport(void)
 /*********************************************************************/
 void Report(void)
 {
-      static FILE *timefile,*DynTimeFile;
+      static FILE *timefile,*DynTimeFile,*UtcDateFile;
       static FILE **xfile, **ufile, **xffile, **uffile;
       static FILE **ConstraintFile;
       static FILE *PosNfile,*VelNfile,*qbnfile,*wbnfile;
@@ -196,6 +179,7 @@ void Report(void)
       static FILE *RPYfile;
       static FILE *Hwhlfile;
       static FILE *MTBfile;
+      static FILE *Thrfile;
       static FILE *AlbedoFile;
       static FILE *IllumFile;
       //static FILE *ProjAreaFile;
@@ -203,10 +187,11 @@ void Report(void)
       static char First = TRUE;
       long Isc,i;
       struct DynType *D;
-      double CBL[3][3],Roll,Pitch,Yaw;
+      double CBR[3][3],CRN[3][3],Roll,Pitch,Yaw;
       struct WorldType *W;
       double WorldAngVel[3],wxR[3],VelN[3];
       double PosW[3],VelW[3],PosR[3],VelR[3];
+      double CRL[3][3] = {{1.0,0.0,0.0},{0.0,1.0,0.0},{0.0,0.0,1.0}};
       char s[40];
       //double ZAxis[3] = {0.0,0.0,1.0};
 
@@ -214,6 +199,7 @@ void Report(void)
          First = FALSE;
          timefile = FileOpen(InOutPath,"time.42","w");
          DynTimeFile = FileOpen(InOutPath,"DynTime.42","w");
+         UtcDateFile = FileOpen(InOutPath,"UTC.42","w");
 
          ufile = (FILE **) calloc(Nsc,sizeof(FILE *));
          xfile = (FILE **) calloc(Nsc,sizeof(FILE *));
@@ -253,8 +239,18 @@ void Report(void)
          //ProjAreaFile = FileOpen(InOutPath,"ProjArea.42","w");
          RPYfile = FileOpen(InOutPath,"RPY.42","w");
          Hwhlfile = FileOpen(InOutPath,"Hwhl.42","w");
-         MTBfile = FileOpen(InOutPath,"MTB.42","w");
-         AccFile = FileOpen(InOutPath,"Acc.42","w");
+
+         if (SC[0].Nmtb > 0) {
+            MTBfile = FileOpen(InOutPath,"MTB.42","w");
+         }
+         
+         if (SC[0].Nthr > 0) {
+            Thrfile = FileOpen(InOutPath,"Thr.42","w");
+         }
+         
+         if (SC[0].Nacc > 0) {
+            AccFile = FileOpen(InOutPath,"Acc.42","w");
+         }
          
          if (SC[0].Ncss > 0) {
             AlbedoFile = FileOpen(InOutPath,"Albedo.42","w");
@@ -265,6 +261,8 @@ void Report(void)
       if (OutFlag) {
          fprintf(timefile,"%lf\n",SimTime);
          fprintf(DynTimeFile,"%lf\n",DynTime);
+         fprintf(UtcDateFile," %ld:%02ld:%02ld:%02ld:%02ld:%09.6lf\n",
+            UTC.Year,UTC.Month,UTC.Day,UTC.Hour,UTC.Minute,UTC.Second);
          for(Isc=0;Isc<Nsc;Isc++) {
             if (SC[Isc].Exists) {
                D = &SC[Isc].Dyn;
@@ -331,16 +329,23 @@ void Report(void)
             //fprintf(ProjAreaFile,"%18.12le %18.12le\n",
             //   FindTotalProjectedArea(&SC[0],ZAxis),
             //   FindTotalUnshadedProjectedArea(&SC[0],ZAxis));
-            MxMT(SC[0].B[0].CN,SC[0].CLN,CBL);
-            C2A(123,CBL,&Roll,&Pitch,&Yaw);
-            fprintf(RPYfile,"%lf %lf %lf\n",Roll*R2D,Pitch*R2D,Yaw*R2D);
+            MxM(CRL,SC[0].CLN,CRN);
+            MxMT(SC[0].B[0].CN,CRN,CBR);
+            C2A(123,CBR,&Roll,&Pitch,&Yaw);
+            fprintf(RPYfile,"%le %le %le\n",Roll*R2D,Pitch*R2D,Yaw*R2D);
             if (SC[0].Nw > 0) {
-               for(i=0;i<SC[0].Nw;i++) fprintf(Hwhlfile,"%lf ",SC[0].Whl[i].H);
+               for(i=0;i<SC[0].Nw;i++) {
+                  fprintf(Hwhlfile,"%lf ",SC[0].Whl[i].H);
+               }
                fprintf(Hwhlfile,"\n");
             }
             if (SC[0].Nmtb > 0) {
                for(i=0;i<SC[0].Nmtb;i++) fprintf(MTBfile,"%lf ",SC[0].MTB[i].M);
                fprintf(MTBfile,"\n");
+            }
+            if (SC[0].Nthr > 0) {
+               for(i=0;i<SC[0].Nthr;i++) fprintf(Thrfile,"%lf ",SC[0].Thr[i].F);
+               fprintf(Thrfile,"\n");
             }
             if (SC[0].Nacc > 0) {
                for(i=0;i<SC[0].Nacc;i++) 
@@ -362,12 +367,11 @@ void Report(void)
             //MagReport();
             //GyroReport();
             
-            FreqRespDiag();
-
+            
          }
 
       }
-
+      
       /* An example how to call specialized reporting based on sim case */
       /* if (!strcmp(InOutPath,"./Potato/")) PotatoReport(); */
       

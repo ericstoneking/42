@@ -1,0 +1,8 @@
+<<<<<<<<<<<<<<<<  Body Node Inputs for 42  >>>>>>>>>>>>>>>>>>>>>
+Jitter Nodes                    ! Description
+4                               ! Number of Nodes
+******************* Node Location, Comment *********************
+1.0  0.0  0.0         "Wheel 0"
+0.0  1.0  0.0         "Wheel 1"
+0.0  0.0  1.0         "Wheel 2"
+0.5  0.0  0.0         "Instrument"
