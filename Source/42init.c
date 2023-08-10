@@ -4382,6 +4382,9 @@ void InitSim(int argc, char **argv)
       TimeMode = DecodeString(response);
 /* .. Duration, Step size */
       fscanf(infile,"%lf %lf %[^\n] %[\n]",&STOPTIME,&DTSIM,junk,&newline);
+/* .. Enable File Output */
+      fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+      ReportEnable = DecodeString(response);
 /* .. File output interval */
       fscanf(infile,"%lf %[^\n] %[\n]",&DTOUT,junk,&newline);
 /* .. RNG Seed */
