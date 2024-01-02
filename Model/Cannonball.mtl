@@ -1,0 +1,12 @@
+# Exported from Wings 3D 2.1.7
+newmtl CANNONBALL
+Ns 0.0
+d 1.0
+illum 2
+Kd 1.0 1.0 1.0
+Ka 1.0 1.0 1.0
+Ks 1.0 1.0 1.0
+Ke 0.0 0.0 0.0
+SpecFrac 1.0
+DiffFrac 0.0
+

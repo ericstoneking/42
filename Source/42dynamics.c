@@ -152,10 +152,11 @@ void MapJointStatesToStateVector(struct SCType *S)
 
       for(i=0;i<S->Nw;i++) {
          D->h[i] = S->Whl[i].H;
+         D->a[i] = S->Whl[i].Ang;
       }
 }
 /**********************************************************************/
-void MapStateVectorToBodyStates(double *u, double *x, double *h,
+void MapStateVectorToBodyStates(double *u, double *x, double *h, double *a,
    double *uf, double *xf, struct SCType *S)
 {
       double wi[3],ri[3],ro[3],wxr[3],wxri[3],wxro[3];
@@ -330,6 +331,7 @@ void MapStateVectorToBodyStates(double *u, double *x, double *h,
          W = &S->Whl[Iw];
          W->H = h[Iw];
          W->w = W->H/W->J;
+         W->Ang = a[Iw];
       }
 }
 /**********************************************************************/
@@ -354,6 +356,10 @@ void BodyStatesToNodeStates(struct SCType *S)
             N->qb[3] = 1.0;
             if (S->FlexActive) {
                for(i=0;i<3;i++) {
+                  N->FlexPos[i] = 0.0;
+                  N->FlexVel[i] = 0.0;
+                  N->FlexAng[i] = 0.0;
+                  N->FlexAngRate[i] = 0.0;
                   for(If=0;If<B->Nf;If++) {
                      N->FlexPos[i] += N->PSI[i][If]*B->eta[If];
                      N->FlexVel[i] += N->PSI[i][If]*B->xi[If];
@@ -403,13 +409,11 @@ void FindTotalAngMom(struct SCType *S) {
       }
 
       /* Wheels */
-      if (!S->WhlJitterActive) {
-         for(Iwhl=0;Iwhl<S->Nw;Iwhl++) {
-            W = &S->Whl[Iwhl];
-            for(i=0;i<3;i++) Hwb[i] = W->A[i]*W->H;
-            MTxV(S->B[W->Body].CN,Hwb,Hwn);
-            for(i=0;i<3;i++) S->Hvn[i] += Hwn[i];
-         }
+      for(Iwhl=0;Iwhl<S->Nw;Iwhl++) {
+         W = &S->Whl[Iwhl];
+         for(i=0;i<3;i++) Hwb[i] = W->A[i]*W->H;
+         MTxV(S->B[W->Body].CN,Hwb,Hwn);
+         for(i=0;i<3;i++) S->Hvn[i] += Hwn[i];
       }
 
       /* Express in B[0] frame */
@@ -431,11 +435,9 @@ double FindTotalKineticEnergy(struct SCType *S)
          KE += 0.5*(VoV(B->wn,Iw)+VoV(B->vn,mv));
       }
 
-      if (!S->WhlJitterActive) {
-         for(Iwhl=0;Iwhl<S->Nw;Iwhl++) {
-            W = &S->Whl[Iwhl];
-            KE += 0.5*W->w*W->J*W->w;
-         }
+      for(Iwhl=0;Iwhl<S->Nw;Iwhl++) {
+         W = &S->Whl[Iwhl];
+         KE += 0.5*W->w*W->J*W->w;
       }
 
       if (Orb[S->RefOrb].Regime == ORB_ZERO) {
@@ -1326,7 +1328,7 @@ void FindInertiaTrq(struct SCType *S)
       double H[3],wxH[3],Ia[3];
       double cPexa[3];
       double CAccR[3];
-      long Ib,Iw,i,Nf;
+      long Ib,Iw,i;
 
       /* -I*AlphaR - wxH for all bodies */
       for(Ib=0;Ib<S->Nb;Ib++) {
@@ -1338,23 +1340,20 @@ void FindInertiaTrq(struct SCType *S)
          for(i=0;i<3;i++) B->InertiaTrq[i] = -Ia[i] - wxH[i];
       }
       
-      if (!S->WhlJitterActive) {
-         for(Iw=0;Iw<S->Nw;Iw++) {
-            W = &S->Whl[Iw];
-            B = &S->B[W->Body];
-            for(i=0;i<3;i++) {
-               H[i] = W->H*W->A[i];
-            }
-            VxV(B->wn,H,wxH);
-            for(i=0;i<3;i++) B->InertiaTrq[i] +=  -wxH[i];
+      for(Iw=0;Iw<S->Nw;Iw++) {
+         W = &S->Whl[Iw];
+         B = &S->B[W->Body];
+         for(i=0;i<3;i++) {
+            H[i] = W->H*W->A[i];
          }
+         VxV(B->wn,H,wxH);
+         for(i=0;i<3;i++) B->InertiaTrq[i] +=  -wxH[i];
       }
 
       if (S->FlexActive && S->RefPt == REFPT_JOINT) {
          /* -(c + Pf*eta) x AccR */
          for(Ib=0;Ib<S->Nb;Ib++) {
             B = &S->B[Ib];
-            Nf = B->Nf;
             MxV(B->CN,B->AccR,CAccR);
             MxV(B->cplusPeta,CAccR,cPexa);
             for(i=0;i<3;i++) B->InertiaTrq[i] += -cPexa[i];
@@ -1479,7 +1478,7 @@ void FindFlexFrc(struct SCType *S)
       long Ib,In,i,k,Nf,f0;
       struct BodyType *B;
       struct DynType *D;
-      struct NodeType *FN;
+      struct NodeType *N;
 
       D = &S->Dyn;
 
@@ -1494,15 +1493,15 @@ void FindFlexFrc(struct SCType *S)
                                  + B->Kf[i][k]*B->eta[k];
          }
          for(In=0;In<B->NumNodes;In++) {
-            FN = &B->Node[In];
+            N = &B->Node[In];
             for(i=0;i<Nf;i++) {
                D->FlexFrc[f0+i] +=
-                  FN->PSI[0][i]*FN->Frc[0] +
-                  FN->PSI[1][i]*FN->Frc[1] +
-                  FN->PSI[2][i]*FN->Frc[2] +
-                  FN->THETA[0][i]*FN->Trq[0] +
-                  FN->THETA[1][i]*FN->Trq[1] +
-                  FN->THETA[2][i]*FN->Trq[2];
+                  N->PSI[0][i]*N->Frc[0] +
+                  N->PSI[1][i]*N->Frc[1] +
+                  N->PSI[2][i]*N->Frc[2] +
+                  N->THETA[0][i]*N->Trq[0] +
+                  N->THETA[1][i]*N->Trq[1] +
+                  N->THETA[2][i]*N->Trq[2];
             }
          }
       }
@@ -1697,8 +1696,9 @@ void EchoRemAcc(struct SCType *S)
 
 }
 /**********************************************************************/
-void KaneNBodyEOM(double *u, double *x, double *h, double *uf, double *xf,
-                  double *udot, double *xdot, double *hdot, 
+void KaneNBodyEOM(double *u, double *x, double *h, double *a, 
+                  double *uf, double *xf,
+                  double *udot, double *xdot, double *hdot, double *adot, 
                   double *ufdot, double *xfdot,
                   struct SCType *S)
 {
@@ -1712,11 +1712,10 @@ void KaneNBodyEOM(double *u, double *x, double *h, double *uf, double *xf,
       double FrcBiN[3], FrcBoN[3];
       double rxFi[3],rxFo[3];
       D = &S->Dyn;
-      //static long First = 1;
 
 /* .. Dynamics */
 
-      MapStateVectorToBodyStates(u,x,h,uf,xf,S);
+      MapStateVectorToBodyStates(u,x,h,a,uf,xf,S);
 
       /* Joint Partials */
       for(Ig=0;Ig<S->Ng;Ig++) {
@@ -1780,13 +1779,11 @@ void KaneNBodyEOM(double *u, double *x, double *h, double *uf, double *xf,
          }
       }
       /* Add Wheel Torques */
-      if (!S->WhlJitterActive) {
-         for(Iw=0;Iw<S->Nw;Iw++) {
-            W = &S->Whl[Iw];
-            Ib = W->Body;
-            for(i=0;i<3;i++) {
-               D->BodyTrq[3*Ib+i] -= W->Trq*W->A[i];
-            }
+      for(Iw=0;Iw<S->Nw;Iw++) {
+         W = &S->Whl[Iw];
+         Ib = W->Body;
+         for(i=0;i<3;i++) {
+            D->BodyTrq[3*Ib+i] -= W->Trq*W->A[i];
          }
       }
       
@@ -1906,7 +1903,6 @@ void KaneNBodyEOM(double *u, double *x, double *h, double *uf, double *xf,
       //   EchoEOM(D->COEF,D->ActiveState,D->RHS,D->Ns); 
       //}
       LINSOLVE(D->COEF,D->ActiveState,D->RHS,D->Ns);
-      //OrderNSolveEOM(S);
       //EchoUdot(D->ActiveState,D->Ns);
 
 /* .. Map out result */
@@ -1940,10 +1936,9 @@ void KaneNBodyEOM(double *u, double *x, double *h, double *uf, double *xf,
       for(i=0;i<D->Nf;i++) xfdot[i] = uf[i];
 
 /* .. Wheel-body interaction  */
-      if (!S->WhlJitterActive) {
-         for (i=0;i<S->Nw;i++) {
-            hdot[i] = S->Whl[i].Trq;
-         }
+      for (i=0;i<S->Nw;i++) {
+         hdot[i] = S->Whl[i].Trq;
+         adot[i] = h[i]/S->Whl[i].J;
       }
 }
 /**********************************************************************/
@@ -2067,7 +2062,7 @@ void KaneNBodyConstraints(struct SCType *S)
 
       D = &S->Dyn;
 
-      MapStateVectorToBodyStates(D->u,D->x,D->h,D->uf,D->xf,S);
+      MapStateVectorToBodyStates(D->u,D->x,D->h,D->a,D->uf,D->xf,S);
 
       for(Ig=0;Ig<S->Ng;Ig++) {
          G = &S->G[Ig];
@@ -2109,13 +2104,11 @@ void KaneNBodyConstraints(struct SCType *S)
          }
       }
       /* Add Wheel Torques */
-      if (!S->WhlJitterActive) {
-         for(Iw=0;Iw<S->Nw;Iw++) {
-            W = &S->Whl[Iw];
-            Ib = W->Body;
-            for(i=0;i<3;i++) {
-               D->BodyTrq[3*Ib+i] -= W->Trq*W->A[i];
-            }
+      for(Iw=0;Iw<S->Nw;Iw++) {
+         W = &S->Whl[Iw];
+         Ib = W->Body;
+         for(i=0;i<3;i++) {
+            D->BodyTrq[3*Ib+i] -= W->Trq*W->A[i];
          }
       }
       /* Applied Joint Torques and Forces */
@@ -2209,6 +2202,7 @@ void KaneNBodyRK4(struct SCType *S)
       double *u,*uu,*du,*udot;
       double *x,*xx,*dx,*xdot;
       double *h,*hh,*dh,*hdot;
+      double *a,*aa,*da,*adot;
       double *uf,*uuf,*duf,*ufdot;
       double *xf,*xxf,*dxf,*xfdot;
       long i,iu,Ig;
@@ -2224,27 +2218,31 @@ void KaneNBodyRK4(struct SCType *S)
       u = D->u;
       x = D->x;
       h = D->h;
+      a = D->a;
       uf = D->uf;
       xf = D->xf;
 
       uu = D->uu;
       xx = D->xx;
       hh = D->hh;
+      aa = D->aa;
       uuf = D->uuf;
       xxf = D->xxf;
 
       du = D->du;
       dx = D->dx;
       dh = D->dh;
+      da = D->da;
       duf = D->duf;
       dxf = D->dxf;
 
       udot = D->udot;
       xdot = D->xdot;
       hdot = D->hdot;
+      adot = D->adot;
       ufdot = D->ufdot;
       xfdot = D->xfdot;
-
+      
       /* State vector initialized in InitKaneNBody() */
 
 /* .. Check for Locked Joint DOFs */
@@ -2291,7 +2289,7 @@ void KaneNBodyRK4(struct SCType *S)
 /* .. 4th order Runge Kutta */
 
       /* First Call */
-      KaneNBodyEOM(u,x,h,uf,xf,du,dx,dh,duf,dxf,S);
+      KaneNBodyEOM(u,x,h,a,uf,xf,du,dx,dh,da,duf,dxf,S);
       for(i=0;i<Nu;i++)  {
          uu[i] = u[i] + 0.5*DTSIM*du[i];
          udot[i] = du[i]/6.0;
@@ -2303,6 +2301,8 @@ void KaneNBodyRK4(struct SCType *S)
       for(i=0;i<Nw;i++)  {
          hh[i] = h[i] + 0.5*DTSIM*dh[i];
          hdot[i] = dh[i]/6.0;
+         aa[i] = a[i] + 0.5*DTSIM*da[i];
+         adot[i] = da[i]/6.0;
       }
       for(i=0;i<Nf;i++)  {
          uuf[i] = uf[i] + 0.5*DTSIM*duf[i];
@@ -2319,7 +2319,7 @@ void KaneNBodyRK4(struct SCType *S)
       FindBodyAccelerations(S);
       
       /* Second Call */
-      KaneNBodyEOM(uu,xx,hh,uuf,xxf,du,dx,dh,duf,dxf,S);
+      KaneNBodyEOM(uu,xx,hh,aa,uuf,xxf,du,dx,dh,da,duf,dxf,S);
 
       for(i=0;i<Nu;i++) {
          uu[i] = u[i] + 0.5*DTSIM*du[i];
@@ -2332,6 +2332,8 @@ void KaneNBodyRK4(struct SCType *S)
       for(i=0;i<Nw;i++) {
          hh[i] = h[i] + 0.5*DTSIM*dh[i];
          hdot[i] += dh[i]/3.0;
+         aa[i] = a[i] + 0.5*DTSIM*da[i];
+         adot[i] += da[i]/3.0;
       }
       for(i=0;i<Nf;i++)  {
          uuf[i] = uf[i] + 0.5*DTSIM*duf[i];
@@ -2341,7 +2343,7 @@ void KaneNBodyRK4(struct SCType *S)
       }
 
       /* Third Call */
-      KaneNBodyEOM(uu,xx,hh,uuf,xxf,du,dx,dh,duf,dxf,S);
+      KaneNBodyEOM(uu,xx,hh,aa,uuf,xxf,du,dx,dh,da,duf,dxf,S);
 
       for(i=0;i<Nu;i++) {
          uu[i] = u[i] + DTSIM*du[i];
@@ -2354,6 +2356,8 @@ void KaneNBodyRK4(struct SCType *S)
       for(i=0;i<Nw;i++) {
          hh[i] = h[i] + DTSIM*dh[i];
          hdot[i] += dh[i]/3.0;
+         aa[i] = a[i] + DTSIM*da[i];
+         adot[i] += da[i]/3.0;
       }
       for(i=0;i<Nf;i++)  {
          uuf[i] = uf[i] + DTSIM*duf[i];
@@ -2363,12 +2367,13 @@ void KaneNBodyRK4(struct SCType *S)
       }
 
       /* Fourth Call */
-      KaneNBodyEOM(uu,xx,hh,uuf,xxf,du,dx,dh,duf,dxf,S);
+      KaneNBodyEOM(uu,xx,hh,aa,uuf,xxf,du,dx,dh,da,duf,dxf,S);
 
       for(i=0;i<Nu;i++) udot[i] += du[i]/6.0;
       for(i=0;i<Nx;i++) xdot[i] += dx[i]/6.0;
       for(i=0;i<Nw;i++) {
          hdot[i] += dh[i]/6.0;
+         adot[i] += da[i]/6.0;
       }
       for(i=0;i<Nf;i++)  {
          ufdot[i] += duf[i]/6.0;
@@ -2377,7 +2382,12 @@ void KaneNBodyRK4(struct SCType *S)
 
       for(i=0;i<Nu;i++) u[i] += udot[i]*DTSIM;
       for(i=0;i<Nx;i++) x[i] += xdot[i]*DTSIM;
-      for(i=0;i<Nw;i++) h[i] += hdot[i]*DTSIM;
+      for(i=0;i<Nw;i++) {
+         h[i] += hdot[i]*DTSIM;
+         a[i] += adot[i]*DTSIM;
+         while(a[i] < -Pi) a[i] += TwoPi;
+         while(a[i] >  Pi) a[i] -= TwoPi;
+      }
       for(i=0;i<Nf;i++)  {
          uf[i] += ufdot[i]*DTSIM;
          xf[i] += xfdot[i]*DTSIM;
@@ -2408,7 +2418,7 @@ void KaneNBodyRK4(struct SCType *S)
       }
 
 /* .. Map out state variables */
-      MapStateVectorToBodyStates(u,x,h,uf,xf,S);
+      MapStateVectorToBodyStates(u,x,h,a,uf,xf,S);
       MotionConstraints(S);
       BodyStatesToNodeStates(S);
       SCMassProps(S);
@@ -2513,7 +2523,6 @@ void OneBodyEOM(double *u, double *x, double *h,
 /**********************************************************************/
 void OneBodyRK4(struct SCType *S)
 {
-      struct BodyType *B;
       struct DynType *D;
       struct WhlType *W;
       double *u,*uu,*du,*udot;
@@ -2526,7 +2535,6 @@ void OneBodyRK4(struct SCType *S)
 
       /* Save some typing (and dereferencing) */
       D = &S->Dyn;
-      B = &S->B[0];
       Nw = S->Nw;
       Nf = D->Nf;
 
@@ -2679,10 +2687,7 @@ void OrderNJointPartials(struct JointType *G)
       double Pv[3][3] = {{0.0,0.0,0.0},{0.0,0.0,0.0},{0.0,0.0,0.0}};
       double CPv[3][3];
       long i1,i2,i3,Cyclic,i,j,k;
-      struct BodyType *Bi;
       
-      Bi = G->Bi;
-
       if (G->Init) {
          G->Init = 0;
          
@@ -3197,7 +3202,10 @@ void OrderNMultiBodyEOM(struct SCType *S)
       for(Iw=0;Iw<S->Nw;Iw++) {
          W = &S->Whl[Iw];
          B = &S->B[W->Body];
-         for(i=0;i<3;i++) B->WhlMom[i] += W->H*W->A[i];
+         for(i=0;i<3;i++) {
+            B->SpatFrc[i] -= W->Trq*W->A[i];
+            B->WhlMom[i] += W->H*W->A[i];
+         }
       }
             
       /* First Pass: Root to tips */
@@ -3302,7 +3310,7 @@ void OrderNMultiBodyEOM(struct SCType *S)
       }
       
       /* Wheel EOM */
-      for(Iw=0;Iw<S->Nw;Iw++) {
+     for(Iw=0;Iw<S->Nw;Iw++) {
          W = &S->Whl[Iw];
          W->Hdot = W->Trq;
       }
@@ -3436,12 +3444,12 @@ void OrderNMultiBodyRK4(struct SCType *S)
             }
          }
       }
-      
+
       for(Iw=0;Iw<S->Nw;Iw++) {
          W = &S->Whl[Iw];
          W->RKdH = f*W->Hdot;
       }
-
+      
       /* Set up for Second Call */
       dt = 0.5*DTSIM;
       for(Ib=0;Ib<S->Nb;Ib++) {
@@ -3741,12 +3749,12 @@ void OrderNMultiBodyRK4(struct SCType *S)
       for(Iw=0;Iw<S->Nw;Iw++) {
          W = &S->Whl[Iw];
          D->h[Iw] = W->RKHm + dt*W->RKdH;
-      }      
+      }
 
-      MapStateVectorToBodyStates(D->u,D->x,D->h,D->uf,D->xf,S); 
+      MapStateVectorToBodyStates(D->u,D->x,D->h,D->a,D->uf,D->xf,S); 
       MotionConstraints(S);
+      BodyStatesToNodeStates(S);
       SCMassProps(S);
-
       FindTotalAngMom(S);
 }
 /**********************************************************************/
@@ -4207,7 +4215,7 @@ void Dynamics(struct SCType *S)
       O = &Orb[S->RefOrb];
 
 
-      if (S->Nb > 1) {
+      //if (S->Nb > 1) {
          switch(S->DynMethod) {
             case DYN_GAUSS_ELIM :
                KaneNBodyRK4(S);
@@ -4220,8 +4228,8 @@ void Dynamics(struct SCType *S)
                exit(1);
             
          }
-      }
-      else OneBodyRK4(S);
+      //}
+      //else OneBodyRK4(S);
 
       switch(O->Regime) {
          case ORB_ZERO :

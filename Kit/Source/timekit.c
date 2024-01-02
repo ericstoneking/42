@@ -273,10 +273,10 @@ double JD2GMST(double JD)
 
 }
 /**********************************************************************/
-/* GPS Epoch is 6 Jan 1980 00:00:00.0 which is JD = 2444244.5         */
+/* GPS Epoch is 6 Jan 1980 00:00:00.0 UTC which is JD = 2444244.5 UTC */
 /* GPS Time is expressed in weeks and seconds                         */
 /* GPS Time rolls over every 1024 weeks                               */
-/* This function yields JD in TT                                      */
+/* This function yields JD in TT, so add (32.184+19.0) sec            */
 double GpsTimeToJD(long GpsRollover, long GpsWeek, double GpsSecond)
 {
       double DaysSinceWeek,DaysSinceRollover,DaysSinceEpoch,JD;
@@ -284,20 +284,20 @@ double GpsTimeToJD(long GpsRollover, long GpsWeek, double GpsSecond)
       DaysSinceWeek = GpsSecond/86400.0;
       DaysSinceRollover = DaysSinceWeek + 7.0*GpsWeek;
       DaysSinceEpoch = DaysSinceRollover + 7168.0*GpsRollover;
-      JD = DaysSinceEpoch + 2444244.5;
+      JD = DaysSinceEpoch + 2444244.5 + (32.184+19.0)/86400.0;
 
       return(JD);
 }
 /**********************************************************************/
-/* GPS Epoch is 6 Jan 1980 00:00:00.0 which is JD = 2444244.5         */
+/* GPS Epoch is 6 Jan 1980 00:00:00.0 UTC which is JD = 2444244.5 UTC */
 /* GPS Time is expressed in weeks and seconds                         */
 /* GPS Time rolls over every 1024 weeks                               */
-/* This function requires JD in TT                                    */
+/* This function requires JD in TT, so subtract (32.184+19.0) sec     */
 void JDToGpsTime(double JD, long *GpsRollover, long *GpsWeek, double *GpsSecond)
 {
       double DaysSinceEpoch, DaysSinceRollover, DaysSinceWeek;
 
-      DaysSinceEpoch = JD - 2444244.5;
+      DaysSinceEpoch = JD - 2444244.5 - (32.184+19.0)/86400.0;
       *GpsRollover = (long) (DaysSinceEpoch/7168.0);
       DaysSinceRollover = DaysSinceEpoch - 7168.0*((double) *GpsRollover);
       *GpsWeek = (long) (DaysSinceRollover/7.0);

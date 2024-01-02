@@ -1121,7 +1121,8 @@ void LunaInertialFrame(double JulDay, double CNJ[3][3])
 {
 #define D2R (1.74532925199E-2)
       double D,T;
-      double E1,E2,E3,E4,E6,E7,E10,E12,E13;
+      double E1,E2,E3,E4,E6,E7,E10,E13;
+      /* double E12; */
       double SinE1,SinE2,SinE3,SinE4,SinE6;
       double SinE10,SinE13;
       double CosE1,CosE2,CosE3,CosE4,CosE6,CosE7,CosE10,CosE13;
@@ -1138,7 +1139,7 @@ void LunaInertialFrame(double JulDay, double CNJ[3][3])
       E6 = fmod(311.589 + 26.4057084*D,360.0)*D2R;
       E7 = fmod(134.963 + 13.0649930*D,360.0)*D2R;
       E10 = fmod(15.134 - 0.1589763*D,360.0)*D2R;
-      E12 = fmod(239.961 + 0.1643573*D,360.0)*D2R;
+      /* E12 = fmod(239.961 + 0.1643573*D,360.0)*D2R; */
       E13 = fmod(25.053 + 12.9590088*D,360.0)*D2R;
 
       SinE1 = sin(E1);
@@ -2231,7 +2232,7 @@ void RelRV2EHRV(double OrbRadius, double OrbRate, double OrbCLN[3][3],
 
       for(i=0;i<3;i++) p[i] = Rrel[i] - OrbRadius*OrbCLN[2][i];
       magp = CopyUnitV(p,b3);
-      for(i=0;i<3;i++) b3[i] *= -1.0;
+      for(i=0;i<3;i++) b3[i] = -b3[i];
       alpha = atan2(-VoV(OrbCLN[0],b3),VoV(OrbCLN[2],b3));
       beta = asin(-VoV(b3,OrbCLN[1]));
 
