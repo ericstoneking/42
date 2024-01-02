@@ -1,5 +1,5 @@
 <<<<<<<<<<<<<<<<  42 Graphics Configuration File  >>>>>>>>>>>>>>>>>>>
-0.5                               !  GL Output Interval [sec]
+1.0                               !  GL Output Interval [sec]
 Skymap09.txt                       !  Star Catalog File Name
 TRUE                               !  Map Window Exists
 TRUE                               !  Orrery Window Exists
@@ -35,7 +35,7 @@ FALSE "Gal Grid"                   !  Show B Grid
 FALSE  "FOVs"                      !  Show Fields of View
 FALSE "Prox Ops"                   !  Show Prox Ops
 FALSE "TDRS"                       !  Show TDRS Satellites
-FALSE  "Shadows"                    !  Show Shadows
+TRUE  "Shadows"                    !  Show Shadows
 FALSE "Astro Labels"               !  Show Astro Labels
 FALSE "Truth Vectors"              !  Show Truth Vectors
 FALSE "FSW Vectors"                !  Show FSW Vectors

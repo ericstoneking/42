@@ -18,7 +18,7 @@ Kd 0.0  0.0  0.0
 Ks 0.0  0.0  0.0
 Ke 0.0  0.0  0.0
 
-newmtl SHADED  
+newmtl INTERIOR  
 d 1.0
 Ns 1.0
 Ka 1.0  1.0  1.0 

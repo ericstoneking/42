@@ -58,10 +58,6 @@ struct NodeType {
 
 struct ShakerType {
    /*~ Parameters ~*/
-   long Body;
-   long Node;
-   long FrcTrq;
-   double Axis[3];
    long Ntone;
    long RandomActive;
    double *ToneAmp; /* N or Nm */
@@ -86,7 +82,6 @@ struct BodyType {
    double c[3]; /* First mass moment about ref pt, expressed in B */
    double I[3][3]; /* Moment of Inertia, about ref pt, expressed in B frame */
    double EmbeddedMom[3]; /* Constant embedded momentum, for CMGs and rotating instruments */
-   double EmbeddedDipole[3]; /* Constant embedded magnetic moment [[A-m^2]] */
    double wn[3]; /* Angular Velocity of B wrt N expressed in B frame [[rad/sec]] [~=~] */
    double qn[4]; /* [~=~] */
    double vn[3]; /* velocity of B ref pt expressed in N frame */
@@ -163,6 +158,7 @@ struct JointType {
    long Bout;             /* Index of outer body */
    struct BodyType *Bi;
    struct BodyType *Bo;
+   struct WhlType *W;     /* Used if Type is WHEEL_JOINT */
    long Nanc;             /* Number of "ancestor" joints: joints between this one and B[0] */
    long *Anc;             /* Indices of ancestor joints */
    double RigidRin[3];    /* Position wrt inner body ref pt (rigid) */
@@ -257,7 +253,7 @@ struct JointType {
    long Rotc0;
    long Trnc0;
    
-   char ParmFileName[40];
+   struct ShakerType *Shaker[6];
 };
 
 struct IdealActType {
@@ -281,10 +277,7 @@ struct WhlType {
    double H;  /* Angular Momentum, [[Nms]] [~=~] */
    double J;  /* Rotary inertia, kg-m^2 */
    double w;  /* Angular speed, rad/sec */
-   double Ang; /* Spin phase angle, rad */
-   double A[3]; /* Axis vector wrt Body */
-   double Uaxis[3]; /* Transverse axes */
-   double Vaxis[3]; /* Transverse axes */
+   double A[3]; /* Axis vector wrt Body 0 */
    double Tmax;
    double Hmax;
    double Tcmd;
@@ -306,6 +299,7 @@ struct WhlType {
    double FricTrq; /* Friction Torque, Nm */
 
    /* For Jitter */
+   double m; /* Rotor mass [kg] */
    double gamma; /* 2*Jt/Jr (<1.0) */
    double Jt; /* Transverse rotor inertia, [kg-m^2] */
    double ImbPhase; /* Phase of static imbalance wrt dynamic imbalance [rad] */
@@ -313,10 +307,10 @@ struct WhlType {
    double LatDamp;
    double RockFreq; /* [rad/sec] */
    double RockDamp;
+   double Ks;  /* Static imbalance coefficient of fundamental harmonic, [kg-m] */
+   double Kd;  /* Dynamic imbalance coefficient of fundamental harmonic, [kg-m^2] */
    long NumHarm;
    struct WhlHarmType *Harm;
-   double JitFrc[3];
-   double JitTrq[3];
 
    /* For OrderN Dynamics */
    double Hdot;
@@ -337,14 +331,12 @@ struct MTBType {
 
 struct ThrType {
    /*~ Internal Variables ~*/
-   long Mode; /* THR_PULSED or THR_PROPORTIONAL */
    double Fmax;
    double F;
    long Body; /* Body that thruster is mounted on */
    long Node;
    double A[3]; /* Axis vector wrt Body 0 */
-   double PulseWidthCmd;  /* [[sec]], for THR_PULSED */
-   double ThrustLevelCmd; /* [{0.0:1.0}], for THR_PROPORTIONAL */
+   double PulseWidthCmd;
    double Frc[3]; /* Force exerted */
    double Trq[3]; /* Torque exerted */
    struct DelayType *Delay; /* For injecting delay into control loops */
@@ -547,7 +539,6 @@ struct DynType {
    double *u,*uu,*du,*udot;  /* Nu  (Dynamic States) */
    double *x,*xx,*dx,*xdot;  /* Nx  (Kinematic States) */
    double *h,*hh,*dh,*hdot;  /* Nw  (Wheel Momentum States) */
-   double *a,*aa,*da,*adot;  /* Nw  (Wheel spin angle states) */
    /* For Flex */
    long Nf;  /* Total Number of Flex Modes, Sum(B.Nf) */
    double **PAngVelf; /* 3*Nb x Nf */
@@ -578,6 +569,30 @@ struct EnvTrqType {
    double Hs[3];
 };
 
+struct FreqNormEqType {
+   double AtA[4][4];
+   double Atb[4];
+};
+
+struct FreqRespType {
+   long State;
+   FILE *outfile;
+   double MinDecade;
+   double MaxDecade;
+   long Nf;
+   long If;
+   long InitFreq;
+   double RefAmp;
+   double Time,SettleTime,ReadTime,EndTime;
+   double RefFreq;
+   double RefPeriod;
+   double *Np;
+   double RefAng[3];
+   double RefRate[3];
+   double OutAng[3];
+   struct FreqNormEqType NormEq[3];
+};
+
 struct SCType {
    /*~ Internal Variables ~*/
    long ID;     /* SC[x].ID = x */
@@ -606,7 +621,6 @@ struct SCType {
    long Nst; /* Number of star trackers */
    long Ngps; /* Number of GPS receivers */
    long Nacc; /* Number of accelerometer axes */
-   long Nsh; /* Number of shakers */
    
    double mass;
    double cm[3]; /* wrt B0 origin, expressed in B0 frame */
@@ -646,7 +660,6 @@ struct SCType {
    long FlexActive;
    /* Include higher-order coupling terms in rigid-flex dynamics */
    long IncludeSecondOrderFlexTerms;
-   char ShakerFileName[40];
    long WhlDragActive;
    long WhlJitterActive;
    /* Workspace for KaneNBody */
@@ -662,6 +675,9 @@ struct SCType {
    long GainAndDelayActive;
    double LoopGain;
    double LoopDelay;
+   
+   long FreqRespActive;
+   struct FreqRespType FreqResp;
    
    /*~ Structures ~*/
    struct AcType AC;
@@ -679,7 +695,6 @@ struct SCType {
    struct StarTrackerType *ST;   /* [*Nst*] */
    struct GpsType *GPS;          /* [*Ngps*] */
    struct AccelType *Accel;      /* [*Nacc*] */
-   struct ShakerType *Shaker;    /* [*Nsh*] */
 };
 
 struct TargetType {

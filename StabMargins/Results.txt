@@ -1,0 +1,9 @@
+Predicted Margins:
+   Gain: 4.46x (13.1 dB)
+   Delay: 0.25+0.8 = 1.05 sec
+   Frequency at Delay-caused Instability: 0.155 Hz (6.5 sec period)
+
+Observed Onset of Instability:
+   Gain: 4.25x (12.6 dB)
+   Delay: 1.05 sec
+   Frequency at Delay-caused Instability: 6.48 sec period

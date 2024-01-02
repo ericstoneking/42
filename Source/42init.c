@@ -142,7 +142,7 @@ long DecodeString(char *s)
       else if (!strcmp(s,"CMG_FSW")) return CMG_FSW;
       else if (!strcmp(s,"THR_FSW")) return THR_FSW;
       else if (!strcmp(s,"CFS_FSW")) return CFS_FSW;
-      else if (!strcmp(s,"RBT_FSW")) return RBT_FSW;
+      else if (!strcmp(s,"FREQRESP_FSW")) return FREQRESP_FSW;
 
       else if (!strcmp(s,"PHOBOS")) return PHOBOS;
       else if (!strcmp(s,"DEIMOS")) return DEIMOS;
@@ -215,7 +215,6 @@ long DecodeString(char *s)
       
       else if (!strcmp(s,"MEAN")) return EPH_MEAN;
       else if (!strcmp(s,"DE430")) return EPH_DE430;
-      else if (!strcmp(s,"DE440")) return EPH_DE440;
 
       else if (!strcmp(s,"MAJOR")) return MAJOR_CONSTELL;
       else if (!strcmp(s,"ZODIAC")) return ZODIAC_CONSTELL;
@@ -223,6 +222,7 @@ long DecodeString(char *s)
       
       else if (!strcmp(s,"PASSIVE")) return PASSIVE_JOINT;
       else if (!strcmp(s,"ACTUATED")) return ACTUATED_JOINT;
+      else if (!strcmp(s,"SHAKER")) return SHAKER_JOINT;
       else if (!strcmp(s,"STEPPER_MOTOR")) return STEPPER_MOTOR_JOINT;
       else if (!strcmp(s,"TVC_JOINT")) return TVC_JOINT;
       else if (!strcmp(s,"VIBRATION_ISOLATOR")) return VIBRATION_ISOLATOR_JOINT;
@@ -232,9 +232,6 @@ long DecodeString(char *s)
 
       else if (!strcmp(s,"FORCE")) return FORCE;
       else if (!strcmp(s,"TORQUE")) return TORQUE;
-
-      else if (!strcmp(s,"PULSED")) return THR_PULSED;
-      else if (!strcmp(s,"PROPORTIONAL")) return THR_PROPORTIONAL;
 
       else {
          printf("Bogus input %s in DecodeString (42init.c:%d)\n",s,__LINE__);
@@ -483,7 +480,6 @@ void InitOrbit(struct OrbitType *O)
 
 /* .. Orbit Parameters */
       O->Epoch = DynTime;
-      O->SplineActive = FALSE;
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
@@ -680,7 +676,6 @@ void InitOrbit(struct OrbitType *O)
             }
             else if (ElementType == INP_SPLINE) {
                O->SplineFile = FileOpen(InOutPath,ElementFileName,"rt");
-               O->SplineActive = TRUE;
                for(i=0;i<4;i++) {
                   fscanf(O->SplineFile," %ld:%ld:%ld:%ld:%ld:%lf %lf %lf %lf %lf %lf %lf %[\n]",
                      &NodeYear,&NodeMonth,&NodeDay,&NodeHour,&NodeMin,&NodeSec,
@@ -689,7 +684,6 @@ void InitOrbit(struct OrbitType *O)
                      &newline);
                   O->NodeDynTime[i] = DateToTime(NodeYear,NodeMonth,NodeDay,
                      NodeHour,NodeMin,NodeSec);
-                  O->NodeDynTime[i] += DynTime-CivilTime; /* Adjust from UTC to TT */
                   for(j=0;j<3;j++) {
                      O->NodePos[i][j] *= 1000.0;
                      O->NodeVel[i][j] *= 1000.0;
@@ -1009,10 +1003,6 @@ void InitRigidDyn(struct SCType *S)
       D->hh = (double *) calloc(S->Nw,sizeof(double));
       D->dh = (double *) calloc(S->Nw,sizeof(double));
       D->hdot = (double *) calloc(S->Nw,sizeof(double));
-      D->a = (double *) calloc(S->Nw,sizeof(double));
-      D->aa = (double *) calloc(S->Nw,sizeof(double));
-      D->da = (double *) calloc(S->Nw,sizeof(double));
-      D->adot = (double *) calloc(S->Nw,sizeof(double));
 
       for(i=0;i<3;i++) {
          D->PAngVel[i][i] = 1.0;
@@ -1241,7 +1231,6 @@ void InitFlexModes(struct SCType *S)
                   FN->Frc[i] = 0.0;
                   FN->Trq[i] = 0.0;
                }
-               FN->FlexFrc = (double *) calloc(B->Nf,sizeof(double));
             }
 
             /**** Joint Node Mode Shapes ****/
@@ -1307,10 +1296,6 @@ void InitFlexModes(struct SCType *S)
             for(Iz=0;Iz<Nnonzero;Iz++) {
                fscanf(infile,"%ld %ld %ld %lf %[^\n] %[\n]",
                   &Im,&In,&Ia,&value,junk,&newline);
-               if (In > B->NumNodes-1) {
-                  printf("Error in InitFlexModes (PSI):  Node %ld out of range\n",In);
-                  exit(1);
-               }
                FN = &B->Node[In];
                if (Ia > 2) {
                   printf("Error in InitFlexModes (PSI): Axis %ld out of range\n",Ia);
@@ -1330,10 +1315,6 @@ void InitFlexModes(struct SCType *S)
                fscanf(infile,"%ld %ld %ld %lf %[^\n] %[\n]",
                   &Im,&In,&Ia,&value,junk,&newline);
                FN = &B->Node[In];
-               if (In > B->NumNodes-1) {
-                  printf("Error in InitFlexModes (THETA):  Node %ld out of range\n",In);
-                  exit(1);
-               }
                if (Ia > 2) {
                   printf("Error in InitFlexModes (THETA): Axis %ld out of range\n",Ia);
                   exit(1);
@@ -1554,132 +1535,189 @@ void InitNodes(struct BodyType *B)
       }
 }
 /**********************************************************************/
-void InitPassiveJoint(struct JointType *G, struct SCType *S)
+void InitShakers(void)
 {
       FILE *infile;
-      char junk[80],newline;
-      long i;
-      
-      for(i=0;i<3;i++) {
-         G->RotSpringCoef[i] = 0.0;
-         G->RotDampCoef[i] = 0.0;
-         G->TrnSpringCoef[i] = 0.0;
-         G->TrnDampCoef[i] = 0.0;
-      }
-      if (strcmp(G->ParmFileName,"NONE")) {
-         infile = FileOpen(InOutPath,G->ParmFileName,"r");
-         fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-         fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-         fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-         fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
-                &G->RotSpringCoef[0],
-                &G->RotSpringCoef[1],
-                &G->RotSpringCoef[2],
-                junk,&newline);
-         fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
-                &G->RotDampCoef[0],
-                &G->RotDampCoef[1],
-                &G->RotDampCoef[2],
-                junk,&newline);
-         fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
-                &G->TrnSpringCoef[0],
-                &G->TrnSpringCoef[1],
-                &G->TrnSpringCoef[2],
-                junk,&newline);
-         fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
-                &G->TrnDampCoef[0],
-                &G->TrnDampCoef[1],
-                &G->TrnDampCoef[2],
-                junk,&newline);
-         fclose(infile);
-      }
-}
-/**********************************************************************/
-void InitActuatedJoint(struct JointType *G, struct SCType *S)
-{
-      long i;
-      
-      for(i=0;i<3;i++) {
-         G->MaxTrq[i] = 10.0;
-         G->MaxAngRate[i] = 1.0*D2R;
-         G->AngRateGain[i] = G->MaxTrq[i]/G->MaxAngRate[i];
-         G->MaxFrc[i] = 10.0;
-         G->MaxPosRate[i] = 0.01;
-         G->PosRateGain[i] = G->MaxFrc[i]/G->MaxPosRate[i];
-      }
-}
-/**********************************************************************/
-void InitShakers(struct SCType *S)
-{
-      FILE *infile;
-      long Ish,It;
+      long Nsh,Ish,Isc,Ig,Id,It;
+      long FrcTrq;
+      struct SCType *S;
+      struct JointType *G;
       struct ShakerType *Sh;
       char response[80],junk[80],newline;
-      
-      if (strcmp(S->ShakerFileName,"NONE")) {
-      
-         infile = FileOpen(InOutPath,S->ShakerFileName,"r");
 
+      infile = FileOpen(InOutPath,"Inp_Shaker.txt","r");
+      fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      fscanf(infile,"%ld %[^\n] %[\n]",&Nsh,junk,&newline);
+      for(Ish=0;Ish<Nsh;Ish++) {
          fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-         fscanf(infile,"%ld %[^\n] %[\n]",&S->Nsh,junk,&newline);
-         fscanf(infile,"%[^\n] %[\n]",junk,&newline);  
-         
-         S->Shaker = (struct ShakerType *) calloc(S->Nsh,sizeof(struct ShakerType)); 
-         for(Ish=0;Ish<S->Nsh;Ish++) {
-            Sh = &S->Shaker[Ish];
+         fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         fscanf(infile,"%ld %ld  %[^\n] %[\n]",&Isc,&Ig,junk,&newline); 
+         if (Isc>=Nsc || !SC[Isc].Exists) {
+            printf("Shaker[%ld] assigned to non-existent SC[%ld].\n",Ish,Isc);
+            exit(1);
+         }
+         S = &SC[Isc];
+         if (Ig>=S->Ng) {
+            printf("Shaker[%ld] assigned to non-existent SC[%ld].G[%ld].\n",
+               Ish,Isc,Ig);
+            exit(1);
+         }
+         G = &S->G[Ig];
+         if (G->Type != SHAKER_JOINT) {
+            printf("SC[%ld].G[%ld] is not a SHAKER_JOINT.\n",Isc,Ig);
+            exit(1);
+         }
+         fscanf(infile,"%s %ld %[^\n] %[\n]",response,&Id,junk,&newline); 
+         FrcTrq = DecodeString(response);
+         if (FrcTrq == TORQUE && Id >= G->RotDOF) {
+            printf("Torque DOF %ld is greater than SC[%ld].G[%ld].RotDOF (%ld).\n",
+               Id,Isc,Ig,G->RotDOF);
+            exit(1);
+         }
+         if (FrcTrq == FORCE && Id >= G->TrnDOF) {
+            printf("Force DOF %ld is greater than SC[%ld].G[%ld].TrnDOF (%ld).\n",
+               Id,Isc,Ig,G->TrnDOF);
+            exit(1);
+         }
+         if (FrcTrq == FORCE) {
+            G->Shaker[3+Id] = (struct ShakerType *) calloc(1,sizeof(struct ShakerType));
+            Sh = G->Shaker[3+Id];
+         }
+         else {
+            G->Shaker[Id] = (struct ShakerType *) calloc(1,sizeof(struct ShakerType));
+            Sh = G->Shaker[Id];
+         }
+         fscanf(infile,"%ld %[^\n] %[\n]",&Sh->Ntone,junk,&newline);
+         if (Sh->Ntone==0) {
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-            fscanf(infile,"%ld %ld %[^\n] %[\n]",&Sh->Body,&Sh->Node,junk,&newline);
-            fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline); 
-            Sh->FrcTrq = DecodeString(response);
-            fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
-               &Sh->Axis[0],&Sh->Axis[1],&Sh->Axis[2],junk,&newline);
-            UNITV(Sh->Axis);   
-            fscanf(infile,"%ld %[^\n] %[\n]",&Sh->Ntone,junk,&newline);
-            if (Sh->Ntone==0) {
-               fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-               fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-               fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-            }
-            else {
-               Sh->ToneAmp = (double *) calloc(Sh->Ntone,sizeof(double));
-               Sh->ToneFreq = (double *) calloc(Sh->Ntone,sizeof(double));
-               Sh->TonePhase = (double *) calloc(Sh->Ntone,sizeof(double));
-               for(It=0;It<Sh->Ntone;It++) {
-                  fscanf(infile,"%lf %[^\n] %[\n]",&Sh->ToneAmp[It],junk,&newline);
-                  fscanf(infile,"%lf %[^\n] %[\n]",&Sh->ToneFreq[It],junk,&newline);
-                  fscanf(infile,"%lf %[^\n] %[\n]",&Sh->TonePhase[It],junk,&newline);
-                  Sh->ToneFreq[It] *= TwoPi;
-                  Sh->TonePhase[It] *= D2R;
-               }
-            }
-            fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline); 
-            Sh->RandomActive = DecodeString(response);
-            if (!Sh->RandomActive) {
-               fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-               fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-               Sh->RandomProc = NULL;
-               Sh->Lowpass = NULL;
-               Sh->Highpass = NULL;
-            }
-            else {
-               fscanf(infile,"%lf %lf %[^\n] %[\n]",
-                  &Sh->LowBandLimit,&Sh->HighBandLimit,junk,&newline);
-               fscanf(infile,"%lf %[^\n] %[\n]",&Sh->RandStd,junk,&newline);
-               Sh->RandStd /= Sh->HighBandLimit-Sh->LowBandLimit;
-               Sh->HighBandLimit *= TwoPi;
-               Sh->LowBandLimit *= TwoPi;
-         
-               /* Lowpass and Highpass overlap to form Bandpass */
-               Sh->RandomProc = CreateRandomProcess(RngSeed+Ish);
-               Sh->Lowpass = CreateSecondOrderLowpassFilter(Sh->HighBandLimit,1.0,
-                  DTSIM,1.0E6,1.0E-12);
-               if (Sh->LowBandLimit > 0.0) 
-                  Sh->Highpass = CreateSecondOrderLowpassFilter(Sh->LowBandLimit,1.0,
-                     DTSIM,1.0E6,1.0E-12);
+            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         }
+         else {
+            Sh->ToneAmp = (double *) calloc(Sh->Ntone,sizeof(double));
+            Sh->ToneFreq = (double *) calloc(Sh->Ntone,sizeof(double));
+            Sh->TonePhase = (double *) calloc(Sh->Ntone,sizeof(double));
+            for(It=0;It<Sh->Ntone;It++) {
+               fscanf(infile,"%lf %[^\n] %[\n]",&Sh->ToneAmp[It],junk,&newline);
+               fscanf(infile,"%lf %[^\n] %[\n]",&Sh->ToneFreq[It],junk,&newline);
+               fscanf(infile,"%lf %[^\n] %[\n]",&Sh->TonePhase[It],junk,&newline);
+               Sh->ToneFreq[It] *= TwoPi;
+               Sh->TonePhase[It] *= D2R;
             }
          }
-         fclose(infile);
+         fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline); 
+         Sh->RandomActive = DecodeString(response);
+         if (!Sh->RandomActive) {
+            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+            Sh->RandomProc = NULL;
+            Sh->Lowpass = NULL;
+            Sh->Highpass = NULL;
+         }
+         else {
+            fscanf(infile,"%lf %lf %[^\n] %[\n]",
+               &Sh->LowBandLimit,&Sh->HighBandLimit,junk,&newline);
+            fscanf(infile,"%lf %[^\n] %[\n]",&Sh->RandStd,junk,&newline);
+            Sh->RandStd /= Sh->HighBandLimit-Sh->LowBandLimit;
+            Sh->HighBandLimit *= TwoPi;
+            Sh->LowBandLimit *= TwoPi;
+            
+            /* Lowpass and Highpass overlap to form Bandpass */
+            Sh->RandomProc = CreateRandomProcess(RngSeed+Ish);
+            Sh->Lowpass = CreateSecondOrderLowpassFilter(Sh->HighBandLimit,1.0,
+               DTSIM,1.0E6,1.0E-12);
+            if (Sh->LowBandLimit > 0.0) 
+               Sh->Highpass = CreateSecondOrderLowpassFilter(Sh->LowBandLimit,1.0,
+                  DTSIM,1.0E6,1.0E-12);
+         }
+      }
+      fclose(infile);            
+}
+/**********************************************************************/
+void InitWhlBodiesAndJoints(struct SCType *S)
+{
+      struct WhlType *W;
+      struct BodyType *B;
+      struct JointType *G;
+      struct NodeType *N;
+      long Iw,Ib,Ig,i,j;
+
+      S->Nb += S->Nw;
+      S->Ng += S->Nw;
+      S->B = (struct BodyType *) realloc(S->B,S->Nb*sizeof(struct BodyType));
+      S->G = (struct JointType *) realloc(S->G,S->Ng*sizeof(struct JointType));
+      
+      for(Iw=0;Iw<S->Nw;Iw++) {
+         Ib = S->Nb-S->Nw+Iw;
+         Ig = S->Ng-S->Nw+Iw;
+         W = &S->Whl[Iw];
+         B = &S->B[Ib];
+         B->mass = W->m;
+         for(i=0;i<3;i++) {
+            B->c[i] = 0.0;
+            for(j=0;j<3;j++) B->I[i][j] = 0.0;
+            B->EmbeddedMom[i] = 0.0;
+         }
+         strcpy(B->GeomFileName,"NONE");
+         strcpy(B->NodeFileName,"NONE");
+         strcpy(B->FlexFileName,"NONE");
+         B->I[0][0] = W->Jt;
+         B->I[1][1] = W->Jt;
+         B->I[2][2] = W->J;
+         B->I[1][2] = -W->Kd;
+         B->I[2][1] = -W->Kd;
+         B->cm[0] = W->Ks/W->m*cos(W->ImbPhase);
+         B->cm[1] = W->Ks/W->m*sin(W->ImbPhase);
+         B->cm[2] = 0.0;
+         InitNodes(B);
+         B->Gin = Ig;
+         
+         G = &S->G[Ig];
+         G->Type = WHEEL_JOINT;
+         G->IsSpherical = FALSE;
+         G->RotDOF = 3;
+         G->TrnDOF = 2;
+         G->RotSeq = 123;
+         G->TrnSeq = 123;
+         for(i=0;i<3;i++) {
+            G->RotLocked[i] = FALSE;
+            G->TrnLocked[i] = FALSE;
+            G->Ang[i] = 0.0;
+            G->AngRate[i] = 0.0;
+            G->Pos[i] = 0.0;
+            G->PosRate[i] = 0.0;
+         }
+         G->AngRate[2] = W->H/W->J;
+         G->Bin = W->Body;
+         G->Bout = Ib;
+         G->Bi = &S->B[G->Bin];
+         G->Bo = &S->B[G->Bout];
+         G->W = W;
+         for(i=0;i<3;i++) G->CGiBi[2][i] = W->A[i];
+         PerpBasis(G->CGiBi[2],G->CGiBi[0],G->CGiBi[1]);
+         for(i=0;i<3;i++) {
+            for(j=0;j<3;j++) G->CBoGo[i][j] = 0.0;
+            G->CBoGo[i][i] = 1.0;
+            G->RigidRout[i] = 0.0;
+         }
+         N = &S->B[W->Body].Node[W->Node];
+         for(i=0;i<3;i++) {
+            G->RigidRin[i] = N->PosB[i] - S->B[W->Body].cm[i];
+            G->RigidRout[i] = -B->cm[i];
+         }
+         
+         G->RotSpringCoef[0] = W->Jt*W->RockFreq*W->RockFreq;
+         G->RotSpringCoef[1] = W->Jt*W->RockFreq*W->RockFreq;
+         G->RotSpringCoef[2] = 0.0;
+         G->RotDampCoef[0] = 2.0*W->Jt*W->RockDamp*W->RockFreq;
+         G->RotDampCoef[1] = 2.0*W->Jt*W->RockDamp*W->RockFreq;
+         G->RotDampCoef[2] = 0.0;
+         G->TrnSpringCoef[0] = W->Jt*W->LatFreq*W->LatFreq;
+         G->TrnSpringCoef[1] = W->Jt*W->LatFreq*W->LatFreq;
+         G->TrnSpringCoef[2] = 0.0;
+         G->TrnDampCoef[0] = 2.0*W->Jt*W->LatDamp*W->LatFreq;
+         G->TrnDampCoef[1] = 2.0*W->Jt*W->LatDamp*W->LatFreq;
+         G->TrnDampCoef[2] = 0.0;         
       }
 }
 /**********************************************************************/
@@ -1719,6 +1757,7 @@ void InitWhlDragAndJitter(struct WhlType *W)
          fscanf(infile,"%[^\n] %[\n]",junk,&newline);
          fscanf(infile,"%[^\n] %[\n]",junk,&newline);
          fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         fscanf(infile,"%lf  %[^\n] %[\n]",&W->m,junk,&newline);
          fscanf(infile,"%lf  %[^\n] %[\n]",&W->gamma,junk,&newline);
          W->Jt = 0.5*W->gamma*W->J;
          fscanf(infile,"%lf  %[^\n] %[\n]",&W->ImbPhase,junk,&newline);
@@ -1727,6 +1766,10 @@ void InitWhlDragAndJitter(struct WhlType *W)
          W->LatFreq *= TwoPi;
          fscanf(infile,"%lf %lf %[^\n] %[\n]",&W->RockFreq,&W->RockDamp,junk,&newline);
          W->RockFreq *= TwoPi;
+         fscanf(infile,"%lf  %[^\n] %[\n]",&W->Ks,junk,&newline);
+         W->Ks *= 1.0E-3*0.01;
+         fscanf(infile,"%lf  %[^\n] %[\n]",&W->Kd,junk,&newline);
+         W->Kd *= 1.0E-3*1.0E-4;
          fscanf(infile,"%[^\n] %[\n]",junk,&newline);
          fscanf(infile,"%ld %[^\n] %[\n]",&W->NumHarm,junk,&newline);
          if (W->NumHarm > 0) {
@@ -1856,7 +1899,7 @@ void InitSpacecraft(struct SCType *S)
       S->FswTag = DecodeString(response);
       fscanf(infile,"%lf %[^\n] %[\n]",&S->FswSampleTime,junk,&newline);
       S->FswMaxCounter = (long) (S->FswSampleTime/DTSIM+0.5);
-      if (S->FswSampleTime < DTSIM) {
+      if (S->FswMaxCounter < 1) {
          printf("Error:  FswSampleTime smaller than DTSIM.\n");
          exit(1);
       }
@@ -1946,7 +1989,6 @@ void InitSpacecraft(struct SCType *S)
       S->FlexActive=DecodeString(response);
       fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
       S->IncludeSecondOrderFlexTerms=DecodeString(response);
-      fscanf(infile,"%s %[^\n] %[\n]",S->ShakerFileName,junk,&newline);
       fscanf(infile,"%lf %[^\n] %[\n]",&S->DragCoef,junk,&newline);
 
 /* .. Body parameters */
@@ -1996,8 +2038,6 @@ void InitSpacecraft(struct SCType *S)
                   &B->cm[1],&B->cm[2],junk,&newline);
          fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",&B->EmbeddedMom[0],
                   &B->EmbeddedMom[1],&B->EmbeddedMom[2],junk,&newline);
-         fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",&B->EmbeddedDipole[0],
-                  &B->EmbeddedDipole[1],&B->EmbeddedDipole[2],junk,&newline);
          fscanf(infile,"%s %[^\n] %[\n]",B->GeomFileName,junk,&newline);
          fscanf(infile,"%s %[^\n] %[\n]",B->NodeFileName,junk,&newline);
          fscanf(infile,"%s %[^\n] %[\n]",B->FlexFileName,junk,&newline);
@@ -2020,7 +2060,7 @@ void InitSpacecraft(struct SCType *S)
       }
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       if (S->Ng == 0) {  /* Read and discard template */
-         for(i=0;i<16;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(i=0;i<19;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
       else {
          for(Ig=0;Ig<S->Ng;Ig++) {
@@ -2139,10 +2179,30 @@ void InitSpacecraft(struct SCType *S)
                   G->RigidRout[j] = pOut[j] - S->B[Bo].cm[j];
                }
             }
-            fscanf(infile,"%s %[^\n] %[\n]",G->ParmFileName,junk,&newline);
-
-            if (G->Type == PASSIVE_JOINT) InitPassiveJoint(G,S);
+            fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
+                   &G->RotSpringCoef[0],
+                   &G->RotSpringCoef[1],
+                   &G->RotSpringCoef[2],
+                   junk,&newline);
+            fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
+                   &G->RotDampCoef[0],
+                   &G->RotDampCoef[1],
+                   &G->RotDampCoef[2],
+                   junk,&newline);
+            fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
+                   &G->TrnSpringCoef[0],
+                   &G->TrnSpringCoef[1],
+                   &G->TrnSpringCoef[2],
+                   junk,&newline);
+            fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
+                   &G->TrnDampCoef[0],
+                   &G->TrnDampCoef[1],
+                   &G->TrnDampCoef[2],
+                   junk,&newline);
+                   
             if (G->Type == ACTUATED_JOINT) InitActuatedJoint(G,S);
+            G->W = NULL;
+            for(i=0;i<6;i++) G->Shaker[i] = NULL;
          }
       }
 
@@ -2169,7 +2229,6 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
                 &W->A[0],&W->A[1],&W->A[2],junk,&newline);
             UNITV(W->A);
-            PerpBasis(W->A,W->Uaxis,W->Vaxis);
             fscanf(infile,"%lf %lf %[^\n] %[\n]",
                 &W->Tmax,&W->Hmax,junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&W->J,junk,&newline);
@@ -2182,6 +2241,7 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%s %[^\n] %[\n]",W->DragJitterFileName,junk,&newline);
             InitWhlDragAndJitter(W);
          }
+         if (S->WhlJitterActive) InitWhlBodiesAndJoints(S);
       }
 
 /* .. MTB parameters */
@@ -2222,13 +2282,11 @@ void InitSpacecraft(struct SCType *S)
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nthr,junk,&newline);
       S->Thr = (struct ThrType *) calloc(S->Nthr,sizeof(struct ThrType));
       if (S->Nthr == 0) {
-         for(i=0;i<6;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(i=0;i<5;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
       else {
          for(It=0;It<S->Nthr;It++) {
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-            fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
-            S->Thr[It].Mode = DecodeString(response);
             fscanf(infile,"%lf %[^\n] %[\n]",&S->Thr[It].Fmax,
                    junk,&newline);
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
@@ -2263,7 +2321,7 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&Gyro->SampleTime,junk,&newline);
             Gyro->MaxCounter = (long) (Gyro->SampleTime/DTSIM+0.5);
-            if (Gyro->SampleTime < DTSIM) {
+            if (Gyro->MaxCounter < 1) {
                printf("Error:  Gyro[%ld].SampleTime smaller than DTSIM.\n",Ig);
                exit(1);
             }
@@ -2317,7 +2375,7 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&MAG->SampleTime,junk,&newline);
             MAG->MaxCounter = (long) (MAG->SampleTime/DTSIM+0.5);
-            if (MAG->SampleTime < DTSIM) {
+            if (MAG->MaxCounter < 1) {
                printf("Error:  MAG[%ld].SampleTime smaller than DTSIM.\n",Im);
                exit(1);
             }
@@ -2355,7 +2413,7 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&CSS->SampleTime,junk,&newline);
             CSS->MaxCounter = (long) (CSS->SampleTime/DTSIM+0.5);
-            if (CSS->SampleTime < DTSIM) {
+            if (CSS->MaxCounter < 1) {
                printf("Error:  CSS[%ld].SampleTime smaller than DTSIM.\n",Ig);
                exit(1);
             }
@@ -2394,7 +2452,7 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&FSS->SampleTime,junk,&newline);
             FSS->MaxCounter = (long) (FSS->SampleTime/DTSIM+0.5);
-            if (FSS->SampleTime < DTSIM) {
+            if (FSS->MaxCounter < 1) {
                printf("Error:  FSS[%ld].SampleTime smaller than DTSIM.\n",Ig);
                exit(1);
             }
@@ -2441,7 +2499,7 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&ST->SampleTime,junk,&newline);
             ST->MaxCounter = (long) (ST->SampleTime/DTSIM+0.5);
-            if (ST->SampleTime < DTSIM) {
+            if (ST->MaxCounter < 1) {
                printf("Error:  ST[%ld].SampleTime smaller than DTSIM.\n",Ig);
                exit(1);
             }
@@ -2497,7 +2555,7 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&GPS->SampleTime,junk,&newline);
             GPS->MaxCounter = (long) (GPS->SampleTime/DTSIM+0.5);
-            if (GPS->SampleTime < DTSIM) {
+            if (GPS->MaxCounter < 1) {
                printf("Error:  GPS[%ld].SampleTime smaller than DTSIM.\n",Ig);
                exit(1);
             }
@@ -2530,7 +2588,7 @@ void InitSpacecraft(struct SCType *S)
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&Accel->SampleTime,junk,&newline);
             Accel->MaxCounter = (long) (Accel->SampleTime/DTSIM+0.5);
-            if (Accel->SampleTime < DTSIM) {
+            if (Accel->MaxCounter < 1) {
                printf("Error:  Accel[%ld].SampleTime smaller than DTSIM.\n",Ia);
                exit(1);
             }
@@ -2709,7 +2767,7 @@ void InitSpacecraft(struct SCType *S)
       D->COEF = CreateMatrix(D->Nu+D->Nf,D->Nu+D->Nf);
       D->RHS = (double *) calloc(D->Nu+D->Nf,sizeof(double));
 
-      MapStateVectorToBodyStates(D->u,D->x,D->h,D->a,D->uf,D->xf,S);
+      MapStateVectorToBodyStates(D->u,D->x,D->h,D->uf,D->xf,S);
       MotionConstraints(S);
       BodyStatesToNodeStates(S);
       SCMassProps(S);
@@ -2733,8 +2791,6 @@ void InitSpacecraft(struct SCType *S)
       
       InitAC(S);
       
-      InitShakers(S);
-      
 /* .. Loop Gain and Delays allow verification of stability margins in the time domain */
       /* Created by commands */
       S->GainAndDelayActive = FALSE;
@@ -2753,7 +2809,10 @@ void InitSpacecraft(struct SCType *S)
       for(It=0;It<S->Nthr;It++) {
          S->Thr[It].Delay = NULL;
       }
-      
+
+      S->FreqRespActive = FALSE;
+      S->FreqResp.State = 0;
+
 }
 /*********************************************************************/
 void LoadTdrs(void)
@@ -2861,7 +2920,6 @@ void LoadPlanets(void)
       struct OrbitType *Eph;
       double Zaxis[3] = {0.0,0.0,1.0};
       double GMST;
-      double C_W_TETE[3][3],C_TEME_TETE[3][3],C_TETE_J2000[3][3];
 
       char PlanetName[10][20] ={"Sun","Mercury","Venus","Earth","Mars",
                                 "Jupiter","Saturn","Uranus","Neptune",
@@ -3043,9 +3101,7 @@ void LoadPlanets(void)
 /* .. Earth rotation is a special case */
       GMST = JD2GMST(UTC.JulDay);
       World[EARTH].PriMerAng = TwoPi*GMST;
-      HiFiEarthPrecNute(UTC.JulDay,C_TEME_TETE,C_TETE_J2000);
-      SimpRot(Zaxis,World[EARTH].PriMerAng,C_W_TETE);
-      MxM(C_W_TETE,C_TETE_J2000,World[EARTH].CWN);
+      SimpRot(Zaxis,World[EARTH].PriMerAng,World[EARTH].CWN);
       C2Q(World[EARTH].CWN,World[EARTH].qwn);
 
       strcpy(World[EARTH].BumpTexFileName,"EarthBump.ppm");
@@ -3917,7 +3973,7 @@ void InitLagrangePoints(void)
       }
 }
 /******************************************************************************/
-long LoadJplEphems(char EphemPath[80],double JD)
+long LoadDE430(char DE430Path[80],double JD)
 {
       FILE *infile;
       double Block[1020];
@@ -3939,41 +3995,20 @@ long LoadJplEphems(char EphemPath[80],double JD)
 
 /* .. Select input file */
       if (JD < 2433264.5) {
-         printf("JD earlier than JPL ephem input files.  Falling back to lower-precision planetary ephemerides.\n");
+         printf("JD earlier than DE430 input files.  Falling back to lower-precision planetary ephemerides.\n");
          return(1);
       }
       else if (JD < 2469808.5) {
-         if (EphemOption == EPH_DE430)
-            infile = FileOpen(EphemPath,"ascp1950.430","rt");
-         else if (EphemOption == EPH_DE440)
-            infile = FileOpen(EphemPath,"ascp01950.440","rt");
-         else {
-            printf("Unknown Ephem Option in LoadJplEphems.\n");
-            exit(1);
-         }             
+         infile = FileOpen(DE430Path,"ascp1950.430","rt");
       }
       else if (JD < 2506352.5) {
-         if (EphemOption == EPH_DE430)
-            infile = FileOpen(EphemPath,"ascp2050.430","rt");
-         else if (EphemOption == EPH_DE440)
-            infile = FileOpen(EphemPath,"ascp02050.440","rt");
-         else {
-            printf("Unknown Ephem Option in LoadJplEphems.\n");
-            exit(1);
-         }             
+         infile = FileOpen(DE430Path,"ascp2050.430","rt");
       }
       else if (JD < 2542864.5) {
-         if (EphemOption == EPH_DE430)
-            infile = FileOpen(EphemPath,"ascp2150.430","rt");
-         else if (EphemOption == EPH_DE440)
-            infile = FileOpen(EphemPath,"ascp02150.440","rt");
-         else {
-            printf("Unknown Ephem Option in LoadJplEphems.\n");
-            exit(1);
-         }             
+         infile = FileOpen(DE430Path,"ascp2150.430","rt");
       }
       else {
-         printf("JD later than JPL ephem input files.  Falling back to lower-precision planetary ephemerides.\n");
+         printf("JD later than available DE430 input files.  Falling back to lower-precision planetary ephemerides.\n");
          return(1);
       }
 
@@ -4347,7 +4382,7 @@ void InitSim(int argc, char **argv)
           { 0.494110775064704,-0.444828614979805, 0.746981957785302},
           {-0.867665382947348,-0.198076649977489, 0.455985113757595}};
       double CJ2000H[3][3];
-      
+
       Pi = 4.0*atan(1.0);
       TwoPi = 2.0*Pi;
       HalfPi = 0.5*Pi;
@@ -4361,18 +4396,11 @@ void InitSim(int argc, char **argv)
       qJ2000H[1] = 0.0;
       qJ2000H[2] = 0.0;
       qJ2000H[3] = 0.979153221449;
-      
-      #ifdef _ENABLE_RBT_
-         sprintf(InOutPath,"../../GSFC/RBT/InOut/");
-         sprintf(ModelPath,"../../GSFC/RBT/Model/");
-         if (argc > 1) sprintf(InOutPath,"../../GSFC/RBT/%s/",argv[1]);
-         if (argc > 2) sprintf(ModelPath,"../../GSFC/RBT/%s/",argv[2]);
-      #else
-         sprintf(InOutPath,"./InOut/");
-         sprintf(ModelPath,"./Model/");
-         if (argc > 1) sprintf(InOutPath,"./%s/",argv[1]);
-         if (argc > 2) sprintf(ModelPath,"./%s/",argv[2]);
-      #endif
+
+      sprintf(InOutPath,"./InOut/");
+      sprintf(ModelPath,"./Model/");
+      if (argc > 1) sprintf(InOutPath,"./%s/",argv[1]);
+      if (argc > 2) sprintf(ModelPath,"./%s/",argv[2]);
 
 /* .. Read from file Inp_Sim.txt */
       infile=FileOpen(InOutPath,"Inp_Sim.txt","r");
@@ -4397,13 +4425,11 @@ void InitSim(int argc, char **argv)
 /* .. Reference Orbits */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%ld %[^\n] %[\n]",&Norb,junk,&newline);
-      Orb = NULL;
       Orb = (struct OrbitType *) calloc(Norb,sizeof(struct OrbitType));
       if (Orb == NULL) {
          printf("Orb calloc returned null pointer.  Bailing out!\n");
          exit(1);
       }
-      Frm = NULL;
       Frm = (struct FormationType *) calloc(Norb,sizeof(struct FormationType));
       if (Frm == NULL) {
          printf("Frm calloc returned null pointer.  Bailing out!\n");
@@ -4419,7 +4445,6 @@ void InitSim(int argc, char **argv)
 /* .. Spacecraft */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%ld %[^\n] %[\n]",&Nsc,junk,&newline);
-      SC = NULL;
       SC = (struct SCType *) calloc(Nsc,sizeof(struct SCType));
       if (SC == NULL) {
          printf("SC calloc returned null pointer.  Bailing out!\n");
@@ -4473,9 +4498,9 @@ void InitSim(int argc, char **argv)
       SolPressActive=DecodeString(response1);
       SolPressShadowsActive=DecodeString(response2);
       fscanf(infile,"%s  %[^\n] %[\n]",response,junk,&newline);
-      ResidualDipoleActive=DecodeString(response);
-      fscanf(infile,"%s  %[^\n] %[\n]",response,junk,&newline);
       GravPertActive=DecodeString(response);
+      fscanf(infile,"%s  %[^\n] %[\n]",response,junk,&newline);
+      JointTrqActive=DecodeString(response);
       fscanf(infile,"%s  %[^\n] %[\n]",response,junk,&newline);
       ThrusterPlumesActive=DecodeString(response);
       fscanf(infile,"%s  %[^\n] %[\n]",response,junk,&newline);
@@ -4517,7 +4542,7 @@ void InitSim(int argc, char **argv)
       }
 
       fclose(infile);
-      
+
 /* .. Load Materials */
       Nmatl = 0;
       Matl = AddMtlLib(ModelPath,"42.mtl",Matl,&Nmatl);
@@ -4555,8 +4580,7 @@ void InitSim(int argc, char **argv)
       LoadSun();
       LoadPlanets();
       /* JPL planetary ephems */
-      if (EphemOption == EPH_DE430 || EphemOption == EPH_DE440) 
-         LoadJplEphems(ModelPath,TT.JulDay);
+      if (EphemOption == EPH_DE430) LoadDE430(ModelPath,TT.JulDay);
 
 /* .. Load Moons */
       if (World[EARTH].Exists) LoadMoonOfEarth();
@@ -4659,6 +4683,7 @@ void InitSim(int argc, char **argv)
             InitSpacecraft(&SC[Isc]);
          }
       }
+      InitShakers();
 
       LoadTdrs();
       

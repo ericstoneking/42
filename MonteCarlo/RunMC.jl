@@ -29,7 +29,7 @@ function RunMC()
 
 # ... Initialization and Setup
       BasePath = "./Baseline";
-      Nrun = 20;
+      Nrun = 50;
       MaxCore = 12;
       
       # Allocate output variables
@@ -41,7 +41,7 @@ function RunMC()
       StartTime = now();
       # Make sure graphics front end is FALSE
       s = "FALSE                           !  Graphics Front End?";
-      ReplaceLineInFile(BasePath*"/Inp_Sim.txt",7,s);
+      ReplaceLineInFile(BasePath*"/Inp_Sim.txt",6,s);
             
       # Prepare batch inputs
       for Ibatch = 1:Nbatch
@@ -52,7 +52,6 @@ function RunMC()
          end
          BatchPath = "";
          RunPath = Vector{String}(undef,Ncore);
-         RunProc = Vector{Any}(undef,Ncore);
          for Icore = 1:Ncore
             Irun = Int((Ibatch-1)*MaxCore+Icore);
             
@@ -75,19 +74,12 @@ function RunMC()
          println("Starting Runs $(FirstRunOfBatch) - $(LastRunOfBatch)");
          cd("..")
          t1 = now();
-         #for Icore = 1:Ncore-1
-         #   Path = "MonteCarlo/$(RunPath[Icore])"
-         #   run(pipeline(`./42 $Path`,stdout="$Path/stdout.txt",stderr="$Path/stderr.txt"),wait=false);
-         #end
-         #Path = "MonteCarlo/$(RunPath[Ncore])"
-         #run(pipeline(`./42 $Path`,stdout="$Path/stdout.txt",stderr="$Path/stderr.txt"),wait=true);
-         for Icore = 1:Ncore
+         for Icore = 1:Ncore-1
             Path = "MonteCarlo/$(RunPath[Icore])"
-            RunProc[Icore] = run(pipeline(`./42 $Path`,stdout="$Path/stdout.txt",stderr="$Path/stderr.txt"),wait=false);
+            run(pipeline(`./42 $Path`,stdout="$Path/stdout.txt",stderr="$Path/stderr.txt"),wait=false);
          end
-         for Icore = 1:Ncore
-            wait(RunProc[Icore]);
-         end
+         Path = "MonteCarlo/$(RunPath[Ncore])"
+         run(pipeline(`./42 $Path`,stdout="$Path/stdout.txt",stderr="$Path/stderr.txt"),wait=true);
          t2 = now();
          dt = Dates.value(t2-t1)/1000.0;
          println("All runs complete in $dt sec");
@@ -127,12 +119,10 @@ function RunMC()
             rm("Inp_Region.txt");
             rm("Inp_Sim.txt");
             rm("Inp_TDRS.txt");
-            rm("Nodes_Simple.txt");
             rm("Orb_LEO.txt");
+            rm("Orb_Ellipse.txt");
             #rm("SC_Simple.txt");
-            rm("Shaker_Simple.txt");
             rm("TRV.txt");
-            rm("Whl_Simple.txt");
             
             cd("..")
          end

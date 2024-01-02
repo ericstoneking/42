@@ -57,6 +57,7 @@ def WriteProlog():
       outfile.write("      long Isc,Iorb,Iw,Ipfx,i;\n")
       
       if Pipe == "Socket":
+         outfile.write("      int Success;\n")
          outfile.write("      char AckMsg[5] = \"Ack\\n\";\n")
          outfile.write("      char Msg[16384];\n")
          outfile.write("      long MsgLen = 0;\n")
@@ -167,8 +168,9 @@ def ReadProlog():
       #endif   
       
       if Pipe == "Socket":
-         outfile.write("      \n")
+         outfile.write("      long MsgLen;\n\n")
          outfile.write("      memset(Msg,'\\0',16384);\n")
+         outfile.write("      MsgLen = 0;\n\n")
          outfile.write("      NumBytes = recv(Socket,Msg,16384,0);\n")
          outfile.write("      if (NumBytes <= 0) return; /* Bail out if no message */\n\n")
          outfile.write("      Done = 0;\n")
@@ -229,7 +231,7 @@ def WriteEpilog():
          outfile.write("      LineLen = strlen(line);\n")
          outfile.write("      memcpy(&Msg[MsgLen],line,LineLen);\n")
          outfile.write("      MsgLen += LineLen;\n")
-         outfile.write("      send(Socket,Msg,MsgLen,0);\n\n")
+         outfile.write("      Success = send(Socket,Msg,MsgLen,0);\n\n")
          outfile.write("      /* Wait for Ack */\n");
          outfile.write("      recv(Socket,AckMsg,5,0);\n")
       elif Pipe == "Gmsec":
@@ -340,7 +342,7 @@ def StateRefreshCode():
       outfile.write("               /* Update Dyn */\n")
       outfile.write("               MapJointStatesToStateVector(S);\n")
       outfile.write("               D = &S->Dyn;\n")
-      outfile.write("               MapStateVectorToBodyStates(D->u,D->x,D->h,D->a,D->uf,D->xf,S);\n")
+      outfile.write("               MapStateVectorToBodyStates(D->u,D->x,D->h,D->uf,D->xf,S);\n")
       outfile.write("               MotionConstraints(S);\n")
       outfile.write("            }\n")
       outfile.write("         }\n")
@@ -645,7 +647,7 @@ def main():
       VerbList = {"WriteTo","ReadFrom"}
       PipeList = {"Socket","Gmsec","File","Cmd"}
       
-      infile = open('42.json')
+      infile = open('42.json','rU')
       StructDict = json.load(infile)
       infile.close()
       
@@ -789,7 +791,7 @@ def main():
                   #endif  
                
                   outfile.close()  
-                  infile = open("TempIpc.c")    
+                  infile = open("TempIpc.c","rU")    
                   outfile = open("../Source/IPC/"+Prog+Verb+Pipe+".c","w")
                   StripEmptyLoops(infile,outfile)
                   infile.close()

@@ -129,10 +129,6 @@ SOCKET InitSocketServer(int Port, int AllowBlocking)
          ioctlsocket(sockfd,FIONBIO,&Blocking);
       }
       
-      /* Allow TCP to send small packets (look up Nagle's algorithm) */
-      /* Depending on your message sizes, this may or may not improve performance */
-      //setsockopt(sockfd,IPPROTO_TCP,TCP_NODELAY,&DisableNagle,sizeof(DisableNagle));
-      
       return(sockfd);
 #else
 

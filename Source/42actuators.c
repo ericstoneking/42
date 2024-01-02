@@ -92,18 +92,13 @@ void ThrModel(struct ThrType *Thr,struct SCType *S,double DT)
       struct NodeType *N;
       long i;
 
-      if (Thr->Mode == THR_PULSED) {
-         if (Thr->PulseWidthCmd > DT) {
-            Thr->F = Thr->Fmax;
-            Thr->PulseWidthCmd -= DT;
-         }
-         else {
-            Thr->F = (Thr->PulseWidthCmd/DT)*Thr->Fmax;
-            Thr->PulseWidthCmd = 0.0;
-         }
+      if (Thr->PulseWidthCmd > DT) {
+         Thr->F = Thr->Fmax;
+         Thr->PulseWidthCmd -= DT;
       }
-      else { /* THR_PROPORTIONAL */
-         Thr->F = Thr->ThrustLevelCmd*Thr->Fmax;
+      else {
+         Thr->F = (Thr->PulseWidthCmd/DT)*Thr->Fmax;
+         Thr->PulseWidthCmd = 0.0;
       }
 
       if (Thr->F < 0.0) Thr->F = 0.0;
@@ -225,8 +220,6 @@ void Actuators(struct SCType *S)
       struct JointType *G;
       struct AcJointType *AG;
       struct ThrType *Thr;
-      struct ShakerType *Sh;
-      struct WhlType *W;
 
       AC = &S->AC;
 
@@ -286,34 +279,7 @@ void Actuators(struct SCType *S)
       if (ThrusterPlumesActive) {
          ThrusterPlumeFrcTrq(S);
       }
-      
-      /* Wheel Jitter and Shakers only affect Flex */
-      if (S->FlexActive) {
-         for(i=0;i<S->Nsh;i++) {
-            Sh = &S->Shaker[i];
-            N = &S->B[Sh->Body].Node[Sh->Node];
-            ShakerJitter(Sh,S);
-            if (Sh->FrcTrq == FORCE) {
-               for(j=0;j<3;j++) N->Frc[j] += Sh->Output*Sh->Axis[j];
-            }
-            else {
-               for(j=0;j<3;j++) N->Trq[j] += Sh->Output*Sh->Axis[j];
-            }
-         }
-         
-         if (S->WhlJitterActive) {
-            for(i=0;i<S->Nw;i++) {
-               W = &S->Whl[i];
-               N = &S->B[W->Body].Node[W->Node];
-               WheelJitter(W,S);
-               for(j=0;j<3;j++) {
-                  N->Frc[j] += W->JitFrc[j];
-                  N->Trq[j] += W->JitTrq[j];
-               }
-            }
-         }
-      }
-            
+
 }
 
 /* #ifdef __cplusplus

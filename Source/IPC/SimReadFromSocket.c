@@ -25,8 +25,11 @@ void ReadFromSocket(SOCKET Socket, long EchoEnabled)
 
       long Year,doy,Hour,Minute;
       double Second;
-      
+      long MsgLen;
+
       memset(Msg,'\0',16384);
+      MsgLen = 0;
+
       NumBytes = recv(Socket,Msg,16384,0);
       if (NumBytes <= 0) return; /* Bail out if no message */
 
@@ -1235,7 +1238,7 @@ void ReadFromSocket(SOCKET Socket, long EchoEnabled)
                /* Update Dyn */
                MapJointStatesToStateVector(S);
                D = &S->Dyn;
-               MapStateVectorToBodyStates(D->u,D->x,D->h,D->a,D->uf,D->xf,S);
+               MapStateVectorToBodyStates(D->u,D->x,D->h,D->uf,D->xf,S);
                MotionConstraints(S);
             }
          }

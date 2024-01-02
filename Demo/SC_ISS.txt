@@ -20,7 +20,6 @@ FALSE                         ! Compute Constraint Forces and Torques
 REFPT_CM                      ! Mass Props referenced to REFPT_CM or REFPT_JOINT
 FALSE                         ! Flex Active
 FALSE                         ! Include 2nd Order Flex Terms
-NONE                        ! Shaker File Name
 2.0                           ! Drag Coefficient
 ************************************************************************
 ************************* Body Parameters ******************************
@@ -32,7 +31,6 @@ NONE                        ! Shaker File Name
 0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
 0.0  0.0  0.0                 ! Location of mass center, m
 0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
-0.0  0.0  0.0                 ! Constant Embedded Magnetic Dipole (A-m^2)
 ISS_MainBody.obj              ! Geometry Input File Name
 NONE                        ! Node File Name
 NONE                          ! Flex File Name
@@ -42,7 +40,6 @@ NONE                          ! Flex File Name
 0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
 0.0  0.0  0.0                 ! Location of mass center, m
 0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
-0.0  0.0  0.0                 ! Constant Embedded Magnetic Dipole (A-m^2)
 ISS_SolarTruss.obj            ! Geometry Input File Name
 NONE                        ! Node File Name
 NONE                          ! Flex File Name
@@ -52,7 +49,6 @@ NONE                          ! Flex File Name
 0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
 0.0  0.0  0.0                 ! Location of mass center, m
 0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
-0.0  0.0  0.0                 ! Constant Embedded Magnetic Dipole (A-m^2)
 ISS_SolarTruss.obj            ! Geometry Input File Name
 NONE                        ! Node File Name
 NONE                          ! Flex File Name
@@ -62,7 +58,6 @@ NONE                          ! Flex File Name
 0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
 0.0  0.0  0.0                 ! Location of mass center, m
 0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
-0.0  0.0  0.0                 ! Constant Embedded Magnetic Dipole (A-m^2)
 ISS_SolarPanel.obj            ! Geometry Input File Name
 NONE                        ! Node File Name
 NONE                          ! Flex File Name
@@ -72,7 +67,6 @@ NONE                          ! Flex File Name
 0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
 0.0  0.0  0.0                 ! Location of mass center, m
 0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
-0.0  0.0  0.0                 ! Constant Embedded Magnetic Dipole (A-m^2)
 ISS_SolarPanel.obj            ! Geometry Input File Name
 NONE                        ! Node File Name
 NONE                          ! Flex File Name
@@ -82,7 +76,6 @@ NONE                          ! Flex File Name
 0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
 0.0  0.0  0.0                 ! Location of mass center, m
 0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
-0.0  0.0  0.0                 ! Constant Embedded Magnetic Dipole (A-m^2)
 ISS_SolarPanel.obj            ! Geometry Input File Name
 NONE                        ! Node File Name
 NONE                          ! Flex File Name
@@ -92,7 +85,6 @@ NONE                          ! Flex File Name
 0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
 0.0  0.0  0.0                 ! Location of mass center, m
 0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
-0.0  0.0  0.0                 ! Constant Embedded Magnetic Dipole (A-m^2)
 ISS_SolarPanel.obj            ! Geometry Input File Name
 NONE                        ! Node File Name
 NONE                          ! Flex File Name
@@ -102,7 +94,6 @@ NONE                          ! Flex File Name
 0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
 0.0  0.0  0.0                 ! Location of mass center, m
 0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
-0.0  0.0  0.0                 ! Constant Embedded Magnetic Dipole (A-m^2)
 ISS_SolarPanel.obj            ! Geometry Input File Name
 NONE                        ! Node File Name
 NONE                          ! Flex File Name
@@ -112,7 +103,6 @@ NONE                          ! Flex File Name
 0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
 0.0  0.0  0.0                 ! Location of mass center, m
 0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
-0.0  0.0  0.0                 ! Constant Embedded Magnetic Dipole (A-m^2)
 ISS_SolarPanel.obj            ! Geometry Input File Name
 NONE                        ! Node File Name
 NONE                          ! Flex File Name
@@ -122,7 +112,6 @@ NONE                          ! Flex File Name
 0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
 0.0  0.0  0.0                 ! Location of mass center, m
 0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
-0.0  0.0  0.0                 ! Constant Embedded Magnetic Dipole (A-m^2)
 ISS_SolarPanel.obj            ! Geometry Input File Name
 NONE                        ! Node File Name
 NONE                          ! Flex File Name
@@ -132,7 +121,6 @@ NONE                          ! Flex File Name
 0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
 0.0  0.0  0.0                 ! Location of mass center, m
 0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
-0.0  0.0  0.0                 ! Constant Embedded Magnetic Dipole (A-m^2)
 ISS_SolarPanel.obj            ! Geometry Input File Name
 NONE                        ! Node File Name
 NONE                          ! Flex File Name
@@ -142,7 +130,6 @@ NONE                          ! Flex File Name
 0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
 0.0  0.0  0.0                 ! Location of mass center, m
 0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
-0.0  0.0  0.0                 ! Constant Embedded Magnetic Dipole (A-m^2)
 ISS_Radiator.obj              ! Geometry Input File Name
 NONE                        ! Node File Name
 NONE                          ! Flex File Name
@@ -152,7 +139,6 @@ NONE                          ! Flex File Name
 0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
 0.0  0.0  0.0                 ! Location of mass center, m
 0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
-0.0  0.0  0.0                 ! Constant Embedded Magnetic Dipole (A-m^2)
 ISS_Radiator.obj              ! Geometry Input File Name
 NONE                        ! Node File Name
 NONE                          ! Flex File Name
@@ -162,7 +148,6 @@ NONE                          ! Flex File Name
 0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
 0.0  0.0  0.0                 ! Location of mass center, m
 0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
-0.0  0.0  0.0                 ! Constant Embedded Magnetic Dipole (A-m^2)
 ISS_SmSolarPanel.obj          ! Geometry Input File Name
 NONE                        ! Node File Name
 NONE                          ! Flex File Name
@@ -172,7 +157,6 @@ NONE                          ! Flex File Name
 0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
 0.0  0.0  0.0                 ! Location of mass center, m
 0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
-0.0  0.0  0.0                 ! Constant Embedded Magnetic Dipole (A-m^2)
 ISS_SmSolarPanel.obj          ! Geometry Input File Name
 NONE                        ! Node File Name
 NONE                          ! Flex File Name
@@ -182,7 +166,6 @@ NONE                          ! Flex File Name
 0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
 0.0  0.0  0.0                 ! Location of mass center, m
 0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
-0.0  0.0  0.0                 ! Constant Embedded Magnetic Dipole (A-m^2)
 ISS_HGA.obj                   ! Geometry Input File Name
 NONE                        ! Node File Name
 NONE                          ! Flex File Name
@@ -205,7 +188,10 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0  312           ! Go to Bo Static Angles [deg] & Seq
 0.0  25.9  0.0                ! Position wrt inner body origin, m
 0.0   0.0  0.0                ! Position wrt outer body origin, m
-NONE                          ! Parameter File Name
+0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
+0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
+0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
+0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 1 ================================
 ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 0 2                           ! Inner, outer body indices
@@ -221,7 +207,10 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0  312           ! Go to Bo Static Angles [deg] & Seq
 0.0 -25.9  0.0                ! Position wrt inner body origin, m
 0.0   0.0  0.0                ! Position wrt outer body origin, m
-NONE                          ! Parameter File Name
+0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
+0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
+0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
+0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 2 ================================
 ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 1 3                           ! Inner, outer body indices
@@ -237,7 +226,10 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0  312           ! Go to Bo Static Angles [deg] & Seq
 1.434 6.810 0.580             ! Position wrt inner body origin, m
 0.0   0.0  0.0                ! Position wrt outer body origin, m
-NONE                          ! Parameter File Name
+0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
+0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
+0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
+0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 3 ================================
 ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 1 4                           ! Inner, outer body indices
@@ -253,7 +245,10 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0  312           ! Go to Bo Static Angles [deg] & Seq
 -1.349 6.797 -0.750           ! Position wrt inner body origin, m
 0.0   0.0  0.0                ! Position wrt outer body origin, m
-NONE                          ! Parameter File Name
+0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
+0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
+0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
+0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 4 ================================
 ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 1 5                           ! Inner, outer body indices
@@ -269,7 +264,10 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0  312           ! Go to Bo Static Angles [deg] & Seq
 1.115 22.329 0.549            ! Position wrt inner body origin, m
 0.0   0.0  0.0                ! Position wrt outer body origin, m
-NONE                          ! Parameter File Name
+0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
+0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
+0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
+0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 5 ================================
 ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 1 6                           ! Inner, outer body indices
@@ -285,7 +283,10 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0  312           ! Go to Bo Static Angles [deg] & Seq
 -1.086 22.333 -0.826          ! Position wrt inner body origin, m
 0.0   0.0  0.0                ! Position wrt outer body origin, m
-NONE                          ! Parameter File Name
+0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
+0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
+0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
+0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 6 ================================
 ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 2 7                           ! Inner, outer body indices
@@ -301,7 +302,10 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0  312           ! Go to Bo Static Angles [deg] & Seq
 1.434 6.810 0.580             ! Position wrt inner body origin, m
 0.0   0.0  0.0                ! Position wrt outer body origin, m
-NONE                          ! Parameter File Name
+0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
+0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
+0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
+0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 7 ================================
 ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 2 8                           ! Inner, outer body indices
@@ -317,7 +321,10 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0  312           ! Go to Bo Static Angles [deg] & Seq
 -1.349 6.797 -0.750           ! Position wrt inner body origin, m
 0.0   0.0  0.0                ! Position wrt outer body origin, m
-NONE                          ! Parameter File Name
+0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
+0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
+0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
+0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 8 ================================
 ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 2 9                           ! Inner, outer body indices
@@ -333,7 +340,10 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0  312           ! Go to Bo Static Angles [deg] & Seq
 1.115 22.329 0.549            ! Position wrt inner body origin, m
 0.0   0.0  0.0                ! Position wrt outer body origin, m
-NONE                          ! Parameter File Name
+0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
+0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
+0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
+0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 9 ================================
 ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 2 10                          ! Inner, outer body indices
@@ -349,7 +359,10 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0  312           ! Go to Bo Static Angles [deg] & Seq
 -1.086 22.333 -0.826          ! Position wrt inner body origin, m
 0.0   0.0  0.0                ! Position wrt outer body origin, m
-NONE                          ! Parameter File Name
+0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
+0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
+0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
+0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 10 ================================
 ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 0 11                          ! Inner, outer body indices
@@ -365,7 +378,10 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0   0.0   312         ! Go to Bo Static Angles [deg] & Seq
 -1.65 14.70 0.0               ! Position wrt inner body origin, m
 0.0   0.0  0.0                ! Position wrt outer body origin, m
-NONE                          ! Parameter File Name
+0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
+0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
+0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
+0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 11 ================================
 ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 0 12                          ! Inner, outer body indices
@@ -381,7 +397,10 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0   0.0   312         ! Go to Bo Static Angles [deg] & Seq
 -1.65 -14.70  0.0             ! Position wrt inner body origin, m
 0.0  0.0  0.0                 ! Position wrt outer body origin, m
-NONE                          ! Parameter File Name
+0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
+0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
+0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
+0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 12 ================================
 ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 0 13                          ! Inner, outer body indices
@@ -397,7 +416,10 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0  312           ! Go to Bo Static Angles [deg] & Seq
 -26.335 1.910 3.380           ! Position wrt inner body origin, m
 0.0   0.0  0.0                ! Position wrt outer body origin, m
-NONE                          ! Parameter File Name
+0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
+0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
+0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
+0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 13 ================================
 ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 0 14                          ! Inner, outer body indices
@@ -413,7 +435,10 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0  312           ! Go to Bo Static Angles [deg] & Seq
 -26.335 -1.712 3.380          ! Position wrt inner body origin, m
 0.0   0.0  0.0                ! Position wrt outer body origin, m
-NONE                          ! Parameter File Name
+0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
+0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
+0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
+0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 ============================== Joint 14 ================================
 ACTUATED                      ! Type of joint (PASSIVE, ACTUATED, others)
 0 15                          ! Inner, outer body indices
@@ -429,7 +454,10 @@ FALSE  FALSE  FALSE           ! TrnDOF Locked
 0.0   0.0  0.0  312           ! Go to Bo Static Angles [deg] & Seq
 -5.286 -3.846 -4.071          ! Position wrt inner body origin, m
 0.0   0.0  0.0                ! Position wrt outer body origin, m
-NONE                          ! Parameter File Name
+0.0   0.0  0.0                ! Rot Passive Spring Coefficients (Nm/rad)
+0.0   0.0  0.0                ! Rot Passive Damping Coefficients (Nms/rad)
+0.0   0.0  0.0                ! Trn Passive Spring Coefficients (N/m)
+0.0   0.0  0.0                ! Trn Passive Damping Coefficients (Ns/m)
 *************************** Wheel Parameters ***************************
 FALSE                       ! Wheel Drag Active
 FALSE                       ! Wheel Jitter Active
@@ -451,7 +479,6 @@ NONE                          ! Jitter Input File Name
 ************************* Thruster Parameters **************************
 0                             ! Number of Thrusters
 ==============================  Thr 0  =================================
-PULSED                        ! Mode (PULSED or PROPORTIONAL)
  1.0                          ! Thrust Force (N)
 -1.0  0.0  0.0                ! Thrust Axis 
 0                             ! Body

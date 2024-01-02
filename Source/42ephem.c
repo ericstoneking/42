@@ -414,7 +414,6 @@ void SplineToPosVel(struct OrbitType *O)
                   &newline);
                O->NodeDynTime[3] = DateToTime(NodeYear,NodeMonth,NodeDay,
                   NodeHour,NodeMin,NodeSec);
-               O->NodeDynTime[3] += DynTime-CivilTime; /* Adjust from UTC to TT */
                for(j=0;j<3;j++) {
                   O->NodePos[3][j] *= 1000.0;
                   O->NodeVel[3][j] *= 1000.0;
@@ -444,7 +443,6 @@ void SplineToPosVel(struct OrbitType *O)
             &O->ArgP,&O->anom,&O->tp,
             &O->SLR,&O->alpha,&O->rmin,
             &O->MeanMotion,&O->Period);
-         O->tp += SimTime;
       }
       else if (O->Regime == ORB_THREE_BODY) {
          MTxV(LagSys[O->Sys].CLN,x,xn);
@@ -498,8 +496,7 @@ void OrbitMotion(double Time)
                }
             }
             else if (O->Regime == ORB_CENTRAL) {
-               if (O->SplineActive) SplineToPosVel(O);
-               else if (O->J2DriftEnabled) MeanEph2RV(O,Time);
+               if (O->J2DriftEnabled) MeanEph2RV(O,Time);
                else {
                   Eph2RV(O->mu,O->SLR,O->ecc,
                          O->inc,O->RAAN,O->ArgP,
@@ -616,10 +613,9 @@ void Ephemerides(void)
             }
          }
       }
-      else if (EphemOption == EPH_DE430 || EphemOption == EPH_DE440) {
+      else if (EphemOption == EPH_DE430) {
          /* Update DE430 block if needed */
-         if (TT.JulDay > World[SOL].eph.Cheb[1].JD2) 
-            LoadJplEphems(ModelPath,TT.JulDay);
+         if (TT.JulDay > World[SOL].eph.Cheb[1].JD2) LoadDE430(ModelPath,TT.JulDay);
          for(Iw=SOL;Iw<=LUNA;Iw++) {
             W = &World[Iw];
             Eph = &W->eph;

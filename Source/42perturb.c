@@ -526,7 +526,7 @@ void AeroFrcTrq(struct SCType *S)
          G = &Geom[B->GeomTag];
          for(Ipoly=0;Ipoly<G->Npoly;Ipoly++) {
             P = &G->Poly[Ipoly];
-               if (strncmp(Matl[P->Matl].Label,"SHADED",6)) { /* Aero doesn't see shaded polys */
+            if (strcmp(Matl[P->Matl].Label,"INTERIOR")) { /* Aero doesn't see interior polys */
                WoN = VoV(VrelB,P->Norm);
                if (WoN > 0.0) {
                   PolyArea = WoN*P->UnshadedArea;
@@ -579,7 +579,7 @@ void SolPressFrcTrq(struct SCType *S)
             /* Find force and torque on each illuminated polygon */
             for(Ipoly=0;Ipoly<G->Npoly;Ipoly++) {
                P = &G->Poly[Ipoly];
-               if (strncmp(Matl[P->Matl].Label,"SHADED",6)) { /* SRP doesn't see shaded polys */
+               if (strcmp(Matl[P->Matl].Label,"INTERIOR")) { /* SRP doesn't see interior polys */
                   MxV(B->CN,S->svn,svb);
                   SoN = VoV(svb,P->Norm);
                   if (SoN > 0.0) {
@@ -603,20 +603,6 @@ void SolPressFrcTrq(struct SCType *S)
          }
       }
 
-}
-/**********************************************************************/
-void ResidualDipoleTrq(struct SCType *S)
-{
-      struct BodyType *B;
-      double bvb[3],Trq[3];
-      long Ib,i;
-
-      for(Ib=0;Ib<S->Nb;Ib++) {
-         B = &S->B[Ib];
-         MxV(B->CN,S->bvn,bvb);
-         VxV(B->EmbeddedDipole,bvb,Trq);
-         for(i=0;i<3;i++) B->Trq[i] += Trq[i];
-      }
 }
 /**********************************************************************/
 /* A point is fixed in Body B of Spacecraft S.                        */
@@ -660,7 +646,7 @@ void BodyRgnContactFrcTrq(struct SCType *S, long Ibody,
       double FrcP[3];
       double ContactArea;
       double Dist,MinDist;
-      double PosR[3],VelR[3],RelPosR[3],PosRR[3];
+      double PosR[3],VelR[3],RelPosR[3];
       static long HitPoly = 0;
       long OtherPoly;
       long Ib,Ie,i,Done;
@@ -682,13 +668,12 @@ void BodyRgnContactFrcTrq(struct SCType *S, long Ibody,
          /* Use Centroid for proximity */
          /* Find position and velocity of Centroid wrt origin of R */
          FindPosVelR(S,B,Pb->Centroid,PosR,VelR);
-         MxV(R->CN,PosR,PosRR);
 
          /* Find poly (Pr) in Gr closest to Pb */
          Done = 0;
          while(!Done) {
             Done = 1;
-            for(i=0;i<3;i++) RelPosR[i] = PosRR[i] - Gr->Poly[HitPoly].Centroid[i];
+            for(i=0;i<3;i++) RelPosR[i] = PosR[i] - Gr->Poly[HitPoly].Centroid[i];
             MinDist = MAGV(RelPosR);
             /* Check neighboring polys */
             for(Ie=0;Ie<3;Ie++) {
@@ -696,7 +681,7 @@ void BodyRgnContactFrcTrq(struct SCType *S, long Ibody,
                if (E->Poly1 >= 0 && E->Poly2 >= 0) { /* Screen edges of region */
                   OtherPoly = (E->Poly1 == HitPoly ? E->Poly2 : E->Poly1);
                   for(i=0;i<3;i++)
-                     RelPosR[i] = PosRR[i] - Gr->Poly[OtherPoly].Centroid[i];
+                     RelPosR[i] = PosR[i] - Gr->Poly[OtherPoly].Centroid[i];
                   Dist = MAGV(RelPosR);
                   if (Dist < MinDist) {
                      MinDist = Dist;
@@ -726,6 +711,7 @@ void BodyRgnContactFrcTrq(struct SCType *S, long Ibody,
          MxV(CPN,vbrn,VelP);
 
          /* Find contact force */
+         /* printf("Body %ld Poly %ld h = %lf\n",Ibody,Ib,h); */
          FrcP[2] = 0.0;
          FrcP[0] = 0.0;
          FrcP[1] = 0.0;
@@ -737,8 +723,7 @@ void BodyRgnContactFrcTrq(struct SCType *S, long Ibody,
                FrcP[1] = 0.0;
             }
             else {
-               ContactArea = (1.0-PosP[2]/Pb->radius)*Pb->Area;
-               FrcP[2] = -(R->ElastCoef*PosP[2] + R->DampCoef*VelP[2])*ContactArea;
+               FrcP[2] = -(R->ElastCoef*PosP[2] + R->DampCoef*VelP[2])*Pb->Area;
                FrcP[0] = -R->FricCoef*FrcP[2]*VelP[0];
                FrcP[1] = -R->FricCoef*FrcP[2]*VelP[1];
             }
@@ -1044,9 +1029,6 @@ void Perturbations(struct SCType *S)
 
 /* .. Solar Radiation Pressure Forces and Torques */
       if (SolPressActive) SolPressFrcTrq(S);
-      
-/* .. Embedded Magnetic Dipole Torque */
-      if (ResidualDipoleActive) ResidualDipoleTrq(S);
 
 /* .. Contact Forces and Torques */
       if (ContactActive) ContactFrcTrq(S);

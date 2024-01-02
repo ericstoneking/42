@@ -171,7 +171,6 @@ struct OrbitType {
    double CLN[3][3]; /* For ZERO, L = N.  For FLIGHT, L = ENU.  For CENTRAL, L = LVLH.  For THREE_BODY, L = XYZ */
    double wln[3]; /* Expressed in N */
    /* Fit spline to data file */
-   long SplineActive;
    double NodeDynTime[4]; /* Sec since J2000 (TT) */
    double NodePos[4][3];
    double NodeVel[4][3];

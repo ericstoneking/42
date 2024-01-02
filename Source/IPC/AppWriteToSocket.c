@@ -10,6 +10,7 @@ void WriteToSocket(SOCKET Socket, struct AcType *AC)
 {
 
       long Isc,Iorb,Iw,Ipfx,i;
+      int Success;
       char AckMsg[5] = "Ack\n";
       char Msg[16384];
       long MsgLen = 0;
@@ -1037,7 +1038,7 @@ void WriteToSocket(SOCKET Socket, struct AcType *AC)
       LineLen = strlen(line);
       memcpy(&Msg[MsgLen],line,LineLen);
       MsgLen += LineLen;
-      send(Socket,Msg,MsgLen,0);
+      Success = send(Socket,Msg,MsgLen,0);
 
       /* Wait for Ack */
       recv(Socket,AckMsg,5,0);
