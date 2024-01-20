@@ -55,8 +55,9 @@ void TimeToDate(double Time, long *Year, long *Month, long *Day,
 long MD2DOY(long Year, long Month, long Day);
 void DOY2MD(long Year, long DayOfYear, long *Month, long *Day);
 double JD2GMST(double JD);
-double GpsTimeToJD(long GpsRollover, long GpsWeek, double GpsSecond);
-void JDToGpsTime(double JD, long *GpsRollover, long *GpsWeek, double *GpsSecond);
+void GpsTimeToGpsDate(double GpsTime, long *GpsRollover, long *GpsWeek, 
+   double *GpsSecond);
+double GpsDateToGpsTime(long GpsRollover, long GpsWeek, double GpsSecond);
 double usec(void);
 void RealSystemTime(long *Year, long *DOY, long *Month, long *Day,
                    long *Hour, long *Minute, double *Second, double LSB);

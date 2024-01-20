@@ -101,7 +101,7 @@ long AdvanceTime(void)
                &UTC.Hour,&UTC.Minute,&UTC.Second,DTSIM);
             UTC.doy = MD2DOY(UTC.Year,UTC.Month,UTC.Day);
 
-            JDToGpsTime(TT.JulDay,&GpsRollover,&GpsWeek,&GpsSecond);
+            GpsTimeToGpsDate(GpsTime,&GpsRollover,&GpsWeek,&GpsSecond);
 
             break;
          case REAL_TIME :
@@ -125,7 +125,7 @@ long AdvanceTime(void)
                &UTC.Hour,&UTC.Minute,&UTC.Second,DTSIM);
             UTC.doy = MD2DOY(UTC.Year,UTC.Month,UTC.Day);
 
-            JDToGpsTime(TT.JulDay,&GpsRollover,&GpsWeek,&GpsSecond);
+            GpsTimeToGpsDate(GpsTime,&GpsRollover,&GpsWeek,&GpsSecond);
 
             break;
          case EXTERNAL_TIME :
@@ -143,6 +143,7 @@ long AdvanceTime(void)
                UTC.Hour,UTC.Minute,UTC.Second);
             AtomicTime = CivilTime + LeapSec;
             DynTime = AtomicTime + 32.184;
+            GpsTime = AtomicTime - 19.0;
 
             TT.JulDay = TimeToJD(DynTime);
             TimeToDate(DynTime,&TT.Year,&TT.Month,&TT.Day,
@@ -152,7 +153,7 @@ long AdvanceTime(void)
             UTC.JulDay = TimeToJD(CivilTime);
             UTC.doy = MD2DOY(UTC.Year,UTC.Month,UTC.Day);
 
-            JDToGpsTime(TT.JulDay,&GpsRollover,&GpsWeek,&GpsSecond);
+            GpsTimeToGpsDate(GpsTime,&GpsRollover,&GpsWeek,&GpsSecond);
             DynTime0 = DynTime - SimTime;
 
             break;
@@ -163,6 +164,7 @@ long AdvanceTime(void)
                UTC.Hour,UTC.Minute,UTC.Second);
             AtomicTime = CivilTime + LeapSec;
             DynTime = AtomicTime + 32.184;
+            GpsTime = AtomicTime - 19.0;
 
             TT.JulDay = TimeToJD(DynTime);
             TimeToDate(DynTime,&TT.Year,&TT.Month,&TT.Day,
@@ -172,7 +174,7 @@ long AdvanceTime(void)
             UTC.JulDay = TimeToJD(CivilTime);
             UTC.doy = MD2DOY(UTC.Year,UTC.Month,UTC.Day);
 
-            JDToGpsTime(TT.JulDay,&GpsRollover,&GpsWeek,&GpsSecond);
+            GpsTimeToGpsDate(GpsTime,&GpsRollover,&GpsWeek,&GpsSecond);
             SimTime = DynTime - DynTime0;
             break;
       }

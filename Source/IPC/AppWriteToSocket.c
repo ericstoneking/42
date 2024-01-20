@@ -103,6 +103,14 @@ void WriteToSocket(SOCKET Socket, struct AcType *AC)
          MsgLen += LineLen;
          if (AC->EchoEnabled) printf("%s",line);
 
+         sprintf(line,"SC[%ld].AC.Thr[%ld].ThrustLevelCmd = %18.12le\n",
+            Isc,i,
+            AC->Thr[i].ThrustLevelCmd);
+         LineLen = strlen(line);
+         memcpy(&Msg[MsgLen],line,LineLen);
+         MsgLen += LineLen;
+         if (AC->EchoEnabled) printf("%s",line);
+
       }
 
       sprintf(line,"SC[%ld].AC.Cmd.AngRate = %18.12le %18.12le %18.12le\n",

@@ -4549,7 +4549,7 @@ void InitSim(int argc, char **argv)
       UTC.JulDay = TimeToJD(CivilTime);
       UTC.doy = MD2DOY(UTC.Year,UTC.Month,UTC.Day);
       
-      JDToGpsTime(TT.JulDay,&GpsRollover,&GpsWeek,&GpsSecond);
+      GpsTimeToGpsDate(GpsTime,&GpsRollover,&GpsWeek,&GpsSecond);
 
 /* .. Load Sun and Planets */
       LoadSun();
