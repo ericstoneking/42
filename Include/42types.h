@@ -326,10 +326,10 @@ struct WhlType {
 
 struct MTBType {
    /*~ Internal Variables ~*/
-   double M;
+   double M; /* Magnetic moment, [A-m^2]*/
    double A[3]; /* Axis vector wrt Body 0 */
-   double Mmax;
-   double Mcmd;
+   double Mmax; /* Max magnetic moment, [A-m^2]*/
+   double Mcmd; /* Commanded magnetic moment, [A-m^2]*/
    double Trq[3]; /* Exerted on Body 0, expressed in B[0] frame */
    long Node;
    struct DelayType *Delay; /* For injecting delay into control loops */
