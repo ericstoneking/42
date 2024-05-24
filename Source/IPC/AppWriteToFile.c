@@ -83,6 +83,12 @@ void WriteToFile(FILE *StateFile, struct AcType *AC)
          fprintf(StateFile,"%s",line);
          if (AC->EchoEnabled) printf("%s",line);
 
+         sprintf(line,"SC[%ld].AC.Thr[%ld].ThrustLevelCmd = %18.12le\n",
+            Isc,i,
+            AC->Thr[i].ThrustLevelCmd);
+         fprintf(StateFile,"%s",line);
+         if (AC->EchoEnabled) printf("%s",line);
+
       }
 
       sprintf(line,"SC[%ld].AC.Cmd.AngRate = %18.12le %18.12le %18.12le\n",

@@ -24,7 +24,7 @@ uniform float WorldRad;
 uniform vec3 PosEyeW;
 uniform mat3 CEF;
 uniform mat3 CWE;
-uniform float Width; 
+uniform float TexWidth; 
                                                                        
 varying vec3 ViewVecInPlane;                                                
 
@@ -72,7 +72,7 @@ void main(void)
          float r = length(ViewVecInPlane);
          float DistScale = 1.0/(r*r); /* Corner pixels look smaller due to distance */
          float CosScale = 1.0/r; /* Pixel is tilted from LOS to F */
-         float PixelScale = 4.0/Width/Width; /* Face area is 4.0 */
+         float PixelScale = 4.0/TexWidth/TexWidth; /* Face area is 4.0 */
          float ViewScale = -ViewVecE.z; /* cos of angle from E axis */
          float PiScale = 1.0/3.1415926535897; /* So integral over hemisphere = 1.0 */
          float ScaleFactor = PixelScale*DistScale*CosScale*ViewScale*PiScale;

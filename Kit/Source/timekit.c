@@ -273,36 +273,32 @@ double JD2GMST(double JD)
 
 }
 /**********************************************************************/
-/* GPS Epoch is 6 Jan 1980 00:00:00.0 which is JD = 2444244.5         */
-/* GPS Time is expressed in weeks and seconds                         */
-/* GPS Time rolls over every 1024 weeks                               */
-/* This function yields JD in TT                                      */
-double GpsTimeToJD(long GpsRollover, long GpsWeek, double GpsSecond)
-{
-      double DaysSinceWeek,DaysSinceRollover,DaysSinceEpoch,JD;
-
-      DaysSinceWeek = GpsSecond/86400.0;
-      DaysSinceRollover = DaysSinceWeek + 7.0*GpsWeek;
-      DaysSinceEpoch = DaysSinceRollover + 7168.0*GpsRollover;
-      JD = DaysSinceEpoch + 2444244.5;
-
-      return(JD);
-}
-/**********************************************************************/
-/* GPS Epoch is 6 Jan 1980 00:00:00.0 which is JD = 2444244.5         */
-/* GPS Time is expressed in weeks and seconds                         */
-/* GPS Time rolls over every 1024 weeks                               */
-/* This function requires JD in TT                                    */
-void JDToGpsTime(double JD, long *GpsRollover, long *GpsWeek, double *GpsSecond)
+/* GPS Epoch is 6 Jan 1980 00:00:00.0 UTC                             */
+/* which is 6 Jan 1980 00:00:19.0 TAI                                 */
+/* J2000 is 1 Jan 2000 12:00:00.0 TT                                  */
+/* which is 1 Jan 2000 11:59:27.816 TAI                               */
+/* so J2000-GPS epoch is 7300.5 days minus (19+32.184) sec            */
+void GpsTimeToGpsDate(double GpsTime, long *GpsRollover, long *GpsWeek, 
+   double *GpsSecond)
 {
       double DaysSinceEpoch, DaysSinceRollover, DaysSinceWeek;
 
-      DaysSinceEpoch = JD - 2444244.5;
+      DaysSinceEpoch = 7300.5 + GpsTime/86400.0;
       *GpsRollover = (long) (DaysSinceEpoch/7168.0);
       DaysSinceRollover = DaysSinceEpoch - 7168.0*((double) *GpsRollover);
       *GpsWeek = (long) (DaysSinceRollover/7.0);
       DaysSinceWeek = DaysSinceRollover - 7.0*((double) *GpsWeek);
       *GpsSecond = DaysSinceWeek*86400.0;
+}
+/**********************************************************************/
+/* GPS Epoch is 6 Jan 1980 00:00:00.0 UTC                             */
+/* which is 6 Jan 1980 00:00:19.0 TAI                                 */
+/* J2000 is 1 Jan 2000 12:00:00.0 TT                                  */
+/* which is 1 Jan 2000 11:59:27.816 TAI                               */
+/* so J2000-GPS epoch is 7300.5 days minus (19+32.184) sec            */
+double GpsDateToGpsTime(long GpsRollover, long GpsWeek, double GpsSecond)
+{
+      return(((GpsRollover*1024.0+GpsWeek)*7.0-7300.5)*86400.0+GpsSecond); 
 }
 
 /**********************************************************************/

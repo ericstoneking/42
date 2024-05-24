@@ -131,7 +131,7 @@ Z_AXIS                      ! Boresight Axis X_AXIS, Y_AXIS, or Z_AXIS
 0.25                        ! Sample Time,sec
 -90.0  90.0  00.0  321      ! Mounting Angles (deg), Seq in Body
 Z_AXIS                      ! Boresight Axis X_AXIS, Y_AXIS, or Z_AXIS
-8.0   8.0                   ! H, V FOV Size, deg
+28.0   28.0                   ! H, V FOV Size, deg
 30.0  10.0  10.0            ! Sun, Earth, Moon Exclusion Angles, deg
 2.0  2.0  20.0              ! Noise Equivalent Angle, arcsec RMS
 0                           ! Node

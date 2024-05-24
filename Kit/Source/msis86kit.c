@@ -686,7 +686,8 @@ doublereal globe5_(real *yrd, real *sec, real *lat, real *long__, real *tloc,
     static real c__;
     static integer i__;
     static real s, c2, c4, f1, f2, s2, p44, p45, t71, t72, t81, t82, cd14,
-       cd32, cd18, cd39, c2d14, exp1, exp2;
+       cd32, cd18, cd39, exp1, exp2;
+    /* static real c2d14; */
     /* Subroutine */ int tselec_86(real *);
 
 /*       CALCULATE G(L) FUNCTION FOR MSIS-86/CIRA 1986 */
@@ -772,7 +773,7 @@ L16:
    cd14 = cos(dr * (lpoly_1.day - p[14]));
     }
     if (lpoly_1.day != dayl || p[14] != p14) {
-   c2d14 = cos(dr * 2 * (lpoly_1.day - p[14]));
+   /* c2d14 = cos(dr * 2 * (lpoly_1.day - p[14])); */
     }
     if (lpoly_1.day != dayl || p[18] != p18) {
    cd18 = cos(dr * 2.f * (lpoly_1.day - p[18]));

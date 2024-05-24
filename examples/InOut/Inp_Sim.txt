@@ -1,8 +1,8 @@
 <<<<<<<<<<<<<<<<<  42: The Mostly Harmless Simulator  >>>>>>>>>>>>>>>>>
 ************************** Simulation Control **************************
 FAST                            !  Time Mode (FAST, REAL, EXTERNAL, or NOS3)
-5000.0   0.1                    !  Sim Duration, Step Size [sec]
-5.0                             !  File Output Interval [sec]
+1000.0    0.1                   !  Sim Duration, Step Size [sec]
+10.0                            !  File Output Interval [sec]
 0                               !  RNG Seed
 TRUE                            !  Graphics Front End?
 Inp_Cmd.txt                     !  Command Script File Name
@@ -11,10 +11,10 @@ Inp_Cmd.txt                     !  Command Script File Name
 TRUE   Orb_LEO.txt              !  Input file name for Orb 0
 *****************************  Spacecraft  *****************************
 1                               !  Number of Spacecraft
-TRUE  0 SC_Simple.txt           !  Existence, RefOrb, Input file for SC 0
+TRUE 0 SC_Simple.txt            !  Existence, RefOrb, Input file for SC 0
 ***************************** Environment  *****************************
-10 18 2025                      !  Date (UTC) (Month, Day, Year)
-08 30 00.00                     !  Time (UTC) (Hr,Min,Sec)
+07 10 2029                      !  Date (UTC) (Month, Day, Year)
+08 30 10.00                     !  Time (UTC) (Hr,Min,Sec)
 37.0                            !  Leap Seconds (sec)
 USER                            !  F10.7, Ap (USER, NOMINAL or TWOSIGMA)
 230.0                           !  USER-provided F10.7
@@ -47,7 +47,7 @@ TRUE                            !  Neptune and its moons
 TRUE                            !  Pluto and its moons
 FALSE                           !  Asteroids and Comets
 ***************** Lagrange Point Systems of Interest ******************
-FALSE                           !  Earth-Moon
+TRUE                            !  Earth-Moon
 FALSE                           !  Sun-Earth
 FALSE                           !  Sun-Jupiter
 ************************* Ground Stations ***************************

@@ -57,7 +57,6 @@ def WriteProlog():
       outfile.write("      long Isc,Iorb,Iw,Ipfx,i;\n")
       
       if Pipe == "Socket":
-         outfile.write("      int Success;\n")
          outfile.write("      char AckMsg[5] = \"Ack\\n\";\n")
          outfile.write("      char Msg[16384];\n")
          outfile.write("      long MsgLen = 0;\n")
@@ -168,9 +167,8 @@ def ReadProlog():
       #endif   
       
       if Pipe == "Socket":
-         outfile.write("      long MsgLen;\n\n")
+         outfile.write("      \n")
          outfile.write("      memset(Msg,'\\0',16384);\n")
-         outfile.write("      MsgLen = 0;\n\n")
          outfile.write("      NumBytes = recv(Socket,Msg,16384,0);\n")
          outfile.write("      if (NumBytes <= 0) return; /* Bail out if no message */\n\n")
          outfile.write("      Done = 0;\n")
@@ -231,7 +229,7 @@ def WriteEpilog():
          outfile.write("      LineLen = strlen(line);\n")
          outfile.write("      memcpy(&Msg[MsgLen],line,LineLen);\n")
          outfile.write("      MsgLen += LineLen;\n")
-         outfile.write("      Success = send(Socket,Msg,MsgLen,0);\n\n")
+         outfile.write("      send(Socket,Msg,MsgLen,0);\n\n")
          outfile.write("      /* Wait for Ack */\n");
          outfile.write("      recv(Socket,AckMsg,5,0);\n")
       elif Pipe == "Gmsec":
@@ -296,13 +294,14 @@ def TimeRefreshCode():
          outfile.write("         DOY2MD(UTC.Year,UTC.doy,&UTC.Month,&UTC.Day);\n")
          outfile.write("         CivilTime = DateToTime(UTC.Year,UTC.Month,UTC.Day,UTC.Hour,UTC.Minute,UTC.Second);\n")
          outfile.write("         AtomicTime = CivilTime + LeapSec;\n")
+         outfile.write("         GpsTime = AtomicTime - 19.0;\n")
          outfile.write("         DynTime = AtomicTime + 32.184;\n")
          outfile.write("         TT.JulDay = TimeToJD(DynTime);\n")
          outfile.write("         TimeToDate(DynTime,&TT.Year,&TT.Month,&TT.Day,\n")
          outfile.write("            &TT.Hour,&TT.Minute,&TT.Second,DTSIM);\n")
          outfile.write("         TT.doy = MD2DOY(TT.Year,TT.Month,TT.Day);\n")
          outfile.write("         UTC.JulDay = TimeToJD(CivilTime);\n")
-         outfile.write("         JDToGpsTime(TT.JulDay,&GpsRollover,&GpsWeek,&GpsSecond);\n")
+         outfile.write("         GpsTimeToGpsDate(GpsTime,&GpsRollover,&GpsWeek,&GpsSecond);\n")
          outfile.write("         SimTime = DynTime-DynTime0;\n")
          outfile.write("      }\n\n")
       else:
@@ -647,7 +646,7 @@ def main():
       VerbList = {"WriteTo","ReadFrom"}
       PipeList = {"Socket","Gmsec","File","Cmd"}
       
-      infile = open('42.json','rU')
+      infile = open('42.json')
       StructDict = json.load(infile)
       infile.close()
       
@@ -791,7 +790,7 @@ def main():
                   #endif  
                
                   outfile.close()  
-                  infile = open("TempIpc.c","rU")    
+                  infile = open("TempIpc.c")    
                   outfile = open("../Source/IPC/"+Prog+Verb+Pipe+".c","w")
                   StripEmptyLoops(infile,outfile)
                   infile.close()

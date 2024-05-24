@@ -3011,6 +3011,7 @@ void CheckOpenGLProperties(void)
 
       glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB,&MaxTex);
       printf("OpenGL Max Texture Units: %i\n",(int) MaxTex);
+
 }
 /**********************************************************************/
 /*  The Hammer (or Aitoff-Hammer) projection is an equal-area map     */

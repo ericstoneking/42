@@ -483,6 +483,7 @@ void InitOrbit(struct OrbitType *O)
 
 /* .. Orbit Parameters */
       O->Epoch = DynTime;
+      O->SplineActive = FALSE;
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
@@ -679,6 +680,7 @@ void InitOrbit(struct OrbitType *O)
             }
             else if (ElementType == INP_SPLINE) {
                O->SplineFile = FileOpen(InOutPath,ElementFileName,"rt");
+               O->SplineActive = TRUE;
                for(i=0;i<4;i++) {
                   fscanf(O->SplineFile," %ld:%ld:%ld:%ld:%ld:%lf %lf %lf %lf %lf %lf %lf %[\n]",
                      &NodeYear,&NodeMonth,&NodeDay,&NodeHour,&NodeMin,&NodeSec,
@@ -687,6 +689,7 @@ void InitOrbit(struct OrbitType *O)
                      &newline);
                   O->NodeDynTime[i] = DateToTime(NodeYear,NodeMonth,NodeDay,
                      NodeHour,NodeMin,NodeSec);
+                  O->NodeDynTime[i] += DynTime-CivilTime; /* Adjust from UTC to TT */
                   for(j=0;j<3;j++) {
                      O->NodePos[i][j] *= 1000.0;
                      O->NodeVel[i][j] *= 1000.0;
@@ -1610,7 +1613,6 @@ void InitShakers(struct SCType *S)
 {
       FILE *infile;
       long Ish,It;
-      long FrcTrq;
       struct ShakerType *Sh;
       char response[80],junk[80],newline;
       
@@ -1629,7 +1631,7 @@ void InitShakers(struct SCType *S)
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
             fscanf(infile,"%ld %ld %[^\n] %[\n]",&Sh->Body,&Sh->Node,junk,&newline);
             fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline); 
-            FrcTrq = DecodeString(response);
+            Sh->FrcTrq = DecodeString(response);
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
                &Sh->Axis[0],&Sh->Axis[1],&Sh->Axis[2],junk,&newline);
             UNITV(Sh->Axis);   
@@ -2578,7 +2580,7 @@ void InitSpacecraft(struct SCType *S)
                MTxV(O->CLN,S->VelEH,S->VelR);
             }
             else {
-               EHRV2RelRV(O->SMA,MAGV(O->wln),
+               EHRV2RelRV(O->SMA,O->MeanMotion,
                   O->CLN,S->PosEH,S->VelEH,S->PosR,S->VelR);
             }
          }
@@ -4550,7 +4552,7 @@ void InitSim(int argc, char **argv)
       UTC.JulDay = TimeToJD(CivilTime);
       UTC.doy = MD2DOY(UTC.Year,UTC.Month,UTC.Day);
       
-      JDToGpsTime(TT.JulDay,&GpsRollover,&GpsWeek,&GpsSecond);
+      GpsTimeToGpsDate(GpsTime,&GpsRollover,&GpsWeek,&GpsSecond);
 
 /* .. Load Sun and Planets */
       LoadSun();

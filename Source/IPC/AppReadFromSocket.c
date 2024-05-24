@@ -26,11 +26,8 @@ void ReadFromSocket(SOCKET Socket, struct AcType *AC)
       long Year,doy,Hour,Minute;
       double Second;
       long Month,Day;
-      long MsgLen;
-
+      
       memset(Msg,'\0',16384);
-      MsgLen = 0;
-
       NumBytes = recv(Socket,Msg,16384,0);
       if (NumBytes <= 0) return; /* Bail out if no message */
 

@@ -15,7 +15,7 @@
 #include "42.h"
 
 #ifdef _ENABLE_RBT_
-   #include "../../../GSFC/RBT/Source/Rbt.h"
+   void RbtFSW(struct SCType *S);
 #endif
 
 void AcFsw(struct AcType *AC);
@@ -1526,7 +1526,6 @@ void CmgFSW(struct SCType *S)
       double CBL[3][3],qbl[4],qbr[4];
       double CRL[3][3];
       double Axis[4][3],Gim[4][3],H[4];
-      double Gain;
       static double MoveTime = 200.0;
       static double RPYCmd[3] = {1.0,1.0,1.0};
       static double qrl[4];
@@ -1576,7 +1575,7 @@ void CmgFSW(struct SCType *S)
          H[i] = 75.0;
       }
 
-      Gain = CMGLaw4x1DOF(C->Tcmd,Axis,Gim,H,C->AngRateCmd);
+      CMGLaw4x1DOF(C->Tcmd,Axis,Gim,H,C->AngRateCmd);
 
       for(i=0;i<4;i++) {
          AC->G[i].Cmd.AngRate[0] = C->AngRateCmd[i];

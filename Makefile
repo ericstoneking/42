@@ -73,23 +73,21 @@ INOUT = $(PROJDIR)InOut/
 GSFCSRC = $(PROJDIR)/GSFC/Source/
 IPCSRC = $(SRC)IPC/
 
-RBTDIR = $(PROJDIR)../../GSFC/RBT/
-RBTSRC = $(RBTDIR)Source/
 
 ifeq ($(42PLATFORM),__APPLE__)
    # Mac Macros
    CINC = -I /usr/include -I /usr/local/include
    EXTERNDIR =
    # ARCHFLAG = -arch i386
-   ARCHFLAG = -arch x86_64
-   # ARCHFLAG = -arch arm64
+   # ARCHFLAG = -arch x86_64
+   ARCHFLAG = -arch arm64
    # For graphics interface, choose GLUT or GLFW GUI libraries
    # GLUT is well known, but GLFW is better for newer Mac's hires displays
    # OSX fixed their hires GLUT issue.  Keep GLFW around just in case.
    #GLUT_OR_GLFW = _USE_GLFW_
    GLUT_OR_GLFW = _USE_GLUT_
 
-   LFLAGS = -bind_at_load
+   LFLAGS = 
    ifneq ($(strip $(GUIFLAG)),)
       GLINC = -I /System/Library/Frameworks/OpenGL.framework/Headers/ -I /System/Library/Frameworks/GLUT.framework/Headers/
       ifeq ($(strip $(GLUT_OR_GLFW)),_USE_GLUT_)
@@ -200,8 +198,12 @@ else
 endif
 
 ifneq ($(strip $(RBTFLAG)),)
+   RBTDIR = $(PROJDIR)../../GSFC/RBT/
+   RBTSRC = $(RBTDIR)Source/
    RBTOBJ = $(OBJ)RbtFsw.o
 else
+   RBTDIR = 
+   RBTSRC = 
    RBTOBJ =
 endif
 
@@ -241,7 +243,7 @@ $(OBJ)AppWriteToSocket.o $(OBJ)AppReadFromSocket.o $(OBJ)AppWriteToFile.o
 #ANSIFLAGS = -Wstrict-prototypes -pedantic -ansi -Werror
 ANSIFLAGS =
 
-CFLAGS = -fpic -Wall -Wshadow -Wno-deprecated $(XWARN) -g  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(INC) -I $(KITINC) -I $(KITSRC) $(GMSECINC) -O0 $(ARCHFLAG) $(GUIFLAG) $(GUI_LIB) $(SHADERFLAG) $(CFDFLAG) $(FFTBFLAG) $(GSFCFLAG) $(GMSECFLAG) $(STANDALONEFLAG) $(RBTFLAG)
+CFLAGS = -fpic -Wall -Wshadow -Wno-deprecated $(XWARN) -g  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(INC) -I $(KITINC) -I $(KITSRC) -I $(RBTSRC) $(GMSECINC) -O0 $(ARCHFLAG) $(GUIFLAG) $(GUI_LIB) $(SHADERFLAG) $(CFDFLAG) $(FFTBFLAG) $(GSFCFLAG) $(GMSECFLAG) $(STANDALONEFLAG) $(RBTFLAG)
 
 
 ##########################  Rules to link 42  #############################
@@ -411,7 +413,7 @@ $(OBJ)AppReadFromSocket.o  : $(IPCSRC)AppReadFromSocket.c $(INC)42.h $(INC)AcTyp
 $(OBJ)42nos3.o         : $(SRC)42nos3.c
 	$(CC) $(CFLAGS) -c $(SRC)42nos3.c -o $(OBJ)42nos3.o
 
-$(OBJ)RbtFsw.o         : $(RBTSRC)RbtFsw.c
+$(OBJ)RbtFsw.o         : $(RBTSRC)RbtFsw.c $(RBTSRC)Rbt.h
 	$(CC) $(CFLAGS) -c $(RBTSRC)RbtFsw.c -o $(OBJ)RbtFsw.o
 
 ########################  Miscellaneous Rules  ############################

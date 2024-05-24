@@ -660,7 +660,7 @@ void BodyRgnContactFrcTrq(struct SCType *S, long Ibody,
       double FrcP[3];
       double ContactArea;
       double Dist,MinDist;
-      double PosR[3],VelR[3],RelPosR[3];
+      double PosR[3],VelR[3],RelPosR[3],PosRR[3];
       static long HitPoly = 0;
       long OtherPoly;
       long Ib,Ie,i,Done;
@@ -682,12 +682,13 @@ void BodyRgnContactFrcTrq(struct SCType *S, long Ibody,
          /* Use Centroid for proximity */
          /* Find position and velocity of Centroid wrt origin of R */
          FindPosVelR(S,B,Pb->Centroid,PosR,VelR);
+         MxV(R->CN,PosR,PosRR);
 
          /* Find poly (Pr) in Gr closest to Pb */
          Done = 0;
          while(!Done) {
             Done = 1;
-            for(i=0;i<3;i++) RelPosR[i] = PosR[i] - Gr->Poly[HitPoly].Centroid[i];
+            for(i=0;i<3;i++) RelPosR[i] = PosRR[i] - Gr->Poly[HitPoly].Centroid[i];
             MinDist = MAGV(RelPosR);
             /* Check neighboring polys */
             for(Ie=0;Ie<3;Ie++) {
@@ -695,7 +696,7 @@ void BodyRgnContactFrcTrq(struct SCType *S, long Ibody,
                if (E->Poly1 >= 0 && E->Poly2 >= 0) { /* Screen edges of region */
                   OtherPoly = (E->Poly1 == HitPoly ? E->Poly2 : E->Poly1);
                   for(i=0;i<3;i++)
-                     RelPosR[i] = PosR[i] - Gr->Poly[OtherPoly].Centroid[i];
+                     RelPosR[i] = PosRR[i] - Gr->Poly[OtherPoly].Centroid[i];
                   Dist = MAGV(RelPosR);
                   if (Dist < MinDist) {
                      MinDist = Dist;
@@ -725,7 +726,6 @@ void BodyRgnContactFrcTrq(struct SCType *S, long Ibody,
          MxV(CPN,vbrn,VelP);
 
          /* Find contact force */
-         /* printf("Body %ld Poly %ld h = %lf\n",Ibody,Ib,h); */
          FrcP[2] = 0.0;
          FrcP[0] = 0.0;
          FrcP[1] = 0.0;
@@ -737,7 +737,8 @@ void BodyRgnContactFrcTrq(struct SCType *S, long Ibody,
                FrcP[1] = 0.0;
             }
             else {
-               FrcP[2] = -(R->ElastCoef*PosP[2] + R->DampCoef*VelP[2])*Pb->Area;
+               ContactArea = (1.0-PosP[2]/Pb->radius)*Pb->Area;
+               FrcP[2] = -(R->ElastCoef*PosP[2] + R->DampCoef*VelP[2])*ContactArea;
                FrcP[0] = -R->FricCoef*FrcP[2]*VelP[0];
                FrcP[1] = -R->FricCoef*FrcP[2]*VelP[1];
             }

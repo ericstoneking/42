@@ -910,8 +910,8 @@ struct AlbedoFBOType {
    unsigned int FrameTag;
    unsigned int Height, Width;
    unsigned int RenderTag;
-   unsigned int TexTag[2];
-   float *Tex[2];
+   unsigned int TexTag;
+   float *Tex;
 };
 
 /* Orrery POV is different from POV */
