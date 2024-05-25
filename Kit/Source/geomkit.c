@@ -919,6 +919,7 @@ struct GeomType *LoadWingsObjFile(const char ModelPath[80],const char ObjFilenam
       long NoArraySizesFound;
       double Value,Scale = 1.0;
       double Val1,Val2,Val3;
+      char response[40];
       long Seq;
       double RotM[3][3] = {{1.0,0.0,0.0},{0.0,1.0,0.0},{0.0,0.0,1.0}};
       double TransVec[3] = {0.0,0.0,0.0};
@@ -1033,6 +1034,14 @@ struct GeomType *LoadWingsObjFile(const char ModelPath[80],const char ObjFilenam
          fgets(line,512,infile);
          if (sscanf(line,"# Scale up by %lf to actual size",&Value) == 1) {
             Scale = Value;
+         }
+         else if (sscanf(line,"# Scale down by %lf to actual size",&Value) == 1) {
+            Scale = 1.0/Value;
+         }
+         else if (sscanf(line,"# Units = %s",response) == 1) {
+            if (!strncmp(response,"mm",2)) Scale = 0.001;
+            else if (!strncmp(response,"in",2)) Scale = 0.0254;
+            else if (!strncmp(response,"ft",2)) Scale = 0.3048;
          }
          else if (sscanf(line,"# Translate by [%lf %lf %lf]",
             &Val1,&Val2,&Val3) == 3) {

@@ -1328,7 +1328,7 @@ void FindInertiaTrq(struct SCType *S)
       double H[3],wxH[3],Ia[3];
       double cPexa[3];
       double CAccR[3];
-      long Ib,Iw,i,Nf;
+      long Ib,Iw,i;
 
       /* -I*AlphaR - wxH for all bodies */
       for(Ib=0;Ib<S->Nb;Ib++) {
@@ -1354,7 +1354,6 @@ void FindInertiaTrq(struct SCType *S)
          /* -(c + Pf*eta) x AccR */
          for(Ib=0;Ib<S->Nb;Ib++) {
             B = &S->B[Ib];
-            Nf = B->Nf;
             MxV(B->CN,B->AccR,CAccR);
             MxV(B->cplusPeta,CAccR,cPexa);
             for(i=0;i<3;i++) B->InertiaTrq[i] += -cPexa[i];
@@ -2524,7 +2523,6 @@ void OneBodyEOM(double *u, double *x, double *h,
 /**********************************************************************/
 void OneBodyRK4(struct SCType *S)
 {
-      struct BodyType *B;
       struct DynType *D;
       struct WhlType *W;
       double *u,*uu,*du,*udot;
@@ -2537,7 +2535,6 @@ void OneBodyRK4(struct SCType *S)
 
       /* Save some typing (and dereferencing) */
       D = &S->Dyn;
-      B = &S->B[0];
       Nw = S->Nw;
       Nf = D->Nf;
 
@@ -2690,10 +2687,7 @@ void OrderNJointPartials(struct JointType *G)
       double Pv[3][3] = {{0.0,0.0,0.0},{0.0,0.0,0.0},{0.0,0.0,0.0}};
       double CPv[3][3];
       long i1,i2,i3,Cyclic,i,j,k;
-      struct BodyType *Bi;
       
-      Bi = G->Bi;
-
       if (G->Init) {
          G->Init = 0;
          
@@ -3759,8 +3753,8 @@ void OrderNMultiBodyRK4(struct SCType *S)
 
       MapStateVectorToBodyStates(D->u,D->x,D->h,D->a,D->uf,D->xf,S); 
       MotionConstraints(S);
+      BodyStatesToNodeStates(S);
       SCMassProps(S);
-
       FindTotalAngMom(S);
 }
 /**********************************************************************/

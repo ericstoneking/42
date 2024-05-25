@@ -1,8 +1,8 @@
 <<<<<<<<<<<<<<<<  42 Graphics Configuration File  >>>>>>>>>>>>>>>>>>>
-1.0                                !  GL Output Interval [sec]
+1.0                               !  GL Output Interval [sec]
 Skymap09.txt                       !  Star Catalog File Name
 TRUE                               !  Map Window Exists
-TRUE                               !  Orrery Window Exists
+FALSE                               !  Orrery Window Exists
 TRUE                               !  Unit Sphere Window Exists
 ******************************* POV *********************************
 FALSE                              !  Pause at Startup

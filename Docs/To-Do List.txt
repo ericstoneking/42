@@ -2,11 +2,7 @@
 
 Sync initial time when EXTERNAL_TIME is active.  Ref git issue #33.
 
-Implement SPLINE orbit for CENTRAL?
-
 Two-sigma low atmo as well as two-sigma high.  Turn if-else-if ladder into table lookup.
-
-Learn how to get modal integrals from NASTRAN/FEMAP.
 
 Covariance analysis for prox ops, cometary ops, maybe attitude slews?
 
@@ -26,8 +22,6 @@ lenses?).
 Import from compressed image files (jpg rather than ppm)
 
 Instrument FOV view.  Use for docking camera as well as instruments.
-
-Migrate ST and CSS windows from SatCam to 42.
 
 Draw ST and CSS FOVs based on SC_ files in addition to Inp_FOV list.
 

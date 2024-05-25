@@ -174,6 +174,12 @@ void ReadFromGmsec(GMSEC_ConnectionMgr ConnMgr,GMSEC_Status status, long EchoEna
                SC[Isc].AC.Thr[i].PulseWidthCmd = DbleVal[0];
             }
 
+            if (sscanf(line,"SC[%ld].AC.Thr[%ld].ThrustLevelCmd = %le",
+               &Isc,&i,
+               &DbleVal[0]) == 3) {
+               SC[Isc].AC.Thr[i].ThrustLevelCmd = DbleVal[0];
+            }
+
             if (sscanf(line,"SC[%ld].AC.Cmd.AngRate = %le %le %le",
                &Isc,
                &DbleVal[0],
@@ -1201,13 +1207,14 @@ void ReadFromGmsec(GMSEC_ConnectionMgr ConnMgr,GMSEC_Status status, long EchoEna
          DOY2MD(UTC.Year,UTC.doy,&UTC.Month,&UTC.Day);
          CivilTime = DateToTime(UTC.Year,UTC.Month,UTC.Day,UTC.Hour,UTC.Minute,UTC.Second);
          AtomicTime = CivilTime + LeapSec;
+         GpsTime = AtomicTime - 19.0;
          DynTime = AtomicTime + 32.184;
          TT.JulDay = TimeToJD(DynTime);
          TimeToDate(DynTime,&TT.Year,&TT.Month,&TT.Day,
             &TT.Hour,&TT.Minute,&TT.Second,DTSIM);
          TT.doy = MD2DOY(TT.Year,TT.Month,TT.Day);
          UTC.JulDay = TimeToJD(CivilTime);
-         JDToGpsTime(TT.JulDay,&GpsRollover,&GpsWeek,&GpsSecond);
+         GpsTimeToGpsDate(GpsTime,&GpsRollover,&GpsWeek,&GpsSecond);
          SimTime = DynTime-DynTime0;
       }
 

@@ -38,7 +38,7 @@ void InitAlbedo(void)
       GLenum Status;
       GLfloat Eye3x3[9] = {1.0,0.0,0.0, 0.0,1.0,0.0, 0.0,0.0,1.0};
       struct AlbedoFBOType *A;
-      GLuint Width = 256; /* Must be power of 2 */
+      GLuint Width = 64; /* Must be power of 2 */
       
       glutInitWindowSize(Width,Width);
       AlbedoWindow = glutCreateWindow("Albedo Workspace");
@@ -54,23 +54,13 @@ void InitAlbedo(void)
       glBindFramebuffer(GL_FRAMEBUFFER,A->FrameTag);
       A->Height = Width;
       A->Width = Width;
-      A->Tex[0] = (float *) calloc(A->Height*A->Width*3,sizeof(float));
-      A->Tex[1] = (float *) calloc(A->Height*A->Width*3,sizeof(float));
+      A->Tex = (float *) calloc(A->Height*A->Width*3,sizeof(float));
 
       /* Create Textures */
-      glGenTextures(1,(GLuint *) &A->TexTag[0]);
-      glBindTexture(GL_TEXTURE_2D,A->TexTag[0]);
-      glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,A->Width,A->Height,0,
-         GL_RGB,GL_FLOAT,NULL);
-      glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-      glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
-      glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-         
-      glGenTextures(1,(GLuint *) &A->TexTag[1]);
-      glBindTexture(GL_TEXTURE_2D,A->TexTag[1]);
-      glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,A->Width,A->Height,0,
-         GL_RGB,GL_FLOAT,NULL);
+      glGenTextures(1,(GLuint *) &A->TexTag);
+      glBindTexture(GL_TEXTURE_2D,A->TexTag);
+      glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,A->Width,A->Height,0,
+         GL_RGBA,GL_FLOAT,NULL);
       glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
       glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
       glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
@@ -80,9 +70,9 @@ void InitAlbedo(void)
       glGenRenderbuffers(1,&A->RenderTag);
       glBindRenderbuffer(GL_RENDERBUFFER,A->RenderTag);
       glRenderbufferStorage(GL_RENDERBUFFER,
-         GL_RGB,A->Width,A->Height);
+         GL_RGBA,A->Width,A->Height);
 
-      glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,A->TexTag[0],0);
+      glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,A->TexTag,0);
 
       Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
       if (Status != GL_FRAMEBUFFER_COMPLETE) {
@@ -126,29 +116,12 @@ void InitAlbedo(void)
       glUniformMatrix3fv(UniLoc,1,1,Eye3x3);
       UniLoc = glGetUniformLocation(AlbedoShaderProgram,"CWE");
       glUniformMatrix3fv(UniLoc,1,1,Eye3x3);
-      UniLoc = glGetUniformLocation(AlbedoShaderProgram,"Width");
-      glUniform1f(UniLoc,256.0);
+      UniLoc = glGetUniformLocation(AlbedoShaderProgram,"TexWidth");
+      glUniform1f(UniLoc,64.0);
 
       ValidateShaderProgram(AlbedoShaderProgram,"Albedo");
 
       glUseProgram(0);
-
-#if 0
-      FileToString("./Kit/Shaders/TexReduceVtx.glsl",&ShaderText,&StrLen);
-      TexReduceVtxShader = TextToShader(ShaderText,GL_VERTEX_SHADER,"TexReduceVtx");
-      free(ShaderText);
-
-      FileToString("./Kit/Shaders/TexReduceFrag.glsl",&ShaderText,&StrLen);
-      TexReduceFragShader = TextToShader(ShaderText,GL_FRAGMENT_SHADER,"TexReduceFrag");
-      free(ShaderText);
-
-      TexReduceShaderProgram = 
-         BuildShaderProgram(TexReduceVtxShader,TexReduceFragShader,"TexReduce"); 
-
-      glUseProgram(TexReduceShaderProgram);
-      ValidateShaderProgram(TexReduceShaderProgram,"TexReduce");
-      glUseProgram(0);
-#endif
       
 }
 /**********************************************************************/
@@ -258,7 +231,7 @@ void FindAlbedo(struct SCType *S, struct CssType *CSS)
       glBindFramebuffer(GL_FRAMEBUFFER,A->FrameTag);
       glBindRenderbuffer(GL_RENDERBUFFER,A->RenderTag);
 
-      glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,A->TexTag[0],0);
+      glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,A->TexTag,0);
 
       /* Accumulate renders, read out only once */      
       glClear(GL_COLOR_BUFFER_BIT); 
@@ -278,43 +251,15 @@ void FindAlbedo(struct SCType *S, struct CssType *CSS)
          glEnd();
          
       }
-#if 1
       /* Readout from FBO */
-      glReadPixels(0,0,A->Width,A->Height,GL_RGB,GL_FLOAT,A->Tex[0]);
+      /* glReadPixels is bottleneck.  To optimize, consider processing all CSS's */
+      /* at once, then have only one glReadPixels call to retrieve all Albedo */
+      glReadPixels(0,0,A->Width,A->Height,GL_RGBA,GL_FLOAT,A->Tex);
       for(j=0;j<A->Height;j++) {
          for(i=0;i<A->Width;i++) {
-            CSS->Albedo += A->Tex[0][3*(A->Width*j+i)]; /* Scaled in shader */
+            CSS->Albedo += A->Tex[4*(A->Width*j+i)]; /* Scaled in shader */
          }
       }
-#else
-      /* Not ready for prime time */
-      glMatrixMode(GL_PROJECTION);
-      glPushMatrix();
-      glLoadIdentity();
-      gluOrtho2D(-0.5,((float) A->Width)-0.5,-0.5,((float) A->Height)-0.5);
-      glMatrixMode(GL_MODELVIEW);
-      /* Reduce Tex */
-      N = A->Width/2;
-      glUseProgram(TexReductionProgram);
-      do {
-         glActiveTexture(GL_TEXTURE0);
-         glBindTexture(GL_TEXTURE_2D,A->TexTag);
-         glClear(GL_COLOR_BUFFER_BIT);  
-         glBegin(GL_QUADS);
-            glVertex2i(0,0);
-            glVertex2i(N-1,0);
-            glVertex2i(N-1,N-1);
-            glVertex2i(0,N-1);
-         glEnd();
-         glReadPixels(0,0,N,N,GL_RGB,GL_FLOAT,A->Tex);
-         N /= 2;
-      } while(N > 1);
-      CSS->Albedo += A->Tex[0];
-      
-      glMatrixMode(GL_PROJECTION);
-      glPopMatrix();
-      glMatrixMode(GL_MODELVIEW);
-#endif      
 
       glBindRenderbuffer(GL_RENDERBUFFER,0);
       glBindFramebuffer(GL_FRAMEBUFFER,0);
@@ -323,4 +268,6 @@ void FindAlbedo(struct SCType *S, struct CssType *CSS)
       glPopMatrix();
       glMatrixMode(GL_MODELVIEW);
       glPopMatrix();
+      
+      
 }

@@ -168,13 +168,14 @@ void GmatReport(void)
 /*********************************************************************/
 void Report(void)
 {
-      static FILE *timefile,*DynTimeFile;
+      static FILE *timefile,*DynTimeFile,*UtcDateFile;
       static FILE **xfile, **ufile, **xffile, **uffile;
       static FILE **ConstraintFile;
       static FILE *PosNfile,*VelNfile,*qbnfile,*wbnfile;
       static FILE *PosWfile,*VelWfile;
       static FILE *PosRfile,*VelRfile;
       static FILE *Hvnfile,*KEfile;
+      static FILE *Hvbfile;
       static FILE *svnfile,*svbfile;
       static FILE *RPYfile;
       static FILE *Hwhlfile;
@@ -184,6 +185,8 @@ void Report(void)
       static FILE *IllumFile;
       //static FILE *ProjAreaFile;
       static FILE *AccFile;
+      //static FILE *Kepfile;
+      //static FILE *EHfile;
       static char First = TRUE;
       long Isc,i;
       struct DynType *D;
@@ -192,6 +195,7 @@ void Report(void)
       double WorldAngVel[3],wxR[3],VelN[3];
       double PosW[3],VelW[3],PosR[3],VelR[3];
       double CRL[3][3] = {{1.0,0.0,0.0},{0.0,1.0,0.0},{0.0,0.0,1.0}};
+      //double SMA,ecc,inc,RAAN,ArgP,anom,tp,SLR,alpha,rmin,MeanMotion,Period;
       char s[40];
       //double ZAxis[3] = {0.0,0.0,1.0};
 
@@ -199,6 +203,7 @@ void Report(void)
          First = FALSE;
          timefile = FileOpen(InOutPath,"time.42","w");
          DynTimeFile = FileOpen(InOutPath,"DynTime.42","w");
+         UtcDateFile = FileOpen(InOutPath,"UTC.42","w");
 
          ufile = (FILE **) calloc(Nsc,sizeof(FILE *));
          xfile = (FILE **) calloc(Nsc,sizeof(FILE *));
@@ -232,12 +237,15 @@ void Report(void)
          qbnfile = FileOpen(InOutPath,"qbn.42","w");
          wbnfile = FileOpen(InOutPath,"wbn.42","w");
          Hvnfile = FileOpen(InOutPath,"Hvn.42","w");
+         Hvbfile = FileOpen(InOutPath,"Hvb.42","w");
          svnfile = FileOpen(InOutPath,"svn.42","w");
          svbfile = FileOpen(InOutPath,"svb.42","w");
          KEfile = FileOpen(InOutPath,"KE.42","w");
          //ProjAreaFile = FileOpen(InOutPath,"ProjArea.42","w");
          RPYfile = FileOpen(InOutPath,"RPY.42","w");
          Hwhlfile = FileOpen(InOutPath,"Hwhl.42","w");
+         //Kepfile = FileOpen(InOutPath,"KepElem.42","w");
+         //EHfile = FileOpen(InOutPath,"EH.42","w");
 
          if (SC[0].Nmtb > 0) {
             MTBfile = FileOpen(InOutPath,"MTB.42","w");
@@ -260,6 +268,8 @@ void Report(void)
       if (OutFlag) {
          fprintf(timefile,"%lf\n",SimTime);
          fprintf(DynTimeFile,"%lf\n",DynTime);
+         fprintf(UtcDateFile," %ld:%02ld:%02ld:%02ld:%02ld:%09.6lf\n",
+            UTC.Year,UTC.Month,UTC.Day,UTC.Hour,UTC.Minute,UTC.Second);
          for(Isc=0;Isc<Nsc;Isc++) {
             if (SC[Isc].Exists) {
                D = &SC[Isc].Dyn;
@@ -318,6 +328,8 @@ void Report(void)
                SC[0].B[0].wn[0],SC[0].B[0].wn[1],SC[0].B[0].wn[2]);
             fprintf(Hvnfile,"%18.12le %18.12le %18.12le\n",
                SC[0].Hvn[0],SC[0].Hvn[1],SC[0].Hvn[2]);
+            fprintf(Hvbfile,"%18.12le %18.12le %18.12le\n",
+               SC[0].Hvb[0],SC[0].Hvb[1],SC[0].Hvb[2]);
             fprintf(svnfile,"%18.12le %18.12le %18.12le\n",
                SC[0].svn[0],SC[0].svn[1],SC[0].svn[2]);
             fprintf(svbfile,"%18.12le %18.12le %18.12le\n",
@@ -358,13 +370,21 @@ void Report(void)
                fprintf(AlbedoFile,"\n");
             }
             
+            //RV2Eph(DynTime,Orb[0].mu,SC[0].PosN,SC[0].VelN,
+            //   &SMA,&ecc,&inc,&RAAN,&ArgP,&anom,&tp,&SLR,&alpha,&rmin,
+            //   &MeanMotion,&Period);
+            //fprintf(Kepfile,"%le %le %le %le %le %le\n",
+            //   SMA*1.0E-3,ecc,inc*R2D,RAAN*R2D,ArgP*R2D,anom*R2D);
+            
             //OrbPropReport();
             //GmatReport();
             
             //MagReport();
             //GyroReport();
             
-            
+            //fprintf(EHfile,"%le %le %le %le %le %le\n",
+            //   SC[0].PosEH[0],SC[0].PosEH[1],SC[0].PosEH[2],
+            //   SC[0].VelEH[0],SC[0].VelEH[1],SC[0].VelEH[2]);
          }
 
       }

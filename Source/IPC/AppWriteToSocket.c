@@ -10,7 +10,6 @@ void WriteToSocket(SOCKET Socket, struct AcType *AC)
 {
 
       long Isc,Iorb,Iw,Ipfx,i;
-      int Success;
       char AckMsg[5] = "Ack\n";
       char Msg[16384];
       long MsgLen = 0;
@@ -99,6 +98,14 @@ void WriteToSocket(SOCKET Socket, struct AcType *AC)
          sprintf(line,"SC[%ld].AC.Thr[%ld].PulseWidthCmd = %18.12le\n",
             Isc,i,
             AC->Thr[i].PulseWidthCmd);
+         LineLen = strlen(line);
+         memcpy(&Msg[MsgLen],line,LineLen);
+         MsgLen += LineLen;
+         if (AC->EchoEnabled) printf("%s",line);
+
+         sprintf(line,"SC[%ld].AC.Thr[%ld].ThrustLevelCmd = %18.12le\n",
+            Isc,i,
+            AC->Thr[i].ThrustLevelCmd);
          LineLen = strlen(line);
          memcpy(&Msg[MsgLen],line,LineLen);
          MsgLen += LineLen;
@@ -1038,7 +1045,7 @@ void WriteToSocket(SOCKET Socket, struct AcType *AC)
       LineLen = strlen(line);
       memcpy(&Msg[MsgLen],line,LineLen);
       MsgLen += LineLen;
-      Success = send(Socket,Msg,MsgLen,0);
+      send(Socket,Msg,MsgLen,0);
 
       /* Wait for Ack */
       recv(Socket,AckMsg,5,0);
