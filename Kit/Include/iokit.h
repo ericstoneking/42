@@ -31,6 +31,8 @@
 #include <fcntl.h>
 #ifdef _WIN32
    #include <winsock2.h>
+   extern char *_pgmptr;
+   #define OS_SEP '\\'
 #else
    #include <sys/socket.h>
    #include <netinet/in.h>
@@ -38,6 +40,7 @@
    #include <netdb.h>
    /* Finesse winsock SOCKET datatype */
    #define SOCKET int
+   #define OS_SEP '/'
 #endif
 /* #include <sys/un.h> */
 
@@ -48,6 +51,10 @@ int FileToString(const char *file_name, char **result_string,
 
 SOCKET InitSocketServer(int Port, int AllowBlocking);
 SOCKET InitSocketClient(const char *hostname, int Port, int AllowBlocking);
+
+void SplitPath(char *path_file, char **path, char **file);
+void GetExecutablePath(char *path, size_t bufsize);
+void AddTrailingSlash(char *path);
 
 /*
 ** #ifdef __cplusplus

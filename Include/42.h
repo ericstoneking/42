@@ -55,6 +55,9 @@ EXTERN long Nmatl;
 /* Number of geometric objects */
 EXTERN long Ngeom;
 
+#define STRINGIZE(x) #x
+#define STRINGIZE_VALUE_OF(x) STRINGIZE(x)
+
 EXTERN char InOutPath[80];
 EXTERN char ModelPath[80];
 EXTERN char CmdFileName[80];

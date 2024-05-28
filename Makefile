@@ -48,6 +48,12 @@ GMSECFLAG =
 RBTFLAG = 
 #RBTFLAG = -D _ENABLE_RBT_
 
+DEFAULT_CASE_PATH = 
+#DEFAULT_CASE_PATH = -D _DEFAULT_CASE_PATH_=./InOut
+
+DEFAULT_MODEL_PATH = 
+#DEFAULT_MODEL_PATH = -D _DEFAULT_MODEL_PATH_=./Model
+
 ifeq ($(strip $(GMSECFLAG)),)
    GMSECDIR =
    GMSECINC =
@@ -243,7 +249,7 @@ $(OBJ)AppWriteToSocket.o $(OBJ)AppReadFromSocket.o $(OBJ)AppWriteToFile.o
 #ANSIFLAGS = -Wstrict-prototypes -pedantic -ansi -Werror
 ANSIFLAGS =
 
-CFLAGS = -fpic -Wall -Wshadow -Wno-deprecated $(XWARN) -g  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(INC) -I $(KITINC) -I $(KITSRC) -I $(RBTSRC) $(GMSECINC) -O0 $(ARCHFLAG) $(GUIFLAG) $(GUI_LIB) $(SHADERFLAG) $(CFDFLAG) $(FFTBFLAG) $(GSFCFLAG) $(GMSECFLAG) $(STANDALONEFLAG) $(RBTFLAG)
+CFLAGS = -fpic -Wall -Wshadow -Wno-deprecated $(XWARN) -g  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(INC) -I $(KITINC) -I $(KITSRC) -I $(RBTSRC) $(GMSECINC) -O0 $(ARCHFLAG) $(GUIFLAG) $(GUI_LIB) $(SHADERFLAG) $(CFDFLAG) $(FFTBFLAG) $(GSFCFLAG) $(GMSECFLAG) $(STANDALONEFLAG) $(RBTFLAG) $(DEFAULT_CASE_PATH) $(DEFAULT_MODEL_PATH)
 
 
 ##########################  Rules to link 42  #############################

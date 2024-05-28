@@ -278,6 +278,75 @@ SOCKET InitSocketClient(const char *hostname, int Port,int AllowBlocking)
 #endif /* _WIN32 */
 }
 
+/**
+ * Splits the `path_file` into a directory part: `path`, and file part: `file`
+ * If `path_file` is just a filename with no containing folder, `path` will be a 0 length string.
+*/
+void SplitPath(char *path_file, char **path, char **file) {
+   *path = (char *)malloc(strlen(path_file));
+   // file = (char *)malloc(strlen(path_file));
+   strcpy(*path, path_file);
+   char *pos = strrchr(*path, OS_SEP);
+   if (NULL == pos) {
+      *file = strdup(path_file);
+      (*path)[0] = '\0';
+   } else {
+      *pos = '\0';
+      *file = strdup(pos + 1);
+   }
+}
+
+/**
+ * Attempts to retrieve the full path to the currently running executable
+ * and populates `path` with it. Uses `max_path_len` to avoid overrunning `path`
+ * `max_path_len` is the total size of `path`, which means it includes the
+ * null terminating character.
+*/
+void GetExecutablePath(char *path, size_t max_path_len) {
+   ssize_t len;
+   memset(path, 0, max_path_len);
+#if defined(_WIN32)
+   strncpy(path, _pgmptr, max_path_len);
+   len = strlen(path);
+#else
+   len = readlink("/proc/self/exe", path, max_path_len);
+   if (len < 0) {
+     printf("Error: error when getting executable path. Exiting.\n");
+     exit(EXIT_FAILURE);
+   }
+#endif
+   if (len >= max_path_len) {
+     printf("Error: executable path received too long for file path buffer. Exiting.\n");
+     exit(EXIT_FAILURE);
+   }
+}
+
+/**
+ * Looks for a trailing slash in `path`; if one isn't found it appends one to `path`
+*/
+void AddTrailingSlash(char *path) {
+  char *end = strchr(path, '\0');
+  if (end == NULL) {
+    printf(
+        "Error: path provided contains no null terminating character. "
+        "Exiting.\n");
+    exit(EXIT_FAILURE);
+   }
+
+   char *slash = strrchr(path, OS_SEP);
+   if (slash != NULL) {
+      size_t diff = end - slash;
+      if (diff == 1) {
+         return;
+      }
+   }
+
+   char *sep = (char *)malloc(3);
+   sprintf(sep, "%c", OS_SEP);
+   strcat(path, sep);
+   free(sep);
+}
+
 /* #ifdef __cplusplus
 ** }
 ** #endif

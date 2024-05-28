@@ -4368,8 +4368,41 @@ void InitSim(int argc, char **argv)
          if (argc > 1) sprintf(InOutPath,"../../GSFC/RBT/%s/",argv[1]);
          if (argc > 2) sprintf(ModelPath,"../../GSFC/RBT/%s/",argv[2]);
       #else
-         sprintf(InOutPath,"./InOut/");
-         sprintf(ModelPath,"./Model/");
+         char *exec_name, *exec_dir, *exec_path;
+         exec_path = (char *)malloc(FILENAME_MAX);
+
+         GetExecutablePath(exec_path, FILENAME_MAX);
+         SplitPath(exec_path, &exec_dir, &exec_name);
+
+         if (strlen(exec_dir) == 0) {
+           printf("Error finding executable's containing folder. Exiting.");
+           exit(EXIT_FAILURE);
+         }
+
+         AddTrailingSlash(exec_dir);
+
+#ifndef _DEFAULT_CASE_PATH_
+         strcpy(InOutPath, exec_dir);
+         strcat(InOutPath, "examples/InOut");
+#else
+         sprintf(InOutPath, STRINGIZE_VALUE_OF(_DEFAULT_CASE_PATH_));
+#endif
+
+         AddTrailingSlash((char *)InOutPath);
+
+#ifndef _DEFAULT_MODEL_PATH_
+         strcpy(ModelPath, exec_dir);
+         strcat(ModelPath, "Model");
+#else
+         sprintf(ModelPath, STRINGIZE_VALUE_OF(_DEFAULT_MODEL_PATH_));
+#endif
+
+         AddTrailingSlash((char *)ModelPath);
+
+         free(exec_name);
+         free(exec_dir);
+         free(exec_path);
+
          if (argc > 1) sprintf(InOutPath,"./%s/",argv[1]);
          if (argc > 2) sprintf(ModelPath,"./%s/",argv[2]);
       #endif
