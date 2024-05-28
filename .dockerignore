@@ -1,0 +1,21 @@
+# example files
+examples/
+
+# extranneous files
+Screenshots/
+Docs/
+Database/
+Development/
+MonteCarlo/
+Utilities/
+
+# graphics files
+# Model/
+World/
+
+# dockerfile
+Dockerfile
+.dockerignore
+.git
+.github
+.gitignore

@@ -55,6 +55,9 @@ EXTERN long Nmatl;
 /* Number of geometric objects */
 EXTERN long Ngeom;
 
+#define STRINGIZE(x) #x
+#define STRINGIZE_VALUE_OF(x) STRINGIZE(x)
+
 EXTERN char InOutPath[80];
 EXTERN char ModelPath[80];
 EXTERN char CmdFileName[80];
@@ -65,7 +68,7 @@ EXTERN double Pi, TwoPi, HalfPi, SqrtTwo, SqrtHalf, D2R, R2D, GoldenRatio;
 /* Simulation Control */
 EXTERN long TimeMode; /* FAST_TIME, REAL_TIME, EXTERNAL_SYNCH, NOS3_TIME */
 EXTERN double SimTime,STOPTIME,DTSIM,DTOUT,DTOUTGL;
-EXTERN long OutFlag,GLOutFlag,GLEnable,CleanUpFlag;
+EXTERN long OutFlag,GLOutFlag,ReportEnable,GLEnable,CleanUpFlag;
 
 /* Environment */
 EXTERN struct SphereHarmType MagModel;  /* -3,...,10 */

@@ -330,7 +330,7 @@ long SimStep(void)
                PartitionForces(S); /* Orbit-affecting and "internal" */
             }
          }
-         Report();  /* File Output */
+         if (ReportEnable) Report();  /* File Output */
       }
 
       ReportProgress();
@@ -363,7 +363,7 @@ long SimStep(void)
             PartitionForces(S); /* Orbit-affecting and "internal" */
          }
       }
-      Report();  /* File Output */
+      if (ReportEnable) Report();  /* File Output */
 
       /* Exit when Stoptime is reached */
       if (SimComplete) {
