@@ -4190,15 +4190,16 @@ void PartitionForces(struct SCType *S)
       double FextN[3] = {0.0,0.0,0.0};
       double FextB[3];
       long Nb;
-
+      
       Nb = S->Nb;
       for(Ib=0;Ib<Nb;Ib++) {
          for(i=0;i<3;i++) FextN[i] += S->B[Ib].FrcN[i];
       }
 
-      S->FrcN[0] += FextN[0];
-      S->FrcN[1] += FextN[1];
-      S->FrcN[2] += FextN[2];
+      for(i=0;i<3;i++) {
+         S->FrcN[i] += FextN[i];
+         S->AccN[i] = FextN[i]/S->mass; /* For accelerometer model */
+      }
       for(Ib=0;Ib<Nb;Ib++) {
          MxV(S->B[Ib].CN,FextN,FextB);
          for(i=0;i<3;i++) {

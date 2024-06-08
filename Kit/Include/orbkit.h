@@ -211,6 +211,7 @@ void LunaPosition(double JD, double r[3]);
 void LunaInertialFrame(double JulDay, double CNJ[3][3]);
 double LunaPriMerAng(double JulDay);
 void FindCLN(double r[3], double v[3], double CLN[3][3], double wln[3]);
+void FindCEN(double r[3], double CEN[3][3]);
 void FindENU(double PosN[3],double WorldW, double CLN[3][3], double wln[3]);
 void FindLagPtParms(struct LagrangeSystemType *LS);
 void FindLagPtPosVel(double SecSinceJ2000, struct LagrangeSystemType *S,

@@ -176,12 +176,12 @@ long KDProjectRayOntoGeom(double Source[3], double DirVec[3],
 void LoadOctree(struct GeomType *G);
 long OCProjectRayOntoGeom(double Point[3],double DirVec[3],
    struct GeomType *G,double ProjPoint[3],long *ClosestPoly);
-struct GeomType *LoadWingsObjFile(const char ModelPath[80], const char ObjFilename[40],
+struct GeomType *LoadWingsObjFile(const char *ModelPath, const char *ObjFilename,
                        struct MatlType **MatlPtr, long *Nmatl,
                        struct GeomType *Geom, long *Ngeom, long *GeomTag,
                        long EdgesEnabled);
-void WriteGeomToObjFile(struct MatlType *Matl,struct GeomType *Geom,const char Path[80],
-   const char FileName[40]);
+void WriteGeomToObjFile(struct MatlType *Matl,struct GeomType *Geom,const char *Path,
+   const char *FileName);
 double PolyhedronVolume(struct GeomType *G);
 
 /*

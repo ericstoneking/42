@@ -1,7 +1,7 @@
 <<<<<<<<<<<<<<<<<  42: The Mostly Harmless Simulator  >>>>>>>>>>>>>>>>>
 ************************** Simulation Control **************************
 FAST                            !  Time Mode (FAST, REAL, EXTERNAL, or NOS3)
-1000.0    0.1                   !  Sim Duration, Step Size [sec]
+10000.0    0.1                  !  Sim Duration, Step Size [sec]
 10.0                            !  File Output Interval [sec]
 0                               !  RNG Seed
 TRUE                            !  Graphics Front End?
@@ -13,8 +13,8 @@ TRUE   Orb_LEO.txt              !  Input file name for Orb 0
 1                               !  Number of Spacecraft
 TRUE 0 SC_Simple.txt            !  Existence, RefOrb, Input file for SC 0
 ***************************** Environment  *****************************
-07 10 2029                      !  Date (UTC) (Month, Day, Year)
-08 30 10.00                     !  Time (UTC) (Hr,Min,Sec)
+04 08 2024                      !  Date (UTC) (Month, Day, Year)
+12 00 0.00                      !  Time (UTC) (Hr,Min,Sec)
 37.0                            !  Leap Seconds (sec)
 USER                            !  F10.7, Ap (USER, NOMINAL or TWOSIGMA)
 230.0                           !  USER-provided F10.7

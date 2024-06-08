@@ -10,10 +10,10 @@ CM                          !  Pos of CM or ORIGIN, wrt F
 0.0  0.0  0.0               !  Pos wrt Formation (m), expressed in F
 0.0  0.0  0.0               !  Vel wrt Formation (m/s), expressed in F
 *************************** Initial Attitude ***************************
-NAN                         ! Ang Vel wrt [NL], Att [QA] wrt [NLF]
+NAN                         ! Ang Vel wrt [NL], Att [QA] wrt [NLEF]
 0.3    0.4    0.5           ! Ang Vel (deg/sec)
 0.0    0.0    0.0    1.0    ! Quaternion
-60.0  40.0   20.0    213    ! Angles (deg) & Euler Sequence
+20.0    30.0    40.0    213    ! Angles (deg) & Euler Sequence
 ***************************  Dynamics Flags  ***************************
 GAUSS_ELIM                  ! Solve Dynamics by GAUSS_ELIM or ORDER_N
 FALSE                       ! Compute Constraint Forces and Torques
@@ -154,6 +154,20 @@ Z_AXIS                      ! Boresight Axis X_AXIS, Y_AXIS, or Z_AXIS
 0.0                         ! DV Random Walk (m/s/rt-hr)
 0.0 1.0                     ! Bias Stability (m/s^2) over timespan (hr)
 0.0                         ! DV Noise, m/s
-0.5                         ! Initial Bias (m/s^2)
+0.05                        ! Initial Bias (m/s^2)
 0                           ! Node
+************************ Fine Guidance Sensor ****************************
+0                           ! Number of Fine Guidance Sensors
+========================= Fine Guidance Sensor 0 =========================
+0.1                         ! Sample Time,sec
+0.0  0.0  0.0  321          ! Nominal Mounting Angles (deg), Seq in Body
+X_AXIS                      ! Boresight Axis X_AXIS, Y_AXIS, or Z_AXIS
+3600.0   3600.0             ! H, V FOV Size, arcsec
+2.0                         ! Noise Equivalent Angle, arcsec RMS
+60.0                        ! Detector Scale, arcsec/pixel
+0  0                        ! Body, Node
+0.0  0.0  0.0  321          ! FOV Frame (Fr) Angles (deg), Seq wrt R frame
+0.00  0.0                   ! Guide Star H, V (deg) in FOV Frame
+NONE                        ! Optics Input File Name
+NONE                        ! PSF Image File Name
 

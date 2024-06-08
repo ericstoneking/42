@@ -95,8 +95,8 @@ void main(void)
          SpecIllum = Gloss*pow(NoH,10.0);           
          Spec = SpecIllum*vec4(SpecIntensity,SpecIntensity,SpecIntensity,1.0);                    
       
-         //gl_FragColor = DiffIllum*AlbedoColor+Spec; 
-         gl_FragColor = DiffIllum*AlbedoColor; 
+         gl_FragColor = DiffIllum*AlbedoColor+Spec; 
+         //gl_FragColor = DiffIllum*AlbedoColor; 
          gl_FragColor *= ScaleFactor;
          gl_FragColor.a = 1.0;
       }

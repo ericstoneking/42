@@ -54,7 +54,7 @@ void InitAlbedo(void)
       glBindFramebuffer(GL_FRAMEBUFFER,A->FrameTag);
       A->Height = Width;
       A->Width = Width;
-      A->Tex = (float *) calloc(A->Height*A->Width*3,sizeof(float));
+      A->Tex = (float *) calloc(A->Height*A->Width*4,sizeof(float));
 
       /* Create Textures */
       glGenTextures(1,(GLuint *) &A->TexTag);
@@ -128,7 +128,7 @@ void InitAlbedo(void)
 /* Significant contributions to this algorithm were made by           */
 /* Daniel Wilkinson, summer intern 2020, and                          */
 /* Emily Ballantyne, summer intern 2021.                              */
-void FindAlbedo(struct SCType *S, struct CssType *CSS) 
+void FindCssAlbedo(struct SCType *S, struct CssType *CSS) 
 {
       struct BodyType *B;
       struct WorldType *W;

@@ -1100,7 +1100,6 @@ void PrototypeFSW(struct SCType *S)
       struct CmdType *Cmd;
       double alpha[3],Iapp[3];
       double Hvnb[3],Herr[3],werr[3];
-      double qbr[4];
       long Ig,i,j;
 
       AC = &S->AC;
@@ -1149,10 +1148,11 @@ void PrototypeFSW(struct SCType *S)
 
          /* Find qrn, wrn and joint angle commands */
          ThreeAxisAttitudeCommand(S);
+         for(i=0;i<4;i++) AC->qrn[i] = AC->Cmd.qrn[i];
 
          /* Form attitude error signals */
-         QxQT(AC->qbn,Cmd->qrn,qbr);
-         Q2AngleVec(qbr,C->therr);
+         QxQT(AC->qbn,Cmd->qrn,AC->qbr);
+         Q2AngleVec(AC->qbr,C->therr);
          for(i=0;i<3;i++) C->werr[i] = AC->wbn[i] - Cmd->wrn[i];
 
          /* Closed-loop attitude control */

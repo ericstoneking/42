@@ -55,12 +55,12 @@ EXTERN long Nmatl;
 /* Number of geometric objects */
 EXTERN long Ngeom;
 
-EXTERN char InOutPath[80];
-EXTERN char ModelPath[80];
+EXTERN char InOutPath[512];
+EXTERN char ModelPath[512];
 EXTERN char CmdFileName[80];
 
 /* Math Basics */
-EXTERN double Pi, TwoPi, HalfPi, SqrtTwo, SqrtHalf, D2R, R2D, GoldenRatio;
+EXTERN double Pi, TwoPi, HalfPi, SqrtTwo, SqrtHalf, D2R, R2D, A2R, R2A, GoldenRatio;
 
 /* Simulation Control */
 EXTERN long TimeMode; /* FAST_TIME, REAL_TIME, EXTERNAL_SYNCH, NOS3_TIME */
@@ -111,7 +111,7 @@ EXTERN struct LagrangeSystemType LagSys[3];
 EXTERN double CGH[3][3];
 
 /* J2000 to Heliocentric Ecliptic */
-EXTERN double qJ2000H[4];
+EXTERN double qjh[4];
 
 /* SC structure manages attitude and translation wrt Reference Orbit */
 EXTERN struct SCType *SC;
@@ -196,11 +196,18 @@ void UpdateScBoundingBox(struct SCType *S);
 void FindUnshadedAreas(struct SCType *S, double DirVecN[3]);
 void RadBelt(float RadiusKm, float MagLatDeg, int NumEnergies, 
       float *ElectronEnergy, float *ProtonEnergy, double **Flux); 
-void FindAlbedo(struct SCType *S, struct CssType *CSS);
+void InitAlbedo(void);
+void FindCssAlbedo(struct SCType *S, struct CssType *CSS);
+void FindFssAlbedo(struct SCType *S, struct FssType *FSS);
 void JointFrcTrq(struct JointType *G, struct SCType *S);
 void InitActuatedJoint(struct JointType *G, struct SCType *S);
 void WheelJitter(struct WhlType *W, struct SCType *S);
 void ShakerJitter(struct ShakerType *Sh, struct SCType *S);
+long OpticalFieldPoint(double StarVecB[3], struct OpticsType *O, 
+   double FldPntB[3], double FldDirB[3]);
+long OpticalTrain(long FldSC, long FldBody, double FldPntB[3], double FldDirB[3], 
+   long Nopt, struct OpticsType *Opt,
+   long *OutSC, long *OutBody, double OutPntB[3], double OutDirB[3]);
 
 /* Debug Function Prototypes */
 void EchoPVel(struct SCType *S);

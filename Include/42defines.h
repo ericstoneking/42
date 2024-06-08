@@ -309,4 +309,13 @@
 #define THR_PULSED 0
 #define THR_PROPORTIONAL 1
 
+/* Optics */
+#define OPT_APERTURE 0
+#define OPT_PLANAR 1
+#define OPT_CONIC 2
+#define OPT_THINLENS 3
+#define OPT_DETECTOR 4
+#define OPT_CONCAVE (1.0)
+#define OPT_CONVEX (-1.0)
+
 #endif /* __42DEFINES_H__ */

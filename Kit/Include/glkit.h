@@ -127,7 +127,7 @@ void DrawNearFOV(long Nv,double Width,double Height,double Length,
    long BoreAxis, long H_Axis, long V_Axis, long Type,GLfloat Color[4]);
 void DrawFarFOV(long Nv,double Width,double Height, 
    long BoreAxis, long H_Axis, long V_Axis, long Type, GLfloat Color[4],
-                const char Label[40], double SkyDistance);
+                const char *Label, double SkyDistance);
 void RotateL2R(double C[3][3]);
 void RotateR2L(double C[3][3]);
 void MxM4f(float A[16], float B[16], float C[16]);
@@ -136,19 +136,19 @@ void BuildModelMatrix(double CBN[3][3], double pbn[3],
    float ModelMatrix[16]);
 void BuildViewMatrix(double CEN[3][3], double pen[3],
    float ViewMatrix[16]);
-void CaptureScreenToPpm(const char path[40], const char filename[40],
+void CaptureScreenToPpm(const char *path, const char *filename,
                         long Nh, long Nw);
-void TexToPpm(const char path[40], const char filename[40],
+void TexToPpm(const char *path, const char *filename,
               long Nh, long Nw, long Nb, float *Data);
-GLuint PpmToTexTag(const char path[40], const char filename[40],int BytesPerPixel,
+GLuint PpmToTexTag(const char *path, const char *filename,int BytesPerPixel,
                    GLuint wrap);
-GLuint Ppm1DToTexTag(const char path[40], const char filename[40],int BytesPerPixel,
+GLuint Ppm1DToTexTag(const char *path, const char *filename,int BytesPerPixel,
                    GLuint wrap);
-GLuint PpmToCubeTag(const char path[40], const char file[40], int BytesPerPixel);
-GLuint PpmToRingTexTag(const char path[80], const char filename[80]);
-void CubeToPpm(GLubyte *Cube, long N, const char pathname[40],const char filename[40]);
+GLuint PpmToCubeTag(const char *path, const char *file, int BytesPerPixel);
+GLuint PpmToRingTexTag(const char *path, const char *filename);
+void CubeToPpm(GLubyte *Cube, long N, const char *pathname,const char *filename);
 void LoadBucky(double BuckyPf[32][3], long BuckyNeighbor[32][6]);
-void LoadStars(const char StarFileName[40],double BuckyPf[32][3],
+void LoadStars(const char *StarFileName,double BuckyPf[32][3],
                long BuckyNeighbor[32][6],GLuint StarList[32],
                double SkyDistance);
 void DrawStars(double LineOfSight[3],double BuckyPf[32][3],
@@ -177,7 +177,7 @@ void DrawSkySphere(long Ndiv);
 void DrawUnitMercatorSphere(GLuint Nlat, GLuint Nlng);
 void DrawBullseye(GLfloat Color[4],double p[4]);
 void DrawArrowhead(double v[3],double scale);
-void DrawVector(double v[3], const char Label[8], const char Units[8],
+void DrawVector(double v[3], const char *Label, const char *Units,
                 GLfloat Color[4],
                 double VisScale, double MagScale, long UnitVec);
 void DrawAxisLabels(long Iglyph,GLfloat Color[4],

@@ -3740,7 +3740,7 @@ void DrawUnitSphere(void)
 {
       double lat,lng;
       long i,j,Im;
-      char label[20];
+      char label[40];
       
       struct FssType *F;
       struct StarTrackerType *ST;

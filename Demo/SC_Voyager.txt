@@ -156,4 +156,18 @@ Z_AXIS                        ! Boresight Axis X_AXIS, Y_AXIS, or Z_AXIS
 0.0                           ! DV Noise, m/s
 0.5                           ! Initial Bias (m/s^2)
 0                             ! Node
+************************ Fine Guidance Sensor ****************************
+0                           ! Number of Fine Guidance Sensors
+========================= Fine Guidance Sensor 0 =========================
+0.1                         ! Sample Time,sec
+0.0  0.0  0.0  321          ! Nominal Mounting Angles (deg), Seq in Body
+X_AXIS                      ! Boresight Axis X_AXIS, Y_AXIS, or Z_AXIS
+3600.0   3600.0             ! H, V FOV Size, arcsec
+2.0                         ! Noise Equivalent Angle, arcsec RMS
+60.0                        ! Detector Scale, arcsec/pixel
+0  0                        ! Body, Node
+0.0  0.0  0.0  321          ! FOV Frame (Fr) Angles (deg), Seq wrt R frame
+0.00  0.0                   ! Guide Star H, V (deg) in FOV Frame
+NONE                        ! Optics Input File Name
+NONE                        ! PSF Image File Name
 

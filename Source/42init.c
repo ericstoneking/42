@@ -235,6 +235,16 @@ long DecodeString(char *s)
 
       else if (!strcmp(s,"PULSED")) return THR_PULSED;
       else if (!strcmp(s,"PROPORTIONAL")) return THR_PROPORTIONAL;
+      
+      else if (!strcmp(s,"APERTURE")) return OPT_APERTURE;
+      else if (!strcmp(s,"CONIC")) return OPT_CONIC;
+      else if (!strcmp(s,"DETECTOR")) return OPT_DETECTOR;
+      else if (!strcmp(s,"THINLENS")) return OPT_THINLENS;
+      
+      else if (!strcmp(s,"CONCAVE")) return OPT_CONCAVE;
+      else if (!strcmp(s,"CONVEX")) return OPT_CONVEX;
+      
+      
 
       else {
          printf("Bogus input %s in DecodeString (42init.c:%d)\n",s,__LINE__);
@@ -527,10 +537,10 @@ void InitOrbit(struct OrbitType *O)
             O->PosN[j] = R->PosN[j];
             O->VelN[j] = R->VelN[j];
             for(k=0;k<3;k++) O->CLN[j][k] = R->CN[j][k];
-            O->wln[0] = 0.0;
-            O->wln[1] = 0.0;
-            O->wln[2] = World[O->World].w;
          }
+         O->wln[0] = 0.0;
+         O->wln[1] = 0.0;
+         O->wln[2] = World[O->World].w;
          fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
          O->PolyhedronGravityEnabled = DecodeString(response);
 
@@ -1747,6 +1757,65 @@ void InitWhlDragAndJitter(struct WhlType *W)
       }
 }
 /**********************************************************************/
+void InitOptics(struct FgsType *F)
+{
+      FILE *infile;
+      struct SCType *S;
+      struct BodyType *B;
+      struct NodeType *N;
+      struct OpticsType *O;
+      struct OpticsType *Ap,*Det;
+      char junk[256],newline,response[120];
+      double ApPntN[3],FocPntN[3],DetPntN[3],RelPosN[3];
+      long Io,i;
+      long HasFocus;
+
+      if (strcmp(F->OpticsFileName,"NONE")) {
+         infile = FileOpen(InOutPath,F->OpticsFileName,"r");
+         fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         fscanf(infile,"%ld  %[^\n] %[\n]",&F->Nopt,junk,&newline);
+         F->Opt = (struct OpticsType *) calloc(F->Nopt,sizeof(struct OpticsType));
+         for(Io=0;Io<F->Nopt;Io++) {
+            O = &F->Opt[Io];
+            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+            fscanf(infile,"%ld %ld %ld %[^\n] %[\n]",
+               &O->SC,&O->Body,&O->Node,junk,&newline);
+            fscanf(infile,"%lf %[^\n] %[\n]",&O->ApRad,junk,&newline);
+            O->ApRad /= 2.0;
+            fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
+               &O->Axis[0],&O->Axis[1],&O->Axis[2],junk,&newline);
+            UNITV(O->Axis);
+            fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+            O->Type = DecodeString(response);
+            fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+            O->ConicSign = (double) DecodeString(response);
+            fscanf(infile,"%lf %[^\n] %[\n]",&O->FocLen,junk,&newline);
+            fscanf(infile,"%lf %[^\n] %[\n]",&O->ConicConst,junk,&newline);
+         }
+         fclose(infile);
+         F->HasOptics = TRUE;
+
+         /* Check for Aperture, Detector */
+         if (F->Opt[0].Type != OPT_APERTURE) {
+            printf("Optical Train must have Aperture as first element.\n");
+            exit(1);
+         }
+         if (F->Opt[F->Nopt-1].Type != OPT_DETECTOR) {
+            printf("Optical Train must have Detector as last element.\n");
+         }
+         
+         /* TODO: Find erect/inverted, lump in Det->FocLen */
+      }
+      else {
+         F->HasOptics = FALSE;
+      }
+      
+      printf("Exiting InitOptics\n");
+      
+}
+/**********************************************************************/
 void InitOrderNDynamics(struct SCType *S)
 {
       struct BodyType *B;
@@ -1818,10 +1887,11 @@ void InitSpacecraft(struct SCType *S)
       char junk[120],newline,response[120];
       char response1[120],response2[120],response3[120];
       double CBL[3][3],CBF[3][3];
-      long i,j,k,Ia,Ib,Ig,Iw,Im,It,Bi,Bo,Ic,Ist,Ifss;
+      long i,j,k,Ia,Ib,Ig,Iw,Im,It,Bi,Bo,Ic,Ist,Ifss,Ifgs;
       char RateFrame,AttFrame,AttParm;
       double wlnb[3];
       double wbn[3],CBN[3][3],qbn[4];
+      double CEN[3][3],CBE[3][3];
       double Ang1,Ang2,Ang3;
       double pIn[3],pOut[3];
       double psn[3],vsn[3],psl[3],vsl[3],pfl[3],pcmn[3],pcml[3];
@@ -1845,6 +1915,8 @@ void InitSpacecraft(struct SCType *S)
       struct StarTrackerType *ST;
       struct GpsType *GPS;
       struct AccelType *Accel;
+      struct FgsType *Fgs;
+      struct PsfType *PSF;
       long OldNgeom;
 
       infile=FileOpen(InOutPath,S->FileName,"r");
@@ -1920,6 +1992,15 @@ void InitSpacecraft(struct SCType *S)
             for(k=0;k<3;k++) CBF[j][k] = CBN[j][k];
          }
          MxM(CBF,Frm[S->RefOrb].CN,CBN);
+         C2Q(CBN,qbn);
+      }
+      else if (AttFrame == 'E') {
+         /* Adjust CBN */
+         for(j=0;j<3;j++){
+            for(k=0;k<3;k++) CBE[j][k] = CBN[j][k];
+         }
+         FindCEN(Orb[S->RefOrb].PosN,CEN);
+         MxM(CBE,CEN,CBN);
          C2Q(CBN,qbn);
       }
       if(RateFrame == 'L') {
@@ -2522,7 +2603,7 @@ void InitSpacecraft(struct SCType *S)
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nacc,junk,&newline);
       S->Accel = (struct AccelType *) calloc(S->Nacc,sizeof(struct AccelType));
       if (S->Nacc == 0) {
-         for(i=0;i<10;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+         for(i=0;i<11;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
       else {
          for(Ia=0;Ia<S->Nacc;Ia++) {
@@ -2562,6 +2643,74 @@ void InitSpacecraft(struct SCType *S)
          }
       }
 
+/* .. Fine Guidance Sensors */
+      fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      if (junk[0] != '*') {
+         printf("Error:  Malformed SC input file before Fine Guidance Sensor section\n.");
+         exit(1);
+      }
+      fscanf(infile,"%ld %[^\n] %[\n]",&S->Nfgs,junk,&newline);
+      S->Fgs = (struct FgsType *) calloc(S->Nfgs,sizeof(struct FgsType));
+      if (S->Nfgs == 0) {
+         for(i=0;i<7;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      }
+      else {
+         for(Ifgs=0;Ifgs<S->Nfgs;Ifgs++) {
+            Fgs = &S->Fgs[Ifgs];
+            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+            fscanf(infile,"%lf %[^\n] %[\n]",&Fgs->SampleTime,junk,&newline);
+            Fgs->MaxCounter = (long) (Fgs->SampleTime/DTSIM+0.5);
+            if (Fgs->SampleTime < DTSIM) {
+               printf("Error:  Fgs[%ld].SampleTime smaller than DTSIM.\n",Ifgs);
+               exit(1);
+            }
+            Fgs->SampleCounter = Fgs->MaxCounter;
+            fscanf(infile,"%lf %lf %lf %ld %[^\n] %[\n]",
+               &Ang1,&Ang2,&Ang3,&Seq,junk,&newline);
+            A2C(Seq,Ang1*D2R,Ang2*D2R,Ang3*D2R,Fgs->CB);
+            C2Q(Fgs->CB,Fgs->qb);
+            fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+            Fgs->BoreAxis = DecodeString(response);
+            Fgs->H_Axis = (Fgs->BoreAxis+1)%3;
+            Fgs->V_Axis = (Fgs->BoreAxis+2)%3;
+            fscanf(infile,"%lf %lf %[^\n] %[\n]",
+               &Fgs->FovHalfAng[0],&Fgs->FovHalfAng[1],junk,&newline);
+            for(i=0;i<2;i++) {
+               Fgs->FovHalfAng[i] *= 0.5*A2R;
+            }
+            fscanf(infile,"%lf %[^\n] %[\n]",&Fgs->NEA,junk,&newline);
+            Fgs->NEA *= A2R;
+            fscanf(infile,"%lf %[^\n] %[\n]",&Fgs->Scl,junk,&newline);
+            Fgs->Scl *= A2R;
+            fscanf(infile,"%ld %[^\n] %[\n]",&Fgs->Body,junk,&newline);
+            if (Fgs->Body >= S->Nb) {
+               printf("SC[%ld].Fgs[%ld] Body out of range\n",S->ID,Ifgs);
+               exit(1);
+            } 
+            fscanf(infile,"%ld %[^\n] %[\n]",&Fgs->Node,junk,&newline);
+            if (Fgs->Node >= S->B[Fgs->Body].NumNodes) {
+               printf("SC[%ld].Fgs[%ld] Node out of range\n",S->ID,Ifgs);
+               exit(1);
+            } 
+            fscanf(infile,"%lf %lf %lf %ld %[^\n] %[\n]",
+               &Ang1,&Ang2,&Ang3,&Seq,junk,&newline);
+            A2C(Seq,Ang1*D2R,Ang2*D2R,Ang3*D2R,Fgs->CR);
+            C2Q(Fgs->CR,Fgs->qr);
+            fscanf(infile,"%lf %lf  %[^\n] %[\n]",
+               &Ang1,&Ang2,junk,&newline);
+            Fgs->Hr = Ang1*D2R;
+            Fgs->Vr = Ang2*D2R;
+            fscanf(infile,"%s %[^\n] %[\n]",Fgs->OpticsFileName,junk,&newline);
+            fscanf(infile,"%s %[^\n] %[\n]",Fgs->PsfFileName,junk,&newline);
+            InitOptics(Fgs);
+            if (strcmp(Fgs->PsfFileName,"NONE")) {
+               PSF = &Fgs->PSF;
+               PSF->Image = PpmToPsf(ModelPath,Fgs->PsfFileName,
+                  &PSF->Ncol,&PSF->Nrow,&PSF->BytesPerPixel);
+            }
+         }
+      }
+      
 /* .. Initialize some Orbit and Formation variables */
       O = &Orb[S->RefOrb];
       Fr = &Frm[S->RefOrb];
@@ -2853,6 +3002,7 @@ void LoadSun(void)
          W->qnh[i] = 0.0;
       }
       W->qnh[3] = 1.0;
+      QxQT(W->qnh,qjh,W->qnj);
 }
 /*********************************************************************/
 void LoadPlanets(void)
@@ -3010,11 +3160,14 @@ void LoadPlanets(void)
       /* Planetocentric Inertial Reference Frames */
       A2C(123,-23.4392911*D2R,0.0,0.0,World[EARTH].CNH);
       C2Q(World[EARTH].CNH,World[EARTH].qnh);
+      for(i=0;i<3;i++) World[EARTH].qnj[i] = 0.0;
+      World[EARTH].qnj[3] = 1.0;
       for(i=MERCURY;i<=PLUTO;i++) {
          if (i != EARTH) {
             A2C(312,(PoleRA[i]+90.0)*D2R,(90.0-PoleDec[i])*D2R,0.0,CNJ);
             MxM(CNJ,World[EARTH].CNH,World[i].CNH);
             C2Q(World[i].CNH,World[i].qnh);
+            QxQT(World[i].qnh,qjh,World[i].qnj);
          }
       }
 
@@ -3137,6 +3290,7 @@ void LoadMoonOfEarth(void)
          LunaInertialFrame(TT.JulDay,CNJ);
          MxM(CNJ,World[EARTH].CNH,M->CNH);
          C2Q(M->CNH,M->qnh);
+         QxQT(M->qnh,qjh,M->qnj);
          M->PriMerAng = LunaPriMerAng(TT.JulDay);
          M->Type = MOON;
       }
@@ -3223,6 +3377,7 @@ void LoadMoonsOfMars(void)
             for(j=0;j<3;j++) M->CNH[i][j] = P->CNH[i][j];
          }
          C2Q(M->CNH,M->qnh);
+         QxQT(M->qnh,qjh,M->qnj);
          for(i=0;i<4;i++) M->Color[i] = 1.0;
          M->Type = MOON;
       }
@@ -3339,6 +3494,7 @@ void LoadMoonsOfJupiter(void)
             for(j=0;j<3;j++) M->CNH[i][j] = P->CNH[i][j];
          }
          C2Q(M->CNH,M->qnh);
+         QxQT(M->qnh,qjh,M->qnj);
          for(i=0;i<4;i++) M->Color[i] = 1.0;
          M->Type = MOON;
       }
@@ -3450,6 +3606,7 @@ void LoadMoonsOfSaturn(void)
             for(j=0;j<3;j++) M->CNH[i][j] = P->CNH[i][j];
          }
          C2Q(M->CNH,M->qnh);
+         QxQT(M->qnh,qjh,M->qnj);
          for(i=0;i<4;i++) M->Color[i] = 1.0;
          M->Type = MOON;
       }
@@ -3535,6 +3692,7 @@ void LoadMoonsOfUranus(void)
             for(j=0;j<3;j++) M->CNH[i][j] = P->CNH[i][j];
          }
          C2Q(M->CNH,M->qnh);
+         QxQT(M->qnh,qjh,M->qnj);
          for(i=0;i<4;i++) M->Color[i] = 1.0;
          M->Type = MOON;
       }
@@ -3620,6 +3778,7 @@ void LoadMoonsOfNeptune(void)
             for(j=0;j<3;j++) M->CNH[i][j] = P->CNH[i][j];
          }
          C2Q(M->CNH,M->qnh);
+         QxQT(M->qnh,qjh,M->qnj);
          for(i=0;i<4;i++) M->Color[i] = 1.0;
          M->Type = MOON;
       }
@@ -3706,6 +3865,7 @@ void LoadMoonsOfPluto(void)
             for(j=0;j<3;j++) M->CNH[i][j] = P->CNH[i][j];
          }
          C2Q(M->CNH,M->qnh);
+         QxQT(M->qnh,qjh,M->qnj);
          for(i=0;i<4;i++) M->Color[i] = 1.0;
          M->Type = MOON;
       }
@@ -3750,6 +3910,7 @@ void LoadMinorBodies(void)
          A2C(312,(PoleRA+90.0)*D2R,(90.0-PoleDec)*D2R,0.0,CNJ);
          MxM(CNJ,World[EARTH].CNH,W->CNH);
          C2Q(W->CNH,W->qnh);
+         QxQT(W->qnh,qjh,W->qnj);
          E->Exists = TRUE;
          E->Regime = ORB_CENTRAL;
          E->World = SOL;
@@ -4217,8 +4378,8 @@ long LoadJplEphems(char EphemPath[80],double JD)
             PosJ[i] = 1000.0*P;
             VelJ[i] = 1000.0*dPdu*dudJD/86400.0;
          }
-         QTxV(qJ2000H,PosJ,Eph->PosN);
-         QTxV(qJ2000H,VelJ,Eph->VelN);
+         QTxV(qjh,PosJ,Eph->PosN);
+         QTxV(qjh,VelJ,Eph->VelN);
       }
       /* Adjust for barycenters */
       /* Move planets from barycentric to Sun-centered */
@@ -4342,11 +4503,11 @@ void InitSim(int argc, char **argv)
       long Iorb,Isc,i,j,Ip,Im,Iw,Nm;
       long MinorBodiesExist;
       long JunkTag;
-      double CGJ2000[3][3] =
+      double CGJ[3][3] =
          {{-0.054873956175539,-0.873437182224835,-0.483835031431981},
           { 0.494110775064704,-0.444828614979805, 0.746981957785302},
           {-0.867665382947348,-0.198076649977489, 0.455985113757595}};
-      double CJ2000H[3][3];
+      double CJH[3][3];
       
       Pi = 4.0*atan(1.0);
       TwoPi = 2.0*Pi;
@@ -4355,12 +4516,14 @@ void InitSim(int argc, char **argv)
       SqrtHalf = sqrt(0.5);
       R2D = 180.0/Pi;
       D2R = Pi/180.0;
+      A2R = D2R/3600.0;
+      R2A = R2D*3600.0;
       GoldenRatio = (1.0+sqrt(5.0))/2.0;
       
-      qJ2000H[0] = -0.203123038887;
-      qJ2000H[1] = 0.0;
-      qJ2000H[2] = 0.0;
-      qJ2000H[3] = 0.979153221449;
+      qjh[0] = -0.203123038887;
+      qjh[1] = 0.0;
+      qjh[2] = 0.0;
+      qjh[3] = 0.979153221449;
       
       #ifdef _ENABLE_RBT_
          sprintf(InOutPath,"../../GSFC/RBT/InOut/");
@@ -4575,8 +4738,8 @@ void InitSim(int argc, char **argv)
       LoadRegions();
 
 /* .. Galactic Frame */
-      Q2C(qJ2000H,CJ2000H);
-      MxM(CGJ2000,CJ2000H,CGH);
+      Q2C(qjh,CJH);
+      MxM(CGJ,CJH,CGH);
 
 /* .. Ground Station Locations */
       for(i=0;i<Ngnd;i++) {

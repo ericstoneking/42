@@ -1294,6 +1294,19 @@ void FindCLN(double r[3], double v[3], double CLN[3][3], double wln[3])
 
 }
 /**********************************************************************/
+/* E = Equatorial Frame.  e1 = n3, e2 = East, e3 points to axis of World */
+void FindCEN(double r[3], double CEN[3][3])
+{
+      CEN[0][0] =  0.0;
+      CEN[0][1] =  0.0;
+      CEN[0][2] =  1.0;      
+      CEN[2][0] = -r[0];
+      CEN[2][1] = -r[1];
+      CEN[2][2] =  0.0;
+      UNITV(CEN[2]);
+      VxV(CEN[2],CEN[0],CEN[1]);
+}
+/**********************************************************************/
 void FindENU(double PosN[3],double WorldW, double CLN[3][3], double wln[3])
 {
       double Zaxis[3] = {0.0,0.0,1.0};

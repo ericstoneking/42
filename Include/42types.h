@@ -431,6 +431,10 @@ struct FssType {
    double SunAng[2];
    double SunVecS[3];
    double SunVecB[3];
+   double AlbA;
+   double AlbB;
+   double AlbC;
+   double AlbD;
 };
 
 struct StarTrackerType {
@@ -496,6 +500,7 @@ struct AccelType {
    double SigE; /* DV Readout Noise, m/s  */
    
    /*~ Internal Variables ~*/
+   double AccumAccN[3];
    double Bias; /* m/s^2 */
    double PrevVelN[3]; /* m/s */
    double PrevQN[4];
@@ -511,6 +516,76 @@ struct AccelType {
    double DVRWCoef;
    double DVNoiseCoef; 
    double CorrCoef; /* Correlation Coef, exp(-SampleTime/BiasTime) */
+};
+
+struct OpticsType {
+   long SC;
+   long Body;
+   long Node;
+   long Type;
+   double Axis[3];
+   double FocLen;
+   double ConicConst;
+   double ConicSign;   
+   double ApRad;
+};
+
+struct GuideWindowType {
+   /*~ Parameters ~*/
+   long Nrow;
+   long Ncol;
+
+   /*~ Internal Variables ~*/
+   long Row0;
+   long Col0;
+   double *Image; /* Nrow x Ncol, grayscale */
+};
+
+struct PsfType {
+   long Nrow;
+   long Ncol;
+   long BytesPerPixel;
+   double Scl; /* rad/pixel */
+   double *Image;
+};
+
+struct FgsType {
+   /*~ Parameters ~*/
+   long HasOptics;
+   double SampleTime;
+   long MaxCounter;
+   double qb[4];
+   double CB[3][3];
+   double qr[4]; /* q_fr_r */
+   double CR[3][3]; /* CFrR */
+   double NEA;
+   long Body;
+   long Node;
+   long BoreAxis; /* X_AXIS, Y_AXIS, Z_AXIS */
+   long H_Axis; /* (BoreAxis+1)%3 */
+   long V_Axis; /* (BoreAxis+2)%3 */
+   double FovHalfAng[2];
+   double Scl; /* rad/pixel */
+   double Hr; /* Guide Star in Fr */
+   double Vr; /* Guide Star in Fr */
+
+   /*~ Internal Variables ~*/
+   long SampleCounter;
+   long Valid;
+   double StarVecR[3];
+   double H; 
+   double V;
+   double Ang[3];
+   char OpticsFileName[40];
+   char PsfFileName[40];
+   
+   long Nopt;
+   struct OpticsType *Opt;
+   long ApFocus;
+   long DetFocus;
+
+   struct PsfType PSF;   
+   struct GuideWindowType Gw;
 };
 
 struct JointPathTableType { /* tells if joint is in path of body*/
@@ -606,6 +681,7 @@ struct SCType {
    long Nst; /* Number of star trackers */
    long Ngps; /* Number of GPS receivers */
    long Nacc; /* Number of accelerometer axes */
+   long Nfgs; /* Number of Fine Guidance Sensors */
    long Nsh; /* Number of shakers */
    
    double mass;
@@ -618,10 +694,12 @@ struct SCType {
    double PosN[3];   /* Position of cm wrt origin of N, m, expressed in N */
    double VelN[3];   /* Velocity of cm wrt origin of N, m/sec, expressed in N */
    double CLN[3][3]; /* Note that SC.CLN != Orb[RefOrb].CLN if SC.PosR != 0.0 */
+   double CEN[3][3]; /* E = Equatorial frame: e1 = North, e2 = East, e3 = Nadir */
    double wln[3]; /* Expressed in N */
    double PosH[3];  /* Position of cm wrt H frame, expressed in H */
    double VelH[3];  /* Velocity of cm wrt H frame, expressed in H */
    double FrcN[3]; /* Force, N, expressed in N */
+   double AccN[3]; /* Acceleration due to external force, for accelerometer model */
    double svn[3]; /* Sun-pointing unit vector, expressed in N */
    double svb[3]; /* Sun-pointing unit vector, expressed in SC.B[0] [~=~] */
    double bvn[3]; /* Magfield, Tesla, expressed in N */
@@ -679,6 +757,7 @@ struct SCType {
    struct StarTrackerType *ST;   /* [*Nst*] */
    struct GpsType *GPS;          /* [*Ngps*] */
    struct AccelType *Accel;      /* [*Nacc*] */
+   struct FgsType *Fgs;          /* [*Nfgs*] */
    struct ShakerType *Shaker;    /* [*Nsh*] */
 };
 
@@ -815,6 +894,8 @@ struct WorldType {
    double CNH[3][3]; /* DCM from heliocentric ecliptic frame
                         to world-centric equatorial inertial frame */
    double qnh[4]; /* ~*/
+   double CNJ[3][3]; /* DCM from J2000 frame to world-centric equatorial inertial frame */
+   double qnj[4];
 
    /*~ Internal Variables ~*/
    

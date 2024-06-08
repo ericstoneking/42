@@ -45,6 +45,8 @@ FILE *FileOpen(const char *Path, const char *File, const char *CtrlCode);
 void ByteSwapDouble(double *A);
 int FileToString(const char *file_name, char **result_string,
                  size_t *string_len);
+double *PpmToPsf(const char *path, const char *filename, 
+   long *width, long *height, long *BytesPerPixel);
 
 SOCKET InitSocketServer(int Port, int AllowBlocking);
 SOCKET InitSocketClient(const char *hostname, int Port, int AllowBlocking);

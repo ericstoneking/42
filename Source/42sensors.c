@@ -46,6 +46,8 @@ void AccelerometerModel(struct SCType *S)
 
       for(Ia=0;Ia<S->Nacc;Ia++) { 
          A = &S->Accel[Ia];
+         
+         for(i=0;i<3;i++) A->AccumAccN[i] += S->AccN[i]*DTSIM;
          A->SampleCounter++; 
          if (A->SampleCounter >= A->MaxCounter) {
             A->SampleCounter = 0;
@@ -71,8 +73,9 @@ void AccelerometerModel(struct SCType *S)
             AccGG = VoV(AccGGB,Axis);
             
             for(i=0;i<3;i++) {
-               dvn[i] = N->VelN[i] - A->PrevVelN[i];
+               dvn[i] = A->AccumAccN[i] + N->VelN[i] - A->PrevVelN[i];
                A->PrevVelN[i] = N->VelN[i];
+               A->AccumAccN[i] = 0.0;
             }
             QxQ(N->qb,B->qn,NodeQN);
             for(i=0;i<4;i++) AvgQN[i] = A->PrevQN[i] + NodeQN[i];
@@ -208,7 +211,7 @@ void CssModel(struct SCType *S)
             #ifdef _ENABLE_GUI_  
             CSS->Albedo = 0.0;          
             if (AlbedoActive) {
-               FindAlbedo(S,CSS);
+               FindCssAlbedo(S,CSS);
                Signal = CSS->Scale*CSS->Albedo;
                Counts = (long) (Signal/CSS->Quant+0.5);
                CSS->Illum += ((double) Counts)*CSS->Quant;
@@ -275,6 +278,7 @@ void FssModel(struct SCType *S)
             
             S->AC.FSS[Ifss].Valid = FSS->Valid;
             for(i=0;i<2;i++) S->AC.FSS[Ifss].SunAng[i] = FSS->SunAng[i];
+            
          }
       }
 }
@@ -413,6 +417,145 @@ void GpsModel(struct SCType *S)
       }
 }
 /**********************************************************************/
+void FullFgsModel(struct FgsType *F, struct SCType *S)
+{
+      struct OpticsType *O;
+      struct BodyType *B;
+      struct NodeType *N;
+      double ar,StarVecFr[3];
+      double qbb0[4],qb0r[4],qbr[4];
+      double StarVecB[3],StarPosB[3];
+      double FldPntB[3],FldDirB[3],OutPntB[3],OutDirB[3];
+      double x,y,qfb[4],CFB[3][3];
+      long i;
+      long OutSC,OutBody;
+      long InAp,NumOptPassed;
+
+      /* Create Guide Star in Fr, transform to R */
+      ar = sqrt(1.0-F->Hr*F->Hr-F->Vr*F->Vr);
+      StarVecFr[F->H_Axis] = F->Hr;
+      StarVecFr[F->V_Axis] = F->Vr;
+      StarVecFr[F->BoreAxis] = ar;
+
+      QTxV(F->qr,StarVecFr,F->StarVecR);
+            
+      /* Create FldPntB, FldDirB from StarVecR */
+      O = &F->Opt[0];
+      B = &S->B[O->Body];
+      QxQT(B->qn,S->B[0].qn,qbb0); 
+      QxQT(S->B[0].qn,S->AC.qrn,qb0r);
+      QxQ(qbb0,qb0r,qbr);
+      QxV(qbr,F->StarVecR,StarVecB); 
+      
+      InAp = OpticalFieldPoint(StarVecB,O,FldPntB,FldDirB);
+      if (!InAp) {
+         printf("Hmm.  FGS field point is not within aperture.\n");
+         exit(1);
+      }
+            
+      NumOptPassed = OpticalTrain(F->Opt[0].SC,F->Opt[0].Body,FldPntB,FldDirB,
+         F->Nopt,F->Opt,&OutSC,&OutBody,OutPntB,OutDirB);
+
+      if (NumOptPassed == F->Nopt) F->Valid = TRUE;
+      else F->Valid = FALSE;
+      
+      /* Find H,V from OutPntB */
+      O = &F->Opt[F->Nopt-1];
+      B = &S->B[O->Body];
+      N = &B->Node[O->Node];
+      QxQ(F->qb,N->qb,qfb);
+      Q2C(qfb,CFB);
+      x = 0.0;
+      y = 0.0;
+      for(i=0;i<3;i++) StarPosB[i] = OutPntB[i] - N->PosB[i];
+      for(i=0;i<3;i++) {
+         x += CFB[F->H_Axis][i]*StarPosB[i];
+         y += CFB[F->V_Axis][i]*StarPosB[i];
+      }
+      F->H = x/O->FocLen;
+      F->V = y/O->FocLen;
+      
+      /* Apply PSF Image */
+      /* Accumulate GW */
+
+      F->SampleCounter++;
+      if (F->SampleCounter >= F->MaxCounter) {
+         F->SampleCounter = 0;
+         /* Centroiding */
+         /* Output Angles */
+         F->Ang[F->BoreAxis] = 0.0;
+         F->Ang[F->H_Axis] =  (F->V-F->Vr);
+         F->Ang[F->V_Axis] = -(F->H-F->Hr);
+      }
+}
+/**********************************************************************/
+void SimpleFgsModel(struct FgsType *F,struct SCType *S)
+{
+      struct BodyType *B;
+      struct NodeType *N;
+      double ar;
+      double StarVecFr[3];
+      double qbb0[4],qb0r[4],qbr[4],qfb[4];
+      double StarVecB[3],StarVecF[3];
+      
+      F->SampleCounter++;
+      if (F->SampleCounter >= F->MaxCounter) {
+         F->SampleCounter = 0;
+         B = &S->B[F->Body];
+         N = &B->Node[F->Node];
+      
+         /* Create Guide Star in Fr, transform to R */
+         F->Hr = 0.0;
+         F->Vr = 0.0;
+         ar = sqrt(1.0-F->Hr*F->Hr-F->Vr*F->Vr);
+         StarVecFr[F->H_Axis] = F->Hr;
+         StarVecFr[F->V_Axis] = F->Vr;
+         StarVecFr[F->BoreAxis] = ar;
+   
+         /* CFrR = CFB */
+         QTxV(F->qb,StarVecFr,F->StarVecR);
+
+         /* Transform Guide Star from Fr to F */
+         QxQT(B->qn,S->B[0].qn,qbb0);
+         QxQT(S->B[0].qn,S->AC.qrn,qb0r);
+         QxQ(qbb0,qb0r,qbr);
+         QxV(qbr,F->StarVecR,StarVecB);
+         QxQ(F->qb,N->qb,qfb);
+         QxV(qfb,StarVecB,StarVecF);
+         F->H = StarVecF[F->H_Axis] + F->NEA*GaussianRandom(RNG);
+         F->V = StarVecF[F->V_Axis] + F->NEA*GaussianRandom(RNG);
+         
+         F->Ang[F->BoreAxis] = 0.0;
+         F->Ang[F->H_Axis] =  (F->V-F->Vr);
+         F->Ang[F->V_Axis] = -(F->H-F->Hr);
+                     
+         if (StarVecF[F->BoreAxis] > 0.0 && 
+             fabs(F->H) < F->FovHalfAng[0] && 
+             fabs(F->V) < F->FovHalfAng[1]) {
+            F->Valid = TRUE;            
+         }
+         else {
+            F->Valid = FALSE;
+            F->H = 0.0;
+            F->V = 0.0;
+         }
+      }
+}
+/**********************************************************************/
+void FgsModel(struct SCType *S)
+{
+      struct FgsType *F;
+      long Ifgs;
+      
+      for(Ifgs=0;Ifgs<S->Nfgs;Ifgs++) {
+         F = &S->Fgs[Ifgs];
+         
+         if (F->HasOptics) FullFgsModel(F,S);
+         else SimpleFgsModel(F,S);
+      }
+         
+}
+/**********************************************************************/
 /*  This function is called at the simulation rate.  Sub-sampling of  */
 /*  sensors should be done on a case-by-case basis.                   */
 void Sensors(struct SCType *S)
@@ -535,6 +678,11 @@ void Sensors(struct SCType *S)
       for (i=0;i<S->Nw;i++) {
          AC->Whl[i].H = S->Whl[i].H;
          AC->Whl[i].w = S->Whl[i].w;
+      }
+      
+      /* Fine Guidance Sensors */
+      if (S->Nfgs > 0) {
+         FgsModel(S);
       }
 }
 
