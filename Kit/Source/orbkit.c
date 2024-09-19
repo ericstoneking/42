@@ -406,12 +406,13 @@ void  RV2Eph(double time, double mu, double xr[3], double xv[3],
 #undef TWOPI
 }
 /**********************************************************************/
+#define TWOPI (6.283185307179586)
+#define PI (3.141592653589793)
+#define D2R (1.74532925199E-2)
 void TLE2MeanEph(const char Line1[80], const char Line2[80], double JD, 
    double LeapSec, struct OrbitType *O)
 {
 #define EPS (1.0E-12)
-#define TWOPI (6.283185307179586)
-#define D2R (1.74532925199E-2)
 
       char YearString[3];
       char DOYstring[13];
@@ -454,7 +455,7 @@ void TLE2MeanEph(const char Line1[80], const char Line2[80], double JD,
 
       strncpy(RAANstring,&Line2[17],9);
       RAANstring[9] = 0;
-      O->RAAN = ((double) atof(RAANstring))*D2R;
+      O->RAAN0 = ((double) atof(RAANstring))*D2R;
 
       strncpy(EccString,&Line2[26],7);
       EccString[7] = 0;
@@ -462,11 +463,11 @@ void TLE2MeanEph(const char Line1[80], const char Line2[80], double JD,
 
       strncpy(omgstring,&Line2[34],8);
       omgstring[8] = 0;
-      O->ArgP = ((double) atof(omgstring))*D2R;
+      O->ArgP0 = ((double) atof(omgstring))*D2R;
 
       strncpy(MeanAnomString,&Line2[43],8);
       MeanAnomString[8] = 0;
-      O->MeanAnom = ((double) atof(MeanAnomString))*D2R;
+      O->MeanAnom0 = ((double) atof(MeanAnomString))*D2R;
 
       strncpy(MeanMotionString,&Line2[52],11);
       MeanMotionString[11] = 0;
@@ -474,9 +475,9 @@ void TLE2MeanEph(const char Line1[80], const char Line2[80], double JD,
       O->Period = TWOPI/(O->MeanMotion);
 
       /* Time of Periapsis passage given in seconds since J2000 */
-      O->tp = O->Epoch - O->MeanAnom/(O->MeanMotion);
-      while ((O->tp-DynTime) < -(O->Period)) O->tp += O->Period;
-      while ((O->tp-DynTime) >   O->Period ) O->tp -= O->Period;
+      O->tp = O->Epoch - O->MeanAnom0/(O->MeanMotion);
+      while ((DynTime - O->tp) >   O->Period) O->tp += O->Period;
+      while ((DynTime - O->tp) < -(O->Period)) O->tp -= O->Period;
 
       O->MeanSMA = pow(mu/(O->MeanMotion*O->MeanMotion),1.0/3.0);
       O->SMA = O->MeanSMA;
@@ -484,6 +485,7 @@ void TLE2MeanEph(const char Line1[80], const char Line2[80], double JD,
       O->SLR = O->SMA*(1.0 - O->ecc*O->ecc);
       O->rmin = O->SLR/(1.0 + O->ecc);
 
+      O->MeanAnom = O->MeanMotion*(DynTime - O->tp);
       O->anom = MeanAnomToTrueAnom(O->MeanAnom,O->ecc);
             
       /* Initialize J2 Drift Parameters (ref Markley and Crassidis, Ch. 10) */
@@ -492,25 +494,22 @@ void TLE2MeanEph(const char Line1[80], const char Line2[80], double JD,
          Coef = 1.5*J2*Re*Re/(O->SLR*O->SLR)*O->MeanMotion;
          O->RAANdot = -Coef*cos(O->inc);
          O->ArgPdot =  Coef*(2.0-2.5*sin(O->inc)*sin(O->inc));
-         O->RAAN0 = O->RAAN - O->RAANdot*(DynTime-O->Epoch);
-         O->ArgP0 = O->ArgP - O->ArgPdot*(DynTime-O->Epoch);
-         /* 10.122 */
-         O->MeanAnom0 = O->MeanAnom - O->MeanMotion*(DynTime-O->Epoch);
+         O->RAAN = O->RAAN0 + O->RAANdot*(DynTime-O->Epoch);
+         while(O->RAAN >  PI) O->RAAN -= TWOPI;
+         while(O->RAAN < -PI) O->RAAN += TWOPI;
+         O->ArgP = O->ArgP0 + O->ArgPdot*(DynTime-O->Epoch);
+         while(O->ArgP >  PI) O->ArgP -= TWOPI;
+         while(O->ArgP < -PI) O->ArgP += TWOPI;
          /* 10.126 */
          O->J2Rw2bya = J2*Re*Re/O->MeanSMA;   
       }
       else {
          O->RAANdot = 0.0;
          O->ArgPdot = 0.0;
-         O->RAAN0 = O->RAAN;
-         O->ArgP0 = O->ArgP;
+         O->RAAN = O->RAAN0;
+         O->ArgP = O->ArgP0;
          O->J2Rw2bya = 0.0;
-         /* 10.122 */
-         O->MeanAnom0 = O->MeanAnom - O->MeanMotion*(DynTime-O->Epoch);
       }   
-
-#undef TWOPI
-#undef D2R
 }
 /**********************************************************************/
 /* Ref: Markley and Crassidis, 10.4.3                                 */
@@ -530,6 +529,8 @@ void MeanEph2RV(struct OrbitType *O, double DynTime)
 
       /* 10.122 */
       O->MeanAnom = O->MeanAnom0 + O->MeanMotion*(DynTime - O->Epoch);
+      while(O->MeanAnom >  PI) O->MeanAnom -= TWOPI;
+      while(O->MeanAnom < -PI) O->MeanAnom += TWOPI;
       
       O->anom = MeanAnomToTrueAnom(O->MeanAnom,O->ecc);
       
@@ -582,6 +583,9 @@ void MeanEph2RV(struct OrbitType *O, double DynTime)
       }
 
 }
+#undef TWOPI
+#undef PI
+#undef D2R
 /**********************************************************************/
 /* TLEs use UTC.  42 orbits use TT.  So LeapSec are needed.           */
 long LoadTleFromFile(const char *Path, const char *TleFileName,

@@ -74,6 +74,12 @@ int FileToString(const char *file_name, char **result_string,
           printf("Error reading from file %s\n", file_name);
           return -1;
       }
+      if (ret > file_len) {
+         printf("Error: Number of characters read (%d) exceeds expected file size (%d) for file %s\n",
+                 ret,(int) file_len,file_name);
+         return -1;
+      }
+      (*result_string)[ret]  = '\0';
 
       close(fd);
 

@@ -3248,7 +3248,7 @@ GLuint BuildShaderProgram(GLuint VtxShader, GLuint FragShader, const char *Name)
       glLinkProgram(ShaderProgram);
 
       glGetProgramiv(ShaderProgram,GL_LINK_STATUS,&Success);
-
+      
       if (!Success) printf("Error in %s ShaderProgram link\n",Name);
       glGetProgramiv(ShaderProgram,GL_INFO_LOG_LENGTH,&LogSize);
       if (LogSize > 0) {
