@@ -145,20 +145,19 @@ endif
 
 ifeq ($(42PLATFORM),__MSYS__)
    CINC =
-   EXTERNDIR = /c/42ExternalSupport/
+
    # For graphics interface, choose GLUT or GLFW GUI libraries
    # GLUT is well known, but GLFW is better for newer Mac's hires displays
    #GLUT_OR_GLFW = _USE_GLFW_
    GLUT_OR_GLFW = _USE_GLUT_
 
    ifneq ($(strip $(GUIFLAG)),)
-      # TODO: Option to use GLFW instead of GLUT?
-      GLEW = $(EXTERNDIR)GLEW/
-      GLUT = $(EXTERNDIR)freeglut/
+      # Updated paths for pacman-installed GLEW and GLUT
       LIBS =  -lopengl32 -lglu32 -lfreeglut -lws2_32 -lglew32
-      LFLAGS = -L $(GLUT)lib/ -L $(GLEW)lib/
+      LFLAGS = 
       GUIOBJ = $(OBJ)42gl.o $(OBJ)42glut.o $(OBJ)glkit.o $(OBJ)42gpgpu.o
-      GLINC = -I $(GLEW)include/GL/ -I $(GLUT)include/GL/
+      # Update include paths to the MSYS2 installed GLEW and GLUT
+      GLINC = -I /mingw64/include/GL/
       ARCHFLAG = -D GLUT_NO_LIB_PRAGMA -D GLUT_NO_WARNING_DISABLE -D GLUT_DISABLE_ATEXIT_HACK
    else
       GUIOBJ =
@@ -167,6 +166,7 @@ ifeq ($(42PLATFORM),__MSYS__)
       LFLAGS =
       ARCHFLAG =
    endif
+
    XWARN = 
    EXENAME = 42.exe
    CC = gcc
@@ -225,8 +225,16 @@ endif
 42OBJ = $(OBJ)42main.o $(OBJ)42exec.o $(OBJ)42actuators.o $(OBJ)42cmd.o \
 $(OBJ)42dynamics.o $(OBJ)42environs.o $(OBJ)42ephem.o $(OBJ)42fsw.o \
 $(OBJ)42init.o $(OBJ)42ipc.o $(OBJ)42jitter.o $(OBJ)42joints.o \
-$(OBJ)42optics.o $(OBJ)42perturb.o $(OBJ)42report.o $(OBJ)42sensors.o \
-$(OBJ)42nos3.o
+$(OBJ)42optics.o $(OBJ)42perturb.o $(OBJ)42report.o $(OBJ)42sensors.o
+
+# Exclude 42nos3.o for both MSYS2 and generic Windows (MinGW, etc.) since nos3 does not work and wont compile
+ifeq ($(42PLATFORM),__MSYS__)
+   # Exclude 42nos3.o for MSYS
+else ifeq ($(42PLATFORM),_WIN32)
+   # Exclude 42nos3.o for Windows
+else
+   42OBJ += $(OBJ)42nos3.o
+endif
 
 KITOBJ = $(OBJ)dcmkit.o $(OBJ)envkit.o $(OBJ)fswkit.o $(OBJ)geomkit.o \
 $(OBJ)iokit.o $(OBJ)mathkit.o $(OBJ)nrlmsise00kit.o $(OBJ)msis86kit.o \

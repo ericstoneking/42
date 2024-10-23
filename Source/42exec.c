@@ -158,6 +158,7 @@ long AdvanceTime(void)
 
             break;
          case NOS3_TIME :
+            #ifndef _WIN32
             NOS3Time(&UTC.Year,&UTC.doy,&UTC.Month,&UTC.Day,
                &UTC.Hour,&UTC.Minute,&UTC.Second);
             CivilTime = DateToTime(UTC.Year,UTC.Month,UTC.Day,
@@ -176,6 +177,10 @@ long AdvanceTime(void)
 
             GpsTimeToGpsDate(GpsTime,&GpsRollover,&GpsWeek,&GpsSecond);
             SimTime = DynTime - DynTime0;
+            #else
+               printf("NOS3 time mode is not supported on Windows.\n");
+               exit(1);
+            #endif 
             break;
       }
 
