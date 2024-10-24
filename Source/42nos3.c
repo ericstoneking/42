@@ -14,11 +14,11 @@
 #define _POSIX_C_SOURCE 1 /* For signal handling */
 #include <stdio.h>
 #include <stdlib.h>
-#include <dlfcn.h>
 
 #include "42.h"
 
 #if defined(__linux__)
+#include <dlfcn.h>
 #include <semaphore.h>
 static char BusName[120] = "command";
 static char ConnectionString[120] = "tcp://127.0.0.1:12001";

@@ -3,10 +3,15 @@ WSL (Windows Subsystem for Linux) provides a Linux environment running on Window
 
 On the other hand, **MinGW** compiles 42 as a native Windows executable, which means that you can directly use Windows components for window management, networking, and GPU access without extra dependencies or workarounds. MinGW targets native Windows APIs, so no additional software like XLaunch is needed.
 
+NOTE: NOS3 requires linux. If you need NOS3 support, than WSL will be the answer.
+
 ### Steps to Get 42 Working on Windows Using MinGW:
 
 1. **Install MSYS2**:
-   - Download and install MSYS2 from the official website using the `.exe` installer.
+   - We use the MSYS2 version of MinGW rather than the standalone versions like on SourceForge.net
+   - MSYS2 version will come with a package manager (pacman) that is useful for keeping our dependencies up to date, and removes the requirement for the historical 42ExternalSupport folder where dependencies were manually installed and updated
+   - Download and install MSYS2 from the official website https://www.msys2.org/ using the `.exe` installer.
+   - The **MSYS2 MinGW 64-bit** comes with the MSYS2 installation.
 
 2. **Open an MSYS2 Prompt**:
    - MSYS2 should start automatically after installation. If not, open the **MSYS2 MSYS** terminal from the Start menu.
@@ -15,7 +20,7 @@ On the other hand, **MinGW** compiles 42 as a native Windows executable, which m
      - **MinGW** (within MSYS2) is used for building **Windows-native executables**.
 
 3. **Update MSYS2**:
-   - You need to update MSYS2 and MinGW. Run these commands in sequence:
+   - You need to update MSYS2 and MinGW. The terminal may need to restart during this process. Run these commands in sequence:
      ```bash
      pacman -Syu
      pacman -Su
@@ -36,7 +41,14 @@ On the other hand, **MinGW** compiles 42 as a native Windows executable, which m
      ```bash
      pacman -S mingw-w64-x86_64-toolchain
      ```
-
+   - Verify that you have access to gcc from the MinGW terminal:
+      ```bash
+      gcc --version
+      ```
+   - If not, add MinGW64 to your path from the MinGW terminal and verify that you have access to gcc again:
+      ```bash
+         export PATH="/mingw64/bin:$PATH"
+      ```
 7. **Install `make`**:
    - You'll also need the `make` utility to run the Makefile:
      ```bash
