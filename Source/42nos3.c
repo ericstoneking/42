@@ -15,10 +15,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#if !defined(_WIN32)
+// windows has different functions for dynamic linking
+// nos3 not compiled for windows so we won't need this header
+#include <dlfcn.h>
+#endif
+
 #include "42.h"
 
 #if defined(__linux__)
-#include <dlfcn.h>
 #include <semaphore.h>
 static char BusName[120] = "command";
 static char ConnectionString[120] = "tcp://127.0.0.1:12001";

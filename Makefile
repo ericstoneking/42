@@ -228,15 +228,6 @@ $(OBJ)42init.o $(OBJ)42ipc.o $(OBJ)42jitter.o $(OBJ)42joints.o \
 $(OBJ)42optics.o $(OBJ)42perturb.o $(OBJ)42report.o $(OBJ)42sensors.o \
 $(OBJ)42nos3.o
 
-# Exclude 42nos3.o for both MSYS2 and generic Windows (MinGW, etc.) since nos3 does not work and wont compile
-#ifeq ($(42PLATFORM),__MSYS__)
-   # Exclude 42nos3.o for MSYS
-#else ifeq ($(42PLATFORM),_WIN32)
-   # Exclude 42nos3.o for Windows
-#else
- #  42OBJ += $(OBJ)42nos3.o
-#endif
-
 KITOBJ = $(OBJ)dcmkit.o $(OBJ)envkit.o $(OBJ)fswkit.o $(OBJ)geomkit.o \
 $(OBJ)iokit.o $(OBJ)mathkit.o $(OBJ)nrlmsise00kit.o $(OBJ)msis86kit.o \
 $(OBJ)orbkit.o $(OBJ)radbeltkit.o $(OBJ)sigkit.o $(OBJ)sphkit.o $(OBJ)timekit.o
