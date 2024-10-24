@@ -145,19 +145,38 @@ endif
 
 ifeq ($(42PLATFORM),__MSYS__)
    CINC =
-
+   EXTERNDIR = /c/42ExternalSupport/
    # For graphics interface, choose GLUT or GLFW GUI libraries
    # GLUT is well known, but GLFW is better for newer Mac's hires displays
    #GLUT_OR_GLFW = _USE_GLFW_
    GLUT_OR_GLFW = _USE_GLUT_
 
    ifneq ($(strip $(GUIFLAG)),)
-      # Updated paths for pacman-installed GLEW and GLUT
-      LIBS =  -lopengl32 -lglu32 -lfreeglut -lws2_32 -lglew32
-      LFLAGS = 
-      GUIOBJ = $(OBJ)42gl.o $(OBJ)42glut.o $(OBJ)glkit.o $(OBJ)42gpgpu.o
-      # Update include paths to the MSYS2 installed GLEW and GLUT
-      GLINC = -I /mingw64/include/GL/
+      ifneq ($(shell pacman -Qi mingw-w64-x86_64-freeglut >/dev/null 2>&1 && pacman -Qi mingw-w64-x86_64-glew >/dev/null 2>&1 && echo true),)
+         LFLAGS =    
+         GLINC = -I /mingw64/include/GL/         
+         $(info pacman)
+      else
+         GLEW = $(EXTERNDIR)GLEW/
+         GLUT = $(EXTERNDIR)freeglut/
+
+         # if the directories don't exist, throw an error
+         ifeq ($(wildcard $(GLEW)),)
+            $(error The directory $(GLEW) does not exist. Please install GLEW to $(GLEW).)
+         endif
+
+         ifeq ($(wildcard $(GLUT)),)
+            $(error The directory $(GLUT) does not exist. Please install GLUT to $(GLUT).)
+         endif
+
+         LFLAGS = -L $(GLUT)lib/ -L $(GLEW)lib/         
+         GLINC = -I $(GLEW)include/GL/ -I $(GLUT)include/GL/
+         $(info external)
+      endif
+      
+      LIBS =  -lopengl32 -lglu32 -lfreeglut -lws2_32 -lglew32      
+      GUIOBJ = $(OBJ)42gl.o $(OBJ)42glut.o $(OBJ)glkit.o $(OBJ)42gpgpu.o      
+      
       ARCHFLAG = -D GLUT_NO_LIB_PRAGMA -D GLUT_NO_WARNING_DISABLE -D GLUT_DISABLE_ATEXIT_HACK
    else
       GUIOBJ =
