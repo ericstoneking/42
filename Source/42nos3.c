@@ -14,7 +14,12 @@
 #define _POSIX_C_SOURCE 1 /* For signal handling */
 #include <stdio.h>
 #include <stdlib.h>
+
+#ifndef(_WIN32)
+// windows has different functions for dynamic linking
+// nos3 not compiled for windows so we won't need this header
 #include <dlfcn.h>
+#endif
 
 #include "42.h"
 
