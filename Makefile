@@ -171,7 +171,6 @@ ifeq ($(42PLATFORM),__MSYS__)
 
          LFLAGS = -L $(GLUT)lib/ -L $(GLEW)lib/         
          GLINC = -I $(GLEW)include/GL/ -I $(GLUT)include/GL/
-         $(info external)
       endif
       
       LIBS =  -lopengl32 -lglu32 -lfreeglut -lws2_32 -lglew32      

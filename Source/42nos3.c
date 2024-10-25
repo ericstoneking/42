@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#if !defined(_WIN32)
+#ifndef(_WIN32)
 // windows has different functions for dynamic linking
 // nos3 not compiled for windows so we won't need this header
 #include <dlfcn.h>
