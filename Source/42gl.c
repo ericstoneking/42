@@ -2474,6 +2474,12 @@ void FindModelMatrices(void)
       for(Isc=0;Isc<Nsc;Isc++) {
          S = &SC[Isc];
          if (ScIsVisible(POV.Host.RefOrb,Isc,PosR)) {
+            for(i=0;i<3;i++) PosR[i] = S->PosR[i];
+            if (S->RefOrb != POV.Host.RefOrb) {
+               for(i=0;i<3;i++) {
+                  PosR[i] += Orb[S->RefOrb].PosN[i] - Orb[POV.Host.RefOrb].PosN[i];
+               }
+            }
             for(Ib=0;Ib<S->Nb;Ib++) {
                B = &S->B[Ib];
                if (S->RefPt == REFPT_CM) {
@@ -2482,7 +2488,7 @@ void FindModelMatrices(void)
                else {
                   for(i=0;i<3;i++) pcmn[i] = 0.0;
                }
-               for(i=0;i<3;i++) pbn[i] = S->PosR[i] + B->pn[i] - pcmn[i];
+               for(i=0;i<3;i++) pbn[i] = PosR[i] + B->pn[i] - pcmn[i];
                BuildModelMatrix(B->CN,pbn,B->ModelMatrix);
             }
          }
@@ -2521,7 +2527,7 @@ void CamRenderExec(void)
          DrawFarScene();
          SetEye(MONOCULAR);
          DrawBodies();
-         /* DrawContactSpheres(); */ /* Diagnostic only */
+         /* DrawContactSpheres(); */  /* Diagnostic only */
          DrawNearAuxObjects();
       }
 }

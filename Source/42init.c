@@ -133,8 +133,8 @@ long DecodeString(char *s)
       else if (!strcmp(s,"COWELL")) return ORBDOF_COWELL;
 
       else if (!strcmp(s,"PASSIVE_FSW")) return PASSIVE_FSW;
-      else if (!strcmp(s,"PROTOTYPE_FSW")) return PROTOTYPE_FSW;
-      else if (!strcmp(s,"AD_HOC_FSW")) return AD_HOC_FSW;
+      else if (!strcmp(s,"INSTANT_FSW")) return INSTANT_FSW;
+      else if (!strcmp(s,"SANDBOX_FSW")) return SANDBOX_FSW;
       else if (!strcmp(s,"SPINNER_FSW")) return SPINNER_FSW;
       else if (!strcmp(s,"MOMBIAS_FSW")) return MOMBIAS_FSW;
       else if (!strcmp(s,"THREE_AXIS_FSW")) return THREE_AXIS_FSW;
@@ -142,7 +142,6 @@ long DecodeString(char *s)
       else if (!strcmp(s,"CMG_FSW")) return CMG_FSW;
       else if (!strcmp(s,"THR_FSW")) return THR_FSW;
       else if (!strcmp(s,"CFS_FSW")) return CFS_FSW;
-      else if (!strcmp(s,"RBT_FSW")) return RBT_FSW;
 
       else if (!strcmp(s,"PHOBOS")) return PHOBOS;
       else if (!strcmp(s,"DEIMOS")) return DEIMOS;
@@ -204,7 +203,6 @@ long DecodeString(char *s)
       else if (!strcmp(s,"TX")) return IPC_TX;
       else if (!strcmp(s,"RX")) return IPC_RX;
       else if (!strcmp(s,"TXRX")) return IPC_TXRX;
-      else if (!strcmp(s,"ACS")) return IPC_ACS;
       else if (!strcmp(s,"WRITEFILE")) return IPC_WRITEFILE;
       else if (!strcmp(s,"READFILE")) return IPC_READFILE;
       else if (!strcmp(s,"SPIRENT")) return IPC_SPIRENT;
@@ -256,12 +254,16 @@ void EchoDyn(struct SCType *S)
 {
       FILE *outfile;
       char OutFileName[80];
+      char Fmt[40];
       struct DynType *D;
       struct BodyType *B;
       struct JointType *G;
       long i,j,Ib,Ig,Nf;
 
-      sprintf(OutFileName,"Dyn%02ld.42",S->ID);
+      if (Nsc == 1) sprintf(Fmt,"");
+      else if (Nsc <= 10) sprintf(Fmt,"%1ld",S->ID);
+      else sprintf(Fmt,"%02ld",S->ID);
+      sprintf(OutFileName,"Dyn%s.42",Fmt);
       outfile = FileOpen(InOutPath,OutFileName,"w");
 
 /* .. SC Structure */
@@ -887,6 +889,7 @@ void InitRigidDyn(struct SCType *S)
       struct DynType *D;
       FILE *outfile;
       char filename[80];
+      char Fmt[40];
 
       D = &S->Dyn;
 
@@ -1047,7 +1050,10 @@ void InitRigidDyn(struct SCType *S)
       MapJointStatesToStateVector(S);
 
 /* .. Echo tree tables */
-      sprintf(filename,"Tree%02ld.42",S->ID);
+      if (Nsc == 1) sprintf(Fmt,"");
+      else if (Nsc <= 10) sprintf(Fmt,"%1ld",S->ID);
+      else sprintf(Fmt,"%02ld",S->ID);
+      sprintf(filename,"Tree%s.42",Fmt);
       outfile = FileOpen(InOutPath,filename,"w");
       fprintf(outfile,"SC %2ld:  Nb = %2ld  Ng = %2ld\n\n",S->ID,S->Nb,S->Ng);
       fprintf(outfile,"Connect Table:\n\n");
@@ -2881,6 +2887,11 @@ void InitSpacecraft(struct SCType *S)
       S->EnvTrq.First = 1;
       
       InitAC(S);
+
+      #if _AC_STANDALONE_
+      S->AcIpc.Init = 1;
+      S->AcIpc.AllowBlocking = 1;
+      #endif
       
       InitShakers(S);
       
@@ -3196,6 +3207,7 @@ void LoadPlanets(void)
 /* .. Earth rotation is a special case */
       GMST = JD2GMST(UTC.JulDay);
       World[EARTH].PriMerAng = TwoPi*GMST;
+      /* SimpRot(Zaxis,World[EARTH].PriMerAng,World[EARTH].CWN); */
       HiFiEarthPrecNute(UTC.JulDay,C_TEME_TETE,C_TETE_J2000);
       SimpRot(Zaxis,World[EARTH].PriMerAng,C_W_TETE);
       MxM(C_W_TETE,C_TETE_J2000,World[EARTH].CWN);

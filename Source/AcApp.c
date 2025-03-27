@@ -19,14 +19,14 @@
 ** #endif
 */
 
-extern void WriteToFile(FILE *StateFile, struct AcType *AC);
-extern void WriteToGmsec(struct AcType *AC);
-extern void WriteToSocket(SOCKET Socket, struct AcType *AC);
-extern void ReadFromFile(FILE *StateFile, struct AcType *AC);
-extern void ReadFromGmsec(struct AcType *AC);
-extern void ReadFromSocket(SOCKET Socket, struct AcType *AC);
 
 #ifdef _AC_STANDALONE_
+void WriteAcOutToSocket(struct AcType *AC,struct AcIpcType *I);
+void ReadAcInFromSocket(struct AcType *AC,struct AcIpcType *I);
+void ReadAcTblFromSocket(struct AcType *AC,struct AcIpcType *I);
+void ReadAcArraySizesFromSocket(struct AcType *AC,struct AcIpcType *I);
+void ReadAcBufLensFromSocket(struct AcIpcType *I);
+
 /**********************************************************************/
 /* This function copies needed parameters from the SC structure to    */
 /* the AC structure.  This is a crude first pass.  It only allocates  */
@@ -36,83 +36,78 @@ void AllocateAC(struct AcType *AC)
 {
 
       /* Bodies */
-      AC->Nb = 2;
       if (AC->Nb > 0) {
          AC->B = (struct AcBodyType *) calloc(AC->Nb,sizeof(struct AcBodyType));
       }
 
       /* Joints */
-      AC->Ng = 1;
       if (AC->Ng > 0) {
          AC->G = (struct AcJointType *) calloc(AC->Ng,sizeof(struct AcJointType));
       }
       
       /* Wheels */
-      AC->Nwhl = 4;
       if (AC->Nwhl > 0) {
          AC->Whl = (struct AcWhlType *) calloc(AC->Nwhl,sizeof(struct AcWhlType));
       }
 
       /* Magnetic Torquer Bars */
-      AC->Nmtb = 3;
       if (AC->Nmtb > 0) {
          AC->MTB = (struct AcMtbType *) calloc(AC->Nmtb,sizeof(struct AcMtbType));
       }
 
       /* Thrusters */
-      AC->Nthr = 0;
       if (AC->Nthr > 0) {
          AC->Thr = (struct AcThrType *) calloc(AC->Nthr,sizeof(struct AcThrType));
       }
       
-      /* Control Moment Gyros */
-
       /* Gyro Axes */
-      AC->Ngyro = 3;
       if (AC->Ngyro > 0) {
          AC->Gyro = (struct AcGyroType *) calloc(AC->Ngyro,sizeof(struct AcGyroType));
       }
 
       /* Magnetometer Axes */
-      AC->Nmag = 3;
       if (AC->Nmag > 0) {
          AC->MAG = (struct AcMagnetometerType *) calloc(AC->Nmag,sizeof(struct AcMagnetometerType));
       }
 
       /* Coarse Sun Sensors */
-      AC->Ncss = 8;
       if (AC->Ncss > 0) {
          AC->CSS = (struct AcCssType *) calloc(AC->Ncss,sizeof(struct AcCssType));
       }
       
       /* Fine Sun Sensors */
-      AC->Nfss = 1;
       if (AC->Nfss > 0) {
          AC->FSS = (struct AcFssType *) calloc(AC->Nfss,sizeof(struct AcFssType));
       }
 
       /* Star Trackers */
-      AC->Nst = 1;
       if (AC->Nst > 0) {
          AC->ST = (struct AcStarTrackerType *) calloc(AC->Nst,sizeof(struct AcStarTrackerType));
       }
 
       /* GPS */
-      AC->Ngps = 1;
       if (AC->Ngps > 0) {
          AC->GPS = (struct AcGpsType *) calloc(AC->Ngps,sizeof(struct AcGpsType)); 
       }     
       
       /* Accelerometer Axes */
+      if (AC->Nacc > 0) {
+         AC->Accel = (struct AcAccelType *) calloc(AC->Nacc,sizeof(struct AcAccelType)); 
+      }     
 
 
+}
+/**********************************************************************/
+void AllocateAcBufs(struct AcIpcType *I)
+{
+      I->AcInBuf = (char *) calloc(I->AcInBufLen,sizeof(char));
+      I->AcOutBuf = (char *) calloc(I->AcOutBufLen,sizeof(char));
+      I->AcTblBuf = (char *) calloc(I->AcTblBufLen,sizeof(char));
 }
 /**********************************************************************/
 void InitAC(struct AcType *AC)
 {
       AC->Init = 1;
-      
-      AC->EchoEnabled = 1;
       
       /* Controllers */
       AC->CfsCtrl.Init = 1;      
@@ -476,12 +471,12 @@ void AcFsw(struct AcType *AC)
       for(i=0;i<3;i++) AC->Mcmd[i] = C->Kunl*HxB[i];
       
 /* .. Solar Array Steering */
-      G->Cmd.Ang[0] = atan2(AC->svb[0],AC->svb[2]);
-      AngErr = fmod(G->Ang[0]-G->Cmd.Ang[0],AC->TwoPi);
+      G->GCmd.Ang[0] = atan2(AC->svb[0],AC->svb[2]);
+      AngErr = fmod(G->Ang[0]-G->GCmd.Ang[0],AC->TwoPi);
       if (AngErr >  AC->Pi) AngErr -= AC->TwoPi;
       if (AngErr < -AC->Pi) AngErr += AC->TwoPi;
-      G->Cmd.AngRate[0] = -G->AngGain[0]/G->AngRateGain[0]*AngErr;
-      G->Cmd.AngRate[0] = Limit(G->Cmd.AngRate[0],-G->MaxAngRate[0],G->MaxAngRate[0]);
+      G->GCmd.AngRate[0] = -G->AngGain[0]/G->AngRateGain[0]*AngErr;
+      G->GCmd.AngRate[0] = Limit(G->GCmd.AngRate[0],-G->MaxAngRate[0],G->MaxAngRate[0]);
       
 /* .. Actuator Processing */
       WheelProcessing(AC);
@@ -491,39 +486,32 @@ void AcFsw(struct AcType *AC)
 /**********************************************************************/
 int main(int argc, char **argv)
 {
-      FILE *ParmDumpFile;
-      char FileName[120];
       struct AcType AC;
-      SOCKET Socket;
+      struct AcIpcType I;
       char hostname[20] = "localhost";
-      int Port = 10001;
       
-      if (argc > 1) {
-         AC.ID = atoi(argv[1]);
-         Port = 10001 + AC.ID;
-      }
+      if (argc > 1) AC.ID = atoi(argv[1]);
+      else AC.ID = 0;
+      I.Init = 0;
+      I.Port = 10001 + AC.ID;
+      I.AllowBlocking = 1;
       
+      I.Socket = InitSocketClient(hostname,I.Port,I.AllowBlocking);
+      
+      ReadAcArraySizesFromSocket(&AC,&I);
       AllocateAC(&AC);
       
-      Socket = InitSocketClient(hostname,Port,1);
-      
-      /* Load parms */
-      AC.EchoEnabled = 1;
-      ReadFromSocket(Socket,&AC);
+      ReadAcBufLensFromSocket(&I);
+      AllocateAcBufs(&I);
       
       InitAC(&AC);
-      AcFsw(&AC);
       
-      sprintf(FileName,"./Database/AcParmDump%02ld.txt",AC.ID);
-      ParmDumpFile = fopen(FileName,"wt");
-      WriteToFile(ParmDumpFile,&AC);
-      fclose(ParmDumpFile);
-      WriteToSocket(Socket,&AC);
+      ReadAcTblFromSocket(&AC,&I);      
       
       while(1) {
-         ReadFromSocket(Socket,&AC);
+         ReadAcInFromSocket(&AC,&I);
          AcFsw(&AC);
-         WriteToSocket(Socket,&AC);
+         WriteAcOutToSocket(&AC,&I);
       }
       
       return(0);

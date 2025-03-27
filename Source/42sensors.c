@@ -629,13 +629,14 @@ void Sensors(struct SCType *S)
 
       /* GPS Receiver (or ephem model) */
       if (S->Ngps == 0) {
-         AC->Time = DynTime;
+         AC->Time = SimTime; /* or CivilTime or DynTime as desired */
          for(i=0;i<3;i++) {
             AC->PosN[i] = S->PosN[i];
             AC->VelN[i] = S->VelN[i];
          }
       }
       else {
+         AC->Time = SimTime; /* or CivilTime or DynTime as desired */
          GpsModel(S);
       }
       

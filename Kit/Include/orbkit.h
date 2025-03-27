@@ -153,6 +153,10 @@ struct OrbitType {
    double ArgPdot; /* Due to average J2 effect, rad/sec */
    double J2Rw2bya;
    FILE *SplineFile;
+   
+   /*~ Outputs ~*/
+   double PosN[3]; /* Position expressed in N [[m]] [~=~] */
+   double VelN[3]; /* Velocity expressed in N [[m/sec]] [~=~] */
 
    /*~ Internal Variables ~*/
    /* Linearized three-body motion about LP (X0,Y0), m and m/sec */
@@ -166,8 +170,6 @@ struct OrbitType {
    /* For Central Orbit Description */
    double MeanAnom;
    double anom; /* True Anomaly, rad */
-   double PosN[3]; /* Position, [[m]], expressed in N [~=~] */
-   double VelN[3]; /* Velocity, [[m/sec]], expressed in N [~=~] */
    double CLN[3][3]; /* For ZERO, L = N.  For FLIGHT, L = ENU.  For CENTRAL, L = LVLH.  For THREE_BODY, L = XYZ */
    double wln[3]; /* Expressed in N */
    /* Fit spline to data file */

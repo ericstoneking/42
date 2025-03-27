@@ -54,6 +54,7 @@ struct PolyType {
    long *Vn;
    long *E;
    long Matl;
+   long ContactPoly; /* Remembers poly for contact interactions */
    double Area;
    double Norm[3];
    double Dyad[3][3]; /* For polyhedron gravity */

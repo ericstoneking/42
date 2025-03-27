@@ -171,7 +171,7 @@ EOF
 
 # FSW-related commands
 %lf SC[%ld] FswTag = %s
-   # %s is PASSIVE_FSW, PROTOTYPE_FSW, etc.
+   # %s is PASSIVE_FSW, INSTANT_FSW, etc.
 %lf SC[%ld] qrn = [%lf %lf %lf %lf]
 %lf SC[%ld] qrl = [%lf %lf %lf %lf]
 %lf SC[%ld] Cmd Angles = [%lf %lf %lf] deg, Seq = %ld wrt %c Frame

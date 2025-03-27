@@ -1,0 +1,24 @@
+42 has the capability to run controller code in two architectures.  For early studies and algorithm development, it is most convenient to just call the controller directly as part of the 42 sim.  As the controller matures into flight software, or if the controller comes from an external source, it is more convenient to host the controller in a standalone app, communicating with 42 over a socket interface.  The Standalone sim case is an example that demonstrates both of these architectures.  To see it in action, follow this procedure:
+ 
+1)  Run "42 Standalone".  You should see two S/C in Earth orbit (click and drag on the CAM window till you see both in frame).
+ 
+2)  In the makefile, make these lines:
+STANDALONEFLAG =
+#STANDALONEFLAG = -D _AC_STANDALONE_
+into these lines:
+#STANDALONEFLAG =
+STANDALONEFLAG = -D _AC_STANDALONE_
+ 
+3) "make clean" and "make".  Also "make AcApp".  
+ 
+4)  You need three terminal windows, all cd'ed to the folder where the 42 and AcApp executables are.
+4a)  In the first window, run "42 Standalone".  Wait till you see "Server is listening..."
+4b)  In the second window, run "AcApp 0".  Look back in the first window for another "Server is listening..."
+4c)  In the third window, run "AcApp 1".
+ 
+Now you have the two S/C again.  The difference is that now AcApp is a standalone program.  Quit or ^C out of 42.
+ 
+In Standalone mode, 42 and AcApp exchange information over a socket.  On connecting the socket, 42 sends the table parameter message once.  Command parameters and Inputs are sent by 42 to AcApp at each ACS cycle.  AcApp sends Outputs to 42 at each ACS cycle.
+
+The message contents are defined by AutoCode/AcIPC.c and ScIPC.c, which are written by scripts in the Database folder.  You control the message contents by placing variable declarations in AcTypes.h into the Command Parameter, Table Parameter, Input, and Output categories.  See Database/Readme.txt for more.
+

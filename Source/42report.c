@@ -20,6 +20,9 @@
 ** #endif
 */
 
+void WriteAcVarsToCsv(void);
+void WriteScVarsToCsv(void);
+
 /*********************************************************************/
 double FindTotalProjectedArea(struct SCType *S,double VecN[3])
 {
@@ -166,9 +169,46 @@ void GmatReport(void)
       }
 }
 /*********************************************************************/
+void ReportEpoch(void)
+{
+      FILE *outfile;
+      
+      outfile = FileOpen(InOutPath,"Epoch.csv","w");
+      
+      fprintf(outfile,"Epoch_SimTime");
+      fprintf(outfile,",Epoch_DynTime");
+      fprintf(outfile,",Epoch_AtomicTime");
+      fprintf(outfile,",Epoch_CivilTime");
+      fprintf(outfile,",Epoch_JulDay");
+      fprintf(outfile,",Epoch_Year");
+      fprintf(outfile,",Epoch_DOY");
+      fprintf(outfile,",Epoch_Month");
+      fprintf(outfile,",Epoch_Day");
+      fprintf(outfile,",Epoch_Hour");
+      fprintf(outfile,",Epoch_Minute");
+      fprintf(outfile,",Epoch_Second");
+      fprintf(outfile,"\n");
+      
+      fprintf(outfile,"%lf",SimTime);
+      fprintf(outfile,",%lf",DynTime);
+      fprintf(outfile,",%lf",AtomicTime);
+      fprintf(outfile,",%lf",CivilTime);
+      fprintf(outfile,",%lf",UTC.JulDay);
+      fprintf(outfile,",%ld",UTC.Year);
+      fprintf(outfile,",%ld",UTC.doy);
+      fprintf(outfile,",%ld",UTC.Month);
+      fprintf(outfile,",%ld",UTC.Day);
+      fprintf(outfile,",%ld",UTC.Hour);
+      fprintf(outfile,",%ld",UTC.Minute);
+      fprintf(outfile,",%lf",UTC.Second);
+      fprintf(outfile,"\n");
+      
+      fclose(outfile);
+}
+/*********************************************************************/
 void Report(void)
 {
-      static FILE *timefile,*DynTimeFile,*UtcDateFile;
+      static FILE *timefile;
       static FILE **xfile, **ufile, **xffile, **uffile;
       static FILE **ConstraintFile;
       static FILE *PosNfile,*VelNfile,*qbnfile,*wbnfile;
@@ -194,17 +234,16 @@ void Report(void)
       double CBR[3][3],CRN[3][3],Roll,Pitch,Yaw;
       struct WorldType *W;
       double WorldAngVel[3],wxR[3],VelN[3];
-      double PosW[3],VelW[3],PosR[3],VelR[3];
+      double PosW[3],VelW[3];
       double CRL[3][3] = {{1.0,0.0,0.0},{0.0,1.0,0.0},{0.0,0.0,1.0}};
       //double SMA,ecc,inc,RAAN,ArgP,anom,tp,SLR,alpha,rmin,MeanMotion,Period;
       char s[40];
+      char Fmt[40];
       //double ZAxis[3] = {0.0,0.0,1.0};
 
       if (First) {
          First = FALSE;
          timefile = FileOpen(InOutPath,"time.42","w");
-         DynTimeFile = FileOpen(InOutPath,"DynTime.42","w");
-         UtcDateFile = FileOpen(InOutPath,"UTC.42","w");
 
          ufile = (FILE **) calloc(Nsc,sizeof(FILE *));
          xfile = (FILE **) calloc(Nsc,sizeof(FILE *));
@@ -213,18 +252,21 @@ void Report(void)
          ConstraintFile = (FILE **) calloc(Nsc,sizeof(FILE *));
          for(Isc=0;Isc<Nsc;Isc++) {
             if (SC[Isc].Exists) {
-               sprintf(s,"u%02ld.42",Isc);
+               if (Nsc == 1) sprintf(Fmt,"");
+               else if (Nsc <= 10) sprintf(Fmt,"%1ld",Isc);
+               else sprintf(Fmt,"%02ld",Isc);
+               sprintf(s,"u%s.42",Fmt);
                ufile[Isc] = FileOpen(InOutPath,s,"w");
-               sprintf(s,"x%02ld.42",Isc);
+               sprintf(s,"x%s.42",Fmt);
                xfile[Isc] = FileOpen(InOutPath,s,"w");
                if (SC[Isc].FlexActive) {
-                  sprintf(s,"uf%02ld.42",Isc);
+                  sprintf(s,"uf%s.42",Fmt);
                   uffile[Isc] = FileOpen(InOutPath,s,"w");
-                  sprintf(s,"xf%02ld.42",Isc);
+                  sprintf(s,"xf%s.42",Fmt);
                   xffile[Isc] = FileOpen(InOutPath,s,"w");
                }
                if (SC[Isc].ConstraintsRequested) {
-                  sprintf(s,"Constraint%02ld.42",Isc);
+                  sprintf(s,"Constraint%s.42",Fmt);
                   ConstraintFile[Isc] = FileOpen(InOutPath,s,"w");
                }
             }
@@ -267,13 +309,11 @@ void Report(void)
          if (SC[0].Ngps > 0) {
             GpsFile = FileOpen(InOutPath,"Gps.42","w");
          }
+         ReportEpoch();
       }
 
       if (OutFlag) {
          fprintf(timefile,"%lf\n",SimTime);
-         fprintf(DynTimeFile,"%lf\n",DynTime);
-         fprintf(UtcDateFile," %ld:%02ld:%02ld:%02ld:%02ld:%09.6lf\n",
-            UTC.Year,UTC.Month,UTC.Day,UTC.Hour,UTC.Minute,UTC.Second);
          for(Isc=0;Isc<Nsc;Isc++) {
             if (SC[Isc].Exists) {
                D = &SC[Isc].Dyn;
@@ -296,10 +336,14 @@ void Report(void)
             }
          }
          if (SC[0].Exists) {
-            fprintf(PosNfile,"%le %le %le\n",
-               SC[0].PosN[0],SC[0].PosN[1],SC[0].PosN[2]);
-            fprintf(VelNfile,"%le %le %le\n",
-               SC[0].VelN[0],SC[0].VelN[1],SC[0].VelN[2]);
+            fprintf(PosNfile,"%le %le %le  %le %le %le  %le %le %le\n",
+               SC[0].PosN[0],SC[0].PosN[1],SC[0].PosN[2],
+               Orb[0].PosN[0],Orb[0].PosN[1],Orb[0].PosN[2],
+               Rgn[1].PosN[0],Rgn[1].PosN[1],Rgn[1].PosN[2]);
+            fprintf(VelNfile,"%le %le %le  %le %le %le  %le %le %le\n",
+               SC[0].VelN[0],SC[0].VelN[1],SC[0].VelN[2],
+               Orb[0].VelN[0],Orb[0].VelN[1],Orb[0].VelN[2],
+               Rgn[1].VelN[0],Rgn[1].VelN[1],Rgn[1].VelN[2]);
             W = &World[Orb[SC[0].RefOrb].World];
             WorldAngVel[0] = 0.0;
             WorldAngVel[1] = 0.0;
@@ -312,20 +356,20 @@ void Report(void)
                PosW[0],PosW[1],PosW[2]);
             fprintf(VelWfile,"%18.12le %18.12le %18.12le\n",
                VelW[0],VelW[1],VelW[2]);  
-            if (Orb[SC[0].RefOrb].Regime == ORB_FLIGHT) {
-               MxV(Rgn[Orb[SC[0].RefOrb].Region].CN,SC[0].PosR,PosR);
-               MxV(Rgn[Orb[SC[0].RefOrb].Region].CN,SC[0].VelR,VelR);
-               fprintf(PosRfile,"%le %le %le\n",
-                  PosR[0],PosR[1],PosR[2]);
-               fprintf(VelRfile,"%le %le %le\n",
-                  VelR[0],VelR[1],VelR[2]);
-            }
-            else {
+            //if (Orb[SC[0].RefOrb].Regime == ORB_FLIGHT) {
+            //   MxV(Rgn[Orb[SC[0].RefOrb].Region].CN,SC[0].PosR,PosR);
+            //   MxV(Rgn[Orb[SC[0].RefOrb].Region].CN,SC[0].VelR,VelR);
+            //   fprintf(PosRfile,"%le %le %le\n",
+            //      PosR[0],PosR[1],PosR[2]);
+            //   fprintf(VelRfile,"%le %le %le\n",
+            //      VelR[0],VelR[1],VelR[2]);
+            //}
+            //else {
                fprintf(PosRfile,"%le %le %le\n",
                   SC[0].PosR[0],SC[0].PosR[1],SC[0].PosR[2]);
                fprintf(VelRfile,"%le %le %le\n",
                   SC[0].VelR[0],SC[0].VelR[1],SC[0].VelR[2]);
-            }
+            //}
             fprintf(qbnfile,"%le %le %le %le\n",
                SC[0].B[0].qn[0],SC[0].B[0].qn[1],SC[0].B[0].qn[2],SC[0].B[0].qn[3]);
             fprintf(wbnfile,"%le %le %le\n",
@@ -393,9 +437,14 @@ void Report(void)
             //fprintf(EHfile,"%le %le %le %le %le %le\n",
             //   SC[0].PosEH[0],SC[0].PosEH[1],SC[0].PosEH[2],
             //   SC[0].VelEH[0],SC[0].VelEH[1],SC[0].VelEH[2]);
+            
          }
+      
 
       }
+      
+      WriteAcVarsToCsv();
+      WriteScVarsToCsv();
       
       /* An example how to call specialized reporting based on sim case */
       /* if (!strcmp(InOutPath,"./Potato/")) PotatoReport(); */

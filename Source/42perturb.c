@@ -659,12 +659,14 @@ void BodyRgnContactFrcTrq(struct SCType *S, long Ibody,
       double PosP[3],VelP[3];
       double FrcP[3];
       double ContactArea;
+      double ElastFrc;
       double Dist,MinDist;
       double PosR[3],VelR[3],RelPosR[3],PosRR[3];
-      static long HitPoly = 0;
       long OtherPoly;
       long Ib,Ie,i,Done;
       double Fn[3],Fb[3],Tb[3];
+      double MagFrc;
+      double MaxMagFrc;
 
       B = &S->B[Ibody];
       Gb = &Geom[B->GeomTag];
@@ -675,7 +677,10 @@ void BodyRgnContactFrcTrq(struct SCType *S, long Ibody,
          FrcB[i] = 0.0;
          TrqB[i] = 0.0;
       }
-
+      
+      /* Limit force magnitude to elastic collision impulse plus max gravity */
+      MaxMagFrc = 2.0*S->mass*MAGV(S->VelR)/DTSIM + 10.0*S->mass;
+      
       /* Loop through all Polys (Pb) in Gb */
       for(Ib=0;Ib<Gb->Npoly;Ib++) {
          Pb = &Gb->Poly[Ib];
@@ -688,19 +693,19 @@ void BodyRgnContactFrcTrq(struct SCType *S, long Ibody,
          Done = 0;
          while(!Done) {
             Done = 1;
-            for(i=0;i<3;i++) RelPosR[i] = PosRR[i] - Gr->Poly[HitPoly].Centroid[i];
+            for(i=0;i<3;i++) RelPosR[i] = PosRR[i] - Gr->Poly[Pb->ContactPoly].Centroid[i];
             MinDist = MAGV(RelPosR);
             /* Check neighboring polys */
             for(Ie=0;Ie<3;Ie++) {
-               E = &Gr->Edge[Gr->Poly[HitPoly].E[Ie]];
+               E = &Gr->Edge[Gr->Poly[Pb->ContactPoly].E[Ie]];
                if (E->Poly1 >= 0 && E->Poly2 >= 0) { /* Screen edges of region */
-                  OtherPoly = (E->Poly1 == HitPoly ? E->Poly2 : E->Poly1);
+                  OtherPoly = (E->Poly1 == Pb->ContactPoly ? E->Poly2 : E->Poly1);
                   for(i=0;i<3;i++)
                      RelPosR[i] = PosRR[i] - Gr->Poly[OtherPoly].Centroid[i];
                   Dist = MAGV(RelPosR);
                   if (Dist < MinDist) {
                      MinDist = Dist;
-                     HitPoly = OtherPoly;
+                     Pb->ContactPoly = OtherPoly;
                      Done = 0;
                      break;
                   }
@@ -709,7 +714,7 @@ void BodyRgnContactFrcTrq(struct SCType *S, long Ibody,
          }
 
          /* Interact with selected poly */
-         Pr = &Gr->Poly[HitPoly];
+         Pr = &Gr->Poly[Pb->ContactPoly];
          MTxV(R->CN,Pr->Centroid,prn);
          VxV(R->wn,Pr->Centroid,wxrb);
          MTxV(R->CN,wxrb,vrn);
@@ -733,14 +738,16 @@ void BodyRgnContactFrcTrq(struct SCType *S, long Ibody,
             if (PosP[2] > 0.0) {
                ContactArea = (1.0-PosP[2]/Pb->radius)*Pb->Area;
                FrcP[2] = -R->DampCoef*VelP[2]*ContactArea;
-               FrcP[0] = 0.0;
-               FrcP[1] = 0.0;
+               
             }
             else {
                ContactArea = (1.0-PosP[2]/Pb->radius)*Pb->Area;
-               FrcP[2] = -(R->ElastCoef*PosP[2] + R->DampCoef*VelP[2])*ContactArea;
-               FrcP[0] = -R->FricCoef*FrcP[2]*VelP[0];
-               FrcP[1] = -R->FricCoef*FrcP[2]*VelP[1];
+               ContactArea = Limit(ContactArea,0.0,2.0*Pb->Area);
+               PosP[2] = Limit(PosP[2],-Pb->radius,0.0);
+               ElastFrc = -R->ElastCoef*PosP[2]*ContactArea;
+               FrcP[2] = ElastFrc - R->DampCoef*VelP[2]*ContactArea;
+               FrcP[0] = -R->DampCoef*VelP[0]*ContactArea;
+               FrcP[1] = -R->DampCoef*VelP[1]*ContactArea;
             }
          }
 
@@ -753,6 +760,15 @@ void BodyRgnContactFrcTrq(struct SCType *S, long Ibody,
             FrcN[i] += Fn[i];
             FrcB[i] += Fb[i];
             TrqB[i] += Tb[i];
+         }
+      }
+      
+      MagFrc = MAGV(FrcN);
+      if (MagFrc > MaxMagFrc) {
+         for(i=0;i<3;i++) {
+            FrcN[i] *= MaxMagFrc/MagFrc;
+            FrcB[i] *= MaxMagFrc/MagFrc;
+            TrqB[i] *= MaxMagFrc/MagFrc;
          }
       }
 
@@ -918,7 +934,7 @@ void ContactFrcTrq(struct SCType *S)
       struct GeomType *Gi,*Gj;
       double dx[3],cmb[3],cmni[3],cmnj[3];
       long Ir,i,Ib,Isc,Jb;
-
+      
       O = &Orb[S->RefOrb];
 
 /* .. Contact with Regions */

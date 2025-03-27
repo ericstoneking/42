@@ -45,9 +45,6 @@ STANDALONEFLAG =
 GMSECFLAG =
 #GMSECFLAG = -D _ENABLE_GMSEC_
 
-RBTFLAG = 
-#RBTFLAG = -D _ENABLE_RBT_
-
 ifeq ($(strip $(GMSECFLAG)),)
    GMSECDIR =
    GMSECINC =
@@ -70,8 +67,9 @@ SRC = $(PROJDIR)Source/
 KITINC = $(KITDIR)Include/
 KITSRC = $(KITDIR)Source/
 INOUT = $(PROJDIR)InOut/
-GSFCSRC = $(PROJDIR)/GSFC/Source/
-IPCSRC = $(SRC)IPC/
+GSFCSRC = $(PROJDIR)../GSFC/
+AUTOSRC = $(SRC)AutoCode/
+META = $(PROJDIR)MetaCode/
 
 
 ifeq ($(42PLATFORM),__APPLE__)
@@ -193,40 +191,30 @@ endif
 # If not _AC_STANDALONE_, link AcApp.c in with the rest of 42
 ifneq ($(strip $(STANDALONEFLAG)),)
    ACOBJ =
+   ACIPCOBJ = $(OBJ)AcIPC.o
+   SCIPCOBJ = $(OBJ)ScIPC.o
 else
    ACOBJ = $(OBJ)AcApp.o
+   ACIPCOBJ = 
+   SCIPCOBJ = 
 endif
 
-ifneq ($(strip $(RBTFLAG)),)
-   RBTDIR = $(PROJDIR)../../GSFC/RBT/
-   RBTSRC = $(RBTDIR)Source/
-   RBTOBJ = $(OBJ)RbtFsw.o
-else
-   RBTDIR = 
-   RBTSRC = 
-   RBTOBJ =
-endif
-
-
-ifneq ($(strip $(GMSECFLAG)),)
-   GMSECOBJ = $(OBJ)gmseckit.o
-   ACIPCOBJ = $(OBJ)AppReadFromFile.o $(OBJ)AppWriteToGmsec.o $(OBJ)AppReadFromGmsec.o \
-      $(OBJ)AppWriteToSocket.o $(OBJ)AppReadFromSocket.o $(OBJ)AppWriteToFile.o
-   SIMIPCOBJ = $(OBJ)SimWriteToFile.o $(OBJ)SimWriteToGmsec.o $(OBJ)SimWriteToSocket.o \
-      $(OBJ)SimReadFromFile.o $(OBJ)SimReadFromGmsec.o $(OBJ)SimReadFromSocket.o 
-else
-   GMSECOBJ =
-   ACIPCOBJ = $(OBJ)AppReadFromFile.o \
-      $(OBJ)AppWriteToSocket.o $(OBJ)AppReadFromSocket.o $(OBJ)AppWriteToFile.o
-   SIMIPCOBJ = $(OBJ)SimWriteToFile.o $(OBJ)SimWriteToSocket.o \
-      $(OBJ)SimReadFromFile.o $(OBJ)SimReadFromSocket.o 
-endif
+# TODO: Reconstitute if needed
+#ifneq ($(strip $(GMSECFLAG)),)
+#   GMSECOBJ = $(OBJ)gmseckit.o
+#   ACIPCOBJ = 
+#   SCIPCOBJ = 
+#else
+#   GMSECOBJ =
+#   ACIPCOBJ = 
+#   SCIPCOBJ = 
+#endif
 
 42OBJ = $(OBJ)42main.o $(OBJ)42exec.o $(OBJ)42actuators.o $(OBJ)42cmd.o \
 $(OBJ)42dynamics.o $(OBJ)42environs.o $(OBJ)42ephem.o $(OBJ)42fsw.o \
 $(OBJ)42init.o $(OBJ)42ipc.o $(OBJ)42jitter.o $(OBJ)42joints.o \
 $(OBJ)42optics.o $(OBJ)42perturb.o $(OBJ)42report.o $(OBJ)42sensors.o \
-$(OBJ)42nos3.o
+$(OBJ)42nos3.o 
 
 KITOBJ = $(OBJ)dcmkit.o $(OBJ)envkit.o $(OBJ)fswkit.o $(OBJ)geomkit.o \
 $(OBJ)iokit.o $(OBJ)mathkit.o $(OBJ)nrlmsise00kit.o $(OBJ)msis86kit.o \
@@ -237,19 +225,18 @@ $(OBJ)iokit.o $(OBJ)mathkit.o $(OBJ)orbkit.o $(OBJ)sigkit.o $(OBJ)sphkit.o $(OBJ
 
 ACKITOBJ = $(OBJ)dcmkit.o $(OBJ)mathkit.o $(OBJ)fswkit.o $(OBJ)iokit.o $(OBJ)timekit.o
 
-ACIPCOBJ = $(OBJ)AppReadFromFile.o \
-$(OBJ)AppWriteToSocket.o $(OBJ)AppReadFromSocket.o $(OBJ)AppWriteToFile.o
+AUTOOBJ = $(OBJ)WriteAcToCsv.o $(OBJ)WriteScToCsv.o $(OBJ)TxRxIPC.o
 
 #ANSIFLAGS = -Wstrict-prototypes -pedantic -ansi -Werror
 ANSIFLAGS =
 
-CFLAGS = -fpic -Wall -Wshadow -Wno-deprecated $(XWARN) -g  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(INC) -I $(KITINC) -I $(KITSRC) -I $(RBTSRC) $(GMSECINC) -O0 $(ARCHFLAG) $(GUIFLAG) $(GUI_LIB) $(SHADERFLAG) $(CFDFLAG) $(FFTBFLAG) $(GSFCFLAG) $(GMSECFLAG) $(STANDALONEFLAG) $(RBTFLAG)
+CFLAGS = -std=c99 -g -O0 -fpic -Wall -Wshadow -Wno-deprecated $(XWARN) $(ANSIFLAGS) $(GLINC) $(CINC) -I $(INC) -I $(KITINC) -I $(KITSRC) $(GMSECINC) $(ARCHFLAG) $(GUIFLAG) $(GUI_LIB) $(SHADERFLAG) $(CFDFLAG) $(FFTBFLAG) $(GSFCFLAG) $(GMSECFLAG) $(STANDALONEFLAG)
 
 
 ##########################  Rules to link 42  #############################
 
-42 : $(42OBJ) $(GUIOBJ) $(SIMIPCOBJ) $(FFTBOBJ) $(SLOSHOBJ) $(KITOBJ) $(ACOBJ) $(GMSECOBJ) $(RBTOBJ)
-	$(CC) $(LFLAGS) $(GMSECBIN) -o $(EXENAME) $(42OBJ) $(GUIOBJ) $(FFTBOBJ) $(SLOSHOBJ) $(KITOBJ) $(ACOBJ) $(GMSECOBJ) $(SIMIPCOBJ) $(RBTOBJ) $(LIBS) $(GMSECLIB)
+42 : $(42OBJ) $(KITOBJ) $(GUIOBJ) $(AUTOOBJ) $(ACOBJ) $(SCIPCOBJ) $(GMSECOBJ) $(FFTBOBJ) $(SLOSHOBJ)
+	$(CC) $(LFLAGS) $(GMSECBIN) -o $(EXENAME) $(42OBJ) $(KITOBJ) $(GUIOBJ) $(AUTOOBJ) $(ACOBJ) $(SCIPCOBJ) $(GMSECOBJ) $(FFTBOBJ) $(SLOSHOBJ) $(LIBS)
 
 AcApp : $(OBJ)AcApp.o $(ACKITOBJ) $(ACIPCOBJ) $(GMSECOBJ)
 	$(CC) $(LFLAGS) -o AcApp $(OBJ)AcApp.o $(ACKITOBJ) $(ACIPCOBJ) $(GMSECOBJ) $(LIBS)
@@ -374,53 +361,45 @@ $(OBJ)42fftb.o         : $(GSFCSRC)42fftb.c $(INC)42.h
 $(OBJ)AcApp.o          : $(SRC)AcApp.c $(INC)Ac.h $(INC)AcTypes.h
 	$(CC) $(CFLAGS) -c $(SRC)AcApp.c -o $(OBJ)AcApp.o
 
-$(OBJ)SimWriteToFile.o  : $(IPCSRC)SimWriteToFile.c $(INC)42.h $(INC)AcTypes.h
-	$(CC) $(CFLAGS) -c $(IPCSRC)SimWriteToFile.c -o $(OBJ)SimWriteToFile.o
+$(OBJ)WriteAcToCsv.o  : $(AUTOSRC)WriteAcToCsv.c $(INC)42.h $(INC)AcTypes.h
+	$(CC) $(CFLAGS) -c $(AUTOSRC)WriteAcToCsv.c -o $(OBJ)WriteAcToCsv.o
 
-$(OBJ)SimWriteToGmsec.o  : $(IPCSRC)SimWriteToGmsec.c $(INC)42.h $(INC)AcTypes.h
-	$(CC) $(CFLAGS) -c $(IPCSRC)SimWriteToGmsec.c -o $(OBJ)SimWriteToGmsec.o
+$(OBJ)WriteScToCsv.o  : $(AUTOSRC)WriteScToCsv.c $(INC)42.h $(INC)42types.h
+	$(CC) $(CFLAGS) -c $(AUTOSRC)WriteScToCsv.c -o $(OBJ)WriteScToCsv.o
+	
+$(OBJ)TxRxIPC.o  : $(AUTOSRC)TxRxIPC.c $(INC)42.h $(INC)42types.h
+	$(CC) $(CFLAGS) -c $(AUTOSRC)TxRxIPC.c -o $(OBJ)TxRxIPC.o
+	
+$(OBJ)ScIPC.o  : $(AUTOSRC)ScIPC.c $(INC)42.h $(INC)42types.h $(INC)Ac.h $(INC)AcTypes.h
+	$(CC) $(CFLAGS) -c $(AUTOSRC)ScIPC.c -o $(OBJ)ScIPC.o
+	
+$(OBJ)AcIPC.o  : $(AUTOSRC)AcIPC.c $(INC)Ac.h $(INC)AcTypes.h
+	$(CC) $(CFLAGS) -c $(AUTOSRC)AcIPC.c -o $(OBJ)AcIPC.o
+	
+#$(AUTOSRC)AcIPC.c  : $(META)Ac.json
+#	julia $(META)JsonToAcIPC.jl
+	
+#$(AUTOSRC)ScIPC.c  : $(META)Ac.json
+#	julia $(META)JsonToAcIPC.jl
+	
+#$(AUTOSRC)TxRxIPC.c  : $(META)42.json $(META)Ac.json
+#	julia $(META)JsonToTxRxIPC.jl
+	
+#$(AUTOSRC)WriteAcToCsv.c  : $(META)Ac.json
+#	julia $(META)JsonToAcCsv.jl
 
-$(OBJ)SimWriteToSocket.o  : $(IPCSRC)SimWriteToSocket.c $(INC)42.h $(INC)AcTypes.h
-	$(CC) $(CFLAGS) -c $(IPCSRC)SimWriteToSocket.c -o $(OBJ)SimWriteToSocket.o
+#$(AUTOSRC)WriteScToCsv.c  : $(META)42.json
+#	julia $(META)JsonToScCsv.jl
 
-$(OBJ)SimReadFromFile.o  : $(IPCSRC)SimReadFromFile.c $(INC)42.h $(INC)AcTypes.h
-	$(CC) $(CFLAGS) -c $(IPCSRC)SimReadFromFile.c -o $(OBJ)SimReadFromFile.o
+#$(META)42.json  : $(INC)42types.h $(KITINC)orbkit.h
+#	julia $(META)HeadersToJson.jl
 
-$(OBJ)SimReadFromGmsec.o  : $(IPCSRC)SimReadFromGmsec.c $(INC)42.h $(INC)AcTypes.h
-	$(CC) $(CFLAGS) -c $(IPCSRC)SimReadFromGmsec.c -o $(OBJ)SimReadFromGmsec.o
-
-$(OBJ)SimReadFromSocket.o  : $(IPCSRC)SimReadFromSocket.c $(INC)42.h $(INC)AcTypes.h
-	$(CC) $(CFLAGS) -c $(IPCSRC)SimReadFromSocket.c -o $(OBJ)SimReadFromSocket.o
-
-#$(OBJ)SimReadFromCmd.o  : $(IPCSRC)SimReadFromCmd.c $(INC)42.h $(INC)AcTypes.h
-#	$(CC) $(CFLAGS) -c $(IPCSRC)SimReadFromCmd.c -o $(OBJ)SimReadFromCmd.o
-
-$(OBJ)AppWriteToFile.o  : $(IPCSRC)AppWriteToFile.c $(INC)42.h $(INC)AcTypes.h
-	$(CC) $(CFLAGS) -c $(IPCSRC)AppWriteToFile.c -o $(OBJ)AppWriteToFile.o
-
-$(OBJ)AppWriteToGmsec.o  : $(IPCSRC)AppWriteToGmsec.c $(INC)42.h $(INC)AcTypes.h
-	$(CC) $(CFLAGS) -c $(IPCSRC)AppWriteToGmsec.c -o $(OBJ)AppWriteToGmsec.o
-
-$(OBJ)AppWriteToSocket.o  : $(IPCSRC)AppWriteToSocket.c $(INC)42.h $(INC)AcTypes.h
-	$(CC) $(CFLAGS) -c $(IPCSRC)AppWriteToSocket.c -o $(OBJ)AppWriteToSocket.o
-
-$(OBJ)AppReadFromFile.o  : $(IPCSRC)AppReadFromFile.c $(INC)42.h $(INC)AcTypes.h
-	$(CC) $(CFLAGS) -c $(IPCSRC)AppReadFromFile.c -o $(OBJ)AppReadFromFile.o
-
-$(OBJ)AppReadFromGmsec.o  : $(IPCSRC)AppReadFromGmsec.c $(INC)42.h $(INC)AcTypes.h
-	$(CC) $(CFLAGS) -c $(IPCSRC)AppReadFromGmsec.c -o $(OBJ)AppReadFromGmsec.o
-
-$(OBJ)AppReadFromSocket.o  : $(IPCSRC)AppReadFromSocket.c $(INC)42.h $(INC)AcTypes.h
-	$(CC) $(CFLAGS) -c $(IPCSRC)AppReadFromSocket.c -o $(OBJ)AppReadFromSocket.o
+#$(META)Ac.json  : $(INC)AcTypes.h 
+#	julia $(META)HeadersToJson.jl
 
 $(OBJ)42nos3.o         : $(SRC)42nos3.c
 	$(CC) $(CFLAGS) -c $(SRC)42nos3.c -o $(OBJ)42nos3.o
 
-$(OBJ)RbtFsw.o         : $(RBTSRC)RbtFsw.c $(RBTSRC)Rbt.h
-	$(CC) $(CFLAGS) -c $(RBTSRC)RbtFsw.c -o $(OBJ)RbtFsw.o
-
-$(OBJ)42fssalbedo.o         : $(SRC)42fssalbedo.c
-	$(CC) $(CFLAGS) -c $(SRC)42fssalbedo.c -o $(OBJ)42fssalbedo.o
 
 ########################  Miscellaneous Rules  ############################
 clean :
@@ -429,5 +408,7 @@ ifeq ($(42PLATFORM),_WIN32)
 else ifeq ($(42PLATFORM),_WIN64)
 	del .\Object\*.o .\$(EXENAME) .\InOut\*.42
 else
-	rm -f $(OBJ)*.o ./$(EXENAME) ./AcApp $(KITDIR)42kit.so $(INOUT)*.42 ./Standalone/*.42 ./Demo/*.42 ./Rx/*.42 ./Tx/*.42
+	rm -f $(OBJ)*.o ./$(EXENAME) ./AcApp $(KITDIR)42kit.so 
+	rm -f $(INOUT)*.42 ./Standalone/*.42 ./Demo/*.42 ./Rx/*.42 ./Tx/*.42
+	rm -f $(INOUT)*.csv ./Standalone/*.csv ./Demo/*.csv ./Rx/*.csv ./Tx/*.csv
 endif

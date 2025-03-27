@@ -11,6 +11,8 @@
 
 /*    All Other Rights Reserved.                                      */
 
+#version 120
+
 /**********************************************************************/
 /*  Map Fragment Shader                                               */
 /*  Shade according to location in sunlight, night, or eclipse        */

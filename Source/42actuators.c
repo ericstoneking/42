@@ -264,10 +264,10 @@ void Actuators(struct SCType *S)
          AG = &AC->G[i];
          if (G->Type == ACTUATED_JOINT) {
             for(j=0;j<G->RotDOF;j++) {
-               G->AngRateCmd[j] = AG->Cmd.AngRate[j];
+               G->AngRateCmd[j] = AG->GCmd.AngRate[j];
             }
             for(j=0;j<G->TrnDOF;j++) {
-               G->PosRateCmd[j] = AG->Cmd.PosRate[j];
+               G->PosRateCmd[j] = AG->GCmd.PosRate[j];
             }
          }
       }

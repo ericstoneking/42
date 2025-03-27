@@ -2,7 +2,7 @@
 Ion-powered generic S/C       !  Description
 "ION"                         !  Label
 GenScSpriteAlpha.ppm          !  Sprite File Name
-PROTOTYPE_FSW                 !  Flight Software Identifier
+INSTANT_FSW                   !  Flight Software Identifier
 0.2                           !  FSW Sample Time, sec
 ************************* Orbit Parameters ****************************
 FIXED                         !  Orbit Prop FIXED, EULER_HILL, or ENCKE

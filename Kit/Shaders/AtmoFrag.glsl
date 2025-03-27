@@ -11,6 +11,8 @@
 
 /*    All Other Rights Reserved.                                      */
 
+#version 120
+
 /**********************************************************************/
 /*  Atmo Fragment Shader                                              */
 

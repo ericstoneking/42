@@ -1078,6 +1078,7 @@ struct GeomType *LoadWingsObjFile(const char ModelPath[80],const char ObjFilenam
             P = &G->Poly[Ipoly];
             P->Nv = 0;
             P->Matl = MatlIdx;
+            P->ContactPoly = 0;
             P->V = (long *) calloc(3,sizeof(long));
             if (P->V == NULL) {
                printf("P->V calloc returned null pointer.  Bailing out!\n");

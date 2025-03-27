@@ -1,0 +1,1084 @@
+{
+   "Table Definition": [
+      {
+         "Table Name": "CmdVecType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "CmdType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "qrl",
+               "I/O Role": "CMD_PRM",
+               "Data Type": "double",
+               "Array Size": "4"
+            },
+            {
+               "Variable Name": "qrn",
+               "I/O Role": "CMD_PRM",
+               "Data Type": "double",
+               "Array Size": "4"
+            },
+            {
+               "Variable Name": "AngRate",
+               "I/O Role": "OUTPUT",
+               "IPC Role": "Rx",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "Ang",
+               "I/O Role": "OUTPUT",
+               "IPC Role": "Rx",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "PosRate",
+               "I/O Role": "OUTPUT",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "Pos",
+               "I/O Role": "OUTPUT",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "PriVec",
+               "I/O Role": "STRUCT",
+               "Data Type": "CmdVecType"
+            },
+            {
+               "Variable Name": "SecVec",
+               "I/O Role": "STRUCT",
+               "Data Type": "CmdVecType"
+            }
+         ]
+      },
+      {
+         "Table Name": "AcBodyType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "mass",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Units": "kg"
+            },
+            {
+               "Variable Name": "cm",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3",
+               "Units": "m"
+            },
+            {
+               "Variable Name": "MOI",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3,3",
+               "Units": "kg-m^2"
+            }
+         ]
+      },
+      {
+         "Table Name": "AcJointType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "IsSpherical",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "RotDOF",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "TrnDOF",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "RotSeq",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "TrnSeq",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "CGiBi",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3,3"
+            },
+            {
+               "Variable Name": "CBoGo",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3,3"
+            },
+            {
+               "Variable Name": "AngGain",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "AngRateGain",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "PosGain",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "PosRateGain",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "MaxAngRate",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "MaxPosRate",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "MaxTrq",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "MaxFrc",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "Ang",
+               "I/O Role": "INPUT",
+               "IPC Role": "Tx",
+               "Data Type": "double",
+               "Array Size": "3",
+               "Units": "rad"
+            },
+            {
+               "Variable Name": "GCmd",
+               "I/O Role": "STRUCT",
+               "Data Type": "CmdType"
+            }
+         ]
+      },
+      {
+         "Table Name": "AcGyroType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "Axis",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "Rate",
+               "I/O Role": "INPUT",
+               "IPC Role": "Tx",
+               "Data Type": "double",
+               "Units": "rad/sec"
+            }
+         ]
+      },
+      {
+         "Table Name": "AcMagnetometerType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "Axis",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "Field",
+               "I/O Role": "INPUT",
+               "IPC Role": "Tx",
+               "Data Type": "double",
+               "Units": "Tesla"
+            }
+         ]
+      },
+      {
+         "Table Name": "AcCssType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "Body",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "Axis",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "Scale",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double"
+            },
+            {
+               "Variable Name": "Valid",
+               "I/O Role": "INPUT",
+               "IPC Role": "Tx",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "Illum",
+               "I/O Role": "INPUT",
+               "IPC Role": "Tx",
+               "Data Type": "double"
+            }
+         ]
+      },
+      {
+         "Table Name": "AcFssType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "qb",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "4"
+            },
+            {
+               "Variable Name": "CB",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3,3"
+            },
+            {
+               "Variable Name": "Valid",
+               "I/O Role": "INPUT",
+               "IPC Role": "Tx",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "SunAng",
+               "I/O Role": "INPUT",
+               "IPC Role": "Tx",
+               "Data Type": "double",
+               "Array Size": "2",
+               "Units": "rad"
+            }
+         ]
+      },
+      {
+         "Table Name": "AcStarTrackerType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "qb",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "4"
+            },
+            {
+               "Variable Name": "CB",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3,3"
+            },
+            {
+               "Variable Name": "Valid",
+               "I/O Role": "INPUT",
+               "IPC Role": "Tx",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "qn",
+               "I/O Role": "INPUT",
+               "IPC Role": "Tx",
+               "Data Type": "double",
+               "Array Size": "4"
+            }
+         ]
+      },
+      {
+         "Table Name": "AcGpsType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "Valid",
+               "I/O Role": "INPUT",
+               "IPC Role": "Tx",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "Rollover",
+               "I/O Role": "INPUT",
+               "IPC Role": "Tx",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "Week",
+               "I/O Role": "INPUT",
+               "IPC Role": "Tx",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "Sec",
+               "I/O Role": "INPUT",
+               "IPC Role": "Tx",
+               "Data Type": "double"
+            },
+            {
+               "Variable Name": "PosN",
+               "I/O Role": "INPUT",
+               "IPC Role": "Tx",
+               "Data Type": "double",
+               "Array Size": "3",
+               "Units": "m"
+            },
+            {
+               "Variable Name": "VelN",
+               "I/O Role": "INPUT",
+               "IPC Role": "Tx",
+               "Data Type": "double",
+               "Array Size": "3",
+               "Units": "m/s"
+            },
+            {
+               "Variable Name": "PosW",
+               "I/O Role": "INPUT",
+               "IPC Role": "Tx",
+               "Data Type": "double",
+               "Array Size": "3",
+               "Units": "m"
+            },
+            {
+               "Variable Name": "VelW",
+               "I/O Role": "INPUT",
+               "IPC Role": "Tx",
+               "Data Type": "double",
+               "Array Size": "3",
+               "Units": "m/s"
+            },
+            {
+               "Variable Name": "Lng",
+               "I/O Role": "INPUT",
+               "IPC Role": "Tx",
+               "Data Type": "double",
+               "Units": "rad",
+               "Description": "Geocentric"
+            },
+            {
+               "Variable Name": "Lat",
+               "I/O Role": "INPUT",
+               "IPC Role": "Tx",
+               "Data Type": "double",
+               "Units": "rad",
+               "Description": "Geocentric"
+            },
+            {
+               "Variable Name": "Alt",
+               "I/O Role": "INPUT",
+               "IPC Role": "Tx",
+               "Data Type": "double",
+               "Units": "m",
+               "Description": "Geocentric"
+            },
+            {
+               "Variable Name": "WgsLng",
+               "I/O Role": "INPUT",
+               "IPC Role": "Tx",
+               "Data Type": "double",
+               "Units": "rad",
+               "Description": "Geodetic, WGS-84"
+            },
+            {
+               "Variable Name": "WgsLat",
+               "I/O Role": "INPUT",
+               "IPC Role": "Tx",
+               "Data Type": "double",
+               "Units": "rad",
+               "Description": "Geodetic, WGS-84"
+            },
+            {
+               "Variable Name": "WgsAlt",
+               "I/O Role": "INPUT",
+               "IPC Role": "Tx",
+               "Data Type": "double",
+               "Units": "m",
+               "Description": "Geodetic, WGS-84"
+            }
+         ]
+      },
+      {
+         "Table Name": "AcAccelType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "PosB",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "Axis",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "Acc",
+               "I/O Role": "INPUT",
+               "IPC Role": "Tx",
+               "Data Type": "double",
+               "Units": "m/s^2"
+            }
+         ]
+      },
+      {
+         "Table Name": "AcEarthSensorType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "AcWhlType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "Body",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "Axis",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "DistVec",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "J",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double"
+            },
+            {
+               "Variable Name": "Tmax",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double"
+            },
+            {
+               "Variable Name": "Hmax",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double"
+            },
+            {
+               "Variable Name": "H",
+               "I/O Role": "INPUT",
+               "IPC Role": "Tx",
+               "Data Type": "double",
+               "Units": "Nms"
+            },
+            {
+               "Variable Name": "Tcmd",
+               "I/O Role": "OUTPUT",
+               "IPC Role": "Rx",
+               "Data Type": "double",
+               "Units": "N-m"
+            }
+         ]
+      },
+      {
+         "Table Name": "AcMtbType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "Axis",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "DistVec",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "Mmax",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double"
+            },
+            {
+               "Variable Name": "Mcmd",
+               "I/O Role": "OUTPUT",
+               "IPC Role": "Rx",
+               "Data Type": "double",
+               "Units": "A-m^2"
+            }
+         ]
+      },
+      {
+         "Table Name": "AcThrType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "Body",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "PosB",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "Axis",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "rxA",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "Fmax",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double"
+            },
+            {
+               "Variable Name": "PulseWidthCmd",
+               "I/O Role": "OUTPUT",
+               "IPC Role": "Rx",
+               "Data Type": "double",
+               "Units": "sec",
+               "Description": "for PULSED"
+            },
+            {
+               "Variable Name": "ThrustLevelCmd",
+               "I/O Role": "OUTPUT",
+               "IPC Role": "Rx",
+               "Data Type": "double",
+               "Units": "None",
+               "Description": "for PROPORTIONAL"
+            }
+         ]
+      },
+      {
+         "Table Name": "AcInstantCtrlType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "wc",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double"
+            },
+            {
+               "Variable Name": "amax",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double"
+            },
+            {
+               "Variable Name": "vmax",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double"
+            },
+            {
+               "Variable Name": "Kprec",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double"
+            },
+            {
+               "Variable Name": "Knute",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double"
+            }
+         ]
+      },
+      {
+         "Table Name": "AcSandboxCtrlType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "Kr",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "Kp",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            }
+         ]
+      },
+      {
+         "Table Name": "AcSpinnerCtrlType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "Ispin",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double"
+            },
+            {
+               "Variable Name": "Itrans",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double"
+            },
+            {
+               "Variable Name": "SpinRate",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double"
+            },
+            {
+               "Variable Name": "Knute",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double"
+            },
+            {
+               "Variable Name": "Kprec",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double"
+            }
+         ]
+      },
+      {
+         "Table Name": "AcMomBiasCtrlType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "AcThreeAxisCtrlType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "Kr",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "Kp",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "Kunl",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double"
+            }
+         ]
+      },
+      {
+         "Table Name": "AcIssCtrlType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "Kr",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "Kp",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "Tmax",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double"
+            }
+         ]
+      },
+      {
+         "Table Name": "AcCmgCtrlType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "Kr",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "Kp",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            }
+         ]
+      },
+      {
+         "Table Name": "AcThrCtrlType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "Kw",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "Kth",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "Kv",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double"
+            },
+            {
+               "Variable Name": "Kp",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double"
+            }
+         ]
+      },
+      {
+         "Table Name": "AcCfsCtrlType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "Kr",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "Kp",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "Kunl",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double"
+            }
+         ]
+      },
+      {
+         "Table Name": "AcThrSteerCtrlType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "Kr",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "Kp",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            }
+         ]
+      },
+      {
+         "Table Name": "AcType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "ID",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "long",
+               "Description": "Spacecraft ID"
+            },
+            {
+               "Variable Name": "Nb",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "Ng",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "Nwhl",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "Nmtb",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "Nthr",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "Ngyro",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "Nmag",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "Ncss",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "Nfss",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "Nst",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "Ngps",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "Nacc",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "Pi",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double"
+            },
+            {
+               "Variable Name": "TwoPi",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double"
+            },
+            {
+               "Variable Name": "DT",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double"
+            },
+            {
+               "Variable Name": "mass",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double"
+            },
+            {
+               "Variable Name": "cm",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "MOI",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3,3"
+            },
+            {
+               "Variable Name": "svb",
+               "I/O Role": "OUTPUT",
+               "IPC Role": "Rx",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "bvb",
+               "I/O Role": "OUTPUT",
+               "IPC Role": "Rx",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "Hvb",
+               "I/O Role": "OUTPUT",
+               "IPC Role": "Rx",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "B",
+               "I/O Role": "STRUCT",
+               "Data Type": "AcBodyType",
+               "Array Size": "Nb"
+            },
+            {
+               "Variable Name": "G",
+               "I/O Role": "STRUCT",
+               "Data Type": "AcJointType",
+               "Array Size": "Ng"
+            },
+            {
+               "Variable Name": "Gyro",
+               "I/O Role": "STRUCT",
+               "Data Type": "AcGyroType",
+               "Array Size": "Ngyro"
+            },
+            {
+               "Variable Name": "MAG",
+               "I/O Role": "STRUCT",
+               "Data Type": "AcMagnetometerType",
+               "Array Size": "Nmag"
+            },
+            {
+               "Variable Name": "CSS",
+               "I/O Role": "STRUCT",
+               "Data Type": "AcCssType",
+               "Array Size": "Ncss"
+            },
+            {
+               "Variable Name": "FSS",
+               "I/O Role": "STRUCT",
+               "Data Type": "AcFssType",
+               "Array Size": "Nfss"
+            },
+            {
+               "Variable Name": "ST",
+               "I/O Role": "STRUCT",
+               "Data Type": "AcStarTrackerType",
+               "Array Size": "Nst"
+            },
+            {
+               "Variable Name": "GPS",
+               "I/O Role": "STRUCT",
+               "Data Type": "AcGpsType",
+               "Array Size": "Ngps"
+            },
+            {
+               "Variable Name": "Accel",
+               "I/O Role": "STRUCT",
+               "Data Type": "AcAccelType",
+               "Array Size": "Nacc"
+            },
+            {
+               "Variable Name": "ES",
+               "I/O Role": "STRUCT",
+               "Data Type": "AcEarthSensorType"
+            },
+            {
+               "Variable Name": "Whl",
+               "I/O Role": "STRUCT",
+               "Data Type": "AcWhlType",
+               "Array Size": "Nwhl"
+            },
+            {
+               "Variable Name": "MTB",
+               "I/O Role": "STRUCT",
+               "Data Type": "AcMtbType",
+               "Array Size": "Nmtb"
+            },
+            {
+               "Variable Name": "Thr",
+               "I/O Role": "STRUCT",
+               "Data Type": "AcThrType",
+               "Array Size": "Nthr"
+            },
+            {
+               "Variable Name": "InstantCtrl",
+               "I/O Role": "STRUCT",
+               "Data Type": "AcInstantCtrlType"
+            },
+            {
+               "Variable Name": "SandboxCtrl",
+               "I/O Role": "STRUCT",
+               "Data Type": "AcSandboxCtrlType"
+            },
+            {
+               "Variable Name": "SpinnerCtrl",
+               "I/O Role": "STRUCT",
+               "Data Type": "AcSpinnerCtrlType"
+            },
+            {
+               "Variable Name": "MomBiasCtrl",
+               "I/O Role": "STRUCT",
+               "Data Type": "AcMomBiasCtrlType"
+            },
+            {
+               "Variable Name": "ThreeAxisCtrl",
+               "I/O Role": "STRUCT",
+               "Data Type": "AcThreeAxisCtrlType"
+            },
+            {
+               "Variable Name": "IssCtrl",
+               "I/O Role": "STRUCT",
+               "Data Type": "AcIssCtrlType"
+            },
+            {
+               "Variable Name": "CmgCtrl",
+               "I/O Role": "STRUCT",
+               "Data Type": "AcCmgCtrlType"
+            },
+            {
+               "Variable Name": "ThrCtrl",
+               "I/O Role": "STRUCT",
+               "Data Type": "AcThrCtrlType"
+            },
+            {
+               "Variable Name": "CfsCtrl",
+               "I/O Role": "STRUCT",
+               "Data Type": "AcCfsCtrlType"
+            },
+            {
+               "Variable Name": "ThrSteerCtrl",
+               "I/O Role": "STRUCT",
+               "Data Type": "AcThrSteerCtrlType"
+            },
+            {
+               "Variable Name": "Cmd",
+               "I/O Role": "STRUCT",
+               "Data Type": "CmdType"
+            }
+         ]
+      },
+      {
+         "Table Name": "AcIpcType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      }
+   ]
+}

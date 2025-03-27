@@ -2372,6 +2372,9 @@ void DrawVector(double v[3], const char *Label, const char *Units,
       GLubyte GlyphVec[3]={0xfe,0x0c,0x10};
       double u[3],mag;
       char s[40];
+      
+      /* Don't bother drawing zero-length vectors */
+      if (MAGV(v) < 1.0E-12) return;
 
       glDisable(GL_LIGHTING);
       glColor4fv(Color);
@@ -3007,6 +3010,21 @@ void CheckOpenGLProperties(void)
 #endif
 #ifdef GL_VERSION_1_3
       printf("GL_VERSION_1_3 defined\n");
+#endif
+#ifdef GL_VERSION_2_0
+      printf("GL_VERSION_2_0 defined\n");
+#endif
+#ifdef GL_VERSION_2_1
+      printf("GL_VERSION_2_1 defined\n");
+#endif
+#ifdef GL_VERSION_3_0
+      printf("GL_VERSION_3_0 defined\n");
+#endif
+#ifdef GL_VERSION_3_1
+      printf("GL_VERSION_3_1 defined\n");
+#endif
+#ifdef GL_VERSION_3_2
+      printf("GL_VERSION_3_2 defined\n");
 #endif
 #ifdef GL_GLEXT_LEGACY
       printf("GL_GLEXT_LEGACY defined\n");

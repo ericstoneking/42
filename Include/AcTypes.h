@@ -45,16 +45,20 @@ struct CmdVecType {
 };
 
 struct CmdType {
-   /*~ Internal Variables ~*/
-   long Parm;
-   long Frame;
+   /*~ Command Parameters ~*/
+   double qrl[4]; /* [~!~] */
+   double qrn[4]; /* [~!~] */
+
+   /*~ Outputs ~*/
    double AngRate[3]; /* [~<~] */
    double Ang[3]; /* [~<~] */
    double PosRate[3];
    double Pos[3];
+   
+   /*~ Internal Variables ~*/
+   long Parm;
+   long Frame;
    long RotSeq;
-   double qrl[4]; /* [~!~] */
-   double qrn[4]; /* [~!~] */
    double wrn[3];
    double SpinRate;
    double Hvr[3];
@@ -67,14 +71,14 @@ struct CmdType {
 };
 
 struct AcBodyType {
-   /*~ Parameters ~*/
+   /*~ Table Parameters ~*/
    double mass; /* [[kg]] */
    double cm[3]; /* [[m]] */
    double MOI[3][3]; /* [[kg-m^2]] */
 };
 
 struct AcJointType {
-   /*~ Parameters ~*/
+   /*~ Table Parameters ~*/
    long IsSpherical;
    long RotDOF;
    long TrnDOF;
@@ -91,69 +95,75 @@ struct AcJointType {
    double MaxTrq[3];
    double MaxFrc[3];
 
-   /*~ Internal Variables ~*/
+   /*~ Inputs ~*/
    double Ang[3]; /* [[rad]] [~>~] */
+
+   /*~ Internal Variables ~*/
    double AngRate[3];
    double Pos[3];
    double PosRate[3];
    double COI[3][3];
    
    /*~ Structures ~*/
-   struct CmdType Cmd;
+   struct CmdType GCmd;
 };
 
 struct AcGyroType {
-   /*~ Parameters ~*/
+   /*~ Table Parameters ~*/
    double Axis[3];
 
-   /*~ Internal Variables ~*/
+   /*~ Inputs ~*/
    double Rate; /* [[rad/sec]] [~>~] */
 };
 
 struct AcMagnetometerType {
-   /*~ Parameters ~*/
+   /*~ Table Parameters ~*/
    double Axis[3];
 
-   /*~ Internal Variables ~*/
+   /*~ Inputs ~*/
    double Field; /* [[Tesla]] [~>~] */
 };
 
 struct AcCssType {
-   /*~ Parameters ~*/
+   /*~ Table Parameters ~*/
    long Body;
    double Axis[3];
    double Scale;
 
-   /*~ Internal Variables ~*/
+   /*~ Inputs ~*/
    long Valid; /* [~>~] */
    double Illum; /* [~>~] */
 };
 
 struct AcFssType {
-   /*~ Parameters ~*/
+   /*~ Table Parameters ~*/
    double qb[4];
    double CB[3][3];
 
-   /*~ Internal Variables ~*/
+   /*~ Inputs ~*/
    long Valid;       /* [~>~] */
    double SunAng[2]; /* [[rad]] [~>~] */
+   
+   /*~ Internal Variables ~*/
    double SunVecS[3];
    double SunVecB[3];
 };
 
 struct AcStarTrackerType {
-   /*~ Parameters ~*/
+   /*~ Table Parameters ~*/
    double qb[4];
    double CB[3][3];
 
-   /*~ Internal Variables ~*/
+   /*~ Inputs ~*/
    long Valid;   /* [~>~] */
    double qn[4]; /* [~>~] */
+   
+   /*~ Internal Variables ~*/
    double qbn[4];
 };
 
 struct AcGpsType {
-   /*~ Internal Variables ~*/
+   /*~ Inputs ~*/
    long Valid; /* [~>~] */
    long Rollover; /* [~>~] */
    long Week; /* [~>~] */
@@ -171,11 +181,11 @@ struct AcGpsType {
 };
 
 struct AcAccelType {
-   /*~ Parameters ~*/
+   /*~ Table Parameters ~*/
    double PosB[3];
    double Axis[3];
 
-   /*~ Internal Variables ~*/
+   /*~ Inputs ~*/
    double Acc; /* [[m/s^2]] [~>~] */
 };
 
@@ -187,46 +197,52 @@ struct AcEarthSensorType {
 };
 
 struct AcWhlType {
-   /*~ Parameters ~*/
+   /*~ Table Parameters ~*/
    long Body;
    double Axis[3];
    double DistVec[3];
    double J;
    double Tmax;
    double Hmax;
+   
+   /*~ Inputs ~*/
+   double H; /* [[Nms]] [~>~] */
+   
+   /*~ Outputs ~*/
+   double Tcmd; /* [[N-m]] [~<~] */
 
    /*~ Internal Variables ~*/
    double w;
-   double H; /* [[Nms]] [~>~] */
-   double Tcmd; /* [[N-m]] [~<~] */
 };
 
 struct AcMtbType {
-   /*~ Parameters ~*/
+   /*~ Table Parameters ~*/
    double Axis[3];
    double DistVec[3];
    double Mmax;
 
-   /*~ Internal Variables ~*/
+   /*~ Outputs ~*/
    double Mcmd; /* [[A-m^2]] [~<~] */
 };
 
 struct AcThrType {
-   /*~ Parameters ~*/
+   /*~ Table Parameters ~*/
    long Body;
    double PosB[3];
    double Axis[3];
    double rxA[3];
    double Fmax;
 
-   /*~ Internal Variables ~*/
-   double Fcmd;
+   /*~ Outputs ~*/
    double PulseWidthCmd; /* for PULSED [[sec]] [~<~] */
    double ThrustLevelCmd; /* for PROPORTIONAL [[None]] [~<~] */
+   
+   /*~ Internal Variables ~*/
+   double Fcmd;
 };
 
-struct AcPrototypeCtrlType {
-   /*~ Parameters ~*/
+struct AcInstantCtrlType {
+   /*~ Table Parameters ~*/
    double wc;
    double amax;
    double vmax;
@@ -241,8 +257,8 @@ struct AcPrototypeCtrlType {
    double werr[3];
 };
 
-struct AcAdHocCtrlType {
-   /*~ Parameters ~*/
+struct AcSandboxCtrlType {
+   /*~ Table Parameters ~*/
    double Kr[3];
    double Kp[3];
 
@@ -254,7 +270,7 @@ struct AcAdHocCtrlType {
 };
 
 struct AcSpinnerCtrlType {
-   /*~ Parameters ~*/
+   /*~ Table Parameters ~*/
    double Ispin;
    double Itrans; 
    double SpinRate;
@@ -277,7 +293,7 @@ struct AcMomBiasCtrlType {
 };
 
 struct AcThreeAxisCtrlType {
-   /*~ Parameters ~*/
+   /*~ Table Parameters ~*/
    double Kr[3];
    double Kp[3];
    double Kunl;
@@ -289,7 +305,7 @@ struct AcThreeAxisCtrlType {
 };
 
 struct AcIssCtrlType {
-   /*~ Parameters ~*/
+   /*~ Table Parameters ~*/
    double Kr[3];
    double Kp[3];
    double Tmax;
@@ -301,7 +317,7 @@ struct AcIssCtrlType {
 };
 
 struct AcCmgCtrlType {
-   /*~ Parameters ~*/
+   /*~ Table Parameters ~*/
    double Kr[3];
    double Kp[3];
    
@@ -313,7 +329,7 @@ struct AcCmgCtrlType {
 };
 
 struct AcThrCtrlType {
-   /*~ Parameters ~*/
+   /*~ Table Parameters ~*/
    double Kw[3];
    double Kth[3];
    double Kv;
@@ -324,7 +340,7 @@ struct AcThrCtrlType {
 };
 
 struct AcCfsCtrlType {
-   /*~ Parameters ~*/
+   /*~ Table Parameters ~*/
    double Kr[3];
    double Kp[3];
    double Kunl;
@@ -336,7 +352,7 @@ struct AcCfsCtrlType {
 };
 
 struct AcThrSteerCtrlType {
-   /*~ Parameters ~*/
+   /*~ Table Parameters ~*/
    double Kr[3];
    double Kp[3];
 
@@ -349,17 +365,15 @@ struct AcThrSteerCtrlType {
 };
 
 struct AcType {
-   /*~ Parameters ~*/
+   /*~ Command Parameters ~*/
+   
+   /*~ Table Parameters ~*/
    long ID; /* Spacecraft ID */
-   long EchoEnabled; /* For IPC */
-   long ParmLoadEnabled; /* [~>~] */
-   long ParmDumpEnabled; /* [~>~] */
    long Nb;
    long Ng;
    long Nwhl;
    long Nmtb;
    long Nthr;
-   long Ncmg;
    long Ngyro; 
    long Nmag;
    long Ncss;
@@ -377,6 +391,14 @@ struct AcType {
    double MOI[3][3];
    
    /*~ Inputs ~*/
+   
+   /*~ Outputs ~*/
+   double svb[3]; /* [~<~] */
+   double bvb[3]; /* [~<~] */
+   double Hvb[3]; /* [~<~] */
+   
+   /*~ Internal Variables ~*/
+   long Init;
    double Time; /* Time since J2000 [[sec]] */
    long Mode;
    double wbn[3];
@@ -386,17 +408,17 @@ struct AcType {
    double wln[3];
    double qln[4];
    double svn[3];
-   double svb[3]; /* [~<~] */
+   double qrn[4];
+   double wrn[3];
+   double qbr[4];
    double bvn[3];
-   double bvb[3]; /* [~<~] */
    double PosN[3];
    double VelN[3];
    long SunValid;
    long MagValid;
    long EphValid;
    long StValid;
-   
-   /*~ Outputs ~*/
+
    long ReqMode;
 
    double Tcmd[3];
@@ -405,13 +427,6 @@ struct AcType {
    
    double IdealTrq[3];
    double IdealFrc[3];
-   
-   /*~ Internal Variables ~*/
-   long Init;
-   double qrn[4];
-   double wrn[3];
-   double qbr[4];
-   double Hvb[3]; /* [~<~] */
 
    /*~ Structures ~*/
 
@@ -435,8 +450,8 @@ struct AcType {
    struct AcThrType *Thr; /* [*Nthr*] */
    
    /* Control Modes */
-   struct AcPrototypeCtrlType PrototypeCtrl;
-   struct AcAdHocCtrlType AdHocCtrl;
+   struct AcInstantCtrlType InstantCtrl;
+   struct AcSandboxCtrlType SandboxCtrl;
    struct AcSpinnerCtrlType SpinnerCtrl;
    struct AcMomBiasCtrlType MomBiasCtrl;
    struct AcThreeAxisCtrlType ThreeAxisCtrl;
@@ -448,6 +463,34 @@ struct AcType {
    
    struct CmdType Cmd;
 };
+
+#if _AC_STANDALONE_
+#ifdef _WIN32
+   #include <winsock2.h>
+#else
+   #include <sys/socket.h>
+   #include <netinet/in.h>
+   #include <netinet/tcp.h>
+   #include <netdb.h>
+   /* Finesse winsock SOCKET datatype */
+   #define SOCKET int
+#endif
+
+struct AcIpcType {
+   /*~ Internal Variables ~*/
+   long Init;
+   long Enabled;
+   long Port;
+   long AllowBlocking;
+   SOCKET Socket;
+   char *AcInBuf;
+   long AcInBufLen;
+   char *AcOutBuf;
+   long AcOutBufLen;
+   char *AcTblBuf;
+   long AcTblBufLen;
+};
+#endif
 
 /*
 ** #ifdef __cplusplus

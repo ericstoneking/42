@@ -2,7 +2,7 @@
 Voyager                       !  Description
 "Voyager"                     !  Label
 GenScSpriteAlpha.ppm          !  Sprite File Name
-AD_HOC_FSW                    !  Flight Software Identifier
+SANDBOX_FSW                   !  Flight Software Identifier
 0.2                           !  FSW Sample Time, sec
 ************************* Orbit Parameters ****************************
 FIXED                         !  Orbit Prop FIXED, EULER_HILL, or ENCKE

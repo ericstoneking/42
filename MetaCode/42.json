@@ -1,0 +1,647 @@
+{
+   "Table Definition": [
+      {
+         "Table Name": "SphereHarmType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "FormationType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "NodeType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "ShakerType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "Body",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "Node",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "FrcTrq",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "Axis",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "Ntone",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "RandomActive",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "long"
+            },
+            {
+               "Variable Name": "ToneAmp",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "Ntone",
+               "Description": "N or Nm"
+            },
+            {
+               "Variable Name": "ToneFreq",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "Ntone",
+               "Description": "For tonic, rad/sec"
+            },
+            {
+               "Variable Name": "TonePhase",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Array Size": "Ntone",
+               "Description": "For tonic, rad"
+            },
+            {
+               "Variable Name": "LowBandLimit",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Description": "rad/sec"
+            },
+            {
+               "Variable Name": "HighBandLimit",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Description": "rad/sec"
+            },
+            {
+               "Variable Name": "RandStd",
+               "I/O Role": "TBL_PRM",
+               "Data Type": "double",
+               "Description": "Std Dev of band-limited random input, N or Nm"
+            },
+            {
+               "Variable Name": "Output",
+               "I/O Role": "OUTPUT",
+               "Data Type": "double"
+            },
+            {
+               "Variable Name": "RandomProc",
+               "I/O Role": "STRUCT",
+               "Data Type": "RandomProcessType",
+               "Array Size": ""
+            },
+            {
+               "Variable Name": "Lowpass",
+               "I/O Role": "STRUCT",
+               "Data Type": "FilterType",
+               "Array Size": ""
+            },
+            {
+               "Variable Name": "Highpass",
+               "I/O Role": "STRUCT",
+               "Data Type": "FilterType",
+               "Array Size": ""
+            },
+            {
+               "Variable Name": "Rand",
+               "I/O Role": "STRUCT",
+               "Data Type": "FilterType",
+               "Array Size": "",
+               "Description": "White noise in, band-limited noise out"
+            }
+         ]
+      },
+      {
+         "Table Name": "BodyType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "wn",
+               "I/O Role": "OUTPUT",
+               "IPC Role": "TxRx",
+               "Data Type": "double",
+               "Array Size": "3",
+               "Units": "rad/sec",
+               "Description": "Angular Velocity of B wrt N expressed in B frame"
+            },
+            {
+               "Variable Name": "qn",
+               "I/O Role": "OUTPUT",
+               "IPC Role": "TxRx",
+               "Data Type": "double",
+               "Array Size": "4"
+            },
+            {
+               "Variable Name": "Node",
+               "I/O Role": "STRUCT",
+               "Data Type": "NodeType",
+               "Array Size": "NumNodes"
+            }
+         ]
+      },
+      {
+         "Table Name": "JointType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "Pos",
+               "I/O Role": "OUTPUT",
+               "IPC Role": "TxRx",
+               "Data Type": "double",
+               "Array Size": "3",
+               "Description": "translational kinematic state variables"
+            },
+            {
+               "Variable Name": "PosRate",
+               "I/O Role": "OUTPUT",
+               "IPC Role": "TxRx",
+               "Data Type": "double",
+               "Array Size": "3",
+               "Description": "translational dynamic state variables"
+            },
+            {
+               "Variable Name": "Ang",
+               "I/O Role": "OUTPUT",
+               "IPC Role": "TxRx",
+               "Data Type": "double",
+               "Array Size": "3",
+               "Description": "Joint Euler angles"
+            },
+            {
+               "Variable Name": "AngRate",
+               "I/O Role": "OUTPUT",
+               "IPC Role": "TxRx",
+               "Data Type": "double",
+               "Array Size": "3",
+               "Description": "Euler angle rates about gim axes"
+            }
+         ]
+      },
+      {
+         "Table Name": "IdealActType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "WhlHarmType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "WhlType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "H",
+               "I/O Role": "OUTPUT",
+               "IPC Role": "TxRx",
+               "Data Type": "double",
+               "Units": "Nms",
+               "Description": "Angular Momentum,"
+            }
+         ]
+      },
+      {
+         "Table Name": "MTBType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "ThrType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "GyroType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "TrueRate",
+               "I/O Role": "OUTPUT",
+               "IPC Role": "Tx",
+               "Data Type": "double",
+               "Description": "rad/sec"
+            }
+         ]
+      },
+      {
+         "Table Name": "MagnetometerType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "CssType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "FssType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "StarTrackerType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "GpsType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "AccelType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "OpticsType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "GuideWindowType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "PsfType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "FgsType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "JointPathTableType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "BodyPathTableType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "DynType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "EnvTrqType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "IpcType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "SCType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "qn",
+               "I/O Role": "OUTPUT",
+               "IPC Role": "TxRx",
+               "Data Type": "double",
+               "Array Size": "4",
+               "Description": "Attitude of Body 0 in N"
+            },
+            {
+               "Variable Name": "wn",
+               "I/O Role": "OUTPUT",
+               "IPC Role": "TxRx",
+               "Data Type": "double",
+               "Array Size": "3",
+               "Units": "rad/sec",
+               "Description": "Angular rates of Body 0 in N"
+            },
+            {
+               "Variable Name": "PosR",
+               "I/O Role": "OUTPUT",
+               "IPC Role": "TxRx",
+               "Data Type": "double",
+               "Array Size": "3",
+               "Units": "m",
+               "Description": "Position of cm wrt Reference Orbit , expressed in N"
+            },
+            {
+               "Variable Name": "VelR",
+               "I/O Role": "OUTPUT",
+               "IPC Role": "TxRx",
+               "Data Type": "double",
+               "Array Size": "3",
+               "Units": "m/s",
+               "Description": "Velocity of cm wrt R , expressed in N"
+            },
+            {
+               "Variable Name": "svb",
+               "I/O Role": "OUTPUT",
+               "IPC Role": "TxRx",
+               "Data Type": "double",
+               "Array Size": "3",
+               "Description": "Sun-pointing unit vector, expressed in SC.B[0]"
+            },
+            {
+               "Variable Name": "bvb",
+               "I/O Role": "OUTPUT",
+               "IPC Role": "TxRx",
+               "Data Type": "double",
+               "Array Size": "3",
+               "Units": "Tesla",
+               "Description": "Magfield , expressed in SC.B[0]"
+            },
+            {
+               "Variable Name": "Hvb",
+               "I/O Role": "OUTPUT",
+               "IPC Role": "TxRx",
+               "Data Type": "double",
+               "Array Size": "3",
+               "Units": "Nms",
+               "Description": "Total SC angular momentum , expressed in SC.B[0]"
+            },
+            {
+               "Variable Name": "AC",
+               "I/O Role": "STRUCT",
+               "Data Type": "AcType"
+            },
+            {
+               "Variable Name": "B",
+               "I/O Role": "STRUCT",
+               "Data Type": "BodyType",
+               "Array Size": "Nb"
+            },
+            {
+               "Variable Name": "G",
+               "I/O Role": "STRUCT",
+               "Data Type": "JointType",
+               "Array Size": "Ng"
+            },
+            {
+               "Variable Name": "IdealAct",
+               "I/O Role": "STRUCT",
+               "Data Type": "IdealActType",
+               "Array Size": "3"
+            },
+            {
+               "Variable Name": "Whl",
+               "I/O Role": "STRUCT",
+               "Data Type": "WhlType",
+               "Array Size": "Nw"
+            },
+            {
+               "Variable Name": "MTB",
+               "I/O Role": "STRUCT",
+               "Data Type": "MTBType",
+               "Array Size": "Nmtb"
+            },
+            {
+               "Variable Name": "Thr",
+               "I/O Role": "STRUCT",
+               "Data Type": "ThrType",
+               "Array Size": "Nthr"
+            },
+            {
+               "Variable Name": "Gyro",
+               "I/O Role": "STRUCT",
+               "Data Type": "GyroType",
+               "Array Size": "Ngyro"
+            },
+            {
+               "Variable Name": "MAG",
+               "I/O Role": "STRUCT",
+               "Data Type": "MagnetometerType",
+               "Array Size": "Nmag"
+            },
+            {
+               "Variable Name": "CSS",
+               "I/O Role": "STRUCT",
+               "Data Type": "CssType",
+               "Array Size": "Ncss"
+            },
+            {
+               "Variable Name": "FSS",
+               "I/O Role": "STRUCT",
+               "Data Type": "FssType",
+               "Array Size": "Nfss"
+            },
+            {
+               "Variable Name": "ST",
+               "I/O Role": "STRUCT",
+               "Data Type": "StarTrackerType",
+               "Array Size": "Nst"
+            },
+            {
+               "Variable Name": "GPS",
+               "I/O Role": "STRUCT",
+               "Data Type": "GpsType",
+               "Array Size": "Ngps"
+            },
+            {
+               "Variable Name": "Accel",
+               "I/O Role": "STRUCT",
+               "Data Type": "AccelType",
+               "Array Size": "Nacc"
+            },
+            {
+               "Variable Name": "Fgs",
+               "I/O Role": "STRUCT",
+               "Data Type": "FgsType",
+               "Array Size": "Nfgs"
+            },
+            {
+               "Variable Name": "Shaker",
+               "I/O Role": "STRUCT",
+               "Data Type": "ShakerType",
+               "Array Size": "Nsh"
+            },
+            {
+               "Variable Name": "AcIpc",
+               "I/O Role": "STRUCT",
+               "Data Type": "AcIpcType"
+            }
+         ]
+      },
+      {
+         "Table Name": "TargetType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "POVType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "RegionType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "AtmoType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "WorldType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "PosH",
+               "I/O Role": "OUTPUT",
+               "IPC Role": "TxRx",
+               "Data Type": "double",
+               "Array Size": "3",
+               "Description": "Position in H frame"
+            },
+            {
+               "Variable Name": "eph",
+               "I/O Role": "STRUCT",
+               "Data Type": "OrbitType",
+               "Description": "Ephemeris"
+            },
+            {
+               "Variable Name": "Atmo",
+               "I/O Role": "STRUCT",
+               "Data Type": "AtmoType"
+            }
+         ]
+      },
+      {
+         "Table Name": "SpotType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "WidgetType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "FovType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "TdrsType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "GroundStationType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "ShadowFBOType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "AlbedoFBOType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "OrreryPOVType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "ConstellationType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "LagrangePointType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "LagrangeSystemType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "Cheb3DType",
+         "Table Type": "Structure",
+         "Table Data": [
+         ]
+      },
+      {
+         "Table Name": "OrbitType",
+         "Table Type": "Structure",
+         "Table Data": [
+            {
+               "Variable Name": "PosN",
+               "I/O Role": "OUTPUT",
+               "IPC Role": "TxRx",
+               "Data Type": "double",
+               "Array Size": "3",
+               "Units": "m",
+               "Description": "Position expressed in N"
+            },
+            {
+               "Variable Name": "VelN",
+               "I/O Role": "OUTPUT",
+               "IPC Role": "TxRx",
+               "Data Type": "double",
+               "Array Size": "3",
+               "Units": "m/sec",
+               "Description": "Velocity expressed in N"
+            }
+         ]
+      }
+   ]
+}

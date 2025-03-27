@@ -234,8 +234,8 @@
 
 /* FSW Tags */
 #define PASSIVE_FSW 0
-#define PROTOTYPE_FSW 1
-#define AD_HOC_FSW 2
+#define INSTANT_FSW 1
+#define SANDBOX_FSW 2
 #define SPINNER_FSW 3
 #define MOMBIAS_FSW 4
 #define THREE_AXIS_FSW 5
@@ -243,7 +243,6 @@
 #define CMG_FSW 7
 #define THR_FSW 8
 #define CFS_FSW 9
-#define RBT_FSW 10
 
 /* Command Types */
 #define CMD_DIRECTION 0
@@ -269,11 +268,10 @@
 #define IPC_TX 1
 #define IPC_RX 2
 #define IPC_TXRX 3
-#define IPC_ACS 4
-#define IPC_WRITEFILE 5
-#define IPC_READFILE 6
-#define IPC_SPIRENT 7
-#define IPC_FFTB 8
+#define IPC_WRITEFILE 4
+#define IPC_READFILE 5
+#define IPC_SPIRENT 6
+#define IPC_FFTB 7
 
 /* Socket Roles for InterProcess Comm */
 #define IPC_SERVER 0

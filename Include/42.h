@@ -113,10 +113,10 @@ EXTERN double CGH[3][3];
 /* J2000 to Heliocentric Ecliptic */
 EXTERN double qjh[4];
 
-/* SC structure manages attitude and translation wrt Reference Orbit */
-EXTERN struct SCType *SC;
 /* Orb structure manages Reference Orbits */
 EXTERN struct OrbitType *Orb;
+/* SC structure manages attitude and translation wrt Reference Orbit */
+EXTERN struct SCType *SC;
 /* Frm structure describes a Formation of S/C's */
 EXTERN struct FormationType *Frm;
 

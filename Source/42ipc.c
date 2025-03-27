@@ -54,7 +54,6 @@ void InitInterProcessComm(void)
          fscanf(infile,"%[^\n] %[\n]",junk,&newline);
          fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
          I->Mode = DecodeString(response);
-         fscanf(infile,"%ld %[^\n] %[\n]",&I->AcsID,junk,&newline);
          fscanf(infile,"\"%[^\"]\" %[^\n] %[\n]",FileName,junk,&newline);
          fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
          I->SocketRole = DecodeString(response);
@@ -138,9 +137,6 @@ void InitInterProcessComm(void)
             }
 
          }
-         else if (I->Mode == IPC_ACS) {
-            I->Socket = InitSocketServer(I->Port,I->AllowBlocking);
-         }
          else if (I->Mode == IPC_WRITEFILE) {
             I->File = FileOpen(InOutPath,FileName,"wt");
          }
@@ -195,10 +191,10 @@ void InterProcessComm(void)
             #endif
          }
          else if (I->Mode == IPC_WRITEFILE) {
-            WriteToFile(I->File,I->Prefix,I->Nprefix,I->EchoEnabled);
+            //WriteToFile(I->File,I->Prefix,I->Nprefix,I->EchoEnabled);
          }
          else if (I->Mode == IPC_READFILE) {
-            ReadFromFile(I->File,I->EchoEnabled);
+            //ReadFromFile(I->File,I->EchoEnabled);
          }
          #ifdef _ENABLE_FFTB_CODE_
          else if (I->Mode == IPC_FFTB) {

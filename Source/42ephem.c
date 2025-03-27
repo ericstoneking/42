@@ -464,7 +464,6 @@ void OrbitMotion(double Time)
 {
       long Iorb,i,j;
       struct OrbitType *O;
-      struct RegionType *R;
 
 #if 0
       static long RectCtr = 0;
@@ -507,7 +506,8 @@ void OrbitMotion(double Time)
                          O->PosN,O->VelN,&O->anom);
                }
             }
-            /* Else is ORB_ZERO or ORB_FLIGHT, and no action required */
+            /* ORB_FLIGHT is handled in Ephemerides() */
+            /* ORB_ZERO requires no action */
             
             /* Update CLN */
             switch (O->Regime) {
@@ -521,12 +521,6 @@ void OrbitMotion(double Time)
                   break;
                case ORB_FLIGHT :
                   /* L is East-North-Up */
-                  R = &Rgn[O->Region];
-                  for(i=0;i<3;i++) {
-                     O->PosN[i] = R->PosN[i];
-                     O->VelN[i] = R->VelN[i];
-                  }
-                  FindENU(O->PosN,World[O->World].w,O->CLN,O->wln);
                   break;
                case ORB_CENTRAL :
                   /* L is LVLH */
@@ -566,7 +560,7 @@ void Ephemerides(void)
       double ZAxis[3] = {0.0,0.0,1.0};
       double EarthMoonBaryPosH[3],EarthMoonBaryVelH[3];
       struct LagrangeSystemType *LS;
-      long i,j,Ip,Im,Iw,Imb,Ir,Isc;
+      long i,j,Ip,Im,Iw,Imb,Ir,Isc,Iorb;
       long Ic;
       struct Cheb3DType *C;
       double u,dudJD,T[20],U[20],P,dPdu;
@@ -574,6 +568,7 @@ void Ephemerides(void)
       double PosJ[3],VelJ[3];
       double C_W_TETE[3][3],C_TEME_TETE[3][3],C_TETE_J2000[3][3];
       double MagR1,MeanMotion;
+      double VelW[3];
 
 /* .. Locate Planets and Luna */
       if (EphemOption == EPH_MEAN) {
@@ -705,6 +700,7 @@ void Ephemerides(void)
 /* .. Earth rotation is a special case */
       GMST = JD2GMST(UTC.JulDay);
       World[EARTH].PriMerAng = TwoPi*GMST;
+      /* SimpRot(ZAxis,World[EARTH].PriMerAng,World[EARTH].CWN); */
       HiFiEarthPrecNute(UTC.JulDay,C_TEME_TETE,C_TETE_J2000);
       SimpRot(ZAxis,World[EARTH].PriMerAng,C_W_TETE);
       MxM(C_W_TETE,C_TETE_J2000,World[EARTH].CWN);
@@ -745,9 +741,10 @@ void Ephemerides(void)
          R = &Rgn[Ir];
          W = &World[R->World];
          MTxV(W->CWN,R->PosW,R->PosN);
-         R->VelN[0] = -W->w*R->PosN[1];
-         R->VelN[1] = W->w*R->PosN[0];
-         R->VelN[2] = 0.0;
+         VelW[0] = -W->w*R->PosW[1];
+         VelW[1] =  W->w*R->PosW[0];
+         VelW[2] = 0.0;
+         MTxV(W->CWN,VelW,R->VelN);
          MxM(R->CW,W->CWN,R->CN);
       }
 
@@ -762,6 +759,19 @@ void Ephemerides(void)
          CopyUnitV(Tdrs[i].rw,ptw);
          Tdrs[i].lat = asin(ptw[2]);
          Tdrs[i].lng = atan2(ptw[1],ptw[0]);
+      }
+      
+/* .. Orbits (Flight) */
+      for(Iorb=0;Iorb<Norb;Iorb++) {
+         O = &Orb[Iorb];
+         if (O->Exists && O->Regime == ORB_FLIGHT) {
+            R = &Rgn[O->Region];
+            for(i=0;i<3;i++) {
+               O->PosN[i] = R->PosN[i];
+               O->VelN[i] = R->VelN[i];
+            }
+            FindENU(O->PosN,World[O->World].w,O->CLN,O->wln);
+         }
       }
 
 /* .. SC */
