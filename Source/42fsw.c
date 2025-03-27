@@ -15,6 +15,7 @@
 #include "42.h"
 
 void AcFsw(struct AcType *AC);
+#ifdef _AC_STANDALONE_
 long FindInBufLen(struct AcType *AC);
 long FindOutBufLen(struct AcType *AC);
 long FindTblBufLen(struct AcType *AC);
@@ -23,10 +24,7 @@ void ReadAcOutFromSocket(struct AcType *AC,struct AcIpcType *I);
 void WriteAcTblToSocket(struct AcType *AC,struct AcIpcType *I);
 void WriteAcArraySizesToSocket(struct AcType *AC, struct AcIpcType *I);
 void WriteAcBufLensToSocket(struct AcIpcType *I);
-
-//void WriteToSocket(SOCKET Socket, char **Prefix, long Nprefix, long EchoEnabled);
-//void ReadFromSocket(SOCKET Socket, long EchoEnabled);
-
+#endif
 
 /* #ifdef __cplusplus
 ** namespace _42 {
