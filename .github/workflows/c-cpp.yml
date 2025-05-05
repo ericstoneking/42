@@ -5,9 +5,12 @@ name: C/C++ CI
 # using up runner minutes
 on:
   push:
-    branches: [ master ]
+    branches: 
+      - master
+      - issue-*
   pull_request:
-    branches: [ master ]
+    branches: 
+      - master
 
 jobs:
   build-ubuntu:
