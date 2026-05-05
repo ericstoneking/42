@@ -183,6 +183,10 @@ struct MeshType *LoadWingsObjFile(const char *ModelPath, const char *ObjFilename
                        struct MatlType **MatlPtr, long *Nmatl,
                        struct MeshType *Mesh, long *Nmesh, long *MeshTag,
                        long EdgesEnabled);
+struct MeshType *LoadMeshFile(const char *ModelPath, const char *MeshFilename,
+                       struct MatlType **MatlPtr, long *Nmatl,
+                       struct MeshType *Mesh, long *Nmesh, long *MeshTag,
+                       long EdgesEnabled);
 void WriteMeshToObjFile(struct MatlType *Matl,struct MeshType *Mesh,const char *Path,
    const char *FileName);
 double PolyhedronVolume(struct MeshType *M);

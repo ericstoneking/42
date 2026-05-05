@@ -336,7 +336,7 @@ $(OBJ)iokit.o      : $(KITSRC)iokit.c
 $(OBJ)mathkit.o     : $(KITSRC)mathkit.c
 	$(CC) $(CFLAGS) -c $(KITSRC)mathkit.c -o $(OBJ)mathkit.o
 
-$(OBJ)meshkit.o      : $(KITSRC)meshkit.c $(KITINC)meshkit.h
+$(OBJ)meshkit.o      : $(KITSRC)meshkit.c $(KITINC)meshkit.h $(KITINC)cgltf.h
 	$(CC) $(CFLAGS) -c $(KITSRC)meshkit.c -o $(OBJ)meshkit.o
 
 $(OBJ)nrlmsise00kit.o   : $(KITSRC)nrlmsise00kit.c

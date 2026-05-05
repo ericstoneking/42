@@ -2968,7 +2968,7 @@ void InitSpacecraft(struct SCType *S)
 /* .. Load geometry */
       for(j=0;j<S->Nb;j++) {
          OldNmesh = Nmesh;
-         Mesh = LoadWingsObjFile(ModelPath,S->B[j].MeshFileName,
+         Mesh = LoadMeshFile(ModelPath,S->B[j].MeshFileName,
             &Matl,&Nmatl,Mesh,&Nmesh,&S->B[j].MeshTag,
             AeroShadowsActive || SolPressShadowsActive);
          if (ContactActive && OldNmesh != Nmesh) LoadOctree(&Mesh[Nmesh-1]);
@@ -3491,7 +3491,7 @@ void LoadMoonsOfMars(void)
          M->Type = MOON;
       }
       strcpy(World[PHOBOS].MeshFileName,"Phobos.obj");
-      Mesh = LoadWingsObjFile(ModelPath,World[PHOBOS].MeshFileName,
+      Mesh = LoadMeshFile(ModelPath,World[PHOBOS].MeshFileName,
          &Matl,&Nmatl,Mesh,&Nmesh,&World[PHOBOS].MeshTag,FALSE);
 
 
@@ -4042,7 +4042,7 @@ void LoadMinorBodies(void)
          while ((E->tp-DynTime0) < -E->Period) E->tp += E->Period;
          while ((E->tp-DynTime0) >  E->Period) E->tp -= E->Period;
 
-         Mesh = LoadWingsObjFile(ModelPath,W->MeshFileName,
+         Mesh = LoadMeshFile(ModelPath,W->MeshFileName,
             &Matl,&Nmatl,Mesh,&Nmesh,&W->MeshTag,TRUE);
          W->Density = W->mu/(6.67408E-11*PolyhedronVolume(&Mesh[W->MeshTag]));
 
@@ -4137,7 +4137,7 @@ void LoadRegions(void)
          fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
             &R->ElastCoef,&R->DampCoef,&R->FricCoef,junk,&newline);
          fscanf(infile,"%s %[^\n] %[\n]",R->MeshFileName,junk,&newline);
-         Mesh = LoadWingsObjFile(ModelPath,R->MeshFileName,
+         Mesh = LoadMeshFile(ModelPath,R->MeshFileName,
             &Matl,&Nmatl,Mesh,&Nmesh,&R->MeshTag,TRUE);
       }
       fclose(infile);
@@ -4792,7 +4792,7 @@ void InitSim(int argc, char **argv)
 
       /* Known bug: First Mesh loaded in gets corrupted.
       Kludge fix: Load a sacrificial mesh first.  */
-      Mesh = LoadWingsObjFile(ModelPath,"Point.obj",
+      Mesh = LoadMeshFile(ModelPath,"Point.obj",
             &Matl,&Nmatl,Mesh,&Nmesh,&JunkTag,FALSE);
 
 /* .. Time */
