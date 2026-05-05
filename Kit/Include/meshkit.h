@@ -177,6 +177,8 @@ long KDProjectRayOntoMesh(double Source[3], double DirVec[3],
 void LoadOctree(struct MeshType *M);
 long OCProjectRayOntoMesh(double Point[3],double DirVec[3],
    struct MeshType *M,double ProjPoint[3],long *ClosestPoly);
+long PolyIsDegenerate(struct PolyType *P, double **V);
+void FinalizeMesh(struct MeshType *M, long EdgesEnabled);
 struct MeshType *LoadWingsObjFile(const char *ModelPath, const char *ObjFilename,
                        struct MatlType **MatlPtr, long *Nmatl,
                        struct MeshType *Mesh, long *Nmesh, long *MeshTag,

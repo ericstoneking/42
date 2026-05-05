@@ -915,6 +915,116 @@ long OCProjectRayOntoMesh(double Point[3],double DirVec[3],
       return(FoundPoly);
 }
 /*********************************************************************/
+void FinalizeMesh(struct MeshType *M, long EdgesEnabled)
+{
+      long i,j,Ip,Iv,Ie,Ivtx,Ipoly;
+      long V1,V2;
+      long BeenHereOnce;
+      double r[3],magr;
+      double V[3];
+      struct PolyType *P;
+      void *Ptr;
+
+      /* Find Bounding Box */
+      for(j=0;j<3;j++) {
+         M->BBox.max[j] = M->V[0][j];
+         M->BBox.min[j] = M->V[0][j];
+      }
+      for(i=1;i<M->Nv;i++) {
+         for(j=0;j<3;j++) {
+            if (M->V[i][j] < M->BBox.min[j]) M->BBox.min[j] = M->V[i][j];
+            if (M->V[i][j] > M->BBox.max[j]) M->BBox.max[j] = M->V[i][j];
+         }
+      }
+      /* Expand BBox slightly to make sure all Vtx's are inside it */
+      for(j=0;j<3;j++) {
+         M->BBox.max[j] += 0.01;
+         M->BBox.min[j] -= 0.01;
+      }
+      for(j=0;j<3;j++) {
+         M->BBox.center[j] = 0.5*(M->BBox.min[j]+M->BBox.max[j]);
+      }
+      for(j=0;j<3;j++) {
+         r[j] = M->V[0][j]-M->BBox.center[j];
+      }
+      M->BBox.radius = MAGV(r);
+      for(i=1;i<M->Nv;i++) {
+         for(j=0;j<3;j++) {
+            r[j] = M->V[i][j]-M->BBox.center[j];
+         }
+         if (MAGV(r) > M->BBox.radius) M->BBox.radius = MAGV(r);
+      }
+
+      for(i=0;i<M->Nvn;i++) UNITV(M->Vn[i]);
+
+      if (EdgesEnabled) {
+         /* Build Edge Tables */
+         M->Nedge = 0;
+         for(Ip=0;Ip<M->Npoly;Ip++) {
+            P = &M->Poly[Ip];
+            P->E = (long *) calloc(P->Nv,sizeof(long));
+            for(Iv=0;Iv<P->Nv;Iv++) {
+               V1 = P->V[Iv];
+               V2 = P->V[(Iv+1)%P->Nv];
+               BeenHereOnce = 0;
+               for(Ie=0;Ie<M->Nedge;Ie++) {
+                  if (M->Edge[Ie].Vtx1 == V2) {
+                     if (M->Edge[Ie].Vtx2 == V1) {
+                        BeenHereOnce = 1;
+                        M->Edge[Ie].Poly2 = Ip;
+                        P->E[Iv] = Ie;
+                        break;
+                     }
+                  }
+               }
+               if (!BeenHereOnce) {
+                  M->Nedge++;
+                  if (M->Nedge == 1) {
+                     Ptr = calloc(1,sizeof(struct EdgeType));
+                     if (Ptr == NULL) {
+                        printf("Realloc failed in FinalizeMesh\n");
+                        exit(1);
+                     }
+                  }
+                  else {
+                     Ptr = realloc(M->Edge,M->Nedge*sizeof(struct EdgeType));
+                     if (Ptr == NULL) {
+                        printf("Realloc failed in FinalizeMesh\n");
+                        exit(1);
+                     }
+                  }
+                  M->Edge = (struct EdgeType *) Ptr;
+                  M->Edge[M->Nedge-1].Vtx1 = V1;
+                  M->Edge[M->Nedge-1].Vtx2 = V2;
+                  M->Edge[M->Nedge-1].Poly1 = Ip;
+                  M->Edge[M->Nedge-1].Poly2 = -1;
+                  for(i=0;i<3;i++) V[i] = M->V[V1][i] - M->V[V2][i];
+                  M->Edge[M->Nedge-1].Length = MAGV(V);
+                  P->E[Iv] = M->Nedge-1;
+               }
+            }
+         }
+      }
+
+      /* Find Normals, Areas, Centroids for use in surface force models */
+      SurfaceForceProps(M);
+
+      /* For polyhedron gravity */
+      if (EdgesEnabled) EdgeAndPolyDyads(M);
+
+      /* Find radius of bounding sphere for each poly */
+      for(Ipoly=0;Ipoly<M->Npoly;Ipoly++) {
+         P = &M->Poly[Ipoly];
+         P->radius = 0.0;
+         for(Iv=0;Iv<P->Nv;Iv++) {
+            Ivtx = P->V[Iv];
+            for(i=0;i<3;i++) r[i] = M->V[Ivtx][i] - P->Centroid[i];
+            magr = MAGV(r);
+            if (magr > P->radius) P->radius = magr;
+         }
+      }
+}
+/*********************************************************************/
 struct MeshType *LoadWingsObjFile(const char *ModelPath,const char *ObjFilename,
                        struct MatlType **MatlPtr, long *Nmatl,
                        struct MeshType *Mesh, long *Nmesh, long *MeshTag,
@@ -925,17 +1035,12 @@ struct MeshType *LoadWingsObjFile(const char *ModelPath,const char *ObjFilename,
       FILE *TmpFile;
       char *txtptr;
       double V[3];
-      double r[3],magr;
-      long V1,V2;
-      long Ng,Ig,Iv,Im;
+      long Ng,Ig,Im;
       long I,It,In,i,j,MatlIdx;
       long Ivtx,Ivt,Ivn,Ipoly;
-      long Ip,Ie;
       struct MeshType *M;
       struct PolyType *P;
-      void *Ptr;
       struct MatlType *Matl;
-      long BeenHereOnce;
       long NoArraySizesFound;
       double Value,Scale = 1.0;
       double Val1,Val2,Val3;
@@ -1201,104 +1306,7 @@ struct MeshType *LoadWingsObjFile(const char *ModelPath,const char *ObjFilename,
       }
       fclose(infile);
 
-      /* Find Bounding Box */
-      for(j=0;j<3;j++) {
-         M->BBox.max[j] = M->V[0][j];
-         M->BBox.min[j] = M->V[0][j];
-      }
-      for(i=1;i<M->Nv;i++) {
-         for(j=0;j<3;j++) {
-            if (M->V[i][j] < M->BBox.min[j]) M->BBox.min[j] = M->V[i][j];
-            if (M->V[i][j] > M->BBox.max[j]) M->BBox.max[j] = M->V[i][j];
-         }
-      }
-      /* Expand BBox slightly to make sure all Vtx's are inside it */
-      for(j=0;j<3;j++) {
-         M->BBox.max[j] += 0.01;
-         M->BBox.min[j] -= 0.01;
-      }
-      for(j=0;j<3;j++) {
-         M->BBox.center[j] = 0.5*(M->BBox.min[j]+M->BBox.max[j]);
-      }
-      for(j=0;j<3;j++) {
-         r[j] = M->V[0][j]-M->BBox.center[j];
-      }
-      M->BBox.radius = MAGV(r);
-      for(i=1;i<M->Nv;i++) {
-         for(j=0;j<3;j++) {
-            r[j] = M->V[i][j]-M->BBox.center[j];
-         }
-         if (MAGV(r) > M->BBox.radius) M->BBox.radius = MAGV(r);
-      }
-
-      for(i=0;i<M->Nvn;i++) UNITV(M->Vn[i]);
-
-      if (EdgesEnabled) {
-         /* Build Edge Tables */
-         M->Nedge = 0;
-         for(Ip=0;Ip<M->Npoly;Ip++) {
-            P = &M->Poly[Ip];
-            P->E = (long *) calloc(P->Nv,sizeof(long));
-            for(Iv=0;Iv<P->Nv;Iv++) {
-               V1 = P->V[Iv];
-               V2 = P->V[(Iv+1)%P->Nv];
-               BeenHereOnce = 0;
-               for(Ie=0;Ie<M->Nedge;Ie++) {
-                  if (M->Edge[Ie].Vtx1 == V2) {
-                     if (M->Edge[Ie].Vtx2 == V1) {
-                        BeenHereOnce = 1;
-                        M->Edge[Ie].Poly2 = Ip;
-                        P->E[Iv] = Ie;
-                        break;
-                     }
-                  }
-               }
-               if (!BeenHereOnce) {
-                  M->Nedge++;
-                  if (M->Nedge == 1) {
-                     Ptr = calloc(1,sizeof(struct EdgeType));
-                     if (Ptr == NULL) {
-                        printf("Realloc failed in LoadWingsObjFile\n");
-                        exit(1);
-                     }
-                  }
-                  else {
-                     Ptr = realloc(M->Edge,M->Nedge*sizeof(struct EdgeType));
-                     if (Ptr == NULL) {
-                        printf("Realloc failed in LoadWingsObjFile\n");
-                        exit(1);
-                     }
-                  }
-                  M->Edge = (struct EdgeType *) Ptr;
-                  M->Edge[M->Nedge-1].Vtx1 = V1;
-                  M->Edge[M->Nedge-1].Vtx2 = V2;
-                  M->Edge[M->Nedge-1].Poly1 = Ip;
-                  M->Edge[M->Nedge-1].Poly2 = -1;
-                  for(i=0;i<3;i++) V[i] = M->V[V1][i] - M->V[V2][i];
-                  M->Edge[M->Nedge-1].Length = MAGV(V);
-                  P->E[Iv] = M->Nedge-1;
-               }
-            }
-         }
-      }
-
-      /* Find Normals, Areas, Centroids for use in surface force models */
-      SurfaceForceProps(M);
-      
-      /* For polyhedron gravity */
-      if (EdgesEnabled) EdgeAndPolyDyads(M);
-
-      /* Find radius of bounding sphere for each poly */
-      for(Ipoly=0;Ipoly<M->Npoly;Ipoly++) {
-         P = &M->Poly[Ipoly];
-         P->radius = 0.0;
-         for(Iv=0;Iv<P->Nv;Iv++) {
-            Ivtx = P->V[Iv];
-            for(i=0;i<3;i++) r[i] = M->V[Ivtx][i] - P->Centroid[i];
-            magr = MAGV(r);
-            if (magr > P->radius) P->radius = magr;
-         }
-      }
+      FinalizeMesh(M, EdgesEnabled);
 
       *Nmesh = Ng;
       *MeshTag = Ng-1;
