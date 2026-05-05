@@ -14,6 +14,9 @@
 
 #include "meshkit.h"
 
+#define CGLTF_IMPLEMENTATION
+#include "cgltf.h"
+
 /* #ifdef __cplusplus
 ** namespace Kit {
 ** #endif
@@ -915,6 +918,611 @@ long OCProjectRayOntoMesh(double Point[3],double DirVec[3],
       return(FoundPoly);
 }
 /*********************************************************************/
+void FinalizeMesh(struct MeshType *M, long EdgesEnabled)
+{
+      long i,j,Ip,Iv,Ie,Ivtx,Ipoly;
+      long V1,V2;
+      long BeenHereOnce;
+      double r[3],magr;
+      double V[3];
+      struct PolyType *P;
+      void *Ptr;
+
+      /* Find Bounding Box */
+      for(j=0;j<3;j++) {
+         M->BBox.max[j] = M->V[0][j];
+         M->BBox.min[j] = M->V[0][j];
+      }
+      for(i=1;i<M->Nv;i++) {
+         for(j=0;j<3;j++) {
+            if (M->V[i][j] < M->BBox.min[j]) M->BBox.min[j] = M->V[i][j];
+            if (M->V[i][j] > M->BBox.max[j]) M->BBox.max[j] = M->V[i][j];
+         }
+      }
+      /* Expand BBox slightly to make sure all Vtx's are inside it */
+      for(j=0;j<3;j++) {
+         M->BBox.max[j] += 0.01;
+         M->BBox.min[j] -= 0.01;
+      }
+      for(j=0;j<3;j++) {
+         M->BBox.center[j] = 0.5*(M->BBox.min[j]+M->BBox.max[j]);
+      }
+      for(j=0;j<3;j++) {
+         r[j] = M->V[0][j]-M->BBox.center[j];
+      }
+      M->BBox.radius = MAGV(r);
+      for(i=1;i<M->Nv;i++) {
+         for(j=0;j<3;j++) {
+            r[j] = M->V[i][j]-M->BBox.center[j];
+         }
+         if (MAGV(r) > M->BBox.radius) M->BBox.radius = MAGV(r);
+      }
+
+      for(i=0;i<M->Nvn;i++) UNITV(M->Vn[i]);
+
+      if (EdgesEnabled) {
+         /* Build Edge Tables */
+         M->Nedge = 0;
+         for(Ip=0;Ip<M->Npoly;Ip++) {
+            P = &M->Poly[Ip];
+            P->E = (long *) calloc(P->Nv,sizeof(long));
+            for(Iv=0;Iv<P->Nv;Iv++) {
+               V1 = P->V[Iv];
+               V2 = P->V[(Iv+1)%P->Nv];
+               BeenHereOnce = 0;
+               for(Ie=0;Ie<M->Nedge;Ie++) {
+                  if (M->Edge[Ie].Vtx1 == V2) {
+                     if (M->Edge[Ie].Vtx2 == V1) {
+                        BeenHereOnce = 1;
+                        M->Edge[Ie].Poly2 = Ip;
+                        P->E[Iv] = Ie;
+                        break;
+                     }
+                  }
+               }
+               if (!BeenHereOnce) {
+                  M->Nedge++;
+                  if (M->Nedge == 1) {
+                     Ptr = calloc(1,sizeof(struct EdgeType));
+                     if (Ptr == NULL) {
+                        printf("Realloc failed in FinalizeMesh\n");
+                        exit(1);
+                     }
+                  }
+                  else {
+                     Ptr = realloc(M->Edge,M->Nedge*sizeof(struct EdgeType));
+                     if (Ptr == NULL) {
+                        printf("Realloc failed in FinalizeMesh\n");
+                        exit(1);
+                     }
+                  }
+                  M->Edge = (struct EdgeType *) Ptr;
+                  M->Edge[M->Nedge-1].Vtx1 = V1;
+                  M->Edge[M->Nedge-1].Vtx2 = V2;
+                  M->Edge[M->Nedge-1].Poly1 = Ip;
+                  M->Edge[M->Nedge-1].Poly2 = -1;
+                  for(i=0;i<3;i++) V[i] = M->V[V1][i] - M->V[V2][i];
+                  M->Edge[M->Nedge-1].Length = MAGV(V);
+                  P->E[Iv] = M->Nedge-1;
+               }
+            }
+         }
+      }
+
+      /* Find Normals, Areas, Centroids for use in surface force models */
+      SurfaceForceProps(M);
+
+      /* For polyhedron gravity */
+      if (EdgesEnabled) EdgeAndPolyDyads(M);
+
+      /* Find radius of bounding sphere for each poly */
+      for(Ipoly=0;Ipoly<M->Npoly;Ipoly++) {
+         P = &M->Poly[Ipoly];
+         P->radius = 0.0;
+         for(Iv=0;Iv<P->Nv;Iv++) {
+            Ivtx = P->V[Iv];
+            for(i=0;i<3;i++) r[i] = M->V[Ivtx][i] - P->Centroid[i];
+            magr = MAGV(r);
+            if (magr > P->radius) P->radius = magr;
+         }
+      }
+}
+/*********************************************************************/
+static void TransformPoint(const float *m, const float *in, float *out)
+{
+      out[0] = m[0]*in[0] + m[4]*in[1] + m[8]*in[2]  + m[12];
+      out[1] = m[1]*in[0] + m[5]*in[1] + m[9]*in[2]  + m[13];
+      out[2] = m[2]*in[0] + m[6]*in[1] + m[10]*in[2] + m[14];
+}
+/*********************************************************************/
+static void TransformNormal(const float *m, const float *in, float *out)
+{
+      out[0] = m[0]*in[0] + m[4]*in[1] + m[8]*in[2];
+      out[1] = m[1]*in[0] + m[5]*in[1] + m[9]*in[2];
+      out[2] = m[2]*in[0] + m[6]*in[1] + m[10]*in[2];
+}
+/*********************************************************************/
+static cgltf_accessor *FindAttribute(cgltf_primitive *prim,
+   cgltf_attribute_type type)
+{
+      cgltf_size k;
+      for (k = 0; k < prim->attributes_count; k++) {
+         if (prim->attributes[k].type == type)
+            return(prim->attributes[k].data);
+      }
+      return(NULL);
+}
+/*********************************************************************/
+static void UriToPpm(const char *uri, char *dst, long dstlen)
+{
+      const char *dot;
+      long baselen;
+
+      dot = strrchr(uri, '.');
+      if (dot != NULL) {
+         baselen = (long)(dot - uri);
+         if (baselen + 4 >= dstlen) baselen = dstlen - 5;
+         strncpy(dst, uri, baselen);
+         strcpy(dst + baselen, ".ppm");
+      }
+      else {
+         strncpy(dst, uri, dstlen - 1);
+         dst[dstlen - 1] = 0;
+      }
+}
+/*********************************************************************/
+static long MapGltfMaterial(cgltf_material *gmat,
+   struct MatlType **MatlPtr, long *Nmatl)
+{
+      struct MatlType *Matl;
+      long idx, i;
+      float kd[4], ks[4], ke[4];
+      float metallic, roughness, ns;
+      cgltf_pbr_metallic_roughness *pbr;
+
+      Matl = *MatlPtr;
+
+      /* Check if this material was already mapped (by label) */
+      if (gmat->name != NULL) {
+         for (idx = 0; idx < *Nmatl; idx++) {
+            if (!strcmp(gmat->name, Matl[idx].Label))
+               return(idx);
+         }
+      }
+
+      /* Add new material */
+      idx = *Nmatl;
+      (*Nmatl)++;
+      Matl = (struct MatlType *) realloc(Matl, (*Nmatl) * sizeof(struct MatlType));
+      *MatlPtr = Matl;
+      memset(&Matl[idx], 0, sizeof(struct MatlType));
+
+      if (gmat->name != NULL) {
+         strncpy(Matl[idx].Label, gmat->name, 39);
+         Matl[idx].Label[39] = 0;
+      }
+      else {
+         sprintf(Matl[idx].Label, "gltf_mat_%ld", idx);
+      }
+
+      /* Default diffuse white */
+      for (i = 0; i < 4; i++) kd[i] = 1.0f;
+      for (i = 0; i < 4; i++) ks[i] = 0.0f;
+      for (i = 0; i < 4; i++) ke[i] = 0.0f;
+      metallic = 0.0f;
+      roughness = 1.0f;
+
+      if (gmat->has_pbr_metallic_roughness) {
+         pbr = &gmat->pbr_metallic_roughness;
+         for (i = 0; i < 4; i++) kd[i] = pbr->base_color_factor[i];
+         metallic = pbr->metallic_factor;
+         roughness = pbr->roughness_factor;
+
+         /* Color texture */
+         if (pbr->base_color_texture.texture != NULL &&
+             pbr->base_color_texture.texture->image != NULL &&
+             pbr->base_color_texture.texture->image->uri != NULL) {
+            UriToPpm(pbr->base_color_texture.texture->image->uri,
+               Matl[idx].ColorTexFileName, 40);
+         }
+         else {
+            strcpy(Matl[idx].ColorTexFileName, "NONE");
+         }
+      }
+      else {
+         strcpy(Matl[idx].ColorTexFileName, "NONE");
+      }
+
+      /* Normal (bump) texture */
+      if (gmat->normal_texture.texture != NULL &&
+          gmat->normal_texture.texture->image != NULL &&
+          gmat->normal_texture.texture->image->uri != NULL) {
+         UriToPpm(gmat->normal_texture.texture->image->uri,
+            Matl[idx].BumpTexFileName, 40);
+      }
+      else {
+         strcpy(Matl[idx].BumpTexFileName, "NONE");
+      }
+
+      /* Emissive */
+      for (i = 0; i < 3; i++) ke[i] = gmat->emissive_factor[i];
+      ke[3] = 1.0f;
+
+      /* PBR -> Phong approximation */
+      ns = (1.0f - roughness) * 128.0f;
+      if (ns < 1.0f) ns = 1.0f;
+
+      for (i = 0; i < 4; i++) Matl[idx].Kd[i] = kd[i];
+      for (i = 0; i < 4; i++) Matl[idx].Ka[i] = 0.2f * kd[i];
+      Matl[idx].Ka[3] = kd[3];
+      for (i = 0; i < 3; i++) ks[i] = metallic;
+      ks[3] = 1.0f;
+      for (i = 0; i < 4; i++) Matl[idx].Ks[i] = ks[i];
+      for (i = 0; i < 4; i++) Matl[idx].Ke[i] = ke[i];
+      Matl[idx].Ns = ns;
+      Matl[idx].Refl = metallic * (1.0f - roughness);
+
+      /* Spectrum defaults */
+      strcpy(Matl[idx].SpectrumName, "NONE");
+
+      /* Solar pressure defaults */
+      Matl[idx].SpecFrac = (double)metallic;
+      Matl[idx].DiffFrac = 1.0 - Matl[idx].SpecFrac;
+      if (Matl[idx].SpecFrac + Matl[idx].DiffFrac > 1.0) {
+         Matl[idx].DiffFrac = 1.0 - Matl[idx].SpecFrac;
+      }
+
+      return(idx);
+}
+/*********************************************************************/
+static struct MeshType *LoadGltfFile(const char *ModelPath,
+   const char *GltfFilename,
+   struct MatlType **MatlPtr, long *Nmatl,
+   struct MeshType *Mesh, long *Nmesh, long *MeshTag,
+   long EdgesEnabled)
+{
+      long Ng, Ig;
+      struct MeshType *M;
+      cgltf_options options;
+      cgltf_data *data = NULL;
+      cgltf_result result;
+      char filepath[512];
+      cgltf_size in, ip;
+      long TotalVtx, TotalNorm, TotalTex, TotalTri;
+      long Ivtx, Ivn, Ivt, Ipoly;
+      cgltf_accessor *pos_acc, *norm_acc, *tex_acc;
+      float worldmat[16];
+      long VtxOffset, NormOffset, TexOffset;
+      long MatlIdx;
+
+      Ng = *Nmesh;
+
+      /* Check for prior definition */
+      for (Ig = 0; Ig < Ng; Ig++) {
+         if (!strcmp(GltfFilename, Mesh[Ig].ObjFileName)) {
+            *MeshTag = Ig;
+            return(Mesh);
+         }
+      }
+
+      /* Add to list */
+      Ng++;
+      Mesh = (struct MeshType *) realloc(Mesh, Ng * sizeof(struct MeshType));
+      M = &Mesh[Ng - 1];
+      memset(M, 0, sizeof(struct MeshType));
+
+      strncpy(M->ObjFileName, GltfFilename, 39);
+      M->ObjFileName[39] = 0;
+
+      /* Allow a Null Mesh entry */
+      if (!strcmp(M->ObjFileName, "NONE")) {
+         *Nmesh = Ng;
+         *MeshTag = Ng - 1;
+         return(Mesh);
+      }
+
+      M->Matl = (long *) calloc(2, sizeof(long));
+      if (M->Matl == NULL) {
+         printf("M->Matl calloc returned null pointer.  Bailing out!\n");
+         exit(1);
+      }
+
+      /* Build full path */
+      sprintf(filepath, "%s%s", ModelPath, GltfFilename);
+      printf("glTF: Loading %s\n", filepath);
+
+      /* Parse glTF file */
+      memset(&options, 0, sizeof(options));
+      result = cgltf_parse_file(&options, filepath, &data);
+      if (result != cgltf_result_success) {
+         printf("cgltf_parse_file failed for %s (error %d)\n",
+            filepath, (int)result);
+         *Nmesh = Ng;
+         *MeshTag = Ng - 1;
+         return(Mesh);
+      }
+
+      result = cgltf_load_buffers(&options, data, filepath);
+      if (result != cgltf_result_success) {
+         printf("cgltf_load_buffers failed for %s (error %d)\n",
+            filepath, (int)result);
+         cgltf_free(data);
+         *Nmesh = Ng;
+         *MeshTag = Ng - 1;
+         return(Mesh);
+      }
+
+      /* First pass: count vertices, normals, texcoords, triangles */
+      TotalVtx = 0;
+      TotalNorm = 0;
+      TotalTex = 0;
+      TotalTri = 0;
+
+      for (in = 0; in < data->nodes_count; in++) {
+         cgltf_node *node = &data->nodes[in];
+         if (node->mesh == NULL) continue;
+         for (ip = 0; ip < node->mesh->primitives_count; ip++) {
+            cgltf_primitive *prim = &node->mesh->primitives[ip];
+            if (prim->type != cgltf_primitive_type_triangles) {
+               printf("Warning: glTF primitive type %d not supported, "
+                  "skipping (file %s)\n", (int)prim->type, GltfFilename);
+               continue;
+            }
+
+            pos_acc = FindAttribute(prim, cgltf_attribute_type_position);
+            norm_acc = FindAttribute(prim, cgltf_attribute_type_normal);
+            tex_acc = FindAttribute(prim, cgltf_attribute_type_texcoord);
+
+            if (pos_acc != NULL) TotalVtx += (long)pos_acc->count;
+            if (norm_acc != NULL) TotalNorm += (long)norm_acc->count;
+            if (tex_acc != NULL) TotalTex += (long)tex_acc->count;
+
+            if (prim->indices != NULL) {
+               TotalTri += (long)(prim->indices->count / 3);
+            }
+            else if (pos_acc != NULL) {
+               TotalTri += (long)(pos_acc->count / 3);
+            }
+         }
+      }
+
+      printf("glTF: Counted %ld vertices, %ld normals, %ld texcoords, %ld triangles\n",
+         TotalVtx, TotalNorm, TotalTex, TotalTri);
+
+      if (TotalVtx == 0) {
+         printf("Warning: No triangle vertices found in %s\n", GltfFilename);
+         cgltf_free(data);
+         *Nmesh = Ng;
+         *MeshTag = Ng - 1;
+         return(Mesh);
+      }
+
+      /* Allocate arrays */
+      M->Nv = TotalVtx;
+      M->Nvn = TotalNorm;
+      M->Nvt = TotalTex;
+      M->Npoly = TotalTri;
+      M->Nedge = 0;
+
+      M->V = CreateMatrix(M->Nv, 3);
+      if (M->Nvt > 0) M->Vt = CreateMatrix(M->Nvt, 2);
+      if (M->Nvn > 0) M->Vn = CreateMatrix(M->Nvn, 3);
+      M->Poly = (struct PolyType *) calloc(M->Npoly, sizeof(struct PolyType));
+      if (M->Poly == NULL) {
+         printf("M->Poly calloc returned null pointer.  Bailing out!\n");
+         exit(1);
+      }
+
+      /* Second pass: extract data */
+      Ivtx = 0;
+      Ivn = 0;
+      Ivt = 0;
+      Ipoly = 0;
+
+      for (in = 0; in < data->nodes_count; in++) {
+         cgltf_node *node = &data->nodes[in];
+         if (node->mesh == NULL) continue;
+
+         cgltf_node_transform_world(node, worldmat);
+
+         for (ip = 0; ip < node->mesh->primitives_count; ip++) {
+            cgltf_primitive *prim = &node->mesh->primitives[ip];
+            if (prim->type != cgltf_primitive_type_triangles) continue;
+
+            pos_acc = FindAttribute(prim, cgltf_attribute_type_position);
+            norm_acc = FindAttribute(prim, cgltf_attribute_type_normal);
+            tex_acc = FindAttribute(prim, cgltf_attribute_type_texcoord);
+
+            VtxOffset = Ivtx;
+            NormOffset = Ivn;
+            TexOffset = Ivt;
+
+            /* Extract positions */
+            if (pos_acc != NULL) {
+               float *posbuf;
+               long v;
+
+               posbuf = (float *)malloc(pos_acc->count * 3 * sizeof(float));
+               cgltf_accessor_unpack_floats(pos_acc, posbuf, pos_acc->count * 3);
+               for (v = 0; v < (long)pos_acc->count; v++) {
+                  float xf[3];
+                  TransformPoint(worldmat, &posbuf[v * 3], xf);
+                  M->V[Ivtx][0] = (double)xf[0];
+                  M->V[Ivtx][1] = (double)xf[1];
+                  M->V[Ivtx][2] = (double)xf[2];
+                  Ivtx++;
+               }
+               free(posbuf);
+            }
+
+            /* Extract normals */
+            if (norm_acc != NULL) {
+               float *normbuf;
+               cgltf_size count;
+               long v;
+
+               count = norm_acc->count;
+               normbuf = (float *)malloc(count * 3 * sizeof(float));
+               cgltf_accessor_unpack_floats(norm_acc, normbuf, count * 3);
+               for (v = 0; v < (long)count; v++) {
+                  float xf[3];
+                  TransformNormal(worldmat, &normbuf[v * 3], xf);
+                  M->Vn[Ivn][0] = (double)xf[0];
+                  M->Vn[Ivn][1] = (double)xf[1];
+                  M->Vn[Ivn][2] = (double)xf[2];
+                  Ivn++;
+               }
+               free(normbuf);
+            }
+
+            /* Extract texcoords */
+            if (tex_acc != NULL) {
+               float *texbuf;
+               cgltf_size count;
+               long v;
+
+               count = tex_acc->count;
+               texbuf = (float *)malloc(count * 2 * sizeof(float));
+               cgltf_accessor_unpack_floats(tex_acc, texbuf, count * 2);
+               for (v = 0; v < (long)count; v++) {
+                  M->Vt[Ivt][0] = (double)texbuf[v * 2];
+                  M->Vt[Ivt][1] = (double)texbuf[v * 2 + 1];
+                  Ivt++;
+               }
+               free(texbuf);
+            }
+
+            /* Map material */
+            MatlIdx = 0;
+            if (prim->material != NULL) {
+               MatlIdx = MapGltfMaterial(prim->material, MatlPtr, Nmatl);
+               /* Track materials used by this mesh */
+               {
+                  long Im, FirstUse = 1;
+                  for (Im = 0; Im < M->Nmatl; Im++) {
+                     if (MatlIdx == M->Matl[Im]) FirstUse = 0;
+                  }
+                  if (FirstUse) {
+                     M->Nmatl++;
+                     if (M->Nmatl > 2)
+                        M->Matl = (long *) realloc(M->Matl, M->Nmatl * sizeof(long));
+                     M->Matl[M->Nmatl - 1] = MatlIdx;
+                  }
+               }
+            }
+
+            /* Build triangles */
+            if (prim->indices != NULL) {
+               long tri, ntri;
+               ntri = (long)(prim->indices->count / 3);
+               for (tri = 0; tri < ntri; tri++) {
+                  struct PolyType *P = &M->Poly[Ipoly];
+                  long i0, i1, i2;
+
+                  i0 = (long)cgltf_accessor_read_index(prim->indices, tri * 3);
+                  i1 = (long)cgltf_accessor_read_index(prim->indices, tri * 3 + 1);
+                  i2 = (long)cgltf_accessor_read_index(prim->indices, tri * 3 + 2);
+
+                  P->Nv = 3;
+                  P->Matl = MatlIdx;
+                  P->ContactPoly = 0;
+                  P->V = (long *) calloc(3, sizeof(long));
+                  P->Vt = (long *) calloc(3, sizeof(long));
+                  P->Vn = (long *) calloc(3, sizeof(long));
+
+                  P->V[0] = VtxOffset + i0;
+                  P->V[1] = VtxOffset + i1;
+                  P->V[2] = VtxOffset + i2;
+
+                  if (norm_acc != NULL) {
+                     P->Vn[0] = NormOffset + i0;
+                     P->Vn[1] = NormOffset + i1;
+                     P->Vn[2] = NormOffset + i2;
+                     P->HasNorm = 1;
+                  }
+
+                  if (tex_acc != NULL) {
+                     P->Vt[0] = TexOffset + i0;
+                     P->Vt[1] = TexOffset + i1;
+                     P->Vt[2] = TexOffset + i2;
+                     P->HasTex = 1;
+                  }
+
+                  if (PolyIsDegenerate(P, M->V)) {
+                     free(P->V);
+                     free(P->Vt);
+                     free(P->Vn);
+                     M->Npoly--;
+                  }
+                  else {
+                     Ipoly++;
+                  }
+               }
+            }
+            else if (pos_acc != NULL) {
+               /* Non-indexed: every 3 vertices form a triangle */
+               long tri, ntri;
+               ntri = (long)(pos_acc->count / 3);
+               for (tri = 0; tri < ntri; tri++) {
+                  struct PolyType *P = &M->Poly[Ipoly];
+
+                  P->Nv = 3;
+                  P->Matl = MatlIdx;
+                  P->ContactPoly = 0;
+                  P->V = (long *) calloc(3, sizeof(long));
+                  P->Vt = (long *) calloc(3, sizeof(long));
+                  P->Vn = (long *) calloc(3, sizeof(long));
+
+                  P->V[0] = VtxOffset + tri * 3;
+                  P->V[1] = VtxOffset + tri * 3 + 1;
+                  P->V[2] = VtxOffset + tri * 3 + 2;
+
+                  if (norm_acc != NULL) {
+                     P->Vn[0] = NormOffset + tri * 3;
+                     P->Vn[1] = NormOffset + tri * 3 + 1;
+                     P->Vn[2] = NormOffset + tri * 3 + 2;
+                     P->HasNorm = 1;
+                  }
+
+                  if (tex_acc != NULL) {
+                     P->Vt[0] = TexOffset + tri * 3;
+                     P->Vt[1] = TexOffset + tri * 3 + 1;
+                     P->Vt[2] = TexOffset + tri * 3 + 2;
+                     P->HasTex = 1;
+                  }
+
+                  if (PolyIsDegenerate(P, M->V)) {
+                     free(P->V);
+                     free(P->Vt);
+                     free(P->Vn);
+                     M->Npoly--;
+                  }
+                  else {
+                     Ipoly++;
+                  }
+               }
+            }
+         }
+      }
+
+      printf("glTF: Extracted %ld vertices, %ld normals, %ld texcoords, %ld polys\n",
+         Ivtx, Ivn, Ivt, Ipoly);
+      printf("glTF: M->Nv=%ld M->Nvn=%ld M->Nvt=%ld M->Npoly=%ld\n",
+         M->Nv, M->Nvn, M->Nvt, M->Npoly);
+      fflush(stdout);
+
+      FinalizeMesh(M, EdgesEnabled);
+
+      printf("glTF: FinalizeMesh complete\n");
+      fflush(stdout);
+
+      cgltf_free(data);
+
+      *Nmesh = Ng;
+      *MeshTag = Ng - 1;
+      return(Mesh);
+}
+/*********************************************************************/
 struct MeshType *LoadWingsObjFile(const char *ModelPath,const char *ObjFilename,
                        struct MatlType **MatlPtr, long *Nmatl,
                        struct MeshType *Mesh, long *Nmesh, long *MeshTag,
@@ -925,17 +1533,12 @@ struct MeshType *LoadWingsObjFile(const char *ModelPath,const char *ObjFilename,
       FILE *TmpFile;
       char *txtptr;
       double V[3];
-      double r[3],magr;
-      long V1,V2;
-      long Ng,Ig,Iv,Im;
+      long Ng,Ig,Im;
       long I,It,In,i,j,MatlIdx;
       long Ivtx,Ivt,Ivn,Ipoly;
-      long Ip,Ie;
       struct MeshType *M;
       struct PolyType *P;
-      void *Ptr;
       struct MatlType *Matl;
-      long BeenHereOnce;
       long NoArraySizesFound;
       double Value,Scale = 1.0;
       double Val1,Val2,Val3;
@@ -1201,109 +1804,29 @@ struct MeshType *LoadWingsObjFile(const char *ModelPath,const char *ObjFilename,
       }
       fclose(infile);
 
-      /* Find Bounding Box */
-      for(j=0;j<3;j++) {
-         M->BBox.max[j] = M->V[0][j];
-         M->BBox.min[j] = M->V[0][j];
-      }
-      for(i=1;i<M->Nv;i++) {
-         for(j=0;j<3;j++) {
-            if (M->V[i][j] < M->BBox.min[j]) M->BBox.min[j] = M->V[i][j];
-            if (M->V[i][j] > M->BBox.max[j]) M->BBox.max[j] = M->V[i][j];
-         }
-      }
-      /* Expand BBox slightly to make sure all Vtx's are inside it */
-      for(j=0;j<3;j++) {
-         M->BBox.max[j] += 0.01;
-         M->BBox.min[j] -= 0.01;
-      }
-      for(j=0;j<3;j++) {
-         M->BBox.center[j] = 0.5*(M->BBox.min[j]+M->BBox.max[j]);
-      }
-      for(j=0;j<3;j++) {
-         r[j] = M->V[0][j]-M->BBox.center[j];
-      }
-      M->BBox.radius = MAGV(r);
-      for(i=1;i<M->Nv;i++) {
-         for(j=0;j<3;j++) {
-            r[j] = M->V[i][j]-M->BBox.center[j];
-         }
-         if (MAGV(r) > M->BBox.radius) M->BBox.radius = MAGV(r);
-      }
-
-      for(i=0;i<M->Nvn;i++) UNITV(M->Vn[i]);
-
-      if (EdgesEnabled) {
-         /* Build Edge Tables */
-         M->Nedge = 0;
-         for(Ip=0;Ip<M->Npoly;Ip++) {
-            P = &M->Poly[Ip];
-            P->E = (long *) calloc(P->Nv,sizeof(long));
-            for(Iv=0;Iv<P->Nv;Iv++) {
-               V1 = P->V[Iv];
-               V2 = P->V[(Iv+1)%P->Nv];
-               BeenHereOnce = 0;
-               for(Ie=0;Ie<M->Nedge;Ie++) {
-                  if (M->Edge[Ie].Vtx1 == V2) {
-                     if (M->Edge[Ie].Vtx2 == V1) {
-                        BeenHereOnce = 1;
-                        M->Edge[Ie].Poly2 = Ip;
-                        P->E[Iv] = Ie;
-                        break;
-                     }
-                  }
-               }
-               if (!BeenHereOnce) {
-                  M->Nedge++;
-                  if (M->Nedge == 1) {
-                     Ptr = calloc(1,sizeof(struct EdgeType));
-                     if (Ptr == NULL) {
-                        printf("Realloc failed in LoadWingsObjFile\n");
-                        exit(1);
-                     }
-                  }
-                  else {
-                     Ptr = realloc(M->Edge,M->Nedge*sizeof(struct EdgeType));
-                     if (Ptr == NULL) {
-                        printf("Realloc failed in LoadWingsObjFile\n");
-                        exit(1);
-                     }
-                  }
-                  M->Edge = (struct EdgeType *) Ptr;
-                  M->Edge[M->Nedge-1].Vtx1 = V1;
-                  M->Edge[M->Nedge-1].Vtx2 = V2;
-                  M->Edge[M->Nedge-1].Poly1 = Ip;
-                  M->Edge[M->Nedge-1].Poly2 = -1;
-                  for(i=0;i<3;i++) V[i] = M->V[V1][i] - M->V[V2][i];
-                  M->Edge[M->Nedge-1].Length = MAGV(V);
-                  P->E[Iv] = M->Nedge-1;
-               }
-            }
-         }
-      }
-
-      /* Find Normals, Areas, Centroids for use in surface force models */
-      SurfaceForceProps(M);
-      
-      /* For polyhedron gravity */
-      if (EdgesEnabled) EdgeAndPolyDyads(M);
-
-      /* Find radius of bounding sphere for each poly */
-      for(Ipoly=0;Ipoly<M->Npoly;Ipoly++) {
-         P = &M->Poly[Ipoly];
-         P->radius = 0.0;
-         for(Iv=0;Iv<P->Nv;Iv++) {
-            Ivtx = P->V[Iv];
-            for(i=0;i<3;i++) r[i] = M->V[Ivtx][i] - P->Centroid[i];
-            magr = MAGV(r);
-            if (magr > P->radius) P->radius = magr;
-         }
-      }
+      FinalizeMesh(M, EdgesEnabled);
 
       *Nmesh = Ng;
       *MeshTag = Ng-1;
       return(Mesh);
 #undef D2R
+}
+/*********************************************************************/
+struct MeshType *LoadMeshFile(const char *ModelPath, const char *MeshFilename,
+                       struct MatlType **MatlPtr, long *Nmatl,
+                       struct MeshType *Mesh, long *Nmesh, long *MeshTag,
+                       long EdgesEnabled)
+{
+      const char *ext;
+
+      ext = strrchr(MeshFilename, '.');
+      if (ext != NULL &&
+          (!strcmp(ext, ".gltf") || !strcmp(ext, ".glb"))) {
+         return(LoadGltfFile(ModelPath, MeshFilename,
+            MatlPtr, Nmatl, Mesh, Nmesh, MeshTag, EdgesEnabled));
+      }
+      return(LoadWingsObjFile(ModelPath, MeshFilename,
+         MatlPtr, Nmatl, Mesh, Nmesh, MeshTag, EdgesEnabled));
 }
 /*********************************************************************/
 void WriteMeshToObjFile(struct MatlType *Matl,struct MeshType *Mesh,const char *Path,

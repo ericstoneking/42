@@ -402,7 +402,7 @@ void LoadLinkFile(void)
          L->AtmoNoise = CreateRandomProcess(Seed);
          
          OldNmesh = Nmesh;
-         Mesh = LoadWingsObjFile(ModelPath,L->TxAntFileName,
+         Mesh = LoadMeshFile(ModelPath,L->TxAntFileName,
             &Matl,&Nmatl,Mesh,&Nmesh,&L->TxAntPatt.MeshTag,EdgesEnabled);
          if (OldNmesh != Nmesh) LoadOctree(&Mesh[Nmesh-1]);
          
@@ -423,7 +423,7 @@ void LoadLinkFile(void)
          }
          
          OldNmesh = Nmesh;
-         Mesh = LoadWingsObjFile(ModelPath,L->RxAntFileName,
+         Mesh = LoadMeshFile(ModelPath,L->RxAntFileName,
             &Matl,&Nmatl,Mesh,&Nmesh,&L->RxAntPatt.MeshTag,EdgesEnabled);
          if (OldNmesh != Nmesh) LoadOctree(&Mesh[Nmesh-1]);
 
