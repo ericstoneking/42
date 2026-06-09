@@ -18,9 +18,17 @@ FILE *OpenFile(char *Path, char *File, char *CtrlCode)
 {
       FILE *FilePtr;
       char FileName[80];
+      int Written;
 
-      strcpy(FileName,Path);
-      strcat(FileName,File);
+      /* snprintf instead of strcpy+strcat — see iokit.c::FileOpen for
+         the equivalent fix on the main entry path. Same bug shape:
+         attacker-controlled Path + File would overflow FileName[80]. */
+      Written = snprintf(FileName,sizeof(FileName),"%s%s",Path,File);
+      if(Written < 0 || (size_t)Written >= sizeof(FileName)) {
+         printf("Error: combined path length exceeds %zu bytes: %s%s\n",
+                sizeof(FileName)-1, Path, File);
+         exit(1);
+      }
       FilePtr=fopen(FileName,CtrlCode);
       if(FilePtr == NULL) {
          printf("Error opening %s\n",FileName);
