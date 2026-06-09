@@ -52,20 +52,20 @@ void InitInterProcessComm(void)
       for(Iipc=0;Iipc<Nipc;Iipc++) {
          I = &IPC[Iipc];
          fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-         fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+         fscanf(infile,"%119s %119[^\n] %1[\n]",response,junk,&newline);
          I->Mode = DecodeString(response);
-         fscanf(infile,"\"%[^\"]\" %[^\n] %[\n]",FileName,junk,&newline);
-         fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+         fscanf(infile,"\"%79[^\"]\" %119[^\n] %1[\n]",FileName,junk,&newline);
+         fscanf(infile,"%119s %119[^\n] %1[\n]",response,junk,&newline);
          I->SocketRole = DecodeString(response);
-         fscanf(infile,"%s %ld %[^\n] %[\n]",I->HostName,&I->Port,junk,&newline);
-         fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+         fscanf(infile,"%39s %ld %119[^\n] %1[\n]",I->HostName,&I->Port,junk,&newline);
+         fscanf(infile,"%119s %119[^\n] %1[\n]",response,junk,&newline);
          I->AllowBlocking = DecodeString(response);
-         fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+         fscanf(infile,"%119s %119[^\n] %1[\n]",response,junk,&newline);
          I->EchoEnabled = DecodeString(response);
          fscanf(infile,"%ld %[^\n] %[\n]",&I->Nprefix,junk,&newline);
          I->Prefix = (char **) calloc(I->Nprefix,sizeof(char *));
          for(Ipx=0;Ipx<I->Nprefix;Ipx++) {
-            fscanf(infile,"\"%[^\"]\" %[^\n] %[\n]",Prefix,junk,&newline);
+            fscanf(infile,"\"%79[^\"]\" %119[^\n] %1[\n]",Prefix,junk,&newline);
             I->Prefix[Ipx] = (char *) calloc(strlen(Prefix)+1,sizeof(char));
             strcpy(I->Prefix[Ipx],Prefix);
          }

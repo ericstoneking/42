@@ -24,9 +24,19 @@ FILE *FileOpen(const char *Path, const char *File, const char *CtrlCode)
 {
       FILE *FilePtr;
       char FileName[1024];
+      int Written;
 
-      strcpy(FileName,Path);
-      strcat(FileName,File);
+      /* Use snprintf instead of strcpy+strcat — the previous version
+         could overflow FileName[1024] when Path and File combined to
+         more than 1024 bytes (e.g. a long working directory plus a
+         long config-file name). Truncation is preferred over the
+         silent stack smash that strcpy+strcat caused. */
+      Written = snprintf(FileName,sizeof(FileName),"%s%s",Path,File);
+      if(Written < 0 || (size_t)Written >= sizeof(FileName)) {
+         printf("Error: combined path length exceeds %zu bytes: %s%s\n",
+                sizeof(FileName)-1, Path, File);
+         exit(1);
+      }
       FilePtr=fopen(FileName,CtrlCode);
       if(FilePtr == NULL) {
          printf("Error opening %s: %s\n",FileName, strerror(errno));
