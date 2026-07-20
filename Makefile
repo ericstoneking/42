@@ -417,6 +417,6 @@ else ifeq ($(42PLATFORM),_WIN64)
 	del .\Object\*.o .\$(EXENAME) .\InOut\*.42
 else
 	rm -f $(OBJ)*.o ./$(EXENAME) ./AcApp $(KITDIR)42kit.so 
-	rm -f $(INOUT)*.42 ./Standalone/*.42 ./Demo/*.42 ./Rx/*.42 ./Tx/*.42 ./Rover/*.42
-	rm -f $(INOUT)*.csv ./Standalone/*.csv ./Demo/*.csv ./Rx/*.csv ./Tx/*.csv ./Rover/*.csv
+	rm -f $(INOUT)*.42 ./Standalone/*.42 ./Demo/*.42 ./Rx/*.42 ./Tx/*.42 ./LunarComm/*.42
+	rm -f $(INOUT)*.csv ./Standalone/*.csv ./Demo/*.csv ./Rx/*.csv ./Tx/*.csv ./LunarComm/*.csv
 endif

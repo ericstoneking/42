@@ -46,7 +46,7 @@ struct FormationType {
 /* and for more general purposes (sensor, actuator positions) */
 struct NodeType {
    /*~ Internal Variables ~*/
-   char comment[80]; 
+   char comment[81]; 
    double NomPosB[3];
    double PosCm[3]; /* Pos wrt B's cm, expressed in B */
    double **PSI;  /* Translational Mode shapes, 3 x B.Nf */
@@ -112,9 +112,9 @@ struct BodyType {
    double FrcN[3]; /* expressed in N */
    double alpha[3]; /* Angular acceleration of B wrt N, expressed in B */
    double accel[3]; /* Linear acceleration of B wrt N, expressed in N */
-   char MeshFileName[40];
-   char NodeFileName[40];
-   char FlexFileName[40];
+   char MeshFileName[41];
+   char NodeFileName[41];
+   char FlexFileName[41];
    float ModelMatrix[16]; /* For OpenGL */
    long MeshTag;
    /* For KaneNBody Dynamics */
@@ -276,7 +276,7 @@ struct JointType {
    long Rotc0;
    long Trnc0;
    
-   char ParmFileName[40];
+   char ParmFileName[41];
 };
 
 struct IdealActType {
@@ -314,7 +314,7 @@ struct WhlType {
    long Node;
    struct DelayType *Delay; /* For injecting delay into control loops */
    
-   char DragJitterFileName[40];
+   char DragJitterFileName[41];
 
    /* For Drag */
    double CoulCoef; /* Coulomb friction, Nm */
@@ -612,8 +612,8 @@ struct FgsType {
    double H; 
    double V;
    double Ang[3];
-   char OpticsFileName[40];
-   char PsfFileName[40];
+   char OpticsFileName[41];
+   char PsfFileName[41];
    
    long Nopt;
    struct OpticsType *Opt;
@@ -696,7 +696,7 @@ struct IpcType {
    long Mode; /* OFF, TX, RX, TXRX, WRITEFILE, READFILE */
    long SocketRole; /* SERVER, CLIENT, GMSEC_CLIENT */
    long AcsID;  /* AC.ID for ACS mode */
-   char HostName[40];
+   char HostName[41];
    long Port;
    long AllowBlocking;
    long EchoEnabled;
@@ -721,7 +721,7 @@ struct SCType {
    /*~ Internal Variables ~*/
    long ID;     /* SC[x].ID = x */
    long Exists;
-   char Label[40];
+   char Label[41];
    long DynMethod;  /* GAUSS_ELIM, ORDER_N */
    long OrbDOF;  /* FIXED, EULER_HILL, ENCKE, COWELL */
    long RefOrb;
@@ -766,8 +766,8 @@ struct SCType {
    long Eclipse;
    double AtmoDensity;
    double DragCoef;
-   char FileName[20];
-   char SpriteFileName[40];
+   char FileName[41];
+   char SpriteFileName[41];
    unsigned int SpriteTexTag;
    /* The following are for OSCAR */
    double PosF[3]; /* Position of B0 origin wrt F, expressed in F */
@@ -781,7 +781,7 @@ struct SCType {
    long FlexActive;
    /* Include higher-order coupling terms in rigid-flex dynamics */
    long IncludeSecondOrderFlexTerms;
-   char ShakerFileName[40];
+   char ShakerFileName[41];
    long WhlDragActive;
    long WhlJitterActive;
    /* Workspace for KaneNBody */
@@ -888,8 +888,8 @@ struct RegionType {
    double CN[3][3];
    double wn[3]; /* Expressed in R frame */
    double ElastCoef,DampCoef,FricCoef;
-   char Name[20];
-   char MeshFileName[40];
+   char Name[41];
+   char MeshFileName[41];
    long MeshTag;
    float ModelMatrix[16]; /* For OpenGL */
 };
@@ -936,11 +936,11 @@ struct WorldType {
 
    /* Graphical Properties */
    long HasRing;
-   char Name[20];
-   char MapFileName[40];
-   char MeshFileName[40];
-   char ColTexFileName[40];
-   char BumpTexFileName[40];
+   char Name[41];
+   char MapFileName[41];
+   char MeshFileName[41];
+   char ColTexFileName[41];
+   char BumpTexFileName[41];
    float Color[4];
    unsigned char Glyph[14];
    unsigned int TexTag;
@@ -999,7 +999,7 @@ struct FovType {
    long RefOrb;
    long SC;
    long Body;
-   char Label[40];
+   char Label[41];
    long Nv;
    long BoreAxis; /* X_AXIS, Y_AXIS, Z_AXIS */
    long H_Axis; /* (BoreAxis+1)%3 */
@@ -1021,7 +1021,7 @@ struct TdrsType {
    double VelN[3];  /* Velocity vector in N frame (never used?) */
    double lat;
    double lng;
-   char Designation[40];
+   char Designation[41];
 };
 
 struct GroundStationType {
@@ -1031,7 +1031,7 @@ struct GroundStationType {
    long Show;
    double lng, lat;
    double PosW[3];  /* Position vector in World frame */
-   char Label[40];
+   char Label[41];
 };
 
 /* Framebuffer Objects for Spacecraft Shadows */
@@ -1076,7 +1076,7 @@ struct OrreryPOVType {
 
 struct ConstellationType {
    /*~ Internal Variables ~*/
-   char Tag[4]; 
+   char Tag[5]; 
    long Class;  /* MAJOR, ZODIAC, or MINOR */
    long Nstars;
    long Nlines;
@@ -1149,8 +1149,7 @@ struct CommLinkType {
    double NoiseFloor; /* [[dBw]] */
    
    double TxPower; /* [[dBw]] */
-   char TxAntFileName[80];
-
+   char TxAntFileName[81];
    
    double TxPathDirN[3]; /* Points from Tx to Rx, expressed in Tx's N */
    double RxPathDirN[3]; /* Points from Rx to Tx, expressed in Rx's N */
@@ -1160,7 +1159,7 @@ struct CommLinkType {
    double AtmoPathLoss; /* [[dB]] */
    double PathLoss; /* [[dB]] */
 
-   char RxAntFileName[80];
+   char RxAntFileName[81];
    double RxNoisePower; /* [[dBw]] */
 
    double AtmoMean; /* [[dB]] */

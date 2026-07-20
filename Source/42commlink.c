@@ -344,7 +344,7 @@ void LoadLinkFile(void)
       double ang1,ang2,ang3;
       double dt,r;
       double MaxRad;
-      char response[80],junk[80],newline;
+      char response[81];
       struct CommLinkType *L;
       struct AntPattType *A;
       struct MeshType *M;
@@ -353,18 +353,18 @@ void LoadLinkFile(void)
 
       infile = FileOpen(InOutPath,"Inp_CommLink.txt","r");
       
-      fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-      fscanf(infile,"%ld %[^\n] %[\n]",&Nlink,junk,&newline);
+      ScanLine(infile,"",0,NULL);
+      ScanLine(infile,"%ld",1,&Nlink);
       
       CommLink = (struct CommLinkType *) calloc(Nlink,sizeof(struct CommLinkType));
       for(Il=0;Il<Nlink;Il++) {
          L = &CommLink[Il];
-         fscanf(infile,"%[^\n] %[\n]",junk,&newline);  
-         fscanf(infile,"%[^\n] %[\n]",junk,&newline); 
+         ScanLine(infile,"",0,NULL);  
+         ScanLine(infile,"",0,NULL); 
 
-         fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+         ScanLine(infile,"%80s",1,response);
          L->Exists = DecodeString(response);
-         fscanf(infile,"%s %lf  %[^\n] %[\n]",response,&dt,junk,&newline);
+         ScanLine(infile,"%80s %lf",2,response,&dt);
          L->OutEnabled = DecodeString(response);
          if (dt < DTSIM) {
             printf("Link[%ld] output timestep < DTSIM.  You'll want to fix that.\n",Il);
@@ -372,33 +372,31 @@ void LoadLinkFile(void)
          }
          else L->MaxOutCtr = (long) (dt/DTSIM+0.5);
 
-         fscanf(infile,"%s %lf %[^\n] %[\n]",response,&L->DelayTol,junk,&newline); 
+         ScanLine(infile,"%80s %lf",2,response,&L->DelayTol); 
          L->PosAdjustEnabled = DecodeString(response);
 
-         fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline); 
+         ScanLine(infile,"%80s",1,response); 
          L->LinkType = DecodeString(response);
-         fscanf(infile,"%lf %[^\n] %[\n]",&L->Freq,junk,&newline);
+         ScanLine(infile,"%lf",1,&L->Freq);
          L->Wavelength = SPEED_OF_LIGHT/L->Freq;
-         fscanf(infile,"%lf %[^\n] %[\n]",&L->NoiseFloor,junk,&newline);         
-         fscanf(infile,"%ld %ld %[^\n] %[\n]",&L->TxID,&L->TxBody,junk,&newline);
-         fscanf(infile,"%lf %lf %lf %ld %[^\n] %[\n]",
-            &ang1,&ang2,&ang3,&Seq,junk,&newline);   
+         ScanLine(infile,"%lf",1,&L->NoiseFloor);         
+         ScanLine(infile,"%ld %ld",2,&L->TxID,&L->TxBody);
+         ScanLine(infile,"%lf %lf %lf %ld",4,&ang1,&ang2,&ang3,&Seq);   
          A2C(Seq,ang1*D2R,ang2*D2R,ang3*D2R,L->TxCAB);      
-         fscanf(infile,"%lf %[^\n] %[\n]",&L->TxPower,junk,&newline);
-         fscanf(infile,"%lf %lf %[^\n] %[\n]",&L->TxAntPatt.PeakGain,
-            &L->TxAntPatt.FloorGain,junk,&newline);
-         fscanf(infile,"\"%[^\"]\" %[^\n] %[\n]",L->TxAntFileName,junk,&newline);
-         fscanf(infile,"%ld %ld %[^\n] %[\n]",&L->RxID,&L->RxBody,junk,&newline);
-         fscanf(infile,"%lf %lf %lf %ld %[^\n] %[\n]",
-            &ang1,&ang2,&ang3,&Seq,junk,&newline);   
+         ScanLine(infile,"%lf",1,&L->TxPower);
+         ScanLine(infile,"%lf %lf",2,
+            &L->TxAntPatt.PeakGain,&L->TxAntPatt.FloorGain);
+         ScanLine(infile,"\"%80[^\"]\"",1,L->TxAntFileName);
+         ScanLine(infile,"%ld %ld",2,&L->RxID,&L->RxBody);
+         ScanLine(infile,"%lf %lf %lf %ld",4,&ang1,&ang2,&ang3,&Seq);   
          A2C(Seq,ang1*D2R,ang2*D2R,ang3*D2R,L->RxCAB);
-         fscanf(infile,"%lf %lf %[^\n] %[\n]",&L->RxAntPatt.PeakGain,
-            &L->RxAntPatt.FloorGain,junk,&newline);
-         fscanf(infile,"\"%[^\"]\" %[^\n] %[\n]",L->RxAntFileName,junk,&newline);
-         fscanf(infile,"%lf %[^\n] %[\n]",&L->RxNoisePower,junk,&newline);
-         fscanf(infile,"%lf %[^\n] %[\n]",&L->AtmoMean,junk,&newline);
-         fscanf(infile,"%lf %lf %ld %[^\n] %[\n]",
-            &L->AtmoStd,&L->AtmoCorrTime,&Seed,junk,&newline);
+         ScanLine(infile,"%lf %lf",2,
+            &L->RxAntPatt.PeakGain,&L->RxAntPatt.FloorGain);
+         ScanLine(infile,"\"%80[^\"]\"",1,L->RxAntFileName);
+         ScanLine(infile,"%lf",1,&L->RxNoisePower);
+         ScanLine(infile,"%lf",1,&L->AtmoMean);
+         ScanLine(infile,"%lf %lf %ld",3,
+            &L->AtmoStd,&L->AtmoCorrTime,&Seed);
          L->AtmoNoise = CreateRandomProcess(Seed);
          
          OldNmesh = Nmesh;

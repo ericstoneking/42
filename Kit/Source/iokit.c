@@ -20,19 +20,50 @@
 */
 
 /**********************************************************************/
+#define MAX_FILENAME_LENGTH (1024)
 FILE *FileOpen(const char *Path, const char *File, const char *CtrlCode)
 {
       FILE *FilePtr;
-      char FileName[1024];
+      char FileName[MAX_FILENAME_LENGTH];
+      int len;
 
-      strcpy(FileName,Path);
-      strcat(FileName,File);
+      len = snprintf(FileName,MAX_FILENAME_LENGTH,"%s%s",Path,File);
+      if (len < 0 || len >= MAX_FILENAME_LENGTH) {
+         printf("FileName exceeds %d characters.  You'll want to fix that.\n",
+            MAX_FILENAME_LENGTH);
+         exit(1);
+      }
       FilePtr=fopen(FileName,CtrlCode);
       if(FilePtr == NULL) {
          printf("Error opening %s: %s\n",FileName, strerror(errno));
          exit(1);
       }
       return(FilePtr);
+}
+#undef MAX_FILENAME_LENGTH
+/**********************************************************************/
+long ScanLine(FILE *infile, const char *format, long ExpectedNumItems,...)
+{
+      char line[512];
+      va_list args;
+      long NumItems;
+      
+      if (fgets(line,sizeof(line),infile) == NULL) {
+         printf("Read error in ScanLine.\n");
+         exit(1);
+      }
+      
+      va_start(args,ExpectedNumItems);
+      NumItems = vsscanf(line,format,args);
+      va_end(args);
+      
+      if (NumItems != ExpectedNumItems) {
+         printf("Error in ScanLine: Expected %ld items, found %ld\n",
+            ExpectedNumItems,NumItems);
+         exit(1);
+      }
+      
+      return(NumItems);
 }
 /**********************************************************************/
 void ByteSwapDouble(double *A)

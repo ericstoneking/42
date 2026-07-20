@@ -71,13 +71,13 @@ EXTERN long PauseFlag;
 EXTERN long PausedByMouse;
 EXTERN long MouseDown;
 EXTERN long CamWidth, CamHeight;
-EXTERN char CamTitle[80];
+EXTERN char CamTitle[81];
 EXTERN long CamShow[CAM_MENU_SIZE];
-EXTERN char CamShowLabel[CAM_MENU_SIZE][40];
+EXTERN char CamShowLabel[CAM_MENU_SIZE][41];
 EXTERN long MapWidth, MapHeight;
-EXTERN char MapTitle[80];
+EXTERN char MapTitle[81];
 EXTERN long MapShow[MAP_MENU_SIZE];
-EXTERN char MapShowLabel[MAP_MENU_SIZE][40];
+EXTERN char MapShowLabel[MAP_MENU_SIZE][41];
 EXTERN long ShowHUD;
 EXTERN double MouseScaleFactor;
 EXTERN long CaptureCam, CamFrame;
@@ -105,7 +105,7 @@ EXTERN GLuint FortyTwoWatermarkTexTag;
 
 EXTERN long OrreryWidth;
 EXTERN long OrreryHeight;
-EXTERN char OrreryTitle[40];
+EXTERN char OrreryTitle[41];
 EXTERN struct OrreryPOVType Orrery;
 EXTERN GLuint OrrerySphereList;
 EXTERN GLuint OrreryRingList;
@@ -119,7 +119,7 @@ EXTERN GLuint LogoTexTag;
 EXTERN GLuint SphereSunSpriteTexTag;
 EXTERN GLuint SphereMoonSpriteTexTag;
 
-EXTERN char StarCatFileName[80];
+EXTERN char StarCatFileName[81];
 EXTERN double BuckyPf[32][3];
 EXTERN long BuckyNeighbor[32][6];
 

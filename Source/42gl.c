@@ -5348,8 +5348,7 @@ void LoadMapShaders(void)
 void ReadGraphicsInpFile(void)
 {
       FILE *infile;
-      char junk[120],newline;
-      char response[120];
+      char response[121];
       long i;
       char Frame;
       long Host,Target;
@@ -5357,26 +5356,25 @@ void ReadGraphicsInpFile(void)
 /* .. Initialize POV */
       infile = FileOpen(InOutPath,"Inp_Graphics.txt","r");
 /* .. 42 Graphics Configuration File */
-      fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      ScanLine(infile,"",0,NULL);
 /* .. GL Output Interval */
-      fscanf(infile,"%lf %[^\n] %[\n]",&DTOUTGL,junk,&newline);
-      fscanf(infile,"%s %[^\n] %[\n]",StarCatFileName,junk,&newline);
-      fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+      ScanLine(infile,"%lf",1,&DTOUTGL);
+      ScanLine(infile,"%80s",1,StarCatFileName);
+      ScanLine(infile,"%120s",1,response);
       MapWindowExists = DecodeString(response);
-      fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+      ScanLine(infile,"%120s",1,response);
       OrreryWindowExists = DecodeString(response);
-      fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+      ScanLine(infile,"%120s",1,response);
       SphereWindowExists = DecodeString(response);
 /* .. POV */
-      fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-      fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+      ScanLine(infile,"",0,NULL);
+      ScanLine(infile,"%120s",1,response);
       PauseFlag = DecodeString(response);
-      fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+      ScanLine(infile,"%120s",1,response);
       POV.Mode = DecodeString(response);
-      fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+      ScanLine(infile,"%120s",1,response);
       POV.Host.Type = DecodeString(response);
-      fscanf(infile,"%ld %ld %c %[^\n] %[\n]",
-         &Host,&POV.Host.Body,&Frame,junk,&newline);
+      ScanLine(infile,"%ld %ld %c",3,&Host,&POV.Host.Body,&Frame);
       if (Host >= Nsc || !SC[Host].Exists) {
          printf("POV Host SC %ld doesn't exist.\n",Host);
          exit(1);
@@ -5394,10 +5392,9 @@ void ReadGraphicsInpFile(void)
          printf("Nonsense frame in Inp_Graphics.txt\n");
          exit(1);
       }
-      fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+      ScanLine(infile,"%120s",1,response);
       POV.Target.Type = DecodeString(response);
-      fscanf(infile,"%ld %ld %c %[^\n] %[\n]",
-         &Target,&POV.Target.Body,&Frame,junk,&newline);
+      ScanLine(infile,"%ld %ld %c",3,&Target,&POV.Target.Body,&Frame);
       if (Target >= Nsc || !SC[Target].Exists) {
          printf("POV Target SC %ld doesn't exist.\n",Target);
          exit(1);
@@ -5415,53 +5412,51 @@ void ReadGraphicsInpFile(void)
          printf("Nonsense frame in Inp_Graphics.txt\n");
          exit(1);
       }
-      fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+      ScanLine(infile,"%120s",1,response);
       POV.BoreAxis = DecodeString(response);
-      fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+      ScanLine(infile,"%120s",1,response);
       POV.UpAxis = DecodeString(response);
-      fscanf(infile,"%lf %[^\n] %[\n]",&POV.Range,junk,&newline);
-      fscanf(infile,"%lf %[^\n] %[\n]",&POV.Angle,junk,&newline);
-      fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
-         &POV.PosB[0],&POV.PosB[1],&POV.PosB[2],junk,&newline);
-      fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+      ScanLine(infile,"%lf",1,&POV.Range);
+      ScanLine(infile,"%lf",1,&POV.Angle);
+      ScanLine(infile,"%lf %lf %lf",3,
+         &POV.PosB[0],&POV.PosB[1],&POV.PosB[2]);
+      ScanLine(infile,"%120s",1,response);
       POV.View = DecodeString(response);
 
 /* .. CAM Parameters */
-      fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-      fscanf(infile,"\"%[^\"]\" %[^\n] %[\n]",CamTitle,junk,&newline);
-      fscanf(infile,"%ld %ld %[^\n] %[\n]",
-         &CamWidth,&CamHeight,junk,&newline);
-      fscanf(infile,"%lf  %[^\n] %[\n]",&MouseScaleFactor,junk,&newline);
+      ScanLine(infile,"",0,NULL);
+      ScanLine(infile,"\"%80[^\"]\"",1,CamTitle);
+      ScanLine(infile,"%ld %ld",2,&CamWidth,&CamHeight);
+      ScanLine(infile,"%lf",1,&MouseScaleFactor);
       POV.AR = ((double) CamWidth)/((double) CamHeight);
-      fscanf(infile,"%lf  %[^\n] %[\n]",&GammaCorrection,junk,&newline);
+      ScanLine(infile,"%lf",1,&GammaCorrection);
 /* .. Cam Show/Hide */
-      fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      ScanLine(infile,"",0,NULL);
       for(i=0;i<CAM_MENU_SIZE;i++) {
-         fscanf(infile,"%s \"%[^\"]\" %[^\n] %[\n]",response,
-            CamShowLabel[i],junk,&newline);
+         ScanLine(infile,"%120s \"%40[^\"]\"",2,
+            response,CamShowLabel[i]);
          CamShow[i] = DecodeString(response);
       }
       ShadowsEnabled = CamShow[CAM_SHADOWS];
 
 /* .. MAP Parameters */
-      fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-      fscanf(infile,"\"%[^\"]\" %[^\n] %[\n]",MapTitle,junk,&newline);
-      fscanf(infile,"%ld %ld %[^\n] %[\n]",
-         &MapWidth,&MapHeight,junk,&newline);
+      ScanLine(infile,"",0,NULL);
+      ScanLine(infile,"\"%80[^\"]\"",1,MapTitle);
+      ScanLine(infile,"%ld %ld",2,&MapWidth,&MapHeight);
 /* .. Map Show/Hide */
-      fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+      ScanLine(infile,"",0,NULL);
       for(i=0;i<MAP_MENU_SIZE;i++) {
-         fscanf(infile,"%s \"%[^\"]\" %[^\n] %[\n]",response,
-            MapShowLabel[i],junk,&newline);
+         ScanLine(infile,"%120s \"%40[^\"]\"",2,
+            response,MapShowLabel[i]);
          MapShow[i] = DecodeString(response);
       }
 /* .. Sphere Window */
-      fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-      fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+      ScanLine(infile,"",0,NULL);
+      ScanLine(infile,"%120s",1,response);
       ShowConstellations[MAJOR_CONSTELL] = DecodeString(response);
-      fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+      ScanLine(infile,"%120s",1,response);
       ShowConstellations[ZODIAC_CONSTELL] = DecodeString(response);
-      fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+      ScanLine(infile,"%120s",1,response);
       ShowConstellations[MINOR_CONSTELL] = DecodeString(response);
 
       fclose(infile);
@@ -5471,24 +5466,20 @@ void ReadGraphicsInpFile(void)
 void LoadFOVs(void)
 {
       FILE *infile;
-      char junk[120],newline;
-      char response[120],response1[120],response2[120];
+      char response[121],response1[121],response2[121];
       double Ang1,Ang2,Ang3;
       long Seq;
       long i;
 
       infile = FileOpen(InOutPath,"Inp_FOV.txt","r");
-      fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-      fscanf(infile,"%ld %[^\n] %[\n]",&Nfov,junk,&newline);
+      ScanLine(infile,"",0,NULL);
+      ScanLine(infile,"%ld",1,&Nfov);
       FOV = (struct FovType *) calloc(Nfov,sizeof(struct FovType));
       for(i=0;i<Nfov;i++) {
-         fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-         fscanf(infile,"\"%[^\"]\" %[^\n] %[\n]",
-            FOV[i].Label,junk,&newline);
-         fscanf(infile,"%ld %lf %[^\n] %[\n]",
-            &FOV[i].Nv,&FOV[i].Length,junk,&newline);
-         fscanf(infile,"%lf %lf %[^\n] %[\n]",
-            &FOV[i].Width,&FOV[i].Height,junk,&newline);
+         ScanLine(infile,"",0,NULL);
+         ScanLine(infile,"\"%40[^\"]\"",1,FOV[i].Label);
+         ScanLine(infile,"%ld %lf",2,&FOV[i].Nv,&FOV[i].Length);
+         ScanLine(infile,"%lf %lf",2,&FOV[i].Width,&FOV[i].Height);
          if (FOV[i].Width >= 180.0) {
             printf("FOV[%ld] Width >= 180 deg.  This is not allowed.  Bailing out.\n",i);
             exit(1);
@@ -5499,17 +5490,14 @@ void LoadFOVs(void)
          }
          FOV[i].Width *= D2R;
          FOV[i].Height *= D2R;
-         fscanf(infile,"%f %f %f %f %[^\n] %[\n]",
-            &FOV[i].Color[0],&FOV[i].Color[1],&FOV[i].Color[2],&FOV[i].Color[3],
-            junk,&newline);
-         fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+         ScanLine(infile,"%f %f %f %f",4,
+            &FOV[i].Color[0],&FOV[i].Color[1],&FOV[i].Color[2],&FOV[i].Color[3]);
+         ScanLine(infile,"%120s",1,response);
          FOV[i].Type = DecodeString(response);
-         fscanf(infile,"%s %s %[^\n] %[\n]",
-            response1,response2,junk,&newline);
+         ScanLine(infile,"%120s %120s",2,response1,response2);
          FOV[i].NearExists = DecodeString(response1);
          FOV[i].FarExists = DecodeString(response2);
-         fscanf(infile,"%ld %ld %[^\n] %[\n]",
-            &FOV[i].SC,&FOV[i].Body,junk,&newline);
+         ScanLine(infile,"%ld %ld",2,&FOV[i].SC,&FOV[i].Body);
          if (FOV[i].SC >= Nsc) {
             printf("FOV[%ld].SC is out of range.\n",i);
             exit(1);
@@ -5524,12 +5512,11 @@ void LoadFOVs(void)
             FOV[i].FarExists = FALSE;
          }
 
-         fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
-            &FOV[i].pb[0],&FOV[i].pb[1],&FOV[i].pb[2],junk,&newline);
-         fscanf(infile,"%lf %lf %lf %ld %[^\n] %[\n]",
-            &Ang1,&Ang2,&Ang3,&Seq,junk,&newline);
+         ScanLine(infile,"%lf %lf %lf",3,
+            &FOV[i].pb[0],&FOV[i].pb[1],&FOV[i].pb[2]);
+         ScanLine(infile,"%lf %lf %lf %ld",4,&Ang1,&Ang2,&Ang3,&Seq);
             A2C(Seq,Ang1*D2R,Ang2*D2R,Ang3*D2R,FOV[i].CB);
-         fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+         ScanLine(infile,"%120s",1,response);
          FOV[i].BoreAxis = DecodeString(response);
          FOV[i].H_Axis = (FOV[i].BoreAxis+1)%3;
          FOV[i].V_Axis = (FOV[i].BoreAxis+2)%3;

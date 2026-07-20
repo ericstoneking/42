@@ -57,7 +57,7 @@ EXTERN long Nmesh;
 
 EXTERN char InOutPath[512];
 EXTERN char ModelPath[512];
-EXTERN char CmdFileName[80];
+EXTERN char CmdFileName[81];
 
 /* Math Basics */
 EXTERN double Pi, TwoPi, HalfPi, SqrtTwo, SqrtHalf, D2R, R2D, A2R, R2A, GoldenRatio;

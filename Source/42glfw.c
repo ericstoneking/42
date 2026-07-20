@@ -924,6 +924,7 @@ void InitCamWindow(void)
       #ifdef __APPLE__
       glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER,GLFW_FALSE);
 	   #endif
+	   glfwWindowHint(GLFW_SAMPLES,4);
       CamWindow = glfwCreateWindow(CamWidth,CamHeight,CamTitle,NULL,NULL);
       #if (defined(GLEW_BUILD) || defined(GLEW_STATIC))
       if (GLEW_OK != glewInit()) {
@@ -949,6 +950,7 @@ void InitCamWindow(void)
       glPolygonMode(GL_FRONT, GL_FILL);
       /*glPolygonMode(GL_FRONT, GL_LINE);*/
       glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+      glEnable(GL_MULTISAMPLE);
 
 /* .. Create light */
       glEnable(GL_LIGHTING);

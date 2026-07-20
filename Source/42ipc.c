@@ -40,32 +40,32 @@ void ReadFromSocket(SOCKET Socket, long EchoEnabled);
 void InitInterProcessComm(void)
 {
       FILE *infile;
-      char junk[120],newline,response[120];
+      char response[121];
       struct IpcType *I;
       long Iipc,Ipx;
-      char FileName[80],Prefix[80];
+      char FileName[81],Prefix[81];
 
       infile = FileOpen(InOutPath,"Inp_IPC.txt","rt");
-      fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-      fscanf(infile,"%ld %[^\n] %[\n]",&Nipc,junk,&newline);
+      ScanLine(infile,"",0,NULL);
+      ScanLine(infile,"%ld",1,&Nipc);
       IPC = (struct IpcType *) calloc(Nipc,sizeof(struct IpcType));
       for(Iipc=0;Iipc<Nipc;Iipc++) {
          I = &IPC[Iipc];
-         fscanf(infile,"%[^\n] %[\n]",junk,&newline);
-         fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+         ScanLine(infile,"",0,NULL);
+         ScanLine(infile,"%120s",1,response);
          I->Mode = DecodeString(response);
-         fscanf(infile,"\"%[^\"]\" %[^\n] %[\n]",FileName,junk,&newline);
-         fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+         ScanLine(infile,"\"%80[^\"]\"",1,FileName);
+         ScanLine(infile,"%120s",1,response);
          I->SocketRole = DecodeString(response);
-         fscanf(infile,"%s %ld %[^\n] %[\n]",I->HostName,&I->Port,junk,&newline);
-         fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+         ScanLine(infile,"%40s %ld",2,I->HostName,&I->Port);
+         ScanLine(infile,"%120s",1,response);
          I->AllowBlocking = DecodeString(response);
-         fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
+         ScanLine(infile,"%120s",1,response);
          I->EchoEnabled = DecodeString(response);
-         fscanf(infile,"%ld %[^\n] %[\n]",&I->Nprefix,junk,&newline);
+         ScanLine(infile,"%ld",1,&I->Nprefix);
          I->Prefix = (char **) calloc(I->Nprefix,sizeof(char *));
          for(Ipx=0;Ipx<I->Nprefix;Ipx++) {
-            fscanf(infile,"\"%[^\"]\" %[^\n] %[\n]",Prefix,junk,&newline);
+            ScanLine(infile,"\"%80[^\"]\"",1,Prefix);
             I->Prefix[Ipx] = (char *) calloc(strlen(Prefix)+1,sizeof(char));
             strcpy(I->Prefix[Ipx],Prefix);
          }

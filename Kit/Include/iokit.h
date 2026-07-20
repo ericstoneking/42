@@ -26,6 +26,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -42,6 +43,7 @@
 /* #include <sys/un.h> */
 
 FILE *FileOpen(const char *Path, const char *File, const char *CtrlCode);
+long ScanLine(FILE *infile, const char *format, long ExpectedNumItems,...);
 void ByteSwapDouble(double *A);
 int FileToString(const char *file_name, char **result_string,
                  size_t *string_len);

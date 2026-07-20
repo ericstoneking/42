@@ -42,6 +42,7 @@ NONE                          ! Flex File Name
 0.0  0.0  0.0                 ! Products of Inertia (xy,xz,yz)
 0.0  -8.0  0.0                ! Location of mass center, m
 0.0  0.0  0.0                 ! Constant Embedded Momentum (Nms)
+0.0  0.0  0.0                 ! Constant Embedded Magnetic Dipole (A-m^2)
 Aura_SolarArray.obj           ! Geometry Input File Name
 NONE                        ! Node File Name
 NONE                          ! Flex File Name

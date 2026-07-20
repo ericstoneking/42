@@ -408,14 +408,14 @@ void SplineToPosVel(struct OrbitType *O)
             }
          }
          if (O->SplineDateFormat == DATE_MON_DAY) {
-            fscanf(O->SplineFile,O->SplineFmt,
+            ScanLine(O->SplineFile,O->SplineFmt,15,
                &NodeYear,&sep,&NodeMonth,&sep,&NodeDay,&sep,
                &NodeHour,&NodeMin,&NodeSec,
                &O->NodePos[3][0],&O->NodePos[3][1],&O->NodePos[3][2],
                &O->NodeVel[3][0],&O->NodeVel[3][1],&O->NodeVel[3][2]);
          }
          else {
-            fscanf(O->SplineFile,O->SplineFmt,
+            ScanLine(O->SplineFile,O->SplineFmt,13,
                &NodeYear,&sep,&NodeDOY,&sep,
                &NodeHour,&NodeMin,&NodeSec,
                &O->NodePos[3][0],&O->NodePos[3][1],&O->NodePos[3][2],

@@ -934,7 +934,7 @@ void InitCamWindow(void)
 {
       int GlutParm;
 
-      glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
+      glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH | GLUT_MULTISAMPLE);
       //glutInitDisplayString("rgba double depth hidpi");
       glutInitWindowSize(CamWidth,CamHeight);
       CamWindow = glutCreateWindow(CamTitle);
@@ -960,6 +960,8 @@ void InitCamWindow(void)
       glPolygonMode(GL_FRONT, GL_FILL);
       /*glPolygonMode(GL_FRONT, GL_LINE);*/
       glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+      
+      glEnable(GL_MULTISAMPLE);
 
 /* .. Create light */
       glEnable(GL_LIGHTING);

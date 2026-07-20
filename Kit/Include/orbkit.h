@@ -142,7 +142,7 @@ struct OrbitType {
    double rmin;  /* Periapsis radius.  Always well behaved [[m]] */
    double Period;
    double MeanMotion;
-   char FileName[120];
+   char FileName[121];
    long J2DriftEnabled;
    /* J2 Drift Parameters */
    double MeanSMA;
