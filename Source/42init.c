@@ -1688,7 +1688,7 @@ void InitShakers(struct SCType *S)
       FILE *infile;
       long Ish,It;
       struct ShakerType *Sh;
-      char response[120];
+      char response[121];
       
       if (strcmp(S->ShakerFileName,"NONE")) {
       
@@ -1948,8 +1948,8 @@ void InitOrderNDynamics(struct SCType *S)
 void InitSpacecraft(struct SCType *S)
 {
       FILE *infile;
-      char response[120];
-      char response1[120],response2[120],response3[120];
+      char response[121];
+      char response1[121],response2[121],response3[121];
       double CBL[3][3],CBF[3][3];
       long i,j,k,Ia,Ib,Ig,Iw,Im,It,Bi,Bo,Ic,Ist,Ifss,Ifgs;
       char RateFrame,AttFrame,AttParm;
@@ -2953,7 +2953,7 @@ void InitSpacecraft(struct SCType *S)
 void LoadTdrs(void)
 {
       FILE *infile;
-      char response[120];
+      char response[121];
       long i;
 
 /* .. Initialize TDRS */
@@ -3925,7 +3925,7 @@ void LoadMinorBodies(void)
       FILE *infile;
       struct WorldType *W;
       struct OrbitType *E;
-      char response[120];
+      char response[121];
       long Ib,i;
       long EpochYear,EpochMon,EpochDay,EpochHour;
       double CNJ[3][3],PoleRA,PoleDec,Epoch;
@@ -4543,7 +4543,7 @@ void InitSim(int argc, char **argv)
 {
       FILE *infile;
       struct OrbitType *Eph;
-      char response[120],response1[120],response2[120];
+      char response[121],response1[121],response2[121];
       double r1[3],rh[3],vh[3];
       double Zaxis[3] = {0.0,0.0,1.0};
       long Iorb,Isc,i,j,Ip,Im,Iw,Nm;
