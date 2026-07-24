@@ -1696,9 +1696,9 @@ void LagModes2RV(double SecSinceJ2000, struct LagrangeSystemType *LS,
          rl[0] = O->Ax*cw1t + O->Bx*sw1t + O->Cx*cw2t + O->Dx*sw2t;
          rl[1] = O->Ay*cw1t + O->By*sw1t + O->Cy*cw2t + O->Dy*sw2t;
          vl[0] = LP->w1*(-O->Ax*sw1t+O->Bx*cw1t)
-                +LP->w2*(-O->Cx*sw1t+O->Dx*cw1t);
+                +LP->w2*(-O->Cx*sw2t+O->Dx*cw2t);
          vl[1] = LP->w1*(-O->Ay*sw1t+O->By*cw1t)
-                +LP->w2*(-O->Cy*sw1t+O->Dy*cw1t);
+                +LP->w2*(-O->Cy*sw2t+O->Dy*cw2t);
       }
       cwzt = cos(LP->wz*TimeSinceEpoch);
       swzt = sin(LP->wz*TimeSinceEpoch);
@@ -2618,12 +2618,12 @@ void FindLightLagOffsets(double DynTime, struct OrbitType *Observer,
       for(i=0;i<3;i++) RelPos[i] = Target->PosN[i] - Observer->PosN[i];
       dt = MAGV(RelPos)/SPEED_OF_LIGHT;
       Eph2RV(Target->mu,Target->SLR,Target->ecc,Target->inc,Target->RAAN,
-         Target->ArgP,DynTime+dt-Target->tp,PastPos,Vel,&anom);
+         Target->ArgP,DynTime+dt-Target->tp,FuturePos,Vel,&anom);
 
-      for(i=0;i<3;i++) RelPos[i] = PastPos[i] - Observer->PosN[i];
+      for(i=0;i<3;i++) RelPos[i] = FuturePos[i] - Observer->PosN[i];
       dt = MAGV(RelPos)/SPEED_OF_LIGHT;
       Eph2RV(Target->mu,Target->SLR,Target->ecc,Target->inc,Target->RAAN,
-         Target->ArgP,DynTime+dt-Target->tp,PastPos,Vel,&anom);
+         Target->ArgP,DynTime+dt-Target->tp,FuturePos,Vel,&anom);
 
 #undef SPEED_OF_LIGHT
 }
