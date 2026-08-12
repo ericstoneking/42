@@ -208,7 +208,8 @@ void CssModel(struct SCType *S)
                }
             }
 
-            #ifdef _ENABLE_GUI_  
+            #ifdef _ENABLE_GUI_ 
+            #ifdef _USE_SHADERS_
             CSS->Albedo = 0.0;          
             if (AlbedoActive) {
                FindCssAlbedo(S,CSS);
@@ -217,6 +218,7 @@ void CssModel(struct SCType *S)
                CSS->Illum += ((double) Counts)*CSS->Quant;
                CSS->Illum = Limit(CSS->Illum,0.0,CSS->Scale);
             }
+            #endif
             #endif
          
             /* Copy into AC structure */

@@ -1355,7 +1355,6 @@ void HandoffToGui(int argc, char **argv)
       UpdatePOV();
 
       printf("Initializing glfw\n");
-      glutInit(&argc,argv);
       glfwSetErrorCallback(GlfwErrorHandler);
       if (!glfwInit()) {
          printf("Error initializing glfw\n");

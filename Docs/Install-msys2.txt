@@ -1,0 +1,32 @@
+42user.crabmeat402@passinbox.com
+PW: 42user402
+PIN: 2001
+
+Download msys2 from msys2.org
+   Use the x86_64 (more likely) or ARM64 installer
+
+in C:\msys2, find the mingw64 Application.  This is your terminal window.  Pin it to your taskbar.
+
+Using msys2 mingw64 shell:
+
+pacman is the package manager used by msys2.  Install the following:
+
+$ pacman -S make
+$ pacman -S mingw-w64-x86_64-gcc
+$ pacman -S mingw-w64-x86_64-gdb
+$ pacman -S mingw-w64-x86_64-freeglut
+$ pacman -S mingw-w64-x86_64-glew
+$ pacman -S mingw-w64-x86_64-mesa
+
+Download 42 from github.com/ericstoneking/42
+   Click the "Code" button, download as zip
+   Extract the 42-master folder into C:/msys2/mingw64/home/yourusername
+   Rename the folder from "42-master" to "42"
+
+$ cd 42
+$ make clean
+$ make
+$ ./42
+
+
+

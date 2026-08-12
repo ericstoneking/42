@@ -32,7 +32,7 @@ GLuint EarthAlbedoCubeTag;
 GLuint GenericAlbedoCubeTag;
 GLuint AlbedoWindow;
 
-
+#ifdef _USE_SHADERS_
 /**********************************************************************/
 /* GLUT wants a display callback for AlbedoWindow */
 void NullDisplay(void) {}
@@ -278,3 +278,4 @@ void FindCssAlbedo(struct SCType *S, struct CssType *CSS)
       
       
 }
+#endif

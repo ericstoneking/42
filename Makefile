@@ -88,13 +88,14 @@ ifeq ($(42PLATFORM),__APPLE__)
 
    LFLAGS = 
    ifneq ($(strip $(GUIFLAG)),)
-      GLINC = -I /System/Library/Frameworks/OpenGL.framework/Headers/ -I /System/Library/Frameworks/GLUT.framework/Headers/
       ifeq ($(strip $(GLUT_OR_GLFW)),_USE_GLUT_)
+         GLINC = -I /System/Library/Frameworks/OpenGL.framework/Headers/ -I /System/Library/Frameworks/GLUT.framework/Headers/
          LIBS = -framework System -framework Carbon -framework OpenGL -framework GLUT
          GUIOBJ = $(OBJ)42gl.o $(OBJ)42glut.o $(OBJ)glkit.o $(OBJ)42gpgpu.o
          GUI_LIB = -D _USE_GLUT_
       else
-         LIBS = -lglfw -framework System -framework Carbon -framework OpenGL -framework GLUT
+         GLINC = -I /System/Library/Frameworks/OpenGL.framework/Headers/ -I /System/Library/Frameworks/GLUT.framework/Headers/ -I /opt/homebrew/Cellar/glfw/3.4/include
+         LIBS = -L /opt/homebrew/Cellar/glfw/3.4/lib -lglfw -framework System -framework Carbon -framework OpenGL -framework GLUT
          GUIOBJ = $(OBJ)42gl.o $(OBJ)42glfw.o $(OBJ)glkit.o $(OBJ)42gpgpu.o
          GUI_LIB = -D _USE_GLFW_
       endif

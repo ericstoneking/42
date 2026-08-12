@@ -29,9 +29,9 @@
    #endif
 #elif defined __MINGW32__
    #define GLEW_BUILD
-   #include "glew.h"
+   #include <GL/glew.h>
    #define GL_GLEXT_PROTOTYPES
-   #include <glut.h>
+   #include <GL/glut.h>
    #include <GL/glu.h>
 #elif defined _WIN32
    #define GLEW_BUILD
