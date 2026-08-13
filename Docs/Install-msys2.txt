@@ -1,6 +1,3 @@
-42user.crabmeat402@passinbox.com
-PW: 42user402
-PIN: 2001
 
 Download msys2 from msys2.org
    Use the x86_64 (more likely) or ARM64 installer

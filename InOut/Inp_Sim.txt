@@ -13,8 +13,8 @@ TRUE   Orb_LEO.txt              !  Input file name for Orb 0
 1                               !  Number of Spacecraft
 TRUE 0 SC_Simple.txt            !  Existence, RefOrb, Input file for SC 0
 ***************************** Environment  *****************************
-04 08 2024                      !  Date (UTC) (Month, Day, Year)
-00 00 0.00                      !  Time (UTC) (Hr,Min,Sec)
+4 16 2025                       !  Date (UTC) (Month, Day, Year)
+22 00 10.0                      !  Time (UTC) (Hr,Min,Sec)
 37.0                            !  Leap Seconds (sec)
 USER                            !  F10.7, Ap (USER, NOMINAL or TWOSIGMA)
 230.0                           !  USER-provided F10.7

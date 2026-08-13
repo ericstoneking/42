@@ -498,7 +498,8 @@ void InitOrbit(struct OrbitType *O)
       char SplineLine[256];
       long NumMonDay,NumDOY;
       char sep;
-      char MonDayFmt[121] = " %4ld%[ ,/:-]%ld%[ ,/:-]%ld%[ ,/:T-]%ld:%ld:%lf %lf %lf %lf %lf %lf %lf";
+      //char MonDayFmt[121] = " %4ld%[ ,/:-]%ld%[ ,/:-]%ld%[ ,/:T-]%ld:%ld:%lf %lf %lf %lf %lf %lf %lf";
+      char MonDayFmt[121] = " %4ld%c%ld%c%ld%c%ld:%ld:%lf %lf %lf %lf %lf %lf %lf";
       char DOYFmt[121] =    " %4ld%[ ,/:-]%ld%[ ,/:T-]%ld:%ld:%lf %lf %lf %lf %lf %lf %lf";
 
       infile = FileOpen(InOutPath,O->FileName,"r");

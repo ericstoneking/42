@@ -682,7 +682,7 @@ void DrawCamHUD(void)
       char Frame[5][2]={"N","L","F","S","B"};
       char Axis[6][3] = {"+X","+Y","+Z","-X","-Y","-Z"};
       char Mode[3][20] = {"TRACK HOST","TRACK TARGET","FIXED IN HOST"};
-      char WorldName[80];
+      char WorldName[84];
       double RA,Dec;
       GLfloat BoxColor[4] = {0.133,0.545,0.133,1.0};
       GLfloat ClockColor[4] = {0.604,0.804,0.196,1.0};
