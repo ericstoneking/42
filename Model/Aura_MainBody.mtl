@@ -44,7 +44,7 @@ Ka 1.0 1.0 1.0
 Ks 1.0 1.0 1.0
 Ke 0.0 0.0 0.0
 
-newmtl HIRDLS White SG
+newmtl HIRDLS_White_SG
 Ns 100.0
 d 1.0
 illum 2

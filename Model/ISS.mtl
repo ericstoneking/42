@@ -198,15 +198,6 @@ Ka 0.76 0.76 0.76
 Ks 0.2  0.2  0.2
 Ke 0.0 0.0 0.0
 
-newmtl NODE2DOCKPORT_MATL
-Ns 100.0
-d 1.0
-illum 2
-Kd 0.84 0.84 0.84
-Ka 0.76 0.76 0.76
-Ks 0.2  0.2  0.2
-Ke 0.0 0.0 0.0
-
 newmtl COLUMBUS_MATL
 Ns 100.0
 d 1.0
