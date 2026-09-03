@@ -53,7 +53,7 @@ Ka 0.7803921699523926 0.7843137383460999 0.7843137383460999
 Ks 1.0 1.0 1.0
 Ke 0.0 0.0 0.0
 
-newmtl MLS Mirrors
+newmtl MLS_Mirrors
 Ns 100.0
 d 1.0
 illum 2
@@ -62,7 +62,7 @@ Ka 0.8823529481887817 0.8823529481887817 0.8784313797950745
 Ks 1.0 1.0 1.0
 Ke 0.0 0.0 0.0
 
-newmtl Rubber Parts
+newmtl Rubber_Parts
 Ns 100.0
 d 1.0
 illum 2
@@ -71,7 +71,7 @@ Ka 0.27954527735710144 0.27954527735710144 0.27954527735710144
 Ks 1.0 1.0 1.0
 Ke 0.0 0.0 0.0
 
-newmtl TES White3sm
+newmtl TES_White3sm
 Ns 100.0
 d 1.0
 illum 2
@@ -80,7 +80,7 @@ Ka 1.0 1.0 1.0
 Ks 1.0 1.0 1.0
 Ke 0.0 0.0 0.0
 
-newmtl TES White4sm
+newmtl TES_White4sm
 Ns 100.0
 d 1.0
 illum 2
@@ -89,7 +89,7 @@ Ka 1.0 1.0 1.0
 Ks 1.0 1.0 1.0
 Ke 0.0 0.0 0.0
 
-newmtl TES interior
+newmtl TES_interior
 Ns 100.0
 d 1.0
 illum 2
@@ -98,7 +98,7 @@ Ka 1.0 1.0 1.0
 Ks 1.0 1.0 1.0
 Ke 0.0 0.0 0.0
 
-newmtl TES mirror
+newmtl TES_mirror
 Ns 100.0
 d 1.0
 illum 2
@@ -107,7 +107,7 @@ Ka 1.0 1.0 1.0
 Ks 1.0 1.0 1.0
 Ke 0.0 0.0 0.0
 
-newmtl TES white
+newmtl TES_white
 Ns 100.0
 d 1.0
 illum 2
@@ -224,7 +224,7 @@ Ka 1.0 1.0 1.0
 Ks 1.0 1.0 1.0
 Ke 0.0 0.0 0.0
 
-newmtl aura-hrdls- White2
+newmtl aura-hrdls-White2
 Ns 100.0
 d 1.0
 illum 2
