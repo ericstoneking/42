@@ -683,6 +683,11 @@ void Sensors(struct SCType *S)
          AC->Whl[i].w = S->Whl[i].w;
       }
       
+      /* Imaging Cameras */
+      if (S->Ncam > 0) {
+         CameraModel(S);
+      }
+      
       /* Fine Guidance Sensors */
       if (S->Nfgs > 0) {
          FgsModel(S);

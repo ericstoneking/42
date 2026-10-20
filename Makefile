@@ -72,6 +72,7 @@ AUTOSRC = $(SRC)AutoCode/
 META = $(PROJDIR)MetaCode/
 
 
+
 ifeq ($(42PLATFORM),__APPLE__)
    # Mac Macros
    CINC = -I /usr/include -I /usr/local/include
@@ -81,8 +82,8 @@ ifeq ($(42PLATFORM),__APPLE__)
    # ARCHFLAG = -arch arm64
    ARCHFLAG = -arch $(shell uname -m)
    # For graphics interface, choose GLUT or GLFW GUI libraries
-   # GLUT is well known, but GLFW is better for newer Mac's hires displays
-   # OSX fixed their hires GLUT issue.  Keep GLFW around just in case.
+   # GLUT is well known, but is becoming considered obsolete.
+   # GLFW is newer and seems to be a good option going forward.
    #GLUT_OR_GLFW = _USE_GLFW_
    GLUT_OR_GLFW = _USE_GLUT_
 
@@ -90,13 +91,14 @@ ifeq ($(42PLATFORM),__APPLE__)
    ifneq ($(strip $(GUIFLAG)),)
       ifeq ($(strip $(GLUT_OR_GLFW)),_USE_GLUT_)
          GLINC = -I /System/Library/Frameworks/OpenGL.framework/Headers/ -I /System/Library/Frameworks/GLUT.framework/Headers/
-         LIBS = -framework System -framework Carbon -framework OpenGL -framework GLUT
+         LIBS = -framework System -framework Cocoa -framework OpenGL -framework GLUT
          GUIOBJ = $(OBJ)42gl.o $(OBJ)42glut.o $(OBJ)glkit.o $(OBJ)42gpgpu.o
          GUI_LIB = -D _USE_GLUT_
       else
-         GLINC = -I /System/Library/Frameworks/OpenGL.framework/Headers/ -I /System/Library/Frameworks/GLUT.framework/Headers/ -I /opt/homebrew/Cellar/glfw/3.4/include
-         LIBS = -L /opt/homebrew/Cellar/glfw/3.4/lib -lglfw -framework System -framework Carbon -framework OpenGL -framework GLUT
-         GUIOBJ = $(OBJ)42gl.o $(OBJ)42glfw.o $(OBJ)glkit.o $(OBJ)42gpgpu.o
+         GLFWDIR = /opt/homebrew/Cellar/glfw/3.5.1
+         GLINC = -I /System/Library/Frameworks/OpenGL.framework/Headers/ -I $(GLFWDIR)/include
+         LIBS = -L $(GLFWDIR)/lib -lglfw3 -framework System -framework Cocoa -framework OpenGL -framework QuartzCore -framework IOKit
+         GUIOBJ = $(OBJ)42gl.o $(OBJ)42glfw.o $(OBJ)glkit.o $(OBJ)42gpgpu.o  
          GUI_LIB = -D _USE_GLFW_
       endif
    else

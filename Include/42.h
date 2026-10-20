@@ -124,7 +124,8 @@ EXTERN struct FormationType *Frm;
 /* for surface force computation (e.g. aerodynamic)                  */
 EXTERN struct MeshType *Mesh;
 
-EXTERN struct POVType POV;
+EXTERN struct POVType Eye;
+EXTERN struct POVType *CurrentCamera;
 
 EXTERN struct TdrsType Tdrs[10];
 EXTERN struct GroundStationType *GroundStation;
@@ -242,6 +243,9 @@ void NOS3Time(long *year, long *day_of_year, long *month, long *day,
                    
 void InterProcessComm(void);
 void InitInterProcessComm(void);
+
+void CameraModel(struct SCType *S);
+void DrawCamera(void);
 
 #undef EXTERN
 

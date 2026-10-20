@@ -24,7 +24,8 @@
 */
 
 /*******************************************************************************/
-void DrawWorldAsBackdrop(struct WorldType *W,double PosN[3],double svn[3])
+void DrawWorldAsBackdrop(struct WorldType *W,double PosN[3],double svn[3],
+   struct POVType *POV)
 {
       struct AtmoType *A;
       GLint UniLoc;
@@ -42,12 +43,12 @@ void DrawWorldAsBackdrop(struct WorldType *W,double PosN[3],double svn[3])
       glLoadIdentity();
 
       /* Transform and scale into Eye frame */
-      MxV(POV.CN,svn,sve);
+      MxV(POV->CN,svn,sve);
       for(i=0;i<3;i++) LightPos[i] = sve[i];
       glLightfv(GL_LIGHT0,GL_POSITION,LightPos);
-      MxV(POV.CN,PosN,PosE);
+      MxV(POV->CN,PosN,PosE);
       MxV(W->CWN,PosN,PosW);
-      MxMT(W->CWN,POV.CN,CWE);
+      MxMT(W->CWN,POV->CN,CWE);
       WorldDist = CopyUnitV(PosE,UnitWorldVecE);
       for(i=0;i<3;i++) UnitWorldVecE[i] = -UnitWorldVecE[i];
 
@@ -66,7 +67,7 @@ void DrawWorldAsBackdrop(struct WorldType *W,double PosN[3],double svn[3])
       }
       else CosRingAng = -1.0;
 
-      SunDist = MAGV(POV.PosH);
+      SunDist = MAGV(POV->PosH);
       RadRatio = World[0].rad/SunDist;
       CosSunAng = sqrt(1.0-RadRatio*RadRatio);
 
@@ -139,10 +140,10 @@ void DrawWorldAsBackdrop(struct WorldType *W,double PosN[3],double svn[3])
       glUniform1i(UniLoc,W->HasRing);
 
       glBegin(GL_QUADS);
-         glVertex3d(-POV.Width,-POV.Height,-1.0);
-         glVertex3d( POV.Width,-POV.Height,-1.0);
-         glVertex3d( POV.Width, POV.Height,-1.0);
-         glVertex3d(-POV.Width, POV.Height,-1.0);
+         glVertex3d(-POV->AngWidth,-POV->AngHeight,-1.0);
+         glVertex3d( POV->AngWidth,-POV->AngHeight,-1.0);
+         glVertex3d( POV->AngWidth, POV->AngHeight,-1.0);
+         glVertex3d(-POV->AngWidth, POV->AngHeight,-1.0);
       glEnd();
 
       glUseProgram(0);
@@ -151,7 +152,7 @@ void DrawWorldAsBackdrop(struct WorldType *W,double PosN[3],double svn[3])
       
 }
 /**********************************************************************/
-void DrawSunAsBackdrop(void)
+void DrawSunAsBackdrop(struct POVType *POV)
 {
       GLint UniLoc;
       double svh[3],RadRatio,RadRatio2;
@@ -163,9 +164,9 @@ void DrawSunAsBackdrop(void)
       glLoadIdentity();
 
       /* Transform and scale into Eye frame */
-      for(i=0;i<3;i++) svh[i] = -POV.PosH[i];
+      for(i=0;i<3;i++) svh[i] = -POV->PosH[i];
       SunDist = UNITV(svh);
-      MxV(POV.CH,svh,UnitSunVecE);
+      MxV(POV->CH,svh,UnitSunVecE);
 
       RadRatio = World[0].rad/SunDist;
       RadRatio2 = RadRatio*RadRatio;
@@ -184,10 +185,10 @@ void DrawSunAsBackdrop(void)
       glUniform1f(UniLoc,CosCoronaAng);
 
       glBegin(GL_QUADS);
-         glVertex3d(-POV.Width,-POV.Height,-1.0);
-         glVertex3d( POV.Width,-POV.Height,-1.0);
-         glVertex3d( POV.Width, POV.Height,-1.0);
-         glVertex3d(-POV.Width, POV.Height,-1.0);
+         glVertex3d(-POV->AngWidth,-POV->AngHeight,-1.0);
+         glVertex3d( POV->AngWidth,-POV->AngHeight,-1.0);
+         glVertex3d( POV->AngWidth, POV->AngHeight,-1.0);
+         glVertex3d(-POV->AngWidth, POV->AngHeight,-1.0);
       glEnd();
 
       glUseProgram(0);
@@ -501,42 +502,27 @@ void MeshToDisplayLists(struct MeshType *G)
       glEndList();
 }
 /**********************************************************************/
-void SetEye(long Eye)
+void BuildModelViewMatrix(struct POVType *POV)
 {
       long i,j;
 
-      if (Eye == LEFTEYE) {
-      }
-      else if (Eye == RIGHTEYE) {
-      }
-      else {
-         glMatrixMode(GL_PROJECTION);
-         glLoadIdentity();
-         gluPerspective(POV.Angle, POV.AR, POV.Near, POV.Far);
+      glMatrixMode(GL_PROJECTION);
+      glLoadIdentity();
+      gluPerspective(POV->Angle, POV->AR, POV->Near, POV->Far);
 
-         /* Transform from POV frame to N frame */
-         glMatrixMode(GL_MODELVIEW);
-         glLoadIdentity();
+      /* Transform from POV frame to N frame */
+      glMatrixMode(GL_MODELVIEW);
+      glLoadIdentity();
 
-         BuildViewMatrix(POV.CN,POV.PosR,POV.ViewMatrix);
+      BuildViewMatrix(POV->CN,POV->PosR,POV->ViewMatrix);
 
-         glMultMatrixf(POV.ViewMatrix);
-         for(i=0;i<3;i++) {
-            for(j=0;j<3;j++) CNE[3*i+j] = POV.CN[i][j];
-         }
-
-      }
-}
-/**********************************************************************/
-void SetDestination(long Dest)
-{
-      if (Dest == OFFSCREEN) {
-      }
-      else {
+      glMultMatrixf(POV->ViewMatrix);
+      for(i=0;i<3;i++) {
+         for(j=0;j<3;j++) CNE[3*i+j] = POV->CN[i][j];
       }
 }
 /*********************************************************************/
-void DrawPlanetLabels(GLfloat length)
+void DrawPlanetLabels(GLfloat length,struct POVType *POV)
 {
       GLfloat Black[4] = {0.0,0.0,0.0,1.0};
       double Vec[3];
@@ -544,14 +530,14 @@ void DrawPlanetLabels(GLfloat length)
       struct OrbitType *O;
 
       glPushMatrix();
-      O = &Orb[POV.Host.RefOrb];
+      O = &Orb[POV->Host.RefOrb];
       RotateL2R(World[O->World].CNH);
 
       glDisable(GL_LIGHTING);
       for(i=SOL;i<=LUNA;i++) {
          if (World[i].Exists) {
             glColor4fv(World[i].Color);
-            for(j=0;j<3;j++) Vec[j] = World[i].PosH[j]-SC[POV.Host.SC].PosH[j];
+            for(j=0;j<3;j++) Vec[j] = World[i].PosH[j]-SC[POV->Host.SC].PosH[j];
             UNITV(Vec);
             glBegin(GL_LINES);
                glVertex3f(0.0,0.0,0.0);
@@ -664,7 +650,7 @@ void DrawBanner(int ScreenWidth, int ScreenHeight)
 
       glColor4fv(BannerColor);
       glRasterPos2i(ScreenWidth/2 - 4*((int) strlen(Banner)),75);
-      DrawBitmapString(GLUT_BITMAP_HELVETICA_18,Banner);
+      DrawString8x13(Banner);
 
       glMatrixMode(GL_PROJECTION);
       glPopMatrix();
@@ -674,7 +660,188 @@ void DrawBanner(int ScreenWidth, int ScreenHeight)
       glEnable(GL_LIGHTING);
 }
 /*********************************************************************/
-void DrawCamHUD(void)
+void DrawAlphabet(struct POVType *POV)
+{
+#if 0
+      GLfloat Black[4] = {0.0,0.0,0.0,1.0};
+      GLfloat Red[4] = {0.3,0.0,0.0,1.0};
+      GLfloat White[4] = {1.0,1.0,1.0,1.0};
+      long Ic,i,j,k,l;
+      int Nw,Nh;
+      char s[80];
+      unsigned char *GlyphImage;
+      static long BeenThereDoneThat = 0;
+      FILE *outfile;
+      FILE *GlyphFile;
+      unsigned int Char;
+      unsigned char GreenBit;
+      char FileName[80];
+
+      glDisable(GL_LIGHTING);
+      glMatrixMode(GL_PROJECTION);
+      glPushMatrix();
+      glLoadIdentity();
+      gluOrtho2D(0,POV->PixWidth,POV->PixHeight,0);
+      glMatrixMode(GL_MODELVIEW);
+      glLoadIdentity();
+
+      glColor4fv(Red);
+      glBegin(GL_QUADS);
+         #if 0
+         glVertex2i(300,75-8);
+         glVertex2i(300,75+11*8-8);
+         glVertex2i(300+8*12,75+11*8-8);
+         glVertex2i(300+8*12,75-8);
+
+         glVertex2i(300,200-10);
+         glVertex2i(300,200+13*8-10);
+         glVertex2i(300+8*12,200+13*8-10);
+         glVertex2i(300+8*12,200-10);
+         #endif
+         
+         glVertex2i(500,75-16);
+         glVertex2i(500,75+24*8-16);
+         glVertex2i(500+20*12,75+24*8-16);
+         glVertex2i(500+20*12,75-16);
+      glEnd();
+
+      glColor4fv(White);
+      for(i=0;i<8;i++) {
+         for(j=0;j<12;j++) {
+            #if 0
+            glRasterPos2i(300+8*j,75+11*i);
+            sprintf(s,"%c",(char) (32+12*i+j));
+            DrawString8x11(s);
+
+            glRasterPos2i(300+8*j,200+13*i);
+            sprintf(s,"%c",(char) (32+12*i+j));
+            DrawString8x13(s);
+            #endif
+            
+            glRasterPos2i(500+20*j,75+24*i);
+            sprintf(s,"%c",(char) (32+12*i+j));
+            DrawBitmapString(GLUT_BITMAP_HELVETICA_18,s);
+         }
+      }
+      
+      if (!BeenThereDoneThat) {
+         BeenThereDoneThat = 1;
+      
+         #if 0
+         outfile = FileOpen(ModelPath,"Font8x11.txt","w");
+         Nh = 11;
+         Nw = 8;
+         GlyphImage = (unsigned char *) calloc(4*(Nw*Nh),sizeof(unsigned char));
+         for(i=0;i<8;i++) {
+            for(j=0;j<12;j++) {
+               Ic = 12*i+j;
+               if (Ic < 95) {
+                  glReadPixels(300+Nw*j,POV->PixHeight-(75+Nh*i+3),Nw,Nh,GL_RGBA,GL_UNSIGNED_BYTE,GlyphImage);
+                  sprintf(FileName,"Glyph%02ld.ppm",12*i+j);
+                  GlyphFile=FileOpen(ModelPath,FileName,"wb");
+                  fprintf(GlyphFile,"P6\n#.\n%d %d\n255\n",Nw,Nh);
+                  fprintf(outfile,"{");
+                  for(k=0;k<Nh;k++) {
+                     Char = 0;
+                     for(l=0;l<Nw;l++) {
+                        fprintf(GlyphFile,"%c%c%c",
+                           GlyphImage[4*(Nw*(Nh-k-1)+l)+0],
+                           GlyphImage[4*(Nw*(Nh-k-1)+l)+1],
+                           GlyphImage[4*(Nw*(Nh-k-1)+l)+2]);
+                        GreenBit = GlyphImage[4*(Nw*k+l)+1];
+                        if (GreenBit) Char += 1<<(7-l);
+                     }
+                     fprintf(outfile,"0x%02x",Char);
+                     if (k<Nh-1) fprintf(outfile,", ");
+                  }
+                  if (Ic<94) fprintf(outfile,"},\n");
+                  else fprintf(outfile,"}\n");
+               }
+            }
+         }
+         free(GlyphImage);
+         fclose(outfile);
+
+         outfile = FileOpen(ModelPath,"Font8x13.txt","w");
+         Nh = 13;
+         Nw = 8;
+         GlyphImage = (unsigned char *) calloc(4*(Nw*Nh),sizeof(unsigned char));
+         for(i=0;i<8;i++) {
+            for(j=0;j<12;j++) {
+               Ic = 12*i+j;
+               if (Ic < 95) {
+                  glReadPixels(300+Nw*j,POV->PixHeight-(200+Nh*i+3),Nw,Nh,GL_RGBA,GL_UNSIGNED_BYTE,GlyphImage);
+                  sprintf(FileName,"Glyph%02ld.ppm",12*i+j);
+                  GlyphFile=FileOpen(ModelPath,FileName,"wb");
+                  fprintf(GlyphFile,"P6\n#.\n%d %d\n255\n",Nw,Nh);
+                  fprintf(outfile,"{");
+                  for(k=0;k<Nh;k++) {
+                     Char = 0;
+                     for(l=0;l<Nw;l++) {
+                        fprintf(GlyphFile,"%c%c%c",
+                           GlyphImage[4*(Nw*(Nh-k-1)+l)+0],
+                           GlyphImage[4*(Nw*(Nh-k-1)+l)+1],
+                           GlyphImage[4*(Nw*(Nh-k-1)+l)+2]);
+                        GreenBit = GlyphImage[4*(Nw*k+l)+1];
+                        if (GreenBit) Char += 1<<(7-l);
+                     }
+                     fprintf(outfile,"0x%02x",Char);
+                     if (k<Nh-1) fprintf(outfile,", ");
+                  }
+                  if (Ic<94) fprintf(outfile,"},\n");
+                  else fprintf(outfile,"}\n");
+               }
+            }
+         }
+         free(GlyphImage);
+         fclose(outfile);
+         #endif
+         
+         outfile = FileOpen(ModelPath,"FontHelvetica18.txt","w");
+         Nh = 24;
+         Nw = 20;
+         GlyphImage = (unsigned char *) calloc(4*(Nw*Nh),sizeof(unsigned char));
+         for(i=0;i<8;i++) {
+            for(j=0;j<12;j++) {
+               Ic = 12*i+j;
+               if (Ic < 95) {
+                  glReadPixels(500+Nw*j,POV->PixHeight-(75+Nh*i+3),Nw,Nh,GL_RGBA,GL_UNSIGNED_BYTE,GlyphImage);
+                  sprintf(FileName,"Glyph%02ld.ppm",12*i+j);
+                  GlyphFile=FileOpen(ModelPath,FileName,"wb");
+                  fprintf(GlyphFile,"P6\n#.\n%d %d\n255\n",Nw,Nh);
+                  fprintf(outfile,"{");
+                  for(k=0;k<Nh;k++) {
+                     Char = 0;
+                     for(l=0;l<Nw;l++) {
+                        fprintf(GlyphFile,"%c%c%c",
+                           GlyphImage[4*(Nw*(Nh-k-1)+l)+0],
+                           GlyphImage[4*(Nw*(Nh-k-1)+l)+1],
+                           GlyphImage[4*(Nw*(Nh-k-1)+l)+2]);
+                        GreenBit = GlyphImage[4*(Nw*k+l)+1];
+                        if (GreenBit) Char += 1<<(7-l);
+                     }
+                     fprintf(outfile,"0x%02x",Char);
+                     if (k<Nh-1) fprintf(outfile,", ");
+                  }
+                  if (Ic<94) fprintf(outfile,"},\n");
+                  else fprintf(outfile,"}\n");
+               }
+            }
+         }
+         free(GlyphImage);
+         fclose(outfile);
+      }
+
+      glMatrixMode(GL_PROJECTION);
+      glPopMatrix();
+      glMatrixMode(GL_MODELVIEW);
+
+      glColor4fv(Black);
+      glEnable(GL_LIGHTING);
+#endif      
+}
+/*********************************************************************/
+void DrawCamHUD(struct POVType *POV)
 {
       char s[120];
       char mon[12][4]={"Jan","Feb","Mar","Apr","May","Jun",
@@ -695,7 +862,7 @@ void DrawCamHUD(void)
       glMatrixMode(GL_PROJECTION);
       glPushMatrix();
       glLoadIdentity();
-      gluOrtho2D(0,CamWidth,CamHeight,0);
+      gluOrtho2D(0,POV->PixWidth,POV->PixHeight,0);
       glMatrixMode(GL_MODELVIEW);
       glLoadIdentity();
       glMaterialfv(GL_FRONT,GL_AMBIENT,Black);
@@ -717,47 +884,47 @@ void DrawCamHUD(void)
       glColor4fv(ClockColor);
       sprintf(s,"Sim Time = % 8.2f",SimTime);
       glRasterPos2i(10,20);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
+      DrawString8x13(s);
 
       sprintf(s,"%2ld %s %4ld",UTC.Day,mon[UTC.Month-1],UTC.Year);
       glRasterPos2i(40,35);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
+      DrawString8x13(s);
 
       sprintf(s,"UTC %03ld-%02ld:%02ld:%05.2lf",UTC.doy,UTC.Hour,UTC.Minute,UTC.Second);
       glRasterPos2i(10,50);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
+      DrawString8x13(s);
 
 /* .. POV Box */
       W = &PovWidget;
       DrawWidget(W);
 
       glRasterPos2i((W->xmin+W->xmax)/2-12,W->ymin+15);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,"POV");
+      DrawString8x13("POV");
 
       glRasterPos2i(W->xmin+8,W->ymin+30);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,Mode[POV.Mode]);
+      DrawString8x13(Mode[POV->Mode]);
 
       glRasterPos2i(W->xmin+8,W->ymin+45);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,"Fixed in");
+      DrawString8x13("Fixed in");
       for(i=0;i<5;i++) {
          glRasterPos2i(W->xmin+110+10*i,W->ymin+45);
-         DrawBitmapString(GLUT_BITMAP_8_BY_13,Frame[i]);
+         DrawString8x13(Frame[i]);
       }
 
-      sprintf(s,"Boresight: %s",Axis[POV.BoreAxis]);
+      sprintf(s,"Boresight: %s",Axis[POV->BoreAxis]);
       glRasterPos2i(W->xmin+8,W->ymin+60);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
+      DrawString8x13(s);
 
-      sprintf(s,"  Up Axis: %s",Axis[POV.UpAxis]);
+      sprintf(s,"  Up Axis: %s",Axis[POV->UpAxis]);
       glRasterPos2i(W->xmin+8,W->ymin+75);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
+      DrawString8x13(s);
 
 /* .. Show/Hide Menu */
       W = &CamShowWidget;
       DrawWidget(W);
 
       glRasterPos2i((W->xmin+W->xmax)/2-16,W->ymin+15);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,"Show");
+      DrawString8x13("Show");
       for(i=0;i<CAM_MENU_SIZE;i++) {
          if (CamShow[i]) {
             sprintf(s,"x %s",CamShowLabel[i]);
@@ -766,140 +933,140 @@ void DrawCamHUD(void)
             sprintf(s,"  %s",CamShowLabel[i]);
          }
          glRasterPos2i(W->xmin+8,W->ymin+30+15*i);
-         DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
+         DrawString8x13(s);
       }
 
 /* .. Host */
       W = &HostWidget;
       DrawWidget(W);
-      O = &Orb[POV.Host.RefOrb];
+      O = &Orb[POV->Host.RefOrb];
 
       glRasterPos2i((W->xmin+W->xmax)/2-16,W->ymin+15);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,"Host");
+      DrawString8x13("Host");
 
       if (O->Regime == ORB_THREE_BODY) {
          sprintf(WorldName,"%s-%s",
-            World[Orb[POV.Host.RefOrb].Body1].Name,
-            World[Orb[POV.Host.RefOrb].Body2].Name);
+            World[Orb[POV->Host.RefOrb].Body1].Name,
+            World[Orb[POV->Host.RefOrb].Body2].Name);
       }
       else {
-         strcpy(WorldName,World[POV.Host.World].Name);
+         strcpy(WorldName,World[POV->Host.World].Name);
       }
       glRasterPos2i(W->xmin+30,W->ymin+30);
       sprintf(s,"  World: %s",WorldName);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
+      DrawString8x13(s);
 
       glRasterPos2i(W->xmin+30,W->ymin+45);
-      sprintf(s,"Ref Orb: %ld",POV.Host.RefOrb);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
+      sprintf(s,"Ref Orb: %ld",POV->Host.RefOrb);
+      DrawString8x13(s);
       glRasterPos2i(W->xmin+30,W->ymin+60);
-      sprintf(s,"    Frm: %ld",POV.Host.RefOrb);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
+      sprintf(s,"    Frm: %ld",POV->Host.RefOrb);
+      DrawString8x13(s);
       glRasterPos2i(W->xmin+30,W->ymin+75);
-      sprintf(s,"    S/C: %ld",POV.Host.SC);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
+      sprintf(s,"    S/C: %ld",POV->Host.SC);
+      DrawString8x13(s);
       glRasterPos2i(W->xmin+30,W->ymin+90);
-      sprintf(s,"   Body: %ld",POV.Host.Body);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
+      sprintf(s,"   Body: %ld",POV->Host.Body);
+      DrawString8x13(s);
       glRasterPos2i(W->xmin+10,W->ymin+120);
-      sprintf(s,"Range: %7.2lf",POV.Range);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
+      sprintf(s,"Range: %7.2lf",POV->Range);
+      DrawString8x13(s);
       glRasterPos2i(W->xmin+10,W->ymin+135);
-      if (POV.Host.Type >= TARGET_SC) {
-         if (SC[POV.Host.SC].Eclipse)
-            DrawBitmapString(GLUT_BITMAP_8_BY_13,"In Eclipse");
+      if (POV->Host.Type >= TARGET_SC) {
+         if (SC[POV->Host.SC].Eclipse)
+            DrawString8x13("In Eclipse");
          else
-            DrawBitmapString(GLUT_BITMAP_8_BY_13,"In Sunlight");
+            DrawString8x13("In Sunlight");
       }
       glRasterPos2i(W->Spot[5].xmin,W->Spot[5].ymax);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,"-");
+      DrawString8x13("-");
       glRasterPos2i(W->Spot[6].xmin,W->Spot[6].ymax);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,"+");
+      DrawString8x13("+");
       glRasterPos2i(W->Spot[7].xmin,W->Spot[7].ymax);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,"+");
+      DrawString8x13("+");
       glRasterPos2i(W->Spot[8].xmin,W->Spot[8].ymax);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,"-");
+      DrawString8x13("-");
 
 /* .. Target */
       W = &TargetWidget;
       DrawWidget(W);
-      O = &Orb[POV.Host.RefOrb];
+      O = &Orb[POV->Host.RefOrb];
 
       glRasterPos2i((W->xmin+W->xmax)/2-24,W->ymin+15);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,"Target");
+      DrawString8x13("Target");
 
       if (O->Regime == ORB_CENTRAL || O->Regime == ORB_ZERO) {
-         strcpy(WorldName,World[POV.Host.World].Name);
+         strcpy(WorldName,World[POV->Host.World].Name);
       }
       else {
          sprintf(WorldName,"%s-%s",
-            World[Orb[POV.Host.RefOrb].Body1].Name,
-            World[Orb[POV.Host.RefOrb].Body2].Name);
+            World[Orb[POV->Host.RefOrb].Body1].Name,
+            World[Orb[POV->Host.RefOrb].Body2].Name);
       }
       glRasterPos2i(W->xmin+30,W->ymin+30);
       sprintf(s,"  World: %s",WorldName);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
+      DrawString8x13(s);
 
       glRasterPos2i(W->xmin+30,W->ymin+45);
-      sprintf(s,"Ref Orb: %ld",POV.Target.RefOrb);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
+      sprintf(s,"Ref Orb: %ld",POV->Target.RefOrb);
+      DrawString8x13(s);
       glRasterPos2i(W->xmin+30,W->ymin+60);
-      sprintf(s,"    Frm: %ld",POV.Target.RefOrb);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
+      sprintf(s,"    Frm: %ld",POV->Target.RefOrb);
+      DrawString8x13(s);
       glRasterPos2i(W->xmin+30,W->ymin+75);
-      sprintf(s,"    S/C: %ld",POV.Target.SC);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
+      sprintf(s,"    S/C: %ld",POV->Target.SC);
+      DrawString8x13(s);
       glRasterPos2i(W->xmin+30,W->ymin+90);
-      sprintf(s,"   Body: %ld",POV.Target.Body);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
+      sprintf(s,"   Body: %ld",POV->Target.Body);
+      DrawString8x13(s);
       glRasterPos2i(W->xmin+10,W->ymin+120);
-      sprintf(s,"Range: %7.2lf",POV.Range);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
+      sprintf(s,"Range: %7.2lf",POV->Range);
+      DrawString8x13(s);
       glRasterPos2i(W->xmin+10,W->ymin+135);
-      if (POV.Target.Type >= TARGET_SC) {
-         if (SC[POV.Target.SC].Eclipse)
-            DrawBitmapString(GLUT_BITMAP_8_BY_13,"In Eclipse");
+      if (POV->Target.Type >= TARGET_SC) {
+         if (SC[POV->Target.SC].Eclipse)
+            DrawString8x13("In Eclipse");
          else
-            DrawBitmapString(GLUT_BITMAP_8_BY_13,"In Sunlight");
+            DrawString8x13("In Sunlight");
       }
       glRasterPos2i(W->Spot[5].xmin,W->Spot[5].ymax);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,"-");
+      DrawString8x13("-");
       glRasterPos2i(W->Spot[6].xmin,W->Spot[6].ymax);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,"+");
+      DrawString8x13("+");
       glRasterPos2i(W->Spot[7].xmin,W->Spot[7].ymax);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,"+");
+      DrawString8x13("+");
       glRasterPos2i(W->Spot[8].xmin,W->Spot[8].ymax);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,"-");
+      DrawString8x13("-");
 
 /* .. Boresight Direction */
       if (CamShow[N_AXES]) {
          glColor4fv(NBrightColor);
-         RA = atan2(-POV.CN[2][1],-POV.CN[2][0])*R2D;
-         Dec = asin(-POV.CN[2][2])*R2D;
+         RA = atan2(-POV->CN[2][1],-POV->CN[2][0])*R2D;
+         Dec = asin(-POV->CN[2][2])*R2D;
          sprintf(s,"View RA:% 5.2f Dec:% 5.2f",RA,Dec);
-         glRasterPos2i(CamWidth-300,20);
-         DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
+         glRasterPos2i(POV->PixWidth-300,20);
+         DrawString8x13(s);
       }
       if (CamShow[L_AXES]) {
          glColor4fv(LBrightColor);
          sprintf(s,"View in L: [% 5.4f % 5.4f % 5.4f]",
-            -POV.CL[2][0],-POV.CL[2][1],-POV.CL[2][2]);
-         glRasterPos2i(CamWidth-300,35);
-         DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
+            -POV->CL[2][0],-POV->CL[2][1],-POV->CL[2][2]);
+         glRasterPos2i(POV->PixWidth-300,35);
+         DrawString8x13(s);
       }
       if (CamShow[F_AXES]) {
          glColor4fv(FBrightColor);
          sprintf(s,"View in F: [% 5.4f % 5.4f % 5.4f]",
-            -POV.CF[2][0],-POV.CF[2][1],-POV.CF[2][2]);
-         glRasterPos2i(CamWidth-300,50);
-         DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
+            -POV->CF[2][0],-POV->CF[2][1],-POV->CF[2][2]);
+         glRasterPos2i(POV->PixWidth-300,50);
+         DrawString8x13(s);
       }
       if (CamShow[B_AXES]) {
          glColor4fv(BBrightColor);
          sprintf(s,"View in B: [% 5.4f % 5.4f % 5.4f]",
-            -POV.CB[2][0],-POV.CB[2][1],-POV.CB[2][2]);
-         glRasterPos2i(CamWidth-300,65);
-         DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
+            -POV->CB[2][0],-POV->CB[2][1],-POV->CB[2][2]);
+         glRasterPos2i(POV->PixWidth-300,65);
+         DrawString8x13(s);
       }
 
 /* .. ProxOps Grid Spacing */
@@ -907,20 +1074,22 @@ void DrawCamHUD(void)
          glColor4fv(ProxOpsGridColor);
          glLineWidth(2.5);
          glBegin(GL_LINE_STRIP);
-            glVertex2i(CamWidth-120,CamHeight-106);
-            glVertex2i(CamWidth-120,CamHeight-100);
-            glVertex2i(CamWidth-40,CamHeight-100);
-            glVertex2i(CamWidth-40,CamHeight-106);
+            glVertex2i(POV->PixWidth-120,POV->PixHeight-106);
+            glVertex2i(POV->PixWidth-120,POV->PixHeight-100);
+            glVertex2i(POV->PixWidth-40,POV->PixHeight-100);
+            glVertex2i(POV->PixWidth-40,POV->PixHeight-106);
          glEnd();
-         if (POV.GridSpacing < 1000.0) {
-            sprintf(s,"%ld m",(long) POV.GridSpacing);
+         if (POV->GridSpacing < 1000.0) {
+            sprintf(s,"%ld m",(long) POV->GridSpacing);
          }
          else {
-            sprintf(s,"%ld km",(long) (POV.GridSpacing/1000.0));
+            sprintf(s,"%ld km",(long) (POV->GridSpacing/1000.0));
          }
-         glRasterPos2i(CamWidth-80-4*strlen(s),CamHeight-104);
-         DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
+         glRasterPos2i(POV->PixWidth-80-4*strlen(s),POV->PixHeight-104);
+         DrawString8x13(s);
       }
+
+      DrawAlphabet(POV);
 
       glColor4fv(Black);
       glEnable(GL_LIGHTING);
@@ -937,7 +1106,7 @@ void DrawWatermarks(void)
       glMatrixMode(GL_PROJECTION);
       glPushMatrix();
       glLoadIdentity();
-      gluOrtho2D(0,CamWidth,CamHeight,0);
+      gluOrtho2D(0,Eye.PixWidth,Eye.PixHeight,0);
       glMatrixMode(GL_MODELVIEW);
       glLoadIdentity();
       glMaterialfv(GL_FRONT,GL_AMBIENT,Black);
@@ -958,25 +1127,25 @@ void DrawWatermarks(void)
       glBindTexture(GL_TEXTURE_2D,NASAWatermarkTexTag);
       glBegin(GL_QUADS);
          glTexCoord2f(0.0,1.0);
-         glVertex2f(10,CamHeight-10);
+         glVertex2f(10,POV->PixHeight-10);
          glTexCoord2f(1.0,1.0);
-         glVertex2f(60,CamHeight-10);
+         glVertex2f(60,POV->PixHeight-10);
          glTexCoord2f(1.0,0.0);
-         glVertex2f(60,CamHeight-52);
+         glVertex2f(60,POV->PixHeight-52);
          glTexCoord2f(0.0,0.0);
-         glVertex2f(10,CamHeight-52);
+         glVertex2f(10,POV->PixHeight-52);
       glEnd();
 
       glBindTexture(GL_TEXTURE_2D,GSFCWatermarkTexTag);
       glBegin(GL_QUADS);
          glTexCoord2f(0.0,1.0);
-         glVertex2f(70,CamHeight-10);
+         glVertex2f(70,POV->PixHeight-10);
          glTexCoord2f(1.0,1.0);
-         glVertex2f(170,CamHeight-10);
+         glVertex2f(170,POV->PixHeight-10);
          glTexCoord2f(1.0,0.0);
-         glVertex2f(170,CamHeight-52);
+         glVertex2f(170,POV->PixHeight-52);
          glTexCoord2f(0.0,0.0);
-         glVertex2f(70,CamHeight-52);
+         glVertex2f(70,POV->PixHeight-52);
       glEnd();
 #endif
 
@@ -986,13 +1155,13 @@ void DrawWatermarks(void)
       glBindTexture(GL_TEXTURE_2D,FortyTwoWatermarkTexTag);
       glBegin(GL_QUADS);
          glTexCoord2f(0.0,1.0);
-         glVertex2f(CamWidth-50,CamHeight-10);
+         glVertex2f(Eye.PixWidth-50,Eye.PixHeight-10);
          glTexCoord2f(1.0,1.0);
-         glVertex2f(CamWidth-10,CamHeight-10);
+         glVertex2f(Eye.PixWidth-10,Eye.PixHeight-10);
          glTexCoord2f(1.0,0.0);
-         glVertex2f(CamWidth-10,CamHeight-50);
+         glVertex2f(Eye.PixWidth-10,Eye.PixHeight-50);
          glTexCoord2f(0.0,0.0);
-         glVertex2f(CamWidth-50,CamHeight-50);
+         glVertex2f(Eye.PixWidth-50,Eye.PixHeight-50);
       glEnd();
 
       glDisable(GL_TEXTURE_2D);
@@ -1028,7 +1197,7 @@ long ScIsVisible(long RefOrb, long Isc, double PosR[3])
       return(ScVisible);
 }
 /**********************************************************************/
-void DrawFarScene(void)
+void DrawFarScene(struct POVType *POV)
 {
       static long Nw;
       long Iw,Isc,i,j;
@@ -1076,15 +1245,15 @@ void DrawFarScene(void)
 /* .. For Milky Way, Stars, and Far Planets, set sky at 1.0 */
       glMatrixMode(GL_PROJECTION);
       glLoadIdentity();
-      gluPerspective(POV.Angle,POV.AR,0.1,10.0);
+      gluPerspective(POV->Angle,POV->AR,0.1,10.0);
       glMatrixMode(GL_MODELVIEW);
 
 /* .. Transform from View frame to H frame */
       glLoadIdentity();
-      RotateL2R(POV.CH);
+      RotateL2R(POV->CH);
 
       /* Line of Sight, from POV toward back of view frustum */
-      for(i=0;i<3;i++) LoS[i] = -POV.CH[2][i];
+      for(i=0;i<3;i++) LoS[i] = -POV->CH[2][i];
 
       if (CamShow[FERMI_SKY]) glCallList(FermiSkyList);
       else if (CamShow[MILKY_WAY]) glCallList(MilkyWayList);
@@ -1097,10 +1266,10 @@ void DrawFarScene(void)
 
 
 /* .. Find depth, visibility for each world */
-      VisCoef = 0.5*CamHeight/POV.SinFov;
+      VisCoef = 0.5*POV->PixHeight/POV->SinFov;
       for(i=0;i<Nw;i++) {
          Iw = WorldOrder[i];
-         for(j=0;j<3;j++) rh[Iw][j] = POV.PosH[j]-World[Iw].PosH[j];
+         for(j=0;j<3;j++) rh[Iw][j] = POV->PosH[j]-World[Iw].PosH[j];
          Zdepth[i] = VoV(rh[Iw],LoS);
          if (World[Iw].HasRing) {
             World[Iw].NearExtent = -Zdepth[i]-4.0*World[Iw].rad;
@@ -1148,9 +1317,9 @@ void DrawFarScene(void)
       for(i=0;i<Nw;i++) {
          Iw = WorldOrder[i];
          W = &World[Iw];
-         for(j=0;j<3;j++) rh[Iw][j] = POV.PosH[j]-W->PosH[j];
+         for(j=0;j<3;j++) rh[Iw][j] = POV->PosH[j]-W->PosH[j];
          if (W->Visibility == WORLD_IS_SUN) {
-            DrawSunAsBackdrop();
+            DrawSunAsBackdrop(POV);
          }
          else if (W->Visibility == WORLD_IS_POINT_SIZED) {
             CopyUnitV(rh[Iw],r);
@@ -1168,15 +1337,15 @@ void DrawFarScene(void)
             for(j=0;j<3;j++) svh[j] = -W->PosH[j];
             UNITV(svh);
             if (W->MeshTag == 0) { /* World is sphere */
-               MxV(World[POV.Host.World].CNH,rh[Iw],PosN);
-               MxV(World[POV.Host.World].CNH,svh,svn);
-               DrawWorldAsBackdrop(W,PosN,svn);
+               MxV(World[POV->Host.World].CNH,rh[Iw],PosN);
+               MxV(World[POV->Host.World].CNH,svh,svn);
+               DrawWorldAsBackdrop(W,PosN,svn,POV);
             }
             else {
                glClear(GL_DEPTH_BUFFER_BIT);
                glMatrixMode(GL_PROJECTION);
                glLoadIdentity();
-               gluPerspective(POV.Angle,POV.AR,
+               gluPerspective(POV->Angle,POV->AR,
                   W->NearExtent,W->FarExtent);
                glMatrixMode(GL_MODELVIEW);
                glUseProgram(BodyShaderProgram);
@@ -1199,7 +1368,7 @@ void DrawFarScene(void)
 
       glMatrixMode(GL_PROJECTION);
       glLoadIdentity();
-      gluPerspective(POV.Angle,POV.AR,POV.Near,POV.Far);
+      gluPerspective(POV->Angle,POV->AR,POV->Near,POV->Far);
       glMatrixMode(GL_MODELVIEW);
 
 /* .. Draw circle and label for planets */
@@ -1224,7 +1393,7 @@ void DrawFarScene(void)
       }
 
       glLoadIdentity();
-      RotateL2R(POV.CN);
+      RotateL2R(POV->CN);
 
 /* .. Draw Sky Grids */
       if (CamShow[N_GRID]) {
@@ -1232,31 +1401,31 @@ void DrawFarScene(void)
                      MajSkyGridList,MinSkyGridList);
       }
       if (CamShow[L_GRID]) {
-         MxM(CLpermute,Orb[POV.Host.RefOrb].CLN,C);
+         MxM(CLpermute,Orb[POV->Host.RefOrb].CLN,C);
          DrawSkyGrid(LBrightColor,LDimColor,C,
                      MajSkyGridList,MinSkyGridList);
       }
       if (CamShow[F_GRID]) {
-         DrawSkyGrid(FBrightColor,FDimColor,Frm[POV.Host.RefOrb].CN,
+         DrawSkyGrid(FBrightColor,FDimColor,Frm[POV->Host.RefOrb].CN,
                      MajSkyGridList,MinSkyGridList);
       }
       if (CamShow[B_GRID]) {
-         DrawSkyGrid(BBrightColor,BDimColor,SC[POV.Host.SC].B[0].CN,
+         DrawSkyGrid(BBrightColor,BDimColor,SC[POV->Host.SC].B[POV->Host.Body].CN,
                      MajSkyGridList,MinSkyGridList);
       }
       if (CamShow[G_GRID]) {
-         MxMT(CGH,World[POV.Host.World].CNH,C);
+         MxMT(CGH,World[POV->Host.World].CNH,C);
          DrawSkyGrid(GBrightColor,GDimColor,C,
                      MajSkyGridList,MinSkyGridList);
       }
 
 /* .. Draw TDRS */
-      if (CamShow[TDRS] && POV.Host.World == EARTH) {
+      if (CamShow[TDRS] && POV->Host.World == EARTH) {
          glDisable(GL_LIGHTING);
          glColor4fv(TdrsColor);
          for(i=0;i<10;i++) {
             if (Tdrs[i].Exists) {
-               for(j=0;j<3;j++) PosN[j] = Tdrs[i].PosN[j] - POV.PosN[j];
+               for(j=0;j<3;j++) PosN[j] = Tdrs[i].PosN[j] - POV->PosN[j];
                UNITV(PosN);
                for(j=0;j<3;j++) PosN[j] *= SkyDistance;
                glRasterPos3d(PosN[0],PosN[1],PosN[2]);
@@ -1267,15 +1436,15 @@ void DrawFarScene(void)
          glEnable(GL_LIGHTING);
       }
 
-/* .. Draw SC not in POV.Host.RefOrb */
+/* .. Draw SC not in POV->Host.RefOrb */
       glDisable(GL_LIGHTING);
       for(Isc=0;Isc<Nsc;Isc++) {
          S = &SC[Isc];
-         //if (S->RefOrb != POV.Host.RefOrb) {
-         if (!ScIsVisible(POV.Host.RefOrb,Isc,PosR)) {
+         //if (S->RefOrb != POV->Host.RefOrb) {
+         if (!ScIsVisible(POV->Host.RefOrb,Isc,PosR)) {
             glColor4fv(ScColor);
-            for(i=0;i<3;i++) PosH[i] = S->PosH[i] - POV.PosH[i];
-            MxV(World[POV.Host.World].CNH,PosH,PosN);
+            for(i=0;i<3;i++) PosH[i] = S->PosH[i] - POV->PosH[i];
+            MxV(World[POV->Host.World].CNH,PosH,PosN);
             UNITV(PosN);
             for(i=0;i<3;i++) PosN[i] *= SkyDistance;
             glRasterPos3d(PosN[0],PosN[1],PosN[2]);
@@ -1287,7 +1456,7 @@ void DrawFarScene(void)
       
 }
 /**********************************************************************/
-void DrawProxOps(void)
+void DrawProxOps(struct POVType *POV)
 {
       struct SCType *S;
       struct OrbitType *O;
@@ -1309,7 +1478,7 @@ void DrawProxOps(void)
       glDisable(GL_LIGHTING);
       glDepthMask(GL_FALSE);
 
-      O = &Orb[POV.Host.RefOrb];
+      O = &Orb[POV->Host.RefOrb];
       glPushMatrix();
       RotateR2L(O->CLN);
 
@@ -1318,7 +1487,7 @@ void DrawProxOps(void)
       glPointSize(4.0);
 
       for(Isc=0;Isc<Nsc;Isc++) {
-         if (SC[Isc].Exists && SC[Isc].RefOrb == POV.Host.RefOrb) {
+         if (SC[Isc].Exists && SC[Isc].RefOrb == POV->Host.RefOrb) {
             S = &SC[Isc];
             EHRV2EHModes(S->PosEH,S->VelEH,O->MeanMotion,0.0,
                          &A,&Bc,&Bs,&C,&Dc,&Ds);
@@ -1360,9 +1529,9 @@ void DrawProxOps(void)
       glPointSize(1.0);
 
       i = 0;
-      while(POV.Range/5.0 > GridSpacing[i] && i<19) i++;
-      POV.GridSpacing = GridSpacing[i];
-      R = 5.0*POV.GridSpacing;
+      while(POV->Range/5.0 > GridSpacing[i] && i<19) i++;
+      POV->GridSpacing = GridSpacing[i];
+      R = 5.0*POV->GridSpacing;
 
 /* .. Draw Euler-Hill Planes */
       glColor4fv(PlaneColor);
@@ -1400,7 +1569,7 @@ void DrawProxOps(void)
       glColor4fv(GridColor);
       glBegin(GL_LINES);
          for(i=0;i<6;i++) {
-            dr = i*POV.GridSpacing;
+            dr = i*POV->GridSpacing;
             /* X */
             glVertex3d( dr, R,0.0);
             glVertex3d( dr,-R,0.0);
@@ -1432,7 +1601,7 @@ void DrawProxOps(void)
       glEnd();
 
 /* .. Draw L axes */
-      AxisLength = 0.4*POV.Height*POV.Range;
+      AxisLength = 0.4*POV->AngHeight*POV->Range;
       DrawAxisLabels(GLYPH_L,AxisColor,
                      0.0,AxisLength,
                      0.0,AxisLength,
@@ -1445,7 +1614,7 @@ void DrawProxOps(void)
       glDepthMask(GL_TRUE);
 }
 /**********************************************************************/
-void DrawNearAuxObjects(void)
+void DrawNearAuxObjects(struct POVType *POV)
 {
       double AxisLength,r[3],len[3];
       long Isc,Ib,Ithr,i,Ig;
@@ -1462,7 +1631,7 @@ void DrawNearAuxObjects(void)
 /* .. Draw near-field Auxiliary Objects */
       glMatrixMode(GL_PROJECTION);
       glLoadIdentity();
-      gluPerspective(POV.Angle, POV.AR, POV.Near, POV.Far);
+      gluPerspective(POV->Angle, POV->AR, POV->Near, POV->Far);
       glMatrixMode(GL_MODELVIEW);
       glLightModelfv(GL_LIGHT_MODEL_AMBIENT,LocalAmbientLightColor);
       glLightfv(GL_LIGHT0,GL_DIFFUSE,LocalDiffuseLightColor);
@@ -1471,23 +1640,23 @@ void DrawNearAuxObjects(void)
       glLoadIdentity();
 
 /* .. Set to N frame */
-      RotateL2R(POV.CN);
+      RotateL2R(POV->CN);
 
       glLightfv(GL_LIGHT0,GL_POSITION,LightPosN);
 
       /* Translate from POV to R */
-      glTranslated(-POV.PosR[0],-POV.PosR[1],-POV.PosR[2]);
-      AxisLength = 0.4*POV.Height*POV.Range;
+      glTranslated(-POV->PosR[0],-POV->PosR[1],-POV->PosR[2]);
+      AxisLength = 0.4*POV->AngHeight*POV->Range;
 
-      if (CamShow[PROX_OPS]) DrawProxOps();
+      if (CamShow[PROX_OPS]) DrawProxOps(POV);
 
 /* .. Draw Formation Origin and Axes */
       if (CamShow[F_AXES]) {
          glPushMatrix();
-         glTranslated(Frm[POV.Host.RefOrb].PosR[0],
-                      Frm[POV.Host.RefOrb].PosR[1],
-                      Frm[POV.Host.RefOrb].PosR[2]);
-         RotateR2L(Frm[POV.Host.RefOrb].CN);
+         glTranslated(Frm[POV->Host.RefOrb].PosR[0],
+                      Frm[POV->Host.RefOrb].PosR[1],
+                      Frm[POV->Host.RefOrb].PosR[2]);
+         RotateR2L(Frm[POV->Host.RefOrb].CN);
          DrawAxisLabels(GLYPH_F,FBrightColor,
                         0.0,AxisLength,
                         0.0,AxisLength,
@@ -1501,7 +1670,7 @@ void DrawNearAuxObjects(void)
          if (S->Exists) {
             glPushMatrix();
 
-            if (ScIsVisible(POV.Host.RefOrb,Isc,PosR) ) {
+            if (ScIsVisible(POV->Host.RefOrb,Isc,PosR) ) {
                glTranslated(PosR[0],PosR[1],PosR[2]);
                if (CamShow[B_AXES]) {
                   for(Ib=0;Ib<S->Nb;Ib++) {
@@ -1545,7 +1714,7 @@ void DrawNearAuxObjects(void)
                      glPopMatrix();
                   }
                }
-               if (Isc == POV.Host.SC) {
+               if (Isc == POV->Host.SC) {
                   if (CamShow[N_AXES]) {
                      DrawAxisLabels(GLYPH_N,NBrightColor,
                                     0.0,AxisLength,
@@ -1562,7 +1731,7 @@ void DrawNearAuxObjects(void)
                      glPopMatrix();
                   }
                   if (CamShow[ASTRO])
-                     DrawPlanetLabels(AxisLength);
+                     DrawPlanetLabels(AxisLength,POV);
                   if (CamShow[TRUTH_VECTORS]) {
                      B = &S->B[0];
                      glPushMatrix();
@@ -1608,9 +1777,9 @@ void DrawNearAuxObjects(void)
          if (S->Exists) {
             glPushMatrix();
 
-//            if (S->RefOrb == POV.Host.RefOrb) { /* TODO: Improve this */
+//            if (S->RefOrb == POV->Host.RefOrb) { /* TODO: Improve this */
 //               glTranslated(S->PosR[0],S->PosR[1],S->PosR[2]);
-            if (ScIsVisible(POV.Host.RefOrb,Isc,PosR)) {
+            if (ScIsVisible(POV->Host.RefOrb,Isc,PosR)) {
                glTranslated(PosR[0],PosR[1],PosR[2]);
                for(Ithr=0;Ithr<S->Nthr;Ithr++) {
                   B = &S->B[S->Thr[Ithr].Body];
@@ -1635,7 +1804,7 @@ void DrawNearAuxObjects(void)
          glDepthMask(GL_FALSE);
          for(i=0;i<Nfov;i++) {
             F = &FOV[i];
-            if (F->RefOrb == POV.Host.RefOrb) {
+            if (F->RefOrb == POV->Host.RefOrb) {
                if (SC[F->SC].Exists) {
                   S = &SC[F->SC];
                   B = &S->B[F->Body];
@@ -1657,7 +1826,7 @@ void DrawNearAuxObjects(void)
                   if (F->FarExists) {
                      glPushMatrix();
                      glLoadIdentity();
-                     RotateL2R(POV.CN);
+                     RotateL2R(POV->CN);
                      RotateR2L(B->CN);
                      RotateR2L(F->CB);
                      DrawFarFOV(F->Nv,F->Width,F->Height,
@@ -1673,12 +1842,12 @@ void DrawNearAuxObjects(void)
       }
 
 /* .. Draw HUD in POV frame */
-      if (ShowHUD) DrawCamHUD();
-      if (strlen(Banner) > 1) DrawBanner(CamWidth,CamHeight);
+      if (ShowHUD) DrawCamHUD(POV);
+      if (strlen(Banner) > 1) DrawBanner(POV->PixWidth,POV->PixHeight);
       if (ShowWatermark) DrawWatermarks();
 }
 /**********************************************************************/
-void DrawContactSpheres(void)
+void DrawContactSpheres(struct POVType *POV)
 {
       struct SCType *S;
       struct BodyType *B;
@@ -1703,7 +1872,7 @@ void DrawContactSpheres(void)
 
       for(Isc=0;Isc<Nsc;Isc++) {
          S = &SC[Isc];
-         if (S->RefOrb == POV.Host.RefOrb) {
+         if (S->RefOrb == POV->Host.RefOrb) {
             for(Ib=0;Ib<S->Nb;Ib++) {
                B = &S->B[Ib];
                M = &Mesh[B->MeshTag];
@@ -1727,7 +1896,7 @@ void DrawContactSpheres(void)
       glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,Black);
 }
 /**********************************************************************/
-void DepthPass(void)
+void DepthPass(struct POVType *POV)
 {
       /* Bias and Scale, in Column Major order */
       GLfloat BS[16] = {0.5,0.0,0.0,0.0 , 0.0,0.5,0.0,0.0 ,
@@ -1755,8 +1924,8 @@ void DepthPass(void)
       PerpBasis(CLN[2],CLN[0],CLN[1]);
       for(Isc=0;Isc<Nsc;Isc++) {
          S = &SC[Isc];
-         //if (S->RefOrb == POV.Host.RefOrb) { /* TODO:  Improve this */
-         if (ScIsVisible(POV.Host.RefOrb,Isc,PosR) ) {
+         //if (S->RefOrb == POV->Host.RefOrb) { /* TODO:  Improve this */
+         if (ScIsVisible(POV->Host.RefOrb,Isc,PosR) ) {
             for(Ib=0;Ib<S->Nb;Ib++) {
                B = &S->B[Ib];
                M = &Mesh[B->MeshTag];
@@ -1815,8 +1984,8 @@ void DepthPass(void)
             glLoadIdentity();
             for(Isc=0;Isc<Nsc;Isc++) {
                S = &SC[Isc];
-//               if (S->RefOrb == POV.Host.RefOrb) { /* TODO: Improve this */
-               if (ScIsVisible(POV.Host.RefOrb,Isc,PosR) ) {
+//               if (S->RefOrb == POV->Host.RefOrb) { /* TODO: Improve this */
+               if (ScIsVisible(POV->Host.RefOrb,Isc,PosR) ) {
                   for(Ib=0;Ib<S->Nb;Ib++) {
                      B = &S->B[Ib];
                      M = &Mesh[B->MeshTag];
@@ -1841,7 +2010,7 @@ void DepthPass(void)
 
       glBindFramebuffer(GL_FRAMEBUFFER,0);
       glBindRenderbuffer(GL_RENDERBUFFER,0);
-      glViewport(0,0,CamWidth,CamHeight);
+      glViewport(0,0,POV->PixWidth,POV->PixHeight);
 }
 /**********************************************************************/
 void DrawCmdPath(void)
@@ -1885,7 +2054,7 @@ void DrawCmdPath(void)
       glPointSize(1.0);
 }
 /**********************************************************************/
-void OpaquePass(void)
+void OpaquePass(struct POVType *POV)
 {
       long Isc,Ib;
       struct SCType *S;
@@ -1913,7 +2082,7 @@ void OpaquePass(void)
 
       for(Ir=0;Ir<Nrgn;Ir++) {
          R = &Rgn[Ir];
-         if (R->Exists && R->World == POV.Host.World) {
+         if (R->Exists && R->World == POV->Host.World) {
             glPushMatrix();
             glMultMatrixf(R->ModelMatrix);
             /* DrawCmdPath(); */
@@ -1936,7 +2105,7 @@ void OpaquePass(void)
             glLightfv(GL_LIGHT0,GL_DIFFUSE,LocalDiffuseLightColor);
             glLightfv(GL_LIGHT0,GL_SPECULAR,SpecularLightColor);
          }
-         if (ScIsVisible(POV.Host.RefOrb,Isc,PosR)) {
+         if (ScIsVisible(POV->Host.RefOrb,Isc,PosR)) {
             for(Ib=0;Ib<S->Nb;Ib++) {
                B = &S->B[Ib];
                M = &Mesh[B->MeshTag];
@@ -1953,7 +2122,7 @@ void OpaquePass(void)
       }
 }
 /**********************************************************************/
-void SeeThruPass(void)
+void SeeThruPass(struct POVType *POV)
 {
       long Isc,Ib,Ir;
       struct SCType *S;
@@ -1979,7 +2148,7 @@ void SeeThruPass(void)
 
       for(Ir=0;Ir<Nrgn;Ir++) {
          R = &Rgn[Ir];
-         if (R->Exists && R->World == POV.Host.World) {
+         if (R->Exists && R->World == POV->Host.World) {
             glPushMatrix();
             glMultMatrixf(R->ModelMatrix);
             if (ShadowsEnabled) {
@@ -1993,8 +2162,8 @@ void SeeThruPass(void)
 
       for(Isc=0;Isc<Nsc;Isc++) {
          S = &SC[Isc];
-         //if (S->RefOrb == POV.Host.RefOrb) {
-         if (ScIsVisible(POV.Host.RefOrb,Isc,PosR)) {
+         //if (S->RefOrb == POV->Host.RefOrb) {
+         if (ScIsVisible(POV->Host.RefOrb,Isc,PosR)) {
             for(Ib=0;Ib<S->Nb;Ib++) {
                B = &S->B[Ib];
                M = &Mesh[B->MeshTag];
@@ -2007,15 +2176,15 @@ void SeeThruPass(void)
       }
 }
 /**********************************************************************/
-void DrawBodies(void)
+void DrawBodies(struct POVType *POV)
 {
       double CNH[3][3],PosN[3];
       GLfloat Black[4] = {0.0,0.0,0.0,1.0};
 
 /* .. Light Source */
       /* Sun */
-      MTxM(POV.CN,POV.CH,CNH);
-      MxV(CNH,POV.PosH,PosN);
+      MTxM(POV->CN,POV->CH,CNH);
+      MxV(CNH,POV->PosH,PosN);
       UNITV(PosN);
       LightPosN[0] = (GLfloat) -PosN[0];
       LightPosN[1] = (GLfloat) -PosN[1];
@@ -2027,14 +2196,14 @@ void DrawBodies(void)
 
 /* .. Depth Pass */
       if (ShadowsEnabled) {
-         DepthPass();
+         DepthPass(POV);
       }
 
 /* .. Opaque Pass */
-      OpaquePass();
+      OpaquePass(POV);
 
 /* .. SeeThru Pass */
-      if (SeeThruPassNeeded) SeeThruPass();
+      if (SeeThruPassNeeded) SeeThruPass(POV);
 
 /* .. Tidy Up */
       glUseProgram(0);
@@ -2043,11 +2212,7 @@ void DrawBodies(void)
       glMaterialfv(GL_FRONT,GL_EMISSION,Black);
 }
 /**********************************************************************/
-void BufferToScreen()
-{
-}
-/**********************************************************************/
-void SetPovOrientation(void)
+void SetPovOrientation(struct POVType *POV)
 {
       double Axis[6][3] = {{ 1.0,0.0,0.0},{0.0, 1.0,0.0},{0.0,0.0, 1.0},
                            {-1.0,0.0,0.0},{0.0,-1.0,0.0},{0.0,0.0,-1.0}};
@@ -2064,135 +2229,135 @@ void SetPovOrientation(void)
       double Qpermute[4] = {0.5,0.5,-0.5,-0.5};
       long i;
 
-      if (POV.Mode == TRACK_HOST) {
+      if (POV->Mode == TRACK_HOST) {
          for(i=0;i<3;i++) {
-            POV.C[2][i] =  -Axis[POV.BoreAxis][i];
-            POV.C[1][i] =   Axis[POV.UpAxis][i];
+            POV->C[2][i] =  -Axis[POV->BoreAxis][i];
+            POV->C[1][i] =   Axis[POV->UpAxis][i];
          }
-         VxV(POV.C[1],POV.C[2],POV.C[0]);
-         C2Q(POV.C,POV.q);
+         VxV(POV->C[1],POV->C[2],POV->C[0]);
+         C2Q(POV->C,POV->q);
       }
-      else if (POV.Mode == TRACK_TARGET) {
+      else if (POV->Mode == TRACK_TARGET) {
          for(i=0;i<3;i++) {
-            POV.C[2][i] =  -Axis[POS_X][i];
-            POV.C[1][i] =   Axis[NEG_Z][i];
+            POV->C[2][i] =  -Axis[POS_X][i];
+            POV->C[1][i] =   Axis[NEG_Z][i];
          }
-         VxV(POV.C[1],POV.C[2],POV.C[0]);
-         C2Q(POV.C,POV.q);
+         VxV(POV->C[1],POV->C[2],POV->C[0]);
+         C2Q(POV->C,POV->q);
       }
       else { /* FIXED_IN_HOST */
-         QxQ(Qpermute,Qfixed[POV.View],POV.q);
-         Q2C(POV.q,POV.C);
+         QxQ(Qpermute,Qfixed[POV->View],POV->q);
+         Q2C(POV->q,POV->C);
       }
 }
 /**********************************************************************/
-void PovTrackHostMode(void)
+void PovTrackHostMode(struct POVType *POV)
 {
       double qdot[4],rb[3],rs[3],rf[3],rw[3];
       long i,j,RefOrb,center,PovSC,PovBody;
       struct TargetType *Host;
       double rh[3];
 
-      Host = &POV.Host;
+      Host = &POV->Host;
 
       RefOrb = Host->RefOrb;
       center = Orb[RefOrb].World;
       PovSC = Host->SC;
       PovBody = Host->Body;
 
-      if (POV.Frame == FRAME_N) {
+      if (POV->Frame == FRAME_N) {
          for(i=0;i<3;i++) {
-            for(j=0;j<3;j++) POV.CN[i][j] = POV.C[i][j];
+            for(j=0;j<3;j++) POV->CN[i][j] = POV->C[i][j];
          }
-         MxMT(POV.CN,SC[PovSC].CLN,POV.CL);
-         MxMT(POV.CN,Frm[RefOrb].CN,POV.CF);
-         MxMT(POV.CN,SC[PovSC].B[0].CN,POV.CB);
+         MxMT(POV->CN,SC[PovSC].CLN,POV->CL);
+         MxMT(POV->CN,Frm[RefOrb].CN,POV->CF);
+         MxMT(POV->CN,SC[PovSC].B[0].CN,POV->CB);
       }
-      else if(POV.Frame == FRAME_L) {
+      else if(POV->Frame == FRAME_L) {
          for(i=0;i<3;i++) {
-            for(j=0;j<3;j++) POV.CL[i][j] = POV.C[i][j];
+            for(j=0;j<3;j++) POV->CL[i][j] = POV->C[i][j];
          }
          if (Host->Type == TARGET_SC) {
-            MxM(POV.CL,SC[PovSC].CLN,POV.CN);
+            MxM(POV->CL,SC[PovSC].CLN,POV->CN);
          }
          else if(Host->Type == TARGET_REFORB) {
-            MxM(POV.CL,Orb[RefOrb].CLN,POV.CN);
+            MxM(POV->CL,Orb[RefOrb].CLN,POV->CN);
          }
-         MxMT(POV.CN,SC[PovSC].B[0].CN,POV.CB);
-         MxMT(POV.CN,Frm[RefOrb].CN,POV.CF);
+         MxMT(POV->CN,SC[PovSC].B[0].CN,POV->CB);
+         MxMT(POV->CN,Frm[RefOrb].CN,POV->CF);
       }
-      else if(POV.Frame == FRAME_F) {
+      else if(POV->Frame == FRAME_F) {
          for(i=0;i<3;i++) {
-            for(j=0;j<3;j++) POV.CF[i][j] = POV.C[i][j];
+            for(j=0;j<3;j++) POV->CF[i][j] = POV->C[i][j];
          }
-         MxM(POV.CF,Frm[RefOrb].CN,POV.CN);
-         MxMT(POV.CN,Orb[RefOrb].CLN,POV.CL);
-         MxMT(POV.CN,SC[PovSC].B[0].CN,POV.CB);
+         MxM(POV->CF,Frm[RefOrb].CN,POV->CN);
+         MxMT(POV->CN,Orb[RefOrb].CLN,POV->CL);
+         MxMT(POV->CN,SC[PovSC].B[0].CN,POV->CB);
       }
-      else if(POV.Frame == FRAME_S) {
+      else if(POV->Frame == FRAME_S) {
          for(i=0;i<3;i++) {
-            for(j=0;j<3;j++) POV.CB[i][j] = POV.C[i][j];
+            for(j=0;j<3;j++) POV->CB[i][j] = POV->C[i][j];
          }
-         MxM(POV.CB,SC[PovSC].B[0].CN,POV.CN);
-         MxMT(POV.CN,Orb[RefOrb].CLN,POV.CL);
-         MxMT(POV.CN,Frm[RefOrb].CN,POV.CF);
+         MxM(POV->CB,SC[PovSC].B[0].CN,POV->CN);
+         MxMT(POV->CN,Orb[RefOrb].CLN,POV->CL);
+         MxMT(POV->CN,Frm[RefOrb].CN,POV->CF);
       }
-      else if(POV.Frame == FRAME_B) {
+      else if(POV->Frame == FRAME_B) {
          for(i=0;i<3;i++) {
-            for(j=0;j<3;j++) POV.CB[i][j] = POV.C[i][j];
+            for(j=0;j<3;j++) POV->CB[i][j] = POV->C[i][j];
          }
-         MxM(POV.CB,SC[PovSC].B[PovBody].CN,POV.CN);
-         MxMT(POV.CN,Orb[RefOrb].CLN,POV.CL);
-         MxMT(POV.CN,Frm[RefOrb].CN,POV.CF);
+         MxM(POV->CB,SC[PovSC].B[PovBody].CN,POV->CN);
+         MxMT(POV->CN,Orb[RefOrb].CLN,POV->CL);
+         MxMT(POV->CN,Frm[RefOrb].CN,POV->CF);
       }
 
       if (Host->Type == TARGET_WORLD) {
          for(i=0;i<3;i++) {
-            rw[i] = World[Host->World].rad*POV.Range*POV.CN[2][i];
-            POV.PosR[i] = rw[i]-Orb[RefOrb].PosN[i];
+            rw[i] = World[Host->World].rad*POV->Range*POV->CN[2][i];
+            POV->PosR[i] = rw[i]-Orb[RefOrb].PosN[i];
          }
       }
       else if (Host->Type == TARGET_REFORB) {
          Host->World = center;
          for(i=0;i<3;i++) {
-            POV.PosR[i] = POV.Range*POV.CN[2][i];
+            POV->PosR[i] = POV->Range*POV->CN[2][i];
          }
       }
       else if (Host->Type == TARGET_FRM) {
          Host->World = center;
          for(i=0;i<3;i++) {
-            rf[i] = POV.Range*POV.CN[2][i];
-            POV.PosR[i] = rf[i] + Frm[RefOrb].PosR[i];
+            rf[i] = POV->Range*POV->CN[2][i];
+            POV->PosR[i] = rf[i] + Frm[RefOrb].PosR[i];
          }
       }
       else if (Host->Type == TARGET_SC) {
          Host->World = center;
          for(i=0;i<3;i++) {
-            rs[i] = POV.Range*POV.CN[2][i];
-            POV.PosR[i] = rs[i] + SC[PovSC].PosR[i];
+            rs[i] = POV->Range*POV->CN[2][i];
+            POV->PosR[i] = rs[i] + SC[PovSC].PosR[i];
          }
       }
       else if (Host->Type == TARGET_BODY) {
          Host->World = center;
          for(i=0;i<3;i++) {
-            rb[i] = POV.Range*POV.CN[2][i];
+            rb[i] = POV->Range*POV->CN[2][i];
             rs[i] = rb[i] + SC[PovSC].B[PovBody].pn[i];
-            POV.PosR[i] = rs[i] + SC[PovSC].PosR[i];
+            POV->PosR[i] = rs[i] + SC[PovSC].PosR[i];
          }
       }
 
-      for(i=0;i<3;i++) POV.PosN[i] = POV.PosR[i] + Orb[RefOrb].PosN[i];
-      MxM(POV.CN,World[Host->World].CNH,POV.CH);
-      VxM(POV.PosN,World[Host->World].CNH,rh);
-      for(i=0;i<3;i++) POV.PosH[i] = World[Host->World].PosH[i]+rh[i];
+      for(i=0;i<3;i++) POV->PosN[i] = POV->PosR[i] + Orb[RefOrb].PosN[i];
+      MxM(POV->CN,World[Host->World].CNH,POV->CH);
+      VxM(POV->PosN,World[Host->World].CNH,rh);
+      for(i=0;i<3;i++) POV->PosH[i] = World[Host->World].PosH[i]+rh[i];
 
-      QW2QDOT(POV.q,POV.w,qdot);
-      for(i=0;i<4;i++) POV.q[i] += qdot[i];
-      UNITQ(POV.q);
-      Q2C(POV.q,POV.C);
+      QW2QDOT(POV->q,POV->w,qdot);
+      for(i=0;i<4;i++) POV->q[i] += qdot[i];
+      UNITQ(POV->q);
+      Q2C(POV->q,POV->C);
 }
 /**********************************************************************/
-void PovTrackTargetMode(void)
+void PovTrackTargetMode(struct POVType *POV)
 {
       struct TargetType *Host,*Trg;
       double LoS[3],LoSN[3],LoSH[3],pn[3];
@@ -2201,15 +2366,15 @@ void PovTrackTargetMode(void)
       double Cos1deg = 0.99985;
       long j,k;
 
-      Host = &POV.Host;
-      Trg = &POV.Target;
+      Host = &POV->Host;
+      Trg = &POV->Target;
 
 /* .. Find rr, rn, rh for Host and POV */
       if (Host->Type == TARGET_WORLD) {
          for(j=0;j<3;j++) {
             Host->PosH[j] = World[Host->World].PosH[j];
             for(k=0;k<3;k++) Host->CN[j][k] = Identity[j][k];
-            POV.PosH[j] = Host->PosH[j];
+            POV->PosH[j] = Host->PosH[j];
          }
       }
       else if (Host->Type == TARGET_REFORB) {
@@ -2221,15 +2386,15 @@ void PovTrackTargetMode(void)
          }
          MTxV(World[Host->World].CNH,Host->PosN,Host->PosH);
          for(j=0;j<3;j++) Host->PosH[j] += World[Host->World].PosH[j];
-         MTxV(Host->CN,POV.PosB,pn);
+         MTxV(Host->CN,POV->PosB,pn);
          for(j=0;j<3;j++) {
-            POV.PosR[j] = Host->PosR[j] + pn[j];
-            POV.PosN[j] = POV.PosR[j] + Host->PosN[j];
-            for(k=0;k<3;k++) POV.CN[j][k] = Host->CN[j][k];
+            POV->PosR[j] = Host->PosR[j] + pn[j];
+            POV->PosN[j] = POV->PosR[j] + Host->PosN[j];
+            for(k=0;k<3;k++) POV->CN[j][k] = Host->CN[j][k];
          }
-         MxM(POV.CN,World[Host->World].CNH,POV.CH);
-         VxM(POV.PosN,World[Host->World].CNH,POV.PosH);
-         for(j=0;j<3;j++) POV.PosH[j] += World[Host->World].PosH[j];
+         MxM(POV->CN,World[Host->World].CNH,POV->CH);
+         VxM(POV->PosN,World[Host->World].CNH,POV->PosH);
+         for(j=0;j<3;j++) POV->PosH[j] += World[Host->World].PosH[j];
       }
       else if (Host->Type == TARGET_FRM) {
          for(j=0;j<3;j++) {
@@ -2240,15 +2405,15 @@ void PovTrackTargetMode(void)
          }
          MTxV(World[Host->World].CNH,Host->PosN,Host->PosH);
          for(j=0;j<3;j++) Host->PosH[j] += World[Host->World].PosH[j];
-         MTxV(Host->CN,POV.PosB,pn);
+         MTxV(Host->CN,POV->PosB,pn);
          for(j=0;j<3;j++) {
-            POV.PosR[j] = Host->PosR[j] + pn[j];
-            POV.PosN[j] = POV.PosR[j] + Orb[Host->RefOrb].PosN[j];
-            for(k=0;k<3;k++) POV.CN[j][k] = Host->CN[j][k];
+            POV->PosR[j] = Host->PosR[j] + pn[j];
+            POV->PosN[j] = POV->PosR[j] + Orb[Host->RefOrb].PosN[j];
+            for(k=0;k<3;k++) POV->CN[j][k] = Host->CN[j][k];
          }
-         MxM(POV.CN,World[Host->World].CNH,POV.CH);
-         VxM(POV.PosN,World[Host->World].CNH,POV.PosH);
-         for(j=0;j<3;j++) POV.PosH[j] += World[Host->World].PosH[j];
+         MxM(POV->CN,World[Host->World].CNH,POV->CH);
+         VxM(POV->PosN,World[Host->World].CNH,POV->PosH);
+         for(j=0;j<3;j++) POV->PosH[j] += World[Host->World].PosH[j];
       }
       else if (Host->Type == TARGET_SC) {
          for(j=0;j<3;j++) {
@@ -2259,15 +2424,15 @@ void PovTrackTargetMode(void)
          }
          MTxV(World[Host->World].CNH,Host->PosN,Host->PosH);
          for(j=0;j<3;j++) Host->PosH[j] += World[Host->World].PosH[j];
-         MTxV(Host->CN,POV.PosB,pn);
+         MTxV(Host->CN,POV->PosB,pn);
          for(j=0;j<3;j++) {
-            POV.PosR[j] = Host->PosR[j] + pn[j];
-            POV.PosN[j] = POV.PosR[j] + Orb[Host->RefOrb].PosN[j];
-            for(k=0;k<3;k++) POV.CN[j][k] = Host->CN[j][k];
+            POV->PosR[j] = Host->PosR[j] + pn[j];
+            POV->PosN[j] = POV->PosR[j] + Orb[Host->RefOrb].PosN[j];
+            for(k=0;k<3;k++) POV->CN[j][k] = Host->CN[j][k];
          }
-         MxM(POV.CN,World[Host->World].CNH,POV.CH);
-         VxM(POV.PosN,World[Host->World].CNH,POV.PosH);
-         for(j=0;j<3;j++) POV.PosH[j] += World[Host->World].PosH[j];
+         MxM(POV->CN,World[Host->World].CNH,POV->CH);
+         VxM(POV->PosN,World[Host->World].CNH,POV->PosH);
+         for(j=0;j<3;j++) POV->PosH[j] += World[Host->World].PosH[j];
       }
       else {
          for(j=0;j<3;j++) {
@@ -2279,15 +2444,15 @@ void PovTrackTargetMode(void)
          }
          MTxV(World[Host->World].CNH,Host->PosN,Host->PosH);
          for(j=0;j<3;j++) Host->PosH[j] += World[Host->World].PosH[j];
-         MTxV(Host->CN,POV.PosB,pn);
+         MTxV(Host->CN,POV->PosB,pn);
          for(j=0;j<3;j++) {
-            POV.PosR[j] = Host->PosR[j] + pn[j];
-            POV.PosN[j] = POV.PosR[j] + Orb[Host->RefOrb].PosN[j];
-            for(k=0;k<3;k++) POV.CN[j][k] = Host->CN[j][k];
+            POV->PosR[j] = Host->PosR[j] + pn[j];
+            POV->PosN[j] = POV->PosR[j] + Orb[Host->RefOrb].PosN[j];
+            for(k=0;k<3;k++) POV->CN[j][k] = Host->CN[j][k];
          }
-         MxM(POV.CN,World[Host->World].CNH,POV.CH);
-         VxM(POV.PosN,World[Host->World].CNH,POV.PosH);
-         for(j=0;j<3;j++) POV.PosH[j] += World[Host->World].PosH[j];
+         MxM(POV->CN,World[Host->World].CNH,POV->CH);
+         VxM(POV->PosN,World[Host->World].CNH,POV->PosH);
+         for(j=0;j<3;j++) POV->PosH[j] += World[Host->World].PosH[j];
       }
 
 /* .. Find rr, rn, rh for Target */
@@ -2330,19 +2495,19 @@ void PovTrackTargetMode(void)
 
 /* .. Find pointing vector */
       if (Trg->RefOrb == Host->RefOrb) {
-         for(j=0;j<3;j++) LoSN[j] = Trg->PosR[j] - POV.PosR[j];
+         for(j=0;j<3;j++) LoSN[j] = Trg->PosR[j] - POV->PosR[j];
       }
       else if (Trg->World == Host->World) {
-         for(j=0;j<3;j++) LoSN[j] = Trg->PosN[j] - POV.PosN[j];
+         for(j=0;j<3;j++) LoSN[j] = Trg->PosN[j] - POV->PosN[j];
       }
       else {
-         for(j=0;j<3;j++) LoSH[j] = Trg->PosH[j] - POV.PosH[j];
+         for(j=0;j<3;j++) LoSH[j] = Trg->PosH[j] - POV->PosH[j];
          MxV(World[Host->World].CNH,LoSH,LoSN);
       }
       MxV(Host->CN,LoSN,LoS);
       if (MAGV(LoS) < 1.0E-2) {
          printf("Target suspiciously close to POV.  POV Mode reverting to TRACK HOST\n");
-         POV.Mode = TRACK_HOST;
+         POV->Mode = TRACK_HOST;
          PovWidget.Spot[0].Selected = 1;
          PovWidget.Spot[1].Selected = 0;
       }
@@ -2378,29 +2543,29 @@ void PovTrackTargetMode(void)
          CTH[2][1] = SinAz*SinEl;
          CTH[2][2] = CosEl;
          MxM(CTH,Host->CN,CTN);
-         MxM(POV.C,CTN,POV.CN);
-         MxM(POV.CN,World[Host->World].CNH,POV.CH);
-         MxMT(POV.CN,Orb[Host->RefOrb].CLN,POV.CL);
-         MxMT(POV.CN,Frm[Host->RefOrb].CN,POV.CF);
-         MxMT(POV.CN,SC[Host->SC].B[0].CN,POV.CB);
+         MxM(POV->C,CTN,POV->CN);
+         MxM(POV->CN,World[Host->World].CNH,POV->CH);
+         MxMT(POV->CN,Orb[Host->RefOrb].CLN,POV->CL);
+         MxMT(POV->CN,Frm[Host->RefOrb].CN,POV->CF);
+         MxMT(POV->CN,SC[Host->SC].B[0].CN,POV->CB);
       }
 }
 /**********************************************************************/
-void PovFixedInHostMode(void)
+void PovFixedInHostMode(struct POVType *POV)
 {
       struct TargetType *Host;
       double pn[3];
       double Identity[3][3] = {{1.0,0.0,0.0},{0.0,1.0,0.0},{0.0,0.0,1.0}};
       long j,k;
 
-      Host = &POV.Host;
+      Host = &POV->Host;
 
 /* .. Find rr, rn, rh for Host and POV */
       if (Host->Type == TARGET_WORLD) {
          for(j=0;j<3;j++) {
             Host->PosH[j] = World[Host->World].PosH[j];
             for(k=0;k<3;k++) Host->CN[j][k] = Identity[j][k];
-            POV.PosH[j] = Host->PosH[j];
+            POV->PosH[j] = Host->PosH[j];
          }
       }
       else if (Host->Type == TARGET_REFORB) {
@@ -2412,15 +2577,15 @@ void PovFixedInHostMode(void)
          }
          MTxV(World[Host->World].CNH,Host->PosN,Host->PosH);
          for(j=0;j<3;j++) Host->PosH[j] += World[Host->World].PosH[j];
-         MTxV(Host->CN,POV.PosB,pn);
+         MTxV(Host->CN,POV->PosB,pn);
          for(j=0;j<3;j++) {
-            POV.PosR[j] = Host->PosR[j] + pn[j];
-            POV.PosN[j] = POV.PosR[j] + Host->PosN[j];
-            for(k=0;k<3;k++) POV.CN[j][k] = Host->CN[j][k];
+            POV->PosR[j] = Host->PosR[j] + pn[j];
+            POV->PosN[j] = POV->PosR[j] + Host->PosN[j];
+            for(k=0;k<3;k++) POV->CN[j][k] = Host->CN[j][k];
          }
-         MxM(POV.CN,World[Host->World].CNH,POV.CH);
-         VxM(POV.PosN,World[Host->World].CNH,POV.PosH);
-         for(j=0;j<3;j++) POV.PosH[j] += World[Host->World].PosH[j];
+         MxM(POV->CN,World[Host->World].CNH,POV->CH);
+         VxM(POV->PosN,World[Host->World].CNH,POV->PosH);
+         for(j=0;j<3;j++) POV->PosH[j] += World[Host->World].PosH[j];
       }
       else if (Host->Type == TARGET_FRM) {
          for(j=0;j<3;j++) {
@@ -2431,15 +2596,15 @@ void PovFixedInHostMode(void)
          }
          MTxV(World[Host->World].CNH,Host->PosN,Host->PosH);
          for(j=0;j<3;j++) Host->PosH[j] += World[Host->World].PosH[j];
-         MTxV(Host->CN,POV.PosB,pn);
+         MTxV(Host->CN,POV->PosB,pn);
          for(j=0;j<3;j++) {
-            POV.PosR[j] = Host->PosR[j] + pn[j];
-            POV.PosN[j] = POV.PosR[j] + Orb[Host->RefOrb].PosN[j];
-            for(k=0;k<3;k++) POV.CN[j][k] = Host->CN[j][k];
+            POV->PosR[j] = Host->PosR[j] + pn[j];
+            POV->PosN[j] = POV->PosR[j] + Orb[Host->RefOrb].PosN[j];
+            for(k=0;k<3;k++) POV->CN[j][k] = Host->CN[j][k];
          }
-         MxM(POV.CN,World[Host->World].CNH,POV.CH);
-         VxM(POV.PosN,World[Host->World].CNH,POV.PosH);
-         for(j=0;j<3;j++) POV.PosH[j] += World[Host->World].PosH[j];
+         MxM(POV->CN,World[Host->World].CNH,POV->CH);
+         VxM(POV->PosN,World[Host->World].CNH,POV->PosH);
+         for(j=0;j<3;j++) POV->PosH[j] += World[Host->World].PosH[j];
       }
       else if (Host->Type == TARGET_SC) {
          for(j=0;j<3;j++) {
@@ -2450,15 +2615,15 @@ void PovFixedInHostMode(void)
          }
          MTxV(World[Host->World].CNH,Host->PosN,Host->PosH);
          for(j=0;j<3;j++) Host->PosH[j] += World[Host->World].PosH[j];
-         MTxV(Host->CN,POV.PosB,pn);
+         MTxV(Host->CN,POV->PosB,pn);
          for(j=0;j<3;j++) {
-            POV.PosR[j] = Host->PosR[j] + pn[j];
-            POV.PosN[j] = POV.PosR[j] + Orb[Host->RefOrb].PosN[j];
-            for(k=0;k<3;k++) POV.CN[j][k] = Host->CN[j][k];
+            POV->PosR[j] = Host->PosR[j] + pn[j];
+            POV->PosN[j] = POV->PosR[j] + Orb[Host->RefOrb].PosN[j];
+            for(k=0;k<3;k++) POV->CN[j][k] = Host->CN[j][k];
          }
-         MxM(POV.CN,World[Host->World].CNH,POV.CH);
-         VxM(POV.PosN,World[Host->World].CNH,POV.PosH);
-         for(j=0;j<3;j++) POV.PosH[j] += World[Host->World].PosH[j];
+         MxM(POV->CN,World[Host->World].CNH,POV->CH);
+         VxM(POV->PosN,World[Host->World].CNH,POV->PosH);
+         for(j=0;j<3;j++) POV->PosH[j] += World[Host->World].PosH[j];
       }
       else {
          for(j=0;j<3;j++) {
@@ -2470,63 +2635,66 @@ void PovFixedInHostMode(void)
          }
          MTxV(World[Host->World].CNH,Host->PosN,Host->PosH);
          for(j=0;j<3;j++) Host->PosH[j] += World[Host->World].PosH[j];
-         MTxV(Host->CN,POV.PosB,pn);
+         MTxV(Host->CN,POV->PosB,pn);
          for(j=0;j<3;j++) {
-            POV.PosR[j] = Host->PosR[j] + pn[j];
-            POV.PosN[j] = POV.PosR[j] + Orb[Host->RefOrb].PosN[j];
-            for(k=0;k<3;k++) POV.CN[j][k] = Host->CN[j][k];
+            POV->PosR[j] = Host->PosR[j] + pn[j];
+            POV->PosN[j] = POV->PosR[j] + Orb[Host->RefOrb].PosN[j];
          }
-         MxM(POV.CN,World[Host->World].CNH,POV.CH);
-         VxM(POV.PosN,World[Host->World].CNH,POV.PosH);
-         for(j=0;j<3;j++) POV.PosH[j] += World[Host->World].PosH[j];
+         MxM(POV->CB,Host->CN,POV->CN);
+         MxMT(POV->CN,Orb[Host->RefOrb].CLN,POV->CL);
+         MxMT(POV->CN,Frm[Host->RefOrb].CN,POV->CF);
+         MxM(POV->CN,World[Host->World].CNH,POV->CH);
+         VxM(POV->PosN,World[Host->World].CNH,POV->PosH);
+         for(j=0;j<3;j++) POV->PosH[j] += World[Host->World].PosH[j];
       }
 
 
-/* .. Find POV orientation */
-      MxM(POV.C,Host->CN,POV.CN);
-      MxM(POV.CN,World[Host->World].CNH,POV.CH);
-      MxMT(POV.CN,Orb[Host->RefOrb].CLN,POV.CL);
-      MxMT(POV.CN,Frm[Host->RefOrb].CN,POV.CF);
-      MxMT(POV.CN,SC[Host->SC].B[0].CN,POV.CB);
+/*
+      MxM(POV->C,Host->CN,POV->CN);
+      MxM(POV->CN,World[Host->World].CNH,POV->CH);
+      MxMT(POV->CN,Orb[Host->RefOrb].CLN,POV->CL);
+      MxMT(POV->CN,Frm[Host->RefOrb].CN,POV->CF);
+      MxMT(POV->CN,SC[Host->SC].B[Host->Body].CN,POV->CB);
+*/
 }
 /**********************************************************************/
-void PanZoomPOV(void)
+void PanZoomPOV(struct POVType *POV)
 {
       double C[3][3],Ang[3],f,dAng,dR;
       long i;
 
-      if (POV.TimeToGo > 0.0) {
-         f = (POV.TimeToGo-DTOUTGL)/POV.TimeToGo;
+      if (POV->TimeToGo > 0.0) {
+         f = (POV->TimeToGo-DTOUTGL)/POV->TimeToGo;
          if (f < 0.0) f = 0.0;
-         MxMT(POV.C,POV.CmdPermute,C);
-         C2A(POV.CmdSeq,C,&Ang[0],&Ang[1],
+         MxMT(POV->C,POV->CmdPermute,C);
+         C2A(POV->CmdSeq,C,&Ang[0],&Ang[1],
             &Ang[2]);
          for(i=0;i<3;i++) {
-            dAng = Ang[i]-POV.CmdAngle[i];
-            Ang[i] = POV.CmdAngle[i] + f*dAng;
+            dAng = Ang[i]-POV->CmdAngle[i];
+            Ang[i] = POV->CmdAngle[i] + f*dAng;
          }
-         A2C(POV.CmdSeq,Ang[0],Ang[1],Ang[2],C);
-         MxM(C,POV.CmdPermute,POV.C);
-         C2Q(POV.C,POV.q);
+         A2C(POV->CmdSeq,Ang[0],Ang[1],Ang[2],C);
+         MxM(C,POV->CmdPermute,POV->C);
+         C2Q(POV->C,POV->q);
 
-         dR = POV.Range-POV.CmdRange;
-         POV.Range = POV.CmdRange + f*dR;
+         dR = POV->Range-POV->CmdRange;
+         POV->Range = POV->CmdRange + f*dR;
 
-         POV.TimeToGo -= DTOUTGL;
+         POV->TimeToGo -= DTOUTGL;
       }
 }
 /**********************************************************************/
 /*  Find POV location, orientation in RefOrb, N, H, etc               */
-void UpdatePOV(void)
+void UpdatePOV(struct POVType *POV)
 {
-      PanZoomPOV();
+      PanZoomPOV(POV);
 
-      if (POV.Mode == TRACK_HOST) PovTrackHostMode();
-      else if (POV.Mode == TRACK_TARGET) PovTrackTargetMode();
-      else PovFixedInHostMode();
+      if (POV->Mode == TRACK_HOST) PovTrackHostMode(POV);
+      else if (POV->Mode == TRACK_TARGET) PovTrackTargetMode(POV);
+      else PovFixedInHostMode(POV);
 }
 /**********************************************************************/
-void FindModelMatrices(void)
+void FindModelMatrices(struct POVType *POV)
 {
       long Isc,Ib,i,Ir;
       double pbn[3],pcmn[3],prn[3];
@@ -2538,11 +2706,11 @@ void FindModelMatrices(void)
 
       for(Isc=0;Isc<Nsc;Isc++) {
          S = &SC[Isc];
-         if (ScIsVisible(POV.Host.RefOrb,Isc,PosR)) {
+         if (ScIsVisible(POV->Host.RefOrb,Isc,PosR)) {
             for(i=0;i<3;i++) PosR[i] = S->PosR[i];
-            if (S->RefOrb != POV.Host.RefOrb) {
+            if (S->RefOrb != POV->Host.RefOrb) {
                for(i=0;i<3;i++) {
-                  PosR[i] += Orb[S->RefOrb].PosN[i] - Orb[POV.Host.RefOrb].PosN[i];
+                  PosR[i] += Orb[S->RefOrb].PosN[i] - Orb[POV->Host.RefOrb].PosN[i];
                }
             }
             for(Ib=0;Ib<S->Nb;Ib++) {
@@ -2561,8 +2729,8 @@ void FindModelMatrices(void)
 
       for(Ir=0;Ir<Nrgn;Ir++) {
          R = &Rgn[Ir];
-         if (R->Exists && R->World == POV.Host.World) {
-            O = &Orb[POV.Host.RefOrb];
+         if (R->Exists && R->World == POV->Host.World) {
+            O = &Orb[POV->Host.RefOrb];
             for(i=0;i<3;i++) prn[i] = R->PosN[i]-O->PosN[i];
             BuildModelMatrix(R->CN,prn,R->ModelMatrix);
          }
@@ -2571,30 +2739,15 @@ void FindModelMatrices(void)
 /**********************************************************************/
 void CamRenderExec(void)
 {
-      FindModelMatrices();
-      UpdatePOV();
+      FindModelMatrices(&Eye);
+      UpdatePOV(&Eye);
 
-      if (VREnabled) {
-         SetDestination(OFFSCREEN);
-         SetEye(LEFTEYE);
-         DrawFarScene();
-         DrawBodies();
-         DrawNearAuxObjects();
-         SetEye(RIGHTEYE);
-         DrawFarScene();
-         DrawBodies();
-         DrawNearAuxObjects();
-         BufferToScreen();
-      }
-      else {
-         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-         SetDestination(ONSCREEN);
-         DrawFarScene();
-         SetEye(MONOCULAR);
-         DrawBodies();
-         /* DrawContactSpheres(); */  /* Diagnostic only */
-         DrawNearAuxObjects();
-      }
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      DrawFarScene(&Eye);
+      BuildModelViewMatrix(&Eye);
+      DrawBodies(&Eye);
+      /* DrawContactSpheres(&Eye); */  /* Diagnostic only */
+      DrawNearAuxObjects(&Eye);
 }
 /*********************************************************************/
 void DrawClock(void)
@@ -2624,7 +2777,7 @@ void DrawClock(void)
             UTC.Year,UTC.doy,UTC.Hour,UTC.Minute,(long) UTC.Second);
       }
       glRasterPos2i(MapWidth-8*strlen(s),15);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
+      DrawString8x13(s);
 
       glMatrixMode(GL_PROJECTION);
       glPopMatrix();
@@ -2657,18 +2810,18 @@ void DrawCredits(void)
       glMaterialfv(GL_FRONT,GL_EMISSION,CreditColor);
       if (Toggle) {
          glRasterPos2i(5,MapHeight-15);
-         DrawBitmapString(GLUT_BITMAP_8_BY_13,
+         DrawString8x13(
             "42 written by Eric Stoneking");
          glRasterPos2f(5,MapHeight-2);
-         DrawBitmapString(GLUT_BITMAP_8_BY_13,
+         DrawString8x13(
             "Code 591, NASA Goddard Space Flight Center");
       }
       else {
          glRasterPos2i(5,MapHeight-15);
-         DrawBitmapString(GLUT_BITMAP_8_BY_13,
+         DrawString8x13(
             "GlastCam and LroCam contributions from");
          glRasterPos2f(5,MapHeight-2);
-         DrawBitmapString(GLUT_BITMAP_8_BY_13,
+         DrawString8x13(
             "Dean Chai and Neerav Shah.");
       }
       glMatrixMode(GL_PROJECTION);
@@ -2696,7 +2849,7 @@ void DrawTdrsMap(void)
             glEnd();
             glRasterPos2f(lng,lat);
             glBitmap(0,0,0,0,4,-4,0);
-            DrawBitmapString(GLUT_BITMAP_8_BY_13,Tdrs[i].Designation);
+            DrawString8x13(Tdrs[i].Designation);
          }
       }
       glColor4fv(Black);
@@ -2724,7 +2877,7 @@ long OccultedByEarth(double pge[3], double pte[3])
 /*********************************************************************/
 void DrawMap(void)
 {
-
+      struct POVType *POV = &Eye;
       double a,Lng,Lat,x,y;
       double p[3],magr,CosEclipse,rad,lngc,latc,axis[3];
       GLfloat Black[4] = {0.0,0.0,0.0,1.0};
@@ -2747,8 +2900,8 @@ void DrawMap(void)
       glClear(GL_COLOR_BUFFER_BIT);
       glMaterialfv(GL_FRONT,GL_DIFFUSE,Black);
 
-      S = &SC[POV.Host.SC];
-      if (World[POV.Host.World].Type != SUN) {
+      S = &SC[POV->Host.SC];
+      if (World[POV->Host.World].Type != SUN) {
          W = &World[Orb[S->RefOrb].World];
 
          for(i=0;i<3;i++) svh[i] = -W->PosH[i];
@@ -2760,7 +2913,7 @@ void DrawMap(void)
 
 
 /* .. Map with Day/Night Shading */
-         if (POV.Host.World == LUNA) {
+         if (POV->Host.World == LUNA) {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, World[LUNA].ColTexTag);
             glActiveTexture(GL_TEXTURE1);
@@ -2771,7 +2924,7 @@ void DrawMap(void)
          }
          else {
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, World[POV.Host.World].MapTexTag);
+            glBindTexture(GL_TEXTURE_2D, World[POV->Host.World].MapTexTag);
             glUseProgram(MapShaderProgram);
             glUniform3f(MapSunVecLoc,svw[0],svw[1],svw[2]);
             glUniform1f(MapCosEclLoc,CosEclipse);
@@ -2907,13 +3060,13 @@ void DrawMap(void)
          glColor4fv(GroundStationColor);
          glPointSize(5.0);
          for(i=0;i<Ngnd;i++) {
-            if (GroundStation[i].Exists && GroundStation[i].World == POV.Host.World) {
+            if (GroundStation[i].Exists && GroundStation[i].World == POV->Host.World) {
                glBegin(GL_POINTS);
                   glVertex2f(GroundStation[i].lng,GroundStation[i].lat);
                glEnd();
                glRasterPos2f(GroundStation[i].lng,GroundStation[i].lat);
                glBitmap(0,0,0,0,5,-4,0);
-               DrawBitmapString(GLUT_BITMAP_8_BY_13,GroundStation[i].Label);
+               DrawString8x13(GroundStation[i].Label);
             }
          }
          glPointSize(1.0);
@@ -3043,7 +3196,7 @@ void DrawMap(void)
          /* Projected orbit track */
          glPointSize(3.0);
          glLineWidth(1.0);
-         Eph = &Orb[POV.Host.RefOrb];
+         Eph = &Orb[POV->Host.RefOrb];
          Eph2RV(Eph->mu,Eph->SLR,Eph->ecc,Eph->inc,Eph->RAAN,Eph->ArgP,
             DynTime-3600.0-Eph->tp,rn,vn,&anom);
          SimpRot(Zaxis,-3600.0*W->w,CEW);
@@ -3105,7 +3258,7 @@ void DrawMap(void)
 
 
 /* .. TDRS in View */
-         if (POV.Host.World == EARTH && CamShow[TDRS]) DrawTdrsMap();
+         if (POV->Host.World == EARTH && CamShow[TDRS]) DrawTdrsMap();
 
 /* .. Clock shows (possibly offset) time */
          if (MapShow[MAP_CLOCK]) DrawClock();
@@ -3185,7 +3338,7 @@ void DrawOrreryHUD(struct OrreryPOVType *O)
          glVertex2i(x0+80,y0-10);
       glEnd();
       glRasterPos2i(x0+40-4*strlen(O->ScaleLabel[O->Zoom]),y0+15);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,O->ScaleLabel[O->Zoom]);
+      DrawString8x13(O->ScaleLabel[O->Zoom]);
 
       glMatrixMode(GL_PROJECTION);
       glPopMatrix();
@@ -3366,7 +3519,7 @@ void DrawOrrery(void)
                   glEnd();
                   glRasterPos3dv(LS->LP[Ip].PosN);
                   glBitmap(0,0,0.0,0.0,5,5,NULL);
-                  DrawBitmapString(GLUT_BITMAP_8_BY_13,LPName[Ip]);
+                  DrawString8x13(LPName[Ip]);
                }
                glPopMatrix();
             }
@@ -3422,7 +3575,7 @@ void DrawOrrery(void)
                glColor3fv(WorldNameColor);
                glRasterPos3d(0.0,0.0,0.0);
                glBitmap(0,0,0.0,0.0,PointSize/2+2,5,NULL);
-               DrawBitmapString(GLUT_BITMAP_8_BY_13,P->Name);
+               DrawString8x13(P->Name);
                /* Moons */
                for(Im=0;Im<P->Nsat;Im++) {
                   Iw = P->Sat[Im];
@@ -3448,7 +3601,7 @@ void DrawOrrery(void)
                      glColor3fv(WorldNameColor);
                      glRasterPos3d(0.0,0.0,0.0);
                      glBitmap(0,0,0.0,0.0,PointSize/2+2,5,NULL);
-                     DrawBitmapString(GLUT_BITMAP_8_BY_13,M->Name);
+                     DrawString8x13(M->Name);
                      glPopMatrix();
                   }
                }
@@ -3483,7 +3636,7 @@ void DrawOrrery(void)
                glColor3fv(WorldNameColor);
                glRasterPos3d(0.0,0.0,0.0);
                glBitmap(0,0,0.0,0.0,PointSize/2+2,5,NULL);
-               DrawBitmapString(GLUT_BITMAP_8_BY_13,MB->Name);
+               DrawString8x13(MB->Name);
                glPopMatrix();
             }
          }
@@ -3611,7 +3764,7 @@ void DrawOrrery(void)
             RotateR2L(W->CNH);
             glRasterPos3dv(SC[Isc].PosN);
             glBitmap(8,8,4.0,4.0,5.0,-13.0,ScGlyph);
-            DrawBitmapString(GLUT_BITMAP_8_BY_13,SC[Isc].Label);
+            DrawString8x13(SC[Isc].Label);
             glPopMatrix();
          }
       }
@@ -3649,14 +3802,14 @@ void DrawSphereHUD(void)
       DrawWidget(W);
 
       glRasterPos2i((W->xmin+W->xmax)/2 - 12,W->ymax-14);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,"Top");
+      DrawString8x13("Top");
 
       glRasterPos2i((W->xmin+W->xmax)/2 - 24,W->ymin+38);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,"Center");
+      DrawString8x13("Center");
 
       for (i=0; i<6; i++) {
          glRasterPos2i(W->Spot[i].xmin+1,W->Spot[i].ymin+2);
-         DrawBitmapString(GLUT_BITMAP_8_BY_13,top[i]);
+         DrawString8x13(top[i]);
       }
 
       /* Text displayed for spots 7-10 changes based on which axis is selected */
@@ -3666,7 +3819,7 @@ void DrawSphereHUD(void)
 
       for (i=6; i<10; i++) {
          glRasterPos2i(W->Spot[i].xmin+1,W->Spot[i].ymin+2);
-         DrawBitmapString(GLUT_BITMAP_8_BY_13,center[j][i-6]);
+         DrawString8x13(center[j][i-6]);
       }
 
 /* .. Show Box */
@@ -3674,11 +3827,11 @@ void DrawSphereHUD(void)
       DrawWidget(W);
 
       glRasterPos2i((W->xmin+W->xmax)/2 - 16,W->ymax-14);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,"Show");
+      DrawString8x13("Show");
 
       for (i=0; i<6; i++) {
          glRasterPos2i(W->Spot[i].xmin+1,W->Spot[i].ymin+2);
-         DrawBitmapString(GLUT_BITMAP_8_BY_13,show[i]);
+         DrawString8x13(show[i]);
       }
 
 /* .. Vectors Box */
@@ -3686,11 +3839,11 @@ void DrawSphereHUD(void)
       DrawWidget(W);
 
       glRasterPos2i((W->xmin+W->xmax)/2 - 28,W->ymax-14);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,"Vectors");
+      DrawString8x13("Vectors");
 
       for (i=0; i<6; i++) {
          glRasterPos2i(W->Spot[i].xmin+1,W->Spot[i].ymin+2);
-         DrawBitmapString(GLUT_BITMAP_8_BY_13,vectors[i]);
+         DrawString8x13(vectors[i]);
       }
 
 /* .. FOVs Box */
@@ -3698,11 +3851,11 @@ void DrawSphereHUD(void)
       DrawWidget(W);
 
       glRasterPos2i((W->xmin+W->xmax)/2 - 44,W->ymax-14);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,"Sensor FOVs");
+      DrawString8x13("Sensor FOVs");
 
       for (i=0; i<3; i++) {
          glRasterPos2i(W->Spot[i].xmin+1,W->Spot[i].ymin+2);
-         DrawBitmapString(GLUT_BITMAP_8_BY_13,fovs[i]);
+         DrawString8x13(fovs[i]);
       }
 
 /* .. Grids Box */
@@ -3710,11 +3863,11 @@ void DrawSphereHUD(void)
       DrawWidget(W);
 
       glRasterPos2i(W->xmin+4,W->ymin+4);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,"Grids");
+      DrawString8x13("Grids");
 
       for (i=0; i<3; i++) {
          glRasterPos2i(W->Spot[i].xmin+1,W->Spot[i].ymin+2);
-         DrawBitmapString(GLUT_BITMAP_8_BY_13,frames[i]);
+         DrawString8x13(frames[i]);
       }
 
 /* .. Axes Box */
@@ -3722,13 +3875,27 @@ void DrawSphereHUD(void)
       DrawWidget(W);
 
       glRasterPos2i(W->xmin+4,W->ymin+4);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,"Axes");
+      DrawString8x13("Axes");
 
       for (i=0; i<3; i++) {
          glRasterPos2i(W->Spot[i].xmin+1,W->Spot[i].ymin+2);
-         DrawBitmapString(GLUT_BITMAP_8_BY_13,frames[i]);
+         DrawString8x13(frames[i]);
       }
 
+}
+/**********************************************************************/
+void DrawCamera(void)
+{
+      UpdatePOV(CurrentCameraPOV);
+      FindModelMatrices(CurrentCameraPOV);
+
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+      if (CurrentCameraPOV->FarSceneEnabled)
+         DrawFarScene(CurrentCameraPOV);
+      
+      BuildModelViewMatrix(CurrentCameraPOV);
+      DrawBodies(CurrentCameraPOV);
 }
 /**********************************************************************/
 /* 24 possible cases for body axes orientation in Unit Sphere window -
@@ -3795,7 +3962,7 @@ void DrawConstellation(struct ConstellationType *C, double CVJ[3][3])
       glEnd();
 
       glRasterPos2f(lngA,latA);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,C->Tag);
+      DrawString8x13(C->Tag);
 
       for (i=0;i<Nlines;i++) {
          MxV(CVJ,C->StarVec[C->Star1[i]],VecV);
@@ -3810,6 +3977,7 @@ void DrawConstellation(struct ConstellationType *C, double CVJ[3][3])
 /**********************************************************************/
 void DrawUnitSphere(void)
 {
+      struct POVType *POV = &Eye;
       double lat,lng;
       long i,j,Im;
       char label[40];
@@ -3832,7 +4000,7 @@ void DrawUnitSphere(void)
 
       double VecH[3],VecN[3],VecV[3];
 
-      struct SCType *S = &SC[POV.Host.SC];
+      struct SCType *S = &SC[POV->Host.SC];
       struct WorldType *Wd = &World[Orb[S->RefOrb].World];
       struct WidgetType *W;
 
@@ -4157,7 +4325,7 @@ void DrawUnitSphere(void)
       if (W->Spot[3].Selected) {
          for (i=MERCURY;i<=PLUTO;i++) {
             Wd = &World[i];
-            if (Wd->Exists && i != POV.Host.World) {
+            if (Wd->Exists && i != POV->Host.World) {
                for (j=0; j<3; j++) {
                   VecH[j] = Wd->PosH[j] - S->PosH[j];
                }
@@ -4221,7 +4389,7 @@ void DrawUnitSphere(void)
 
 }
 /**********************************************************************/
-void InitCamWidgets(void)
+void InitCamWidgets(struct POVType *POV)
 {
       GLfloat BorderColor[4] = {0.64,0.32,0.075,1.0};
       GLfloat TextColor[4] = {0.8,0.44,0.0,1.0};
@@ -4253,10 +4421,10 @@ void InitCamWidgets(void)
          PovWidget.Spot[i].Visible = 1;
          PovWidget.Spot[i].Selected = 0;
       }
-      PovWidget.Spot[POV.Mode].Selected = 1;
-      PovWidget.Spot[3+POV.Frame].Selected = 1;
-      PovWidget.Spot[8+POV.BoreAxis%3].Selected = 1;
-      PovWidget.Spot[11+POV.UpAxis%3].Selected = 1;
+      PovWidget.Spot[POV->Mode].Selected = 1;
+      PovWidget.Spot[3+POV->Frame].Selected = 1;
+      PovWidget.Spot[8+POV->BoreAxis%3].Selected = 1;
+      PovWidget.Spot[11+POV->UpAxis%3].Selected = 1;
       for(i=0;i<3;i++) {
          PovWidget.Spot[i].xmin = x0+130+10*i;
          PovWidget.Spot[i].xmax = x0+138+10*i;
@@ -4300,7 +4468,7 @@ void InitCamWidgets(void)
          HostWidget.Spot[i].Visible = 1;
          HostWidget.Spot[i].Selected = 0;
       }
-      HostWidget.Spot[POV.Host.Type].Selected = 1;
+      HostWidget.Spot[POV->Host.Type].Selected = 1;
       for(i=0;i<5;i++) {
          HostWidget.Spot[i].xmin = x0+10;
          HostWidget.Spot[i].xmax = x0+18;
@@ -4341,7 +4509,7 @@ void InitCamWidgets(void)
          TargetWidget.Spot[i].Visible = 1;
          TargetWidget.Spot[i].Selected = 0;
       }
-      TargetWidget.Spot[POV.Host.Type].Selected = 1;
+      TargetWidget.Spot[POV->Host.Type].Selected = 1;
       for(i=0;i<5;i++) {
          TargetWidget.Spot[i].xmin = x0+10;
          TargetWidget.Spot[i].xmax = x0+18;
@@ -5347,6 +5515,7 @@ void LoadMapShaders(void)
 /*********************************************************************/
 void ReadGraphicsInpFile(void)
 {
+      struct POVType *POV = &Eye;
       FILE *infile;
       char response[121];
       long i;
@@ -5371,64 +5540,64 @@ void ReadGraphicsInpFile(void)
       ScanLine(infile,"%120s",1,response);
       PauseFlag = DecodeString(response);
       ScanLine(infile,"%120s",1,response);
-      POV.Mode = DecodeString(response);
+      POV->Mode = DecodeString(response);
       ScanLine(infile,"%120s",1,response);
-      POV.Host.Type = DecodeString(response);
-      ScanLine(infile,"%ld %ld %c",3,&Host,&POV.Host.Body,&Frame);
+      POV->Host.Type = DecodeString(response);
+      ScanLine(infile,"%ld %ld %c",3,&Host,&POV->Host.Body,&Frame);
       if (Host >= Nsc || !SC[Host].Exists) {
          printf("POV Host SC %ld doesn't exist.\n",Host);
          exit(1);
       }
-      POV.Host.SC = Host;
-      POV.Host.RefOrb = SC[Host].RefOrb;
-      POV.Host.World = Orb[POV.Host.RefOrb].World;
-      POV.Frame = DecodeString(response);
-      if (Frame == 'N') POV.Frame = FRAME_N;
-      else if (Frame == 'L') POV.Frame = FRAME_L;
-      else if (Frame == 'F') POV.Frame = FRAME_F;
-      else if (Frame == 'S') POV.Frame = FRAME_S;
-      else if (Frame == 'B') POV.Frame = FRAME_B;
+      POV->Host.SC = Host;
+      POV->Host.RefOrb = SC[Host].RefOrb;
+      POV->Host.World = Orb[POV->Host.RefOrb].World;
+      POV->Frame = DecodeString(response);
+      if (Frame == 'N') POV->Frame = FRAME_N;
+      else if (Frame == 'L') POV->Frame = FRAME_L;
+      else if (Frame == 'F') POV->Frame = FRAME_F;
+      else if (Frame == 'S') POV->Frame = FRAME_S;
+      else if (Frame == 'B') POV->Frame = FRAME_B;
       else {
          printf("Nonsense frame in Inp_Graphics.txt\n");
          exit(1);
       }
       ScanLine(infile,"%120s",1,response);
-      POV.Target.Type = DecodeString(response);
-      ScanLine(infile,"%ld %ld %c",3,&Target,&POV.Target.Body,&Frame);
+      POV->Target.Type = DecodeString(response);
+      ScanLine(infile,"%ld %ld %c",3,&Target,&POV->Target.Body,&Frame);
       if (Target >= Nsc || !SC[Target].Exists) {
          printf("POV Target SC %ld doesn't exist.\n",Target);
          exit(1);
       }
-      POV.Target.SC = Target;
-      POV.Target.RefOrb = SC[Target].RefOrb;
-      POV.Target.World = Orb[POV.Target.RefOrb].World;
-      POV.Frame = DecodeString(response);
-      if (Frame == 'N') POV.Frame = FRAME_N;
-      else if (Frame == 'L') POV.Frame = FRAME_L;
-      else if (Frame == 'F') POV.Frame = FRAME_F;
-      else if (Frame == 'S') POV.Frame = FRAME_S;
-      else if (Frame == 'B') POV.Frame = FRAME_B;
+      POV->Target.SC = Target;
+      POV->Target.RefOrb = SC[Target].RefOrb;
+      POV->Target.World = Orb[POV->Target.RefOrb].World;
+      POV->Frame = DecodeString(response);
+      if (Frame == 'N') POV->Frame = FRAME_N;
+      else if (Frame == 'L') POV->Frame = FRAME_L;
+      else if (Frame == 'F') POV->Frame = FRAME_F;
+      else if (Frame == 'S') POV->Frame = FRAME_S;
+      else if (Frame == 'B') POV->Frame = FRAME_B;
       else {
          printf("Nonsense frame in Inp_Graphics.txt\n");
          exit(1);
       }
       ScanLine(infile,"%120s",1,response);
-      POV.BoreAxis = DecodeString(response);
+      POV->BoreAxis = DecodeString(response);
       ScanLine(infile,"%120s",1,response);
-      POV.UpAxis = DecodeString(response);
-      ScanLine(infile,"%lf",1,&POV.Range);
-      ScanLine(infile,"%lf",1,&POV.Angle);
+      POV->UpAxis = DecodeString(response);
+      ScanLine(infile,"%lf",1,&POV->Range);
+      ScanLine(infile,"%lf",1,&POV->Angle);
       ScanLine(infile,"%lf %lf %lf",3,
-         &POV.PosB[0],&POV.PosB[1],&POV.PosB[2]);
+         &POV->PosB[0],&POV->PosB[1],&POV->PosB[2]);
       ScanLine(infile,"%120s",1,response);
-      POV.View = DecodeString(response);
+      POV->View = DecodeString(response);
 
 /* .. CAM Parameters */
       ScanLine(infile,"",0,NULL);
       ScanLine(infile,"\"%80[^\"]\"",1,CamTitle);
-      ScanLine(infile,"%ld %ld",2,&CamWidth,&CamHeight);
+      ScanLine(infile,"%ld %ld",2,&POV->PixWidth,&POV->PixHeight);
       ScanLine(infile,"%lf",1,&MouseScaleFactor);
-      POV.AR = ((double) CamWidth)/((double) CamHeight);
+      POV->AR = ((double) POV->PixWidth)/((double) POV->PixHeight);
       ScanLine(infile,"%lf",1,&GammaCorrection);
 /* .. Cam Show/Hide */
       ScanLine(infile,"",0,NULL);

@@ -248,6 +248,10 @@ long DecodeString(char *s)
       else if (!strcmp(s,"DOWNLINK")) return DOWNLINK;
       else if (!strcmp(s,"CROSSLINK")) return CROSSLINK;
 
+      else if (!strcmp(s,"RGB")) return PIX_RGB;
+      else if (!strcmp(s,"RGBA")) return PIX_RGBA;
+      else if (!strcmp(s,"DEPTH")) return PIX_DEPTH;
+
       else {
          printf("Bogus input %s in DecodeString (42init.c:%d)\n",s,__LINE__);
          exit(1);
@@ -1952,7 +1956,7 @@ void InitSpacecraft(struct SCType *S)
       char response[121];
       char response1[121],response2[121],response3[121];
       double CBL[3][3],CBF[3][3];
-      long i,j,k,Ia,Ib,Ig,Iw,Im,It,Bi,Bo,Ic,Ist,Ifss,Ifgs;
+      long i,j,k,Ia,Ib,Ig,Iw,Im,It,Bi,Bo,Ic,Ist,Ifss,Icam,Ifgs;
       char RateFrame,AttFrame,AttParm;
       double wlnb[3];
       double wbn[3],CBN[3][3],qbn[4];
@@ -1980,9 +1984,12 @@ void InitSpacecraft(struct SCType *S)
       struct StarTrackerType *ST;
       struct GpsType *GPS;
       struct AccelType *Accel;
+      struct CameraType *Cam;
+      struct POVType *P;
       struct FgsType *Fgs;
       struct PsfType *PSF;
       long OldNmesh;
+      double Cy180[3][3] = {{-1.0,0.0,0.0},{0.0,1.0,0.0},{0.0,0.0,-1.0}};
 
       infile=FileOpen(InOutPath,S->FileName,"r");
       ScanLine(infile,"",0,NULL);
@@ -2684,6 +2691,106 @@ void InitSpacecraft(struct SCType *S)
             Accel->DVNoiseCoef = Accel->SigE/sqrt(Accel->SampleTime);
             Accel->CorrCoef = 1.0-Accel->SampleTime/(BiasTime*3600.0);
             Accel->DV = 0.0;
+         }
+      }
+
+/* .. Cameras */
+      ScanLine(infile,"%120s",1,response);
+      if (response[0] != '*') {
+         printf("Error:  Malformed SC input file before Camera section\n.");
+         exit(1);
+      }
+      ScanLine(infile,"%ld",1,&S->Ncam);
+      S->Cam = (struct CameraType *) calloc(S->Ncam,sizeof(struct CameraType));
+      if (S->Ncam == 0) {
+         for(i=0;i<12;i++) ScanLine(infile,"",0,NULL);
+      }
+      else {
+         for(Icam=0;Icam<S->Ncam;Icam++) {
+            Cam = &S->Cam[Icam];
+            ScanLine(infile,"",0,NULL);
+            ScanLine(infile,"%lf",1,&Cam->SampleTime);
+            Cam->MaxCounter = (long) (Cam->SampleTime/DTSIM+0.5);
+            if (Cam->SampleTime < DTSIM) {
+               printf("Error:  SC[%ld].Cam[%ld].SampleTime smaller than DTSIM.\n",
+                  S->ID,Icam);
+               exit(1);
+            }
+            Cam->SampleCounter = Cam->MaxCounter;
+            ScanLine(infile,"\"%80[^\"]\"",1,Cam->Title);
+            ScanLine(infile,"%ld %ld",2,&Cam->Body,&Cam->Node);
+            if (Cam->Body >= S->Nb) {
+               printf("SC[%ld].Cam[%ld] Body out of range\n",S->ID,Icam);
+               exit(1);
+            } 
+            if (Cam->Node >= S->B[Cam->Body].NumNodes) {
+               printf("SC[%ld].Cam[%ld] Node out of range\n",S->ID,Icam);
+               exit(1);
+            } 
+            ScanLine(infile,"%lf %lf %lf %ld",4,&Ang1,&Ang2,&Ang3,&Seq);
+            A2C(Seq,Ang1*D2R,Ang2*D2R,Ang3*D2R,Cam->CB);
+            C2Q(Cam->CB,Cam->qb);
+            ScanLine(infile,"%120s",1,response);
+            Cam->BoreAxis = DecodeString(response);
+            Cam->H_Axis = (Cam->BoreAxis+1)%3;
+            Cam->V_Axis = (Cam->BoreAxis+2)%3;
+            ScanLine(infile,"%d %d",2,&Cam->PosX,&Cam->PosY);
+            P = &Cam->POV;
+            ScanLine(infile,"%d %d",2,&P->PixWidth,&P->PixHeight);
+            ScanLine(infile,"%lf",1,&P->Angle);
+            ScanLine(infile,"%lf %lf",2,&P->Near,&P->Far);
+            P->Mode = FIXED_IN_HOST;
+            P->Host.Type = TARGET_BODY;
+            P->Host.Body = Cam->Body;
+            P->Host.SC = S->ID;
+            P->Host.RefOrb = S->RefOrb;
+            P->Host.World = Orb[S->RefOrb].World;
+            P->Frame = FRAME_B;
+            for(i=0;i<3;i++) {
+               P->PosB[i] = S->B[Cam->Body].Node[Cam->Node].PosB[i];
+            }
+            /* POV axes are H-left, V-up, Boresight-out */
+            MxM(Cam->CB,Cy180,P->CB);
+            MxM(Cam->CB,Cy180,P->C);
+            C2Q(P->C,P->q);
+            ScanLine(infile,"%120s",1,response);
+            Cam->PixelFormat = DecodeString(response);
+            ScanLine(infile,"%120s %120s",2,response1,response2);
+            Cam->Display = DecodeString(response1);
+            Cam->Export = DecodeString(response2);
+            if (Cam->PixelFormat == PIX_DEPTH)
+               P->FarSceneEnabled = FALSE;
+            else
+               P->FarSceneEnabled = TRUE;
+            if (Cam->Export) {
+               if (Cam->PixelFormat == PIX_RGB) {
+                  Cam->BytesPerPixel = 3;
+                  Cam->ImageLen = P->PixWidth*P->PixHeight*Cam->BytesPerPixel;
+                  Cam->ColorImage = 
+                     (unsigned char *) calloc(Cam->ImageLen,sizeof(char));
+                  Cam->DepthImage = NULL;
+               }
+               else if (Cam->PixelFormat == PIX_RGBA) {
+                  Cam->BytesPerPixel = 4;
+                  Cam->ImageLen = P->PixWidth*P->PixHeight*Cam->BytesPerPixel;
+                  Cam->ColorImage = 
+                     (unsigned char *) calloc(Cam->ImageLen,sizeof(char));
+                  Cam->DepthImage = NULL;
+               }
+               else if (Cam->PixelFormat == PIX_DEPTH) {
+                  Cam->BytesPerPixel = sizeof(float);
+                  Cam->ImageLen = P->PixWidth*P->PixHeight;
+                  Cam->ColorImage = NULL;
+                  Cam->DepthImage = (float *) calloc(Cam->ImageLen,sizeof(float));
+               }
+               else {
+                  printf("Unknown PixelFormat %ld for Cam[%ld]\n",
+                     Cam->PixelFormat,Icam);
+                  exit(1);
+               }
+            }
+            
+            Cam->Init = TRUE;
          }
       }
 

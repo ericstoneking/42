@@ -328,4 +328,10 @@
 #define DATE_MON_DAY 0
 #define DATE_DOY 1
 
+#define PIX_RGB 0
+#define PIX_RGBA 1
+#define PIX_DEPTH 2
+
+
+
 #endif /* __42DEFINES_H__ */

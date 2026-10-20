@@ -18,7 +18,7 @@
 
 #include "42.h"
 #define EXTERN extern
-#include "glkit.h"
+#include "42gl.h"
 #undef EXTERN
 
 /* 32-bit textures give more accuracy, if supported */
@@ -30,7 +30,12 @@
 
 GLuint EarthAlbedoCubeTag;
 GLuint GenericAlbedoCubeTag;
-GLuint AlbedoWindow;
+
+#ifdef _USE_GLUT_
+   GLuint AlbedoWindow;
+#else
+   GLFWwindow *AlbedoWindow;
+#endif
 
 #ifdef _USE_SHADERS_
 /**********************************************************************/
@@ -47,11 +52,16 @@ void InitAlbedo(void)
       struct AlbedoFBOType *A;
       GLuint Width = 64; /* Must be power of 2 */
       
-      glutInitWindowSize(Width,Width);
-      AlbedoWindow = glutCreateWindow("Albedo Workspace");
-      glutSetWindow(AlbedoWindow);
+      #ifdef _USE_GLUT_
+         glutInitWindowSize(Width,Width);
+         AlbedoWindow = glutCreateWindow("Albedo Workspace");
+         glutSetWindow(AlbedoWindow);
+         glutDisplayFunc(NullDisplay);
+      #else
+         AlbedoWindow = glfwCreateWindow(Width,Width,"Albedo Workspace",NULL,NULL);
+         glfwMakeContextCurrent(AlbedoWindow);
+      #endif
       glViewport(0,0,Width,Width);
-      glutDisplayFunc(NullDisplay);
       glEnable(GL_BLEND);
       glBlendFunc(GL_ONE,GL_ONE); 
 
@@ -169,7 +179,11 @@ void FindCssAlbedo(struct SCType *S, struct CssType *CSS)
          First = 0;
          InitAlbedo();
       }
-      glutSetWindow(AlbedoWindow);
+      #ifdef _USE_GLUT_
+         glutSetWindow(AlbedoWindow);
+      #else
+         glfwMakeContextCurrent(AlbedoWindow);
+      #endif
 
       B = &S->B[CSS->Body];
       W = &World[Orb[S->RefOrb].World];
@@ -277,5 +291,57 @@ void FindCssAlbedo(struct SCType *S, struct CssType *CSS)
       glPopMatrix();
       
       
+}
+/**********************************************************************/
+void CameraModel(struct SCType *S)
+{
+      struct CameraType *Cam;
+      struct POVType *POV;
+      long Icam;
+      long i;
+      
+      for(Icam=0;Icam<S->Ncam;Icam++) {
+         if (S->Cam[Icam].Export) {
+            Cam = &S->Cam[Icam];
+            POV = &Cam->POV;
+            
+            if (Cam->Init) {
+               Cam->Init = FALSE;
+               InitCameraWindow(Cam);
+            }
+            
+            Cam->SampleCounter++;
+            if (Cam->SampleCounter >= Cam->MaxCounter) {
+               Cam->SampleCounter = 0;
+
+               #ifdef _USE_GLUT_
+                  glutSetWindow(Cam->Window);
+               #else
+                  glfwMakeContextCurrent(Cam->Window);
+               #endif
+               CurrentCameraPOV = &Cam->POV;
+               DrawCamera();
+               
+               if (Cam->Export) {
+                  if (Cam->PixelFormat == PIX_RGB) {
+                     glReadPixels(0,0,POV->PixWidth,POV->PixHeight,
+                        GL_RGB,GL_UNSIGNED_BYTE,Cam->ColorImage);
+                  }
+                  if (Cam->PixelFormat == PIX_RGBA) {
+                     glReadPixels(0,0,POV->PixWidth,POV->PixHeight,
+                        GL_RGBA,GL_UNSIGNED_BYTE,Cam->ColorImage);
+                  }
+                  if (Cam->PixelFormat == PIX_DEPTH) {
+                     glReadPixels(0,0,POV->PixWidth,POV->PixHeight,
+                        GL_DEPTH_COMPONENT,GL_FLOAT,Cam->DepthImage);
+                     for(i=0;i<Cam->ImageLen;i++) {
+                        Cam->DepthImage[i] = DepthToDistance(Cam->DepthImage[i],
+                           POV->Near,POV->Far);
+                     }
+                  }
+               }
+            }
+         }
+      }
 }
 #endif

@@ -54,12 +54,6 @@
 #define MAP_CREDITS 2
 #define MAP_NIGHT 3
 
-#define MONOCULAR 0
-#define LEFTEYE 1
-#define RIGHTEYE 2
-#define ONSCREEN 0
-#define OFFSCREEN 1
-
 EXTERN long MapWindowExists, OrreryWindowExists,SphereWindowExists;
 
 EXTERN double RunTime,FrameRate,RealTimeDT;
@@ -70,7 +64,6 @@ EXTERN double MouseClickX,MouseClickY;
 EXTERN long PauseFlag;
 EXTERN long PausedByMouse;
 EXTERN long MouseDown;
-EXTERN long CamWidth, CamHeight;
 EXTERN char CamTitle[81];
 EXTERN long CamShow[CAM_MENU_SIZE];
 EXTERN char CamShowLabel[CAM_MENU_SIZE][41];
@@ -209,7 +202,6 @@ EXTERN GLuint SkyCube;
 EXTERN GLuint NoiseTex;
 
 EXTERN long ShadowsEnabled;
-EXTERN long VREnabled;
 EXTERN long SeeThruPassNeeded;
 EXTERN GLfloat ShadowMatrix[16];
 
@@ -223,14 +215,17 @@ EXTERN GLfloat CNE[9]; /* DCM between N and Eye frame */
 EXTERN char Banner[120];
 EXTERN GLfloat BannerColor[4];
 
+EXTERN struct POVType *CurrentCameraPOV;
+
 void MeshToDisplayLists(struct MeshType *M);
-void UpdatePOV(void);
+void UpdatePOV(struct POVType *POV);
 void CamRenderExec(void);
 void DrawMap(void);
 void DrawOrrery(void);
 void DrawUnitSphere(void);
-void SetPovOrientation(void);
-void InitCamWidgets(void);
+void DrawCamera(void);
+void SetPovOrientation(struct POVType *POV);
+void InitCamWidgets(struct POVType *POV);
 void InitOrreryWidget(void);
 void InitSphereWidgets(void);
 void LoadShadowMapFBO(void);
@@ -243,6 +238,7 @@ void ReadGraphicsInpFile(void);
 void LoadFOVs(void);
 void InitColors(void);
 
+void InitCameraWindow(struct CameraType *Cam);
 
 /*
 ** #ifdef __cplusplus

@@ -155,6 +155,7 @@ void CheckOrbitRectification(struct OrbitType *O)
 /*  or attitudes, several dynamical variables must be adjusted.       */
 void ChangeNFrame(struct OrbitType *O,long OldWorld, long NewWorld)
 {
+      struct POVType *POV;
       double CN1H[3][3],CN2H[3][3],CL1H[3][3],CL2H[3][3],CH[3][3],VH[3];
       double CBN1[3][3],CBN2[3][3];
       struct FormationType *F;
@@ -162,6 +163,8 @@ void ChangeNFrame(struct OrbitType *O,long OldWorld, long NewWorld)
       struct BodyType *B;
       struct DynType *D;
       long Isc,Ib,i,j;
+      
+      POV = &Eye;
 
       for(i=0;i<3;i++) {
          for(j=0;j<3;j++) {
@@ -232,34 +235,34 @@ void ChangeNFrame(struct OrbitType *O,long OldWorld, long NewWorld)
       }
 
 /* .. POV */
-      if (POV.Host.RefOrb == O->Tag) {
-         POV.Host.World = NewWorld;
-         MxM(POV.CN,CN1H,CH);
-         MxMT(CH,CN2H,POV.CN);
-         MxMT(POV.CN,SC[POV.Host.SC].CLN,POV.CL);
+      if (POV->Host.RefOrb == O->Tag) {
+         POV->Host.World = NewWorld;
+         MxM(POV->CN,CN1H,CH);
+         MxMT(CH,CN2H,POV->CN);
+         MxMT(POV->CN,SC[POV->Host.SC].CLN,POV->CL);
 
-         if (POV.Frame == FRAME_N) {
+         if (POV->Frame == FRAME_N) {
             for(i=0;i<3;i++) {
-               for(j=0;j<3;j++) POV.C[i][j] = POV.CN[i][j];
+               for(j=0;j<3;j++) POV->C[i][j] = POV->CN[i][j];
             }
          }
-         else if (POV.Frame == FRAME_L) {
+         else if (POV->Frame == FRAME_L) {
             for(i=0;i<3;i++) {
-               for(j=0;j<3;j++) POV.C[i][j] = POV.CL[i][j];
+               for(j=0;j<3;j++) POV->C[i][j] = POV->CL[i][j];
             }
          }
-         else if (POV.Frame == FRAME_F) {
+         else if (POV->Frame == FRAME_F) {
             /* Still needs work */
             for(i=0;i<3;i++) {
-               for(j=0;j<3;j++) POV.C[i][j] = POV.CF[i][j];
+               for(j=0;j<3;j++) POV->C[i][j] = POV->CF[i][j];
             }
          }
-         else if (POV.Frame == FRAME_S || POV.Frame == FRAME_B) {
+         else if (POV->Frame == FRAME_S || POV->Frame == FRAME_B) {
             for(i=0;i<3;i++) {
-               for(j=0;j<3;j++) POV.C[i][j] = POV.CB[i][j];
+               for(j=0;j<3;j++) POV->C[i][j] = POV->CB[i][j];
             }
          }
-         C2Q(POV.C,POV.q);
+         C2Q(POV->C,POV->q);
       }
 }
 /**********************************************************************/

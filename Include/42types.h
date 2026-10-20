@@ -16,6 +16,11 @@
 #include "orbkit.h"
 #include "sigkit.h"
 #include "AcTypes.h"
+#ifdef _ENABLE_GUI_
+   #ifdef _USE_GLFW_
+      #include <GLFW/glfw3.h>
+   #endif
+#endif
 
 #ifndef __42TYPES_H__
 #define __42TYPES_H__
@@ -41,6 +46,62 @@ struct FormationType {
    double CL[3][3];
    double PosR[3]; /* Position of F wrt R, expressed in N */
 };
+
+struct TargetType {
+   /*~ Internal Variables ~*/
+   long Type;
+   long World;
+   long RefOrb;
+   long SC;
+   long Body;
+   double PosR[3];
+   double PosN[3];
+   double PosH[3];
+   double CN[3][3];
+};
+
+struct POVType {
+   /*~ Internal Variables ~*/
+   long Mode; /* Track Host, Track Target, or Fixed in Host */
+   struct TargetType Host;
+   struct TargetType Target;
+   long View;
+   long Frame;  /* Which frame is POV frame oriented in? (N=0,L=1,F=2,B=3) */
+   long BoreAxis;  /* POV boresight axis (out of screen): POS_X, POS_Y, ..., NEG_Z */
+   long UpAxis;    /* POV axis pointing to top of window: POS_X, ... NEG_Z */
+   int PixWidth;
+   int PixHeight;
+   long FarSceneEnabled; /* TRUE/FALSE */
+   double AngWidth; /* Angular Width of POV Field of View */
+   double AngHeight; /* Angular Height of POV Field of View */
+   double Near, Far;  /* Near and Far limits of POV FOV */
+   double CosFov, SinFov;
+   double Angle; /* Angle subtended in vertical, deg */
+   double AR;    /* Aspect ratio of POV FOV */
+   double w[3];  /* Angular velocity */
+   double q[4];  /* Quaternion */
+   double PosB[3];  /* Position wrt Host, expressed in Host Body Frame */
+   double Range;
+   double GridSpacing; /* For ProxOps Grid */
+   double wmax[3];
+   double C[3][3];
+   double CN[3][3];
+   double CH[3][3];
+   double CL[3][3];
+   double CF[3][3];
+   double CB[3][3];
+   double PosR[3]; /* Position vector in R, expressed in N */
+   double PosN[3]; /* Position vector in N, expressed in N */
+   double PosH[3]; /* Position vector in H, expressed in H */
+   float ViewMatrix[16];
+   /* For PanZoomPOV */
+   double TimeToGo;
+   long CmdSeq;
+   double CmdAngle[3];
+   double CmdRange;
+   double CmdPermute[3][3];
+};
+
 
 /* "Analysis" nodes, used both for Flex, ("Force" nodes and "Measurement" nodes) */
 /* and for more general purposes (sensor, actuator positions) */
@@ -554,6 +615,46 @@ struct AccelType {
    double CorrCoef; /* Correlation Coef, exp(-SampleTime/BiasTime) */
 };
 
+struct CameraType {
+   /*~ Parameters ~*/
+   double SampleTime;
+   long SampleCounter;
+   long MaxCounter;
+
+   long Body;
+   long Node;
+   double qb[4];
+   double CB[3][3];
+   long BoreAxis;
+   long H_Axis;
+   long V_Axis;
+   
+   /*~ Internal Variables ~*/
+   long Init;
+   #ifdef _ENABLE_GUI_
+      #ifdef _USE_GLUT_
+         unsigned int Window;
+      #else
+         GLFWwindow *Window;
+      #endif
+   #endif
+   char Title[81];
+   int PosX;
+   int PosY;
+   
+   /* Export image from GPU to CPU for further processing */
+   /* PixelFormat: RGBA, RGB, DEPTH, ... */
+   long PixelFormat;
+   long BytesPerPixel;
+   long ImageLen;
+   unsigned char *ColorImage;
+   float *DepthImage;
+   long Display; /* On screen */
+   long Export; /* to CPU in Image buffer */
+
+   struct POVType POV;
+};
+
 struct OpticsType {
    long SC;
    long Body;
@@ -745,6 +846,7 @@ struct SCType {
    long Nst; /* Number of star trackers */
    long Ngps; /* Number of GPS receivers */
    long Nacc; /* Number of accelerometer axes */
+   long Ncam; /* Number of camera sensors */
    long Nfgs; /* Number of Fine Guidance Sensors */
    long Nsh; /* Number of shakers */
    
@@ -814,6 +916,7 @@ struct SCType {
    struct StarTrackerType *ST;   /* [*Nst*] */
    struct GpsType *GPS;          /* [*Ngps*] */
    struct AccelType *Accel;      /* [*Nacc*] */
+   struct CameraType *Cam;       /* [*Ncam*] */
    struct FgsType *Fgs;          /* [*Nfgs*] */
    struct ShakerType *Shaker;    /* [*Nsh*] */
    
@@ -822,59 +925,6 @@ struct SCType {
    #endif
 };
 
-struct TargetType {
-   /*~ Internal Variables ~*/
-   long Type;
-   long World;
-   long RefOrb;
-   long SC;
-   long Body;
-   double PosR[3];
-   double PosN[3];
-   double PosH[3];
-   double CN[3][3];
-};
-
-struct POVType {
-   /*~ Internal Variables ~*/
-   long Mode; /* Track Host, Track Target, or Fixed in Host */
-   struct TargetType Host;
-   struct TargetType Target;
-   long View;
-   long Frame;  /* Which frame is POV frame oriented in? (N=0,L=1,F=2,B=3) */
-   long BoreAxis;  /* POV boresight axis (out of screen): POS_X, POS_Y, ..., NEG_Z */
-   long UpAxis;    /* POV axis pointing to top of window: POS_X, ... NEG_Z */
-   double Width; /* Width of POV Field of View */
-   double Height; /* Height of POV Field of View */
-   double Near, Far;  /* Near and Far limits of POV FOV */
-   double CosFov, SinFov;
-   double Angle; /* Angle subtended in vertical, deg */
-   double AR;    /* Aspect ratio of POV FOV */
-   double PosLeftEye[3]; /* in POV frame, expressed in POV */
-   double PosRightEye[3]; /* in POV frame, expressed in POV */
-   double w[3];  /* Angular velocity */
-   double q[4];  /* Quaternion */
-   double PosB[3];  /* Position wrt Host, expressed in Host B[0] Frame */
-   double Range;
-   double GridSpacing; /* For ProxOps Grid */
-   double wmax[3];
-   double C[3][3];
-   double CN[3][3];
-   double CH[3][3];
-   double CL[3][3];
-   double CF[3][3];
-   double CB[3][3];
-   double PosR[3]; /* Position vector in R, expressed in N */
-   double PosN[3]; /* Position vector in N, expressed in N */
-   double PosH[3]; /* Position vector in H, expressed in H */
-   float ViewMatrix[16];
-   /* For PanZoomPOV */
-   double TimeToGo;
-   long CmdSeq;
-   double CmdAngle[3];
-   double CmdRange;
-   double CmdPermute[3][3];
-};
 
 struct RegionType {
    /*~ Internal Variables ~*/
