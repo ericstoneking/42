@@ -1006,8 +1006,8 @@ void InitCamWindow(void)
       POV->Far = 50.0E3;  /* m */
       SkyDistance = 0.5*POV->Far;
 
-      Font8x11Offset = LoadFont8x11();
-      Font8x13Offset = LoadFont8x13();
+      Font8x11[CAM_FONT] = LoadFont8x11();
+      Font8x13[CAM_FONT] = LoadFont8x13();
       InitCamWidgets(POV);
       SetupViewVolume(POV);
       LoadShadowMapFBO();
@@ -1077,6 +1077,9 @@ void InitMapWindow(void)
       glLightfv(GL_LIGHT0,GL_DIFFUSE,White);
       glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glEnable(GL_BLEND);
+
+      Font8x11[MAP_FONT] = LoadFont8x11();
+      Font8x13[MAP_FONT] = LoadFont8x13();
 
 /* .. Set up view volume */
       glMatrixMode(GL_PROJECTION);
@@ -1175,6 +1178,9 @@ void InitOrreryWindow(void)
       glutPassiveMotionFunc(OrreryMousePassiveMotionHandler);
       glutReshapeFunc(OrreryReshapeHandler);
 
+      Font8x11[ORRERY_FONT] = LoadFont8x11();
+      Font8x13[ORRERY_FONT] = LoadFont8x13();
+
 /* .. Set GL state variables */
       glClearColor(0.141,0.12,0.27,1.0);
       glEnable(GL_POINT_SMOOTH);
@@ -1232,6 +1238,9 @@ void InitSphereWindow(void)
       glutKeyboardFunc(AsciiKeyHandler);
       glutMouseFunc(SphereMouseButtonHandler);
       glutReshapeFunc(SphereReshapeHandler);
+
+      Font8x11[SPHERE_FONT] = LoadFont8x11();
+      Font8x13[SPHERE_FONT] = LoadFont8x13();
 
       glClearColor(0.0,0.0,0.0,1.0);
       glPolygonMode(GL_FRONT,GL_FILL);
@@ -1301,8 +1310,8 @@ void InitCameraWindow(struct CameraType *Cam)
 /* .. Set up view volume */
       SkyDistance = 0.5*POV->Far;
 
-      Font8x11Offset = LoadFont8x11();
-      Font8x13Offset = LoadFont8x13();
+      Font8x11[CAM_FONT] = LoadFont8x11();
+      Font8x13[CAM_FONT] = LoadFont8x13();
       SetupViewVolume(POV);
       LoadShadowMapFBO();
       #ifdef _USE_SHADERS_

@@ -971,8 +971,8 @@ void InitCamWindow(void)
       Eye.Far = 50.0E3;  /* m */
       SkyDistance = 0.5*Eye.Far;
 
-      Font8x11Offset = LoadFont8x11();
-      Font8x13Offset = LoadFont8x13();
+      Font8x11[CAM_FONT] = LoadFont8x11();
+      Font8x13[CAM_FONT] = LoadFont8x13();
       InitCamWidgets(&Eye);
       SetupViewVolume(CamWindow,&Eye);
       LoadShadowMapFBO();
@@ -1034,6 +1034,9 @@ void InitMapWindow(void)
       glLightfv(GL_LIGHT0,GL_DIFFUSE,White);
       glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glEnable(GL_BLEND);
+
+      Font8x11[MAP_FONT] = LoadFont8x11();
+      Font8x13[MAP_FONT] = LoadFont8x13();
 
 /* .. Set up view volume */
       glMatrixMode(GL_PROJECTION);
@@ -1119,7 +1122,7 @@ void InitOrreryWindow(void)
 
       #ifdef __APPLE__
       glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER,GLFW_FALSE);
-	  #endif
+      #endif
       OrreryWindow = glfwCreateWindow(OrreryWidth,OrreryHeight,OrreryTitle,NULL,NULL);
       glfwMakeContextCurrent(OrreryWindow);
       glfwSetWindowPos(OrreryWindow,Eye.PixWidth,MapHeight+66);
@@ -1146,6 +1149,9 @@ void InitOrreryWindow(void)
       glLightfv(GL_LIGHT0,GL_DIFFUSE,White);
       glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glEnable(GL_BLEND);
+
+      Font8x11[ORRERY_FONT] = LoadFont8x11();
+      Font8x13[ORRERY_FONT] = LoadFont8x13();
 
 /* .. Set up view volume */
       O->Radius = ((double) OrreryWidth)/(2.0*80.0)*O->Scale[O->Zoom];
@@ -1178,7 +1184,7 @@ void InitSphereWindow(void)
       SphereWindowHeight = 256 + 16*(NumSphereWindowMenuLines + 2);
       #ifdef __APPLE__
       glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER,GLFW_FALSE);
-	  #endif
+      #endif
       SphereWindow = glfwCreateWindow(SphereWindowWidth,SphereWindowHeight,
             "42 Unit Sphere Viewer",NULL,NULL);
       glfwMakeContextCurrent(SphereWindow);
@@ -1191,6 +1197,9 @@ void InitSphereWindow(void)
 
       glClearColor(0.0,0.0,0.0,1.0);
       glPolygonMode(GL_FRONT,GL_FILL);
+
+      Font8x11[SPHERE_FONT] = LoadFont8x11();
+      Font8x13[SPHERE_FONT] = LoadFont8x13();
 
       glMatrixMode(GL_PROJECTION);
       glLoadIdentity();

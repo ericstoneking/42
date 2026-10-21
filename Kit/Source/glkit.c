@@ -21,42 +21,10 @@
 ** #endif
 */
 
-/**********************************************************************/
-/*  Available fonts:                                                  */
-/*     GLUT_BITMAP_8_BY_13                                            */
-/*     GLUT_BITMAP_9_BY_15                                            */
-/*     GLUT_BITMAP_TIMES_ROMAN_10                                     */
-/*     GLUT_BITMAP_TIMES_ROMAN_24                                     */
-/*     GLUT_BITMAP_HELVETICA_10                                       */
-/*     GLUT_BITMAP_HELVETICA_12                                       */
-/*     GLUT_BITMAP_HELVETICA_18                                       */
-void DrawBitmapString(void *font, const char *string)
-{
-      const char *c;
-      for(c=string; *c != '\0'; c++) {
-         //printf("%p %c\n",c,*c);
-         //printf("%c",*c);
-         if (*c > 31 && *c < 127) { /* Restrict to printable characters */
-            glutBitmapCharacter(font, *c);
-         }
-      }
-      //printf("\n");
-}
-/**********************************************************************/
-/*  Available fonts:                                                  */
-/*     GLUT_STROKE_ROMAN                                              */
-/*     GLUT_STROKE_MONO_ROMAN                                         */
-void DrawStrokeString(void *font, const char *string)
-{
-      const char *c;
-      for(c=string; *c != '\0'; c++) {
-         glutStrokeCharacter(font, *c);
-      }
-}
 /*********************************************************************/
 GLuint LoadFont8x11(void)
 {
-GLubyte Font8x11[95][11] = {
+GLubyte Glyphs8x11[95][11] = {
 {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, /* space */
 {0x00, 0x10, 0x00, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10}, /* ! */
 {0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x28, 0x28, 0x28}, /* " */
@@ -170,24 +138,16 @@ GLubyte Font8x11[95][11] = {
 
       for (i = 0,j = ' '; i < 95; i++,j++) {
          glNewList(Offset + j, GL_COMPILE);
-         glBitmap(8, 11, 0.0, 3.0, 8.0, 0.0, Font8x11[i]);
+         glBitmap(8, 11, 0.0, 3.0, 8.0, 0.0, Glyphs8x11[i]);
          glEndList();
       }
 
       return(Offset);
 }
-/**********************************************************************/
-void DrawString8x11(const char *s)
-{
-      glPushAttrib (GL_LIST_BIT);
-      glListBase(Font8x11Offset);
-      glCallLists((GLsizei) strlen(s), GL_UNSIGNED_BYTE, (GLubyte *) s);
-      glPopAttrib ();
-}
 /*********************************************************************/
 GLuint LoadFont8x13(void)
 {
-GLubyte Font8x13[95][13] = {
+GLubyte Glyphs8x13[95][13] = {
 {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
 {0x00, 0x00, 0x00, 0x10, 0x00, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x00},
 {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x24, 0x24, 0x24, 0x00},
@@ -292,17 +252,17 @@ GLubyte Font8x13[95][13] = {
 
       for (i = 0,j = ' '; i < 95; i++,j++) {
          glNewList(Offset + j, GL_COMPILE);
-         glBitmap(8, 13, 0.0, 3.0, 8.0, 0.0, Font8x13[i]);
+         glBitmap(8, 13, 0.0, 3.0, 8.0, 0.0, Glyphs8x13[i]);
          glEndList();
       }
 
       return(Offset);
 }
 /**********************************************************************/
-void DrawString8x13(const char *s)
+void DrawString(GLuint Font, const char *s)
 {
       glPushAttrib (GL_LIST_BIT);
-      glListBase(Font8x13Offset);
+      glListBase(Font);
       glCallLists((GLsizei) strlen(s), GL_UNSIGNED_BYTE, (GLubyte *) s);
       glPopAttrib ();
 }
@@ -402,7 +362,7 @@ void DrawSkyGrid(GLfloat MajColor[4], GLfloat MinColor[4], double C[3][3],
 }
 /**********************************************************************/
 void LoadSkyGrid(double MajGrid, double MinGrid, double SkyDistance,
-                 GLuint *MajList, GLuint *MinList)
+                 GLuint *MajList, GLuint *MinList, GLuint Font)
 {
 #define D2R (0.0174532925199433)
 
@@ -508,7 +468,7 @@ void LoadSkyGrid(double MajGrid, double MinGrid, double SkyDistance,
             glRasterPos4dv(p);
             sprintf(s,"%i",(int) lng);
             glBitmap(0,0,0,0,-4.0*strlen(s),-5,0);
-            DrawString8x11(s);
+            DrawString(Font,s);
             glBegin(GL_LINE_STRIP);
                for(lat=Lat1;lat<=Lat2;lat+=1.0) {
                   c2=cos(lat*D2R);
@@ -551,7 +511,7 @@ void LoadSkyGrid(double MajGrid, double MinGrid, double SkyDistance,
             glRasterPos4dv(p);
             sprintf(s,"%i",(int) lat);
             glBitmap(0,0,0,0,-4.0*strlen(s),-5,0);
-            DrawString8x11(s);
+            DrawString(Font,s);
             glBegin(GL_LINE_STRIP);
                for(lng=Lng1;lng<=Lng1+0.5*MajGrid-Gap;lng+=0.2) {
                   c1=cos(lng*D2R);
@@ -582,9 +542,9 @@ void LoadSkyGrid(double MajGrid, double MinGrid, double SkyDistance,
       glPointSize(1.0);
 
       glRasterPos3d(0.0,0.0,SkyDistance);
-      DrawString8x11("+90");
+      DrawString(Font,"+90");
       glRasterPos3d(0.0,0.0,-SkyDistance);
-      DrawString8x11("-90");
+      DrawString(Font,"-90");
 
       glEndList();
 
@@ -713,7 +673,7 @@ void DrawNearFOV(long Nv,double Width,double Height,double Length,
 /*********************************************************************/
 void DrawFarFOV(long Nv,double Width,double Height, 
    long BoreAxis, long H_Axis, long V_Axis, long Type, GLfloat Color[4],
-                const char *Label, double SkyDistance)
+                const char *Label, double SkyDistance, GLuint Font)
 {
       double TwoPi = 6.28318530717959;
       double r[4];
@@ -747,7 +707,7 @@ void DrawFarFOV(long Nv,double Width,double Height,
          r[V_Axis] = 0.0;
          glRasterPos4dv(r);
          glBitmap(0,0,0,0,-4.0*strlen(Label),-5,0);
-         DrawString8x11(Label);
+         DrawString(Font,Label);
       }
       else if (Type == 2) { /* FOV_VECTOR */
          glPointSize(4.0);
@@ -761,7 +721,7 @@ void DrawFarFOV(long Nv,double Width,double Height,
          r[V_Axis] = 0.0;
          glRasterPos4dv(r);
          glBitmap(0,0,0,0,-4.0*strlen(Label),-17,0);
-         DrawString8x11(Label);
+         DrawString(Font,Label);
          glPointSize(1.0);
       }
       else if (Type == 3) { /* FOV_PLANE */
@@ -781,7 +741,7 @@ void DrawFarFOV(long Nv,double Width,double Height,
             r[V_Axis] = sin(az);
             glRasterPos4dv(r);
             glBitmap(0,0,0,0,-4.0*strlen(Label),-5,0);
-            DrawString8x11(Label);
+            DrawString(Font,Label);
          }
       }
       else {
@@ -1709,7 +1669,7 @@ GLuint LoadSkyCube(const char *PathName, const char *FileName, double CGH[3][3],
 /* Egret Catalog of Gamma-ray Sources                                 */
 void LoadEgretCatalog(const char *EgretFileName,double BuckyPf[32][3],
                long BuckyNeighbor[32][6], GLuint EgretSourceList[32],
-               double SkyDistance)
+               double SkyDistance,GLuint Font)
 {
 #define Nsource 262
 #define D2R (0.0174532925199433)
@@ -1804,8 +1764,7 @@ void LoadEgretCatalog(const char *EgretFileName,double BuckyPf[32][3],
                glColor4fv(GammaSource[j].Color);
                glRasterPos4dv(GammaSource[j].r);
                glBitmap(0,0,0,0,8,-5,0);
-               DrawBitmapString(GLUT_BITMAP_8_BY_13,
-                  GammaSource[j].Label);
+               DrawString(Font,GammaSource[j].Label);
             }
             glColor4fv(Black);
          glEndList();
@@ -1818,7 +1777,7 @@ void LoadEgretCatalog(const char *EgretFileName,double BuckyPf[32][3],
 /* Fermi Source Catalog 1FGL                                          */
 void Load1FGL(const char *FileName,double BuckyPf[32][3],
                long BuckyNeighbor[32][6],GLuint FermiSourceList[32],
-               double SkyDistance)
+               double SkyDistance, GLuint Font)
 {
 #define Nsource 1452
 #define D2R (0.0174532925199433)
@@ -2028,7 +1987,7 @@ void Load1FGL(const char *FileName,double BuckyPf[32][3],
                glBitmap(16,16,0.0,0.0,0.0,0.0,FglGlyph[Type[j]]);
                glBitmap(0,0,0,0,18,-5,0);
                sprintf(s,"%ld",j);
-               DrawBitmapString(GLUT_BITMAP_8_BY_13,s);
+               DrawString(Font,s);
             }
             glColor4fv(Black);
          glEndList();
@@ -2057,7 +2016,7 @@ void Load1FGL(const char *FileName,double BuckyPf[32][3],
 /**********************************************************************/
 void LoadPulsars(const char *FileName,double BuckyPf[32][3],
                long BuckyNeighbor[32][6],GLuint PulsarList[32],
-               double SkyDistance)
+               double SkyDistance, GLuint Font)
 {
 #define Npul 250
 #define D2R (0.0174532925199433)
@@ -2132,7 +2091,7 @@ void LoadPulsars(const char *FileName,double BuckyPf[32][3],
                glBitmap(0,0,0,0,-8,-8,0);
                glBitmap(16,16,0.0,0.0,0.0,0.0,PulsarGlyph);
                glBitmap(0,0,0,0,18,-5,0);
-               DrawBitmapString(GLUT_BITMAP_8_BY_13,Identifier[j]);
+               DrawString(Font,Identifier[j]);
             }
             glColor4fv(Black);
          glEndList();
@@ -2507,8 +2466,8 @@ void DrawBullseye(GLfloat Color[4],double p[4])
 }
 /*********************************************************************/
 void DrawVector(double v[3], const char *Label, const char *Units,
-                GLfloat Color[4],
-                double VisScale, double MagScale, long UnitVec)
+                GLfloat Color[4],double VisScale, double MagScale, 
+                long UnitVec, GLuint Font)
 {
       GLubyte GlyphHat[4]={0x82,0x44,0x28,0x10};
       GLubyte GlyphVec[3]={0xfe,0x0c,0x10};
@@ -2530,7 +2489,7 @@ void DrawVector(double v[3], const char *Label, const char *Units,
 
          glRasterPos3f(VisScale*v[0],VisScale*v[1],VisScale*v[2]);
          glBitmap(0,0,0,0,4,-5,0);
-         DrawString8x11(Label);
+         DrawString(Font,Label);
          glBitmap(7,4,8.0*strlen(Label),-11.0,0.0,0.0,GlyphHat);
       }
       else {
@@ -2543,7 +2502,7 @@ void DrawVector(double v[3], const char *Label, const char *Units,
          glRasterPos3f(VisScale*u[0],VisScale*u[1],VisScale*u[2]);
          glBitmap(0,0,0,0,4,-5,0);
          sprintf(s,"%s (%5.2lf %s)",Label,MagScale*mag,Units);
-         DrawString8x11(s);
+         DrawString(Font,s);
          glRasterPos3f(VisScale*u[0],VisScale*u[1],VisScale*u[2]);
          glBitmap(0,0,0,0,4,-5,0);
          glBitmap(7,3,0,-11.0,0.0,0.0,GlyphVec);
@@ -2608,7 +2567,7 @@ void DrawAxisLabels(long Iglyph,GLfloat Color[4],
       glEnable(GL_LIGHTING);
 }
 /*********************************************************************/
-void DrawBodyLabel(long Ib,GLfloat Color[4],double p[3])
+void DrawBodyLabel(long Ib,GLfloat Color[4],double p[3],GLuint Font)
 {
       GLfloat Black[4] = {0.0,0.0,0.0,1.0};
       char s[40];
@@ -2618,7 +2577,7 @@ void DrawBodyLabel(long Ib,GLfloat Color[4],double p[3])
       glRasterPos3dv(p);
       glBitmap(0,0,0,0,4,4,0);
       sprintf(s,"B[%ld]",Ib);
-      DrawString8x11(s);
+      DrawString(Font,s);
       glMaterialfv(GL_FRONT,GL_EMISSION,Black);
 }
 /*********************************************************************/
@@ -2627,7 +2586,7 @@ void DrawRollPitchYaw(long xc, long yc, long PixScale,
    double Roll, double Pitch, double Yaw,
    double RollRate, double PitchRate, double YawRate,
    double RollCmd, double PitchCmd, double YawCmd,
-   GLfloat GaugeColor[4], GLfloat BarColor[4])
+   GLfloat GaugeColor[4], GLfloat BarColor[4], GLuint Font)
 {
 #define D2R (0.0174532925199433)
 
@@ -2660,7 +2619,7 @@ void DrawRollPitchYaw(long xc, long yc, long PixScale,
       sprintf(s,"%4.1f",Pitch);
       x = xmin - 8*strlen(s) - 8;
       glRasterPos2i(x,yc+4);
-      DrawString8x11(s);
+      DrawString(Font,s);
       for(i=-9;i<10;i++) {
          y = yc - (long) (Scale*(10*i-Pitch));
          if (y >= ymin && y <= ymax) {
@@ -2670,7 +2629,7 @@ void DrawRollPitchYaw(long xc, long yc, long PixScale,
             glEnd();
             sprintf(s,"%3li",10*i);
             glRasterPos2i(xmax+12,y+4);
-            DrawString8x11(s);
+            DrawString(Font,s);
          }
       }
       y = yc - (long) (((double) PixScale)/RateScale*PitchRate);
@@ -2718,7 +2677,7 @@ void DrawRollPitchYaw(long xc, long yc, long PixScale,
       sprintf(s,"%5.1f",Yaw);
       y = ymin - 6;
       glRasterPos2i(xc-4*strlen(s),y);
-      DrawString8x11(s);
+      DrawString(Font,s);
       for(i=0;i<36;i++) {
          Ang = 10.0*((double) i)-Yaw;
          while (Ang > 180.0) Ang -= 360.0;
@@ -2731,7 +2690,7 @@ void DrawRollPitchYaw(long xc, long yc, long PixScale,
             glEnd();
             sprintf(s,"%02li",i);
             glRasterPos2i(x-8,ymax+20);
-            DrawString8x11(s);
+            DrawString(Font,s);
          }
       }
       x = xc + (long) (((double) PixScale)/RateScale*YawRate);
@@ -2786,7 +2745,7 @@ void DrawRollPitchYaw(long xc, long yc, long PixScale,
       x = xc - 4*strlen(s) - 4;
       y = yc - Rmin + 14;
       glRasterPos2i(x,y);
-      DrawString8x11(s);
+      DrawString(Font,s);
       for(i=0;i<36;i++) {
          Ang = 10.0*((double) i)-Roll;
          while (Ang > 180.0) Ang -= 360.0;
@@ -2803,7 +2762,7 @@ void DrawRollPitchYaw(long xc, long yc, long PixScale,
             glEnd();
             sprintf(s,"%02li",i);
             glRasterPos2i(x-8,y-4);
-            DrawString8x11(s);
+            DrawString(Font,s);
          }
       }
       Ang = 30.0/RateScale*RollRate;
@@ -3069,7 +3028,7 @@ void DrawMercatorSquare(double CVS[3][3], double FOV[2])
 /**********************************************************************/
 /* Draws a small X at the lat/lng point of a vector, as well as label;
    lat and lng are in radians                                         */
-void DrawMercatorVector(double lng, double lat, char *label)
+void DrawMercatorVector(double lng, double lat, char *label,GLuint Font)
 {
       double R2D = 57.2957795130823;
 
@@ -3086,12 +3045,12 @@ void DrawMercatorVector(double lng, double lat, char *label)
       glEnd();
 
       glRasterPos2f(lng+2.5*strlen(label),lat-12);
-      DrawBitmapString(GLUT_BITMAP_8_BY_13,label);
+      DrawString(Font,label);
 }
 /**********************************************************************/
 /* Draws all 6 primary axes on a Mercator projection
    CAV is the DCM from the Axis frame to the Viewing frame            */
-void DrawMercatorAxes(double CVA[3][3], char *label)
+void DrawMercatorAxes(double CVA[3][3], char *label, GLuint Font)
 {
       double TwoPi = 6.28318530717959;
 
@@ -3120,14 +3079,14 @@ void DrawMercatorAxes(double CVA[3][3], char *label)
             sprintf(str,"-%s%ld",label,(long)i/2 + 1);            
          }
 
-         DrawMercatorVector(lng,lat,str);
+         DrawMercatorVector(lng,lat,str,Font);
 
          if (lng > 180-8*strlen(label)) {
-            DrawMercatorVector(lng-TwoPi,lat,str);
+            DrawMercatorVector(lng-TwoPi,lat,str,Font);
          }
 
          if (lng < -180+8*strlen(label)) {
-            DrawMercatorVector(lng+TwoPi,lat,str);
+            DrawMercatorVector(lng+TwoPi,lat,str,Font);
          }
 
       }

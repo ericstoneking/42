@@ -28,6 +28,11 @@
 ** #endif
 */
 
+#define CAM_FONT 0
+#define MAP_FONT 1
+#define ORRERY_FONT 2
+#define SPHERE_FONT 3
+
 #define CAM_MENU_SIZE 18
 #define N_AXES 0
 #define L_AXES 1

@@ -650,7 +650,7 @@ void DrawBanner(int ScreenWidth, int ScreenHeight)
 
       glColor4fv(BannerColor);
       glRasterPos2i(ScreenWidth/2 - 4*((int) strlen(Banner)),75);
-      DrawString8x13(Banner);
+      DrawString(Font8x13[CAM_FONT],Banner);
 
       glMatrixMode(GL_PROJECTION);
       glPopMatrix();
@@ -711,11 +711,11 @@ void DrawAlphabet(struct POVType *POV)
             #if 0
             glRasterPos2i(300+8*j,75+11*i);
             sprintf(s,"%c",(char) (32+12*i+j));
-            DrawString8x11(s);
+            DrawString(Font8x11[CAM_FONT],s);
 
             glRasterPos2i(300+8*j,200+13*i);
             sprintf(s,"%c",(char) (32+12*i+j));
-            DrawString8x13(s);
+            DrawString(Font8x13[CAM_FONT],s);
             #endif
             
             glRasterPos2i(500+20*j,75+24*i);
@@ -884,47 +884,47 @@ void DrawCamHUD(struct POVType *POV)
       glColor4fv(ClockColor);
       sprintf(s,"Sim Time = % 8.2f",SimTime);
       glRasterPos2i(10,20);
-      DrawString8x13(s);
+      DrawString(Font8x13[CAM_FONT],s);
 
       sprintf(s,"%2ld %s %4ld",UTC.Day,mon[UTC.Month-1],UTC.Year);
       glRasterPos2i(40,35);
-      DrawString8x13(s);
+      DrawString(Font8x13[CAM_FONT],s);
 
       sprintf(s,"UTC %03ld-%02ld:%02ld:%05.2lf",UTC.doy,UTC.Hour,UTC.Minute,UTC.Second);
       glRasterPos2i(10,50);
-      DrawString8x13(s);
+      DrawString(Font8x13[CAM_FONT],s);
 
 /* .. POV Box */
       W = &PovWidget;
       DrawWidget(W);
 
       glRasterPos2i((W->xmin+W->xmax)/2-12,W->ymin+15);
-      DrawString8x13("POV");
+      DrawString(Font8x13[CAM_FONT],"POV");
 
       glRasterPos2i(W->xmin+8,W->ymin+30);
-      DrawString8x13(Mode[POV->Mode]);
+      DrawString(Font8x13[CAM_FONT],Mode[POV->Mode]);
 
       glRasterPos2i(W->xmin+8,W->ymin+45);
-      DrawString8x13("Fixed in");
+      DrawString(Font8x13[CAM_FONT],"Fixed in");
       for(i=0;i<5;i++) {
          glRasterPos2i(W->xmin+110+10*i,W->ymin+45);
-         DrawString8x13(Frame[i]);
+         DrawString(Font8x13[CAM_FONT],Frame[i]);
       }
 
       sprintf(s,"Boresight: %s",Axis[POV->BoreAxis]);
       glRasterPos2i(W->xmin+8,W->ymin+60);
-      DrawString8x13(s);
+      DrawString(Font8x13[CAM_FONT],s);
 
       sprintf(s,"  Up Axis: %s",Axis[POV->UpAxis]);
       glRasterPos2i(W->xmin+8,W->ymin+75);
-      DrawString8x13(s);
+      DrawString(Font8x13[CAM_FONT],s);
 
 /* .. Show/Hide Menu */
       W = &CamShowWidget;
       DrawWidget(W);
 
       glRasterPos2i((W->xmin+W->xmax)/2-16,W->ymin+15);
-      DrawString8x13("Show");
+      DrawString(Font8x13[CAM_FONT],"Show");
       for(i=0;i<CAM_MENU_SIZE;i++) {
          if (CamShow[i]) {
             sprintf(s,"x %s",CamShowLabel[i]);
@@ -933,7 +933,7 @@ void DrawCamHUD(struct POVType *POV)
             sprintf(s,"  %s",CamShowLabel[i]);
          }
          glRasterPos2i(W->xmin+8,W->ymin+30+15*i);
-         DrawString8x13(s);
+         DrawString(Font8x13[CAM_FONT],s);
       }
 
 /* .. Host */
@@ -942,7 +942,7 @@ void DrawCamHUD(struct POVType *POV)
       O = &Orb[POV->Host.RefOrb];
 
       glRasterPos2i((W->xmin+W->xmax)/2-16,W->ymin+15);
-      DrawString8x13("Host");
+      DrawString(Font8x13[CAM_FONT],"Host");
 
       if (O->Regime == ORB_THREE_BODY) {
          sprintf(WorldName,"%s-%s",
@@ -954,38 +954,38 @@ void DrawCamHUD(struct POVType *POV)
       }
       glRasterPos2i(W->xmin+30,W->ymin+30);
       sprintf(s,"  World: %s",WorldName);
-      DrawString8x13(s);
+      DrawString(Font8x13[CAM_FONT],s);
 
       glRasterPos2i(W->xmin+30,W->ymin+45);
       sprintf(s,"Ref Orb: %ld",POV->Host.RefOrb);
-      DrawString8x13(s);
+      DrawString(Font8x13[CAM_FONT],s);
       glRasterPos2i(W->xmin+30,W->ymin+60);
       sprintf(s,"    Frm: %ld",POV->Host.RefOrb);
-      DrawString8x13(s);
+      DrawString(Font8x13[CAM_FONT],s);
       glRasterPos2i(W->xmin+30,W->ymin+75);
       sprintf(s,"    S/C: %ld",POV->Host.SC);
-      DrawString8x13(s);
+      DrawString(Font8x13[CAM_FONT],s);
       glRasterPos2i(W->xmin+30,W->ymin+90);
       sprintf(s,"   Body: %ld",POV->Host.Body);
-      DrawString8x13(s);
+      DrawString(Font8x13[CAM_FONT],s);
       glRasterPos2i(W->xmin+10,W->ymin+120);
       sprintf(s,"Range: %7.2lf",POV->Range);
-      DrawString8x13(s);
+      DrawString(Font8x13[CAM_FONT],s);
       glRasterPos2i(W->xmin+10,W->ymin+135);
       if (POV->Host.Type >= TARGET_SC) {
          if (SC[POV->Host.SC].Eclipse)
-            DrawString8x13("In Eclipse");
+            DrawString(Font8x13[CAM_FONT],"In Eclipse");
          else
-            DrawString8x13("In Sunlight");
+            DrawString(Font8x13[CAM_FONT],"In Sunlight");
       }
       glRasterPos2i(W->Spot[5].xmin,W->Spot[5].ymax);
-      DrawString8x13("-");
+      DrawString(Font8x13[CAM_FONT],"-");
       glRasterPos2i(W->Spot[6].xmin,W->Spot[6].ymax);
-      DrawString8x13("+");
+      DrawString(Font8x13[CAM_FONT],"+");
       glRasterPos2i(W->Spot[7].xmin,W->Spot[7].ymax);
-      DrawString8x13("+");
+      DrawString(Font8x13[CAM_FONT],"+");
       glRasterPos2i(W->Spot[8].xmin,W->Spot[8].ymax);
-      DrawString8x13("-");
+      DrawString(Font8x13[CAM_FONT],"-");
 
 /* .. Target */
       W = &TargetWidget;
@@ -993,7 +993,7 @@ void DrawCamHUD(struct POVType *POV)
       O = &Orb[POV->Host.RefOrb];
 
       glRasterPos2i((W->xmin+W->xmax)/2-24,W->ymin+15);
-      DrawString8x13("Target");
+      DrawString(Font8x13[CAM_FONT],"Target");
 
       if (O->Regime == ORB_CENTRAL || O->Regime == ORB_ZERO) {
          strcpy(WorldName,World[POV->Host.World].Name);
@@ -1005,38 +1005,38 @@ void DrawCamHUD(struct POVType *POV)
       }
       glRasterPos2i(W->xmin+30,W->ymin+30);
       sprintf(s,"  World: %s",WorldName);
-      DrawString8x13(s);
+      DrawString(Font8x13[CAM_FONT],s);
 
       glRasterPos2i(W->xmin+30,W->ymin+45);
       sprintf(s,"Ref Orb: %ld",POV->Target.RefOrb);
-      DrawString8x13(s);
+      DrawString(Font8x13[CAM_FONT],s);
       glRasterPos2i(W->xmin+30,W->ymin+60);
       sprintf(s,"    Frm: %ld",POV->Target.RefOrb);
-      DrawString8x13(s);
+      DrawString(Font8x13[CAM_FONT],s);
       glRasterPos2i(W->xmin+30,W->ymin+75);
       sprintf(s,"    S/C: %ld",POV->Target.SC);
-      DrawString8x13(s);
+      DrawString(Font8x13[CAM_FONT],s);
       glRasterPos2i(W->xmin+30,W->ymin+90);
       sprintf(s,"   Body: %ld",POV->Target.Body);
-      DrawString8x13(s);
+      DrawString(Font8x13[CAM_FONT],s);
       glRasterPos2i(W->xmin+10,W->ymin+120);
       sprintf(s,"Range: %7.2lf",POV->Range);
-      DrawString8x13(s);
+      DrawString(Font8x13[CAM_FONT],s);
       glRasterPos2i(W->xmin+10,W->ymin+135);
       if (POV->Target.Type >= TARGET_SC) {
          if (SC[POV->Target.SC].Eclipse)
-            DrawString8x13("In Eclipse");
+            DrawString(Font8x13[CAM_FONT],"In Eclipse");
          else
-            DrawString8x13("In Sunlight");
+            DrawString(Font8x13[CAM_FONT],"In Sunlight");
       }
       glRasterPos2i(W->Spot[5].xmin,W->Spot[5].ymax);
-      DrawString8x13("-");
+      DrawString(Font8x13[CAM_FONT],"-");
       glRasterPos2i(W->Spot[6].xmin,W->Spot[6].ymax);
-      DrawString8x13("+");
+      DrawString(Font8x13[CAM_FONT],"+");
       glRasterPos2i(W->Spot[7].xmin,W->Spot[7].ymax);
-      DrawString8x13("+");
+      DrawString(Font8x13[CAM_FONT],"+");
       glRasterPos2i(W->Spot[8].xmin,W->Spot[8].ymax);
-      DrawString8x13("-");
+      DrawString(Font8x13[CAM_FONT],"-");
 
 /* .. Boresight Direction */
       if (CamShow[N_AXES]) {
@@ -1045,28 +1045,28 @@ void DrawCamHUD(struct POVType *POV)
          Dec = asin(-POV->CN[2][2])*R2D;
          sprintf(s,"View RA:% 5.2f Dec:% 5.2f",RA,Dec);
          glRasterPos2i(POV->PixWidth-300,20);
-         DrawString8x13(s);
+         DrawString(Font8x13[CAM_FONT],s);
       }
       if (CamShow[L_AXES]) {
          glColor4fv(LBrightColor);
          sprintf(s,"View in L: [% 5.4f % 5.4f % 5.4f]",
             -POV->CL[2][0],-POV->CL[2][1],-POV->CL[2][2]);
          glRasterPos2i(POV->PixWidth-300,35);
-         DrawString8x13(s);
+         DrawString(Font8x13[CAM_FONT],s);
       }
       if (CamShow[F_AXES]) {
          glColor4fv(FBrightColor);
          sprintf(s,"View in F: [% 5.4f % 5.4f % 5.4f]",
             -POV->CF[2][0],-POV->CF[2][1],-POV->CF[2][2]);
          glRasterPos2i(POV->PixWidth-300,50);
-         DrawString8x13(s);
+         DrawString(Font8x13[CAM_FONT],s);
       }
       if (CamShow[B_AXES]) {
          glColor4fv(BBrightColor);
          sprintf(s,"View in B: [% 5.4f % 5.4f % 5.4f]",
             -POV->CB[2][0],-POV->CB[2][1],-POV->CB[2][2]);
          glRasterPos2i(POV->PixWidth-300,65);
-         DrawString8x13(s);
+         DrawString(Font8x13[CAM_FONT],s);
       }
 
 /* .. ProxOps Grid Spacing */
@@ -1086,7 +1086,7 @@ void DrawCamHUD(struct POVType *POV)
             sprintf(s,"%ld km",(long) (POV->GridSpacing/1000.0));
          }
          glRasterPos2i(POV->PixWidth-80-4*strlen(s),POV->PixHeight-104);
-         DrawString8x13(s);
+         DrawString(Font8x13[CAM_FONT],s);
       }
 
       DrawAlphabet(POV);
@@ -1384,7 +1384,7 @@ void DrawFarScene(struct POVType *POV)
                   for(i=0;i<3;i++) r[i] *= SkyDistance;
                   glRasterPos3d(-r[0],-r[1],-r[2]);
                   glBitmap(16,16,8.0,8.0,10,-8,WorldGlyph);
-                  DrawString8x11(World[Iw].Name);
+                  DrawString(Font8x11[CAM_FONT],World[Iw].Name);
                }
             }
          }
@@ -1430,7 +1430,7 @@ void DrawFarScene(struct POVType *POV)
                for(j=0;j<3;j++) PosN[j] *= SkyDistance;
                glRasterPos3d(PosN[0],PosN[1],PosN[2]);
                glBitmap(16,16,8.0,8.0,10,-8,TdrsGlyph);
-               DrawString8x11(Tdrs[i].Designation);
+               DrawString(Font8x11[CAM_FONT],Tdrs[i].Designation);
             }
          }
          glEnable(GL_LIGHTING);
@@ -1449,7 +1449,7 @@ void DrawFarScene(struct POVType *POV)
             for(i=0;i<3;i++) PosN[i] *= SkyDistance;
             glRasterPos3d(PosN[0],PosN[1],PosN[2]);
             glBitmap(16,16,8.0,8.0,10,-8,ScGlyph);
-            DrawString8x11(S->Label);
+            DrawString(Font8x11[CAM_FONT],S->Label);
          }
       }
       glEnable(GL_LIGHTING);
@@ -1687,7 +1687,8 @@ void DrawNearAuxObjects(struct POVType *POV)
                      }
                      DrawAxisLabels(GLYPH_B,BBrightColor,
                         0.0,len[0],0.0,len[1],0.0,len[2]);
-                     DrawBodyLabel(Ib,BBrightColor,M->BBox.max);
+                     DrawBodyLabel(Ib,BBrightColor,M->BBox.max,
+                        Font8x11[CAM_FONT]);
 
                      /* Draw dots at joints */
                      glDisable(GL_LIGHTING);
@@ -1738,13 +1739,13 @@ void DrawNearAuxObjects(struct POVType *POV)
                      glTranslated(B->pn[0],B->pn[1],B->pn[2]);
                      RotateR2L(B->CN);
                      DrawVector(S->svb,"s"," ",SvbColor,AxisLength,
-                        1.0,TRUE);
+                        1.0,TRUE,Font8x11[CAM_FONT]);
                      if (MAGV(S->bvb) > 0.0)
                         DrawVector(S->bvb,"B","uT",BvbColor,AxisLength,
-                           1.0E6,FALSE);
+                           1.0E6,FALSE,Font8x11[CAM_FONT]);
                      if (MAGV(S->Hvb) > 0.0)
                         DrawVector(S->Hvb,"H","Nms",HvbColor,AxisLength,
-                           1.0,FALSE);
+                           1.0,FALSE,Font8x11[CAM_FONT]);
                      glPopMatrix();
                   }
                   if (CamShow[FSW_VECTORS]) {
@@ -1754,14 +1755,14 @@ void DrawNearAuxObjects(struct POVType *POV)
                      RotateR2L(B->CN);
                      if (MAGV(S->AC.svb) > 0.0)
                         DrawVector(S->AC.svb,"Sac"," ",SvbColor,
-                           1.15*AxisLength,1.0,TRUE);
+                           1.15*AxisLength,1.0,TRUE,Font8x11[CAM_FONT]);
                      if (MAGV(S->AC.bvb) > 0.0)
                         DrawVector(S->AC.bvb,"Bac","uT",BvbColor,
-                           1.15*AxisLength,1.0E6,FALSE);
+                           1.15*AxisLength,1.0E6,FALSE,Font8x11[CAM_FONT]);
                      if (MAGV(S->AC.Hvb) > 0.0)
                         DrawVector(S->AC.Hvb,"Hac","Nms",HvbColor,
                            1.15*AxisLength,
-                           1.0,FALSE);
+                           1.0,FALSE,Font8x11[CAM_FONT]);
                      glPopMatrix();
                   }
                }
@@ -1831,7 +1832,8 @@ void DrawNearAuxObjects(struct POVType *POV)
                      RotateR2L(F->CB);
                      DrawFarFOV(F->Nv,F->Width,F->Height,
                         F->BoreAxis,F->H_Axis,F->V_Axis,
-                        F->Type,F->Color,F->Label,SkyDistance);
+                        F->Type,F->Color,F->Label,SkyDistance,
+                        Font8x11[CAM_FONT]);
                      glPopMatrix();
                   }
                }
@@ -2777,7 +2779,7 @@ void DrawClock(void)
             UTC.Year,UTC.doy,UTC.Hour,UTC.Minute,(long) UTC.Second);
       }
       glRasterPos2i(MapWidth-8*strlen(s),15);
-      DrawString8x13(s);
+      DrawString(Font8x13[MAP_FONT],s);
 
       glMatrixMode(GL_PROJECTION);
       glPopMatrix();
@@ -2810,18 +2812,18 @@ void DrawCredits(void)
       glMaterialfv(GL_FRONT,GL_EMISSION,CreditColor);
       if (Toggle) {
          glRasterPos2i(5,MapHeight-15);
-         DrawString8x13(
+         DrawString(Font8x13[MAP_FONT],
             "42 written by Eric Stoneking");
          glRasterPos2f(5,MapHeight-2);
-         DrawString8x13(
+         DrawString(Font8x13[MAP_FONT],
             "Code 591, NASA Goddard Space Flight Center");
       }
       else {
          glRasterPos2i(5,MapHeight-15);
-         DrawString8x13(
+         DrawString(Font8x13[MAP_FONT],
             "GlastCam and LroCam contributions from");
          glRasterPos2f(5,MapHeight-2);
-         DrawString8x13(
+         DrawString(Font8x13[MAP_FONT],
             "Dean Chai and Neerav Shah.");
       }
       glMatrixMode(GL_PROJECTION);
@@ -2849,7 +2851,7 @@ void DrawTdrsMap(void)
             glEnd();
             glRasterPos2f(lng,lat);
             glBitmap(0,0,0,0,4,-4,0);
-            DrawString8x13(Tdrs[i].Designation);
+            DrawString(Font8x13[MAP_FONT],Tdrs[i].Designation);
          }
       }
       glColor4fv(Black);
@@ -3066,7 +3068,7 @@ void DrawMap(void)
                glEnd();
                glRasterPos2f(GroundStation[i].lng,GroundStation[i].lat);
                glBitmap(0,0,0,0,5,-4,0);
-               DrawString8x13(GroundStation[i].Label);
+               DrawString(Font8x13[MAP_FONT],GroundStation[i].Label);
             }
          }
          glPointSize(1.0);
@@ -3338,7 +3340,7 @@ void DrawOrreryHUD(struct OrreryPOVType *O)
          glVertex2i(x0+80,y0-10);
       glEnd();
       glRasterPos2i(x0+40-4*strlen(O->ScaleLabel[O->Zoom]),y0+15);
-      DrawString8x13(O->ScaleLabel[O->Zoom]);
+      DrawString(Font8x13[ORRERY_FONT],O->ScaleLabel[O->Zoom]);
 
       glMatrixMode(GL_PROJECTION);
       glPopMatrix();
@@ -3519,7 +3521,7 @@ void DrawOrrery(void)
                   glEnd();
                   glRasterPos3dv(LS->LP[Ip].PosN);
                   glBitmap(0,0,0.0,0.0,5,5,NULL);
-                  DrawString8x13(LPName[Ip]);
+                  DrawString(Font8x13[ORRERY_FONT],LPName[Ip]);
                }
                glPopMatrix();
             }
@@ -3575,7 +3577,7 @@ void DrawOrrery(void)
                glColor3fv(WorldNameColor);
                glRasterPos3d(0.0,0.0,0.0);
                glBitmap(0,0,0.0,0.0,PointSize/2+2,5,NULL);
-               DrawString8x13(P->Name);
+               DrawString(Font8x13[ORRERY_FONT],P->Name);
                /* Moons */
                for(Im=0;Im<P->Nsat;Im++) {
                   Iw = P->Sat[Im];
@@ -3601,7 +3603,7 @@ void DrawOrrery(void)
                      glColor3fv(WorldNameColor);
                      glRasterPos3d(0.0,0.0,0.0);
                      glBitmap(0,0,0.0,0.0,PointSize/2+2,5,NULL);
-                     DrawString8x13(M->Name);
+                     DrawString(Font8x13[ORRERY_FONT],M->Name);
                      glPopMatrix();
                   }
                }
@@ -3636,7 +3638,7 @@ void DrawOrrery(void)
                glColor3fv(WorldNameColor);
                glRasterPos3d(0.0,0.0,0.0);
                glBitmap(0,0,0.0,0.0,PointSize/2+2,5,NULL);
-               DrawString8x13(MB->Name);
+               DrawString(Font8x13[ORRERY_FONT],MB->Name);
                glPopMatrix();
             }
          }
@@ -3764,7 +3766,7 @@ void DrawOrrery(void)
             RotateR2L(W->CNH);
             glRasterPos3dv(SC[Isc].PosN);
             glBitmap(8,8,4.0,4.0,5.0,-13.0,ScGlyph);
-            DrawString8x13(SC[Isc].Label);
+            DrawString(Font8x13[ORRERY_FONT],SC[Isc].Label);
             glPopMatrix();
          }
       }
@@ -3802,14 +3804,14 @@ void DrawSphereHUD(void)
       DrawWidget(W);
 
       glRasterPos2i((W->xmin+W->xmax)/2 - 12,W->ymax-14);
-      DrawString8x13("Top");
+      DrawString(Font8x13[SPHERE_FONT],"Top");
 
       glRasterPos2i((W->xmin+W->xmax)/2 - 24,W->ymin+38);
-      DrawString8x13("Center");
+      DrawString(Font8x13[SPHERE_FONT],"Center");
 
       for (i=0; i<6; i++) {
          glRasterPos2i(W->Spot[i].xmin+1,W->Spot[i].ymin+2);
-         DrawString8x13(top[i]);
+         DrawString(Font8x13[SPHERE_FONT],top[i]);
       }
 
       /* Text displayed for spots 7-10 changes based on which axis is selected */
@@ -3819,7 +3821,7 @@ void DrawSphereHUD(void)
 
       for (i=6; i<10; i++) {
          glRasterPos2i(W->Spot[i].xmin+1,W->Spot[i].ymin+2);
-         DrawString8x13(center[j][i-6]);
+         DrawString(Font8x13[SPHERE_FONT],center[j][i-6]);
       }
 
 /* .. Show Box */
@@ -3827,11 +3829,11 @@ void DrawSphereHUD(void)
       DrawWidget(W);
 
       glRasterPos2i((W->xmin+W->xmax)/2 - 16,W->ymax-14);
-      DrawString8x13("Show");
+      DrawString(Font8x13[SPHERE_FONT],"Show");
 
       for (i=0; i<6; i++) {
          glRasterPos2i(W->Spot[i].xmin+1,W->Spot[i].ymin+2);
-         DrawString8x13(show[i]);
+         DrawString(Font8x13[SPHERE_FONT],show[i]);
       }
 
 /* .. Vectors Box */
@@ -3839,11 +3841,11 @@ void DrawSphereHUD(void)
       DrawWidget(W);
 
       glRasterPos2i((W->xmin+W->xmax)/2 - 28,W->ymax-14);
-      DrawString8x13("Vectors");
+      DrawString(Font8x13[SPHERE_FONT],"Vectors");
 
       for (i=0; i<6; i++) {
          glRasterPos2i(W->Spot[i].xmin+1,W->Spot[i].ymin+2);
-         DrawString8x13(vectors[i]);
+         DrawString(Font8x13[SPHERE_FONT],vectors[i]);
       }
 
 /* .. FOVs Box */
@@ -3851,11 +3853,11 @@ void DrawSphereHUD(void)
       DrawWidget(W);
 
       glRasterPos2i((W->xmin+W->xmax)/2 - 44,W->ymax-14);
-      DrawString8x13("Sensor FOVs");
+      DrawString(Font8x13[SPHERE_FONT],"Sensor FOVs");
 
       for (i=0; i<3; i++) {
          glRasterPos2i(W->Spot[i].xmin+1,W->Spot[i].ymin+2);
-         DrawString8x13(fovs[i]);
+         DrawString(Font8x13[SPHERE_FONT],fovs[i]);
       }
 
 /* .. Grids Box */
@@ -3863,11 +3865,11 @@ void DrawSphereHUD(void)
       DrawWidget(W);
 
       glRasterPos2i(W->xmin+4,W->ymin+4);
-      DrawString8x13("Grids");
+      DrawString(Font8x13[SPHERE_FONT],"Grids");
 
       for (i=0; i<3; i++) {
          glRasterPos2i(W->Spot[i].xmin+1,W->Spot[i].ymin+2);
-         DrawString8x13(frames[i]);
+         DrawString(Font8x13[SPHERE_FONT],frames[i]);
       }
 
 /* .. Axes Box */
@@ -3875,11 +3877,11 @@ void DrawSphereHUD(void)
       DrawWidget(W);
 
       glRasterPos2i(W->xmin+4,W->ymin+4);
-      DrawString8x13("Axes");
+      DrawString(Font8x13[SPHERE_FONT],"Axes");
 
       for (i=0; i<3; i++) {
          glRasterPos2i(W->Spot[i].xmin+1,W->Spot[i].ymin+2);
-         DrawString8x13(frames[i]);
+         DrawString(Font8x13[SPHERE_FONT],frames[i]);
       }
 
 }
@@ -3962,7 +3964,7 @@ void DrawConstellation(struct ConstellationType *C, double CVJ[3][3])
       glEnd();
 
       glRasterPos2f(lngA,latA);
-      DrawString8x13(C->Tag);
+      DrawString(Font8x13[SPHERE_FONT],C->Tag);
 
       for (i=0;i<Nlines;i++) {
          MxV(CVJ,C->StarVec[C->Star1[i]],VecV);
@@ -4067,7 +4069,7 @@ void DrawUnitSphere(void)
          glLineWidth(2);
          DrawSmallCircle(lng,lat,rad);
          glLineWidth(1);
-         DrawMercatorVector(lng,lat,Wd->Name);
+         DrawMercatorVector(lng,lat,Wd->Name,Font8x13[SPHERE_FONT]);
       }
 
 /* .. Grids */
@@ -4100,14 +4102,14 @@ void DrawUnitSphere(void)
 
             if (S->CSS[i].Valid) {
                glColor4fv(ValidCSSColor);
-               DrawMercatorVector(lng,lat,label);
+               DrawMercatorVector(lng,lat,label,Font8x13[SPHERE_FONT]);
 
                rad = acos(S->CSS[i].Illum/S->CSS[i].Scale);
                DrawSmallCircle(lng,lat,rad);
             }
             else {
                glColor4fv(InvalidCSSColor);
-               DrawMercatorVector(lng,lat,label);
+               DrawMercatorVector(lng,lat,label,Font8x13[SPHERE_FONT]);
             }
          }
       }
@@ -4137,7 +4139,7 @@ void DrawUnitSphere(void)
             MxV(CVSp,ZAxis,VecV);
             VecToLngLat(VecV,&lng,&lat);
 
-            DrawMercatorVector(lng,lat,label);
+            DrawMercatorVector(lng,lat,label,Font8x13[SPHERE_FONT]);
          }
       }
 
@@ -4166,7 +4168,7 @@ void DrawUnitSphere(void)
             MxV(CVSp,ZAxis,VecV);
             VecToLngLat(VecV,&lng,&lat);
 
-            DrawMercatorVector(lng,lat,label);
+            DrawMercatorVector(lng,lat,label,Font8x13[SPHERE_FONT]);
          }
       }
 
@@ -4176,19 +4178,19 @@ void DrawUnitSphere(void)
       /* B Axes */
       if (W->Spot[0].Selected) {
          glColor4fv(BBrightColor);
-         DrawMercatorAxes(CVB0,"B");
+         DrawMercatorAxes(CVB0,"B",Font8x13[SPHERE_FONT]);
       }
 
       /* N Axes */
       if (W->Spot[1].Selected) {
          glColor4fv(NBrightColor);
-         DrawMercatorAxes(CVN,"N");
+         DrawMercatorAxes(CVN,"N",Font8x13[SPHERE_FONT]);
       }
 
       /* L Axes */
       if (W->Spot[2].Selected) {
          glColor4fv(LBrightColor);
-         DrawMercatorAxes(CVL,"L");
+         DrawMercatorAxes(CVL,"L",Font8x13[SPHERE_FONT]);
       }
 
 /* .. Vectors */
@@ -4199,21 +4201,21 @@ void DrawUnitSphere(void)
          MxV(CVB0,S->bvb,VecV);
          VecToLngLat(VecV,&lng,&lat);
          glColor4fv(MagFieldColor);
-         DrawMercatorVector(lng,lat,"Mag");
+         DrawMercatorVector(lng,lat,"Mag",Font8x13[SPHERE_FONT]);
       }
       /* Angular Momentum */
       if (W->Spot[1].Selected) {
          MxV(CVB0,S->Hvb,VecV);
          VecToLngLat(VecV,&lng,&lat);
          glColor4fv(AngMomentumColor);
-         DrawMercatorVector(lng,lat,"H");
+         DrawMercatorVector(lng,lat,"H",Font8x13[SPHERE_FONT]);
       }
       /* Velocity */
       if (W->Spot[2].Selected) {
          MxV(CVN,S->VelN,VecV);
          VecToLngLat(VecV,&lng,&lat);
          glColor4fv(VelocityColor);
-         DrawMercatorVector(lng,lat,"V");
+         DrawMercatorVector(lng,lat,"V",Font8x13[SPHERE_FONT]);
       }
       /* Anti-velocity */
       if (W->Spot[3].Selected) {
@@ -4221,21 +4223,21 @@ void DrawUnitSphere(void)
          for(i=0;i<3;i++) VecV[i] = -VecV[i];
          VecToLngLat(VecV,&lng,&lat);
          glColor4fv(AntiVelColor);
-         DrawMercatorVector(lng,lat,"-V");
+         DrawMercatorVector(lng,lat,"-V",Font8x13[SPHERE_FONT]);
       }
       /* Ecliptic North */
       if (W->Spot[4].Selected) {
          MxV(CVH,ZAxis,VecV);
          VecToLngLat(VecV,&lng,&lat);
          glColor4fv(EclipticNorthColor);
-         DrawMercatorVector(lng,lat,"Ecl N");
+         DrawMercatorVector(lng,lat,"Ecl N",Font8x13[SPHERE_FONT]);
       }
       /* Galactic North */
       if (W->Spot[5].Selected) {
          MxV(CVG,ZAxis,VecV);
          VecToLngLat(VecV,&lng,&lat);
          glColor4fv(GalacticNorthColor);
-         DrawMercatorVector(lng,lat,"Gal N");
+         DrawMercatorVector(lng,lat,"Gal N",Font8x13[SPHERE_FONT]);
       }
 
 /* .. Sprites */
@@ -4332,7 +4334,7 @@ void DrawUnitSphere(void)
                MxV(CVH,VecH,VecV);
                VecToLngLat(VecV,&lng,&lat);
                glColor4fv(Wd->Color);
-               DrawMercatorVector(lng,lat,Wd->Name);
+               DrawMercatorVector(lng,lat,Wd->Name,Font8x13[SPHERE_FONT]);
             }
          }
       }
@@ -4415,6 +4417,7 @@ void InitCamWidgets(struct POVType *POV)
       memcpy(PovWidget.SelectedColor,SelectedColor,4*sizeof(GLfloat));
       memcpy(PovWidget.UnselectedColor,UnselectedColor,4*sizeof(GLfloat));
       PovWidget.Nspot = 14;
+      free(PovWidget.Spot);
       PovWidget.Spot =
          (struct SpotType *) calloc(PovWidget.Nspot,sizeof(struct SpotType));
       for(i=0;i<PovWidget.Nspot;i++) {
@@ -4462,6 +4465,7 @@ void InitCamWidgets(struct POVType *POV)
       memcpy(HostWidget.SelectedColor,SelectedColor,4*sizeof(GLfloat));
       memcpy(HostWidget.UnselectedColor,UnselectedColor,4*sizeof(GLfloat));
       HostWidget.Nspot = 9;
+      free(HostWidget.Spot);
       HostWidget.Spot =
          (struct SpotType *) calloc(HostWidget.Nspot,sizeof(struct SpotType));
       for(i=0;i<HostWidget.Nspot;i++) {
@@ -4503,6 +4507,7 @@ void InitCamWidgets(struct POVType *POV)
       memcpy(TargetWidget.SelectedColor,SelectedColor,4*sizeof(GLfloat));
       memcpy(TargetWidget.UnselectedColor,UnselectedColor,4*sizeof(GLfloat));
       TargetWidget.Nspot = 9;
+      free(TargetWidget.Spot);
       TargetWidget.Spot =
          (struct SpotType *) calloc(TargetWidget.Nspot,sizeof(struct SpotType));
       for(i=0;i<TargetWidget.Nspot;i++) {
@@ -4548,6 +4553,7 @@ void InitCamWidgets(struct POVType *POV)
       memcpy(CamShowWidget.SelectedColor,ClearColor,4*sizeof(GLfloat));
       memcpy(CamShowWidget.UnselectedColor,ClearColor,4*sizeof(GLfloat));
       CamShowWidget.Nspot = CAM_MENU_SIZE;
+      free(CamShowWidget.Spot);
       CamShowWidget.Spot =
          (struct SpotType *) calloc(CamShowWidget.Nspot,sizeof(struct SpotType));
       for(i=0;i<CamShowWidget.Nspot;i++) {
@@ -4588,6 +4594,7 @@ void InitOrreryWidget(void)
 
       /* Zoom bar = 2 spots. Pan = 4 */
       W->Nspot = 6;
+      free(W->Spot);
       W->Spot =
          (struct SpotType *) calloc(W->Nspot,sizeof(struct SpotType));
       for(i=0;i<W->Nspot;i++) {
@@ -4666,6 +4673,7 @@ void InitSphereWidgets(void)
       memcpy(CenterWidget.SelectedColor,SelectedColor,4*sizeof(GLfloat));
       memcpy(CenterWidget.UnselectedColor,UnselectedColor,4*sizeof(GLfloat));
       CenterWidget.Nspot = 10;
+      free(CenterWidget.Spot);
       CenterWidget.Spot =
          (struct SpotType *) calloc(CenterWidget.Nspot,sizeof(struct SpotType));
       for(i=0;i<CenterWidget.Nspot;i++) {
@@ -4699,6 +4707,7 @@ void InitSphereWidgets(void)
       memcpy(SphereShowWidget.SelectedColor,SelectedColor,4*sizeof(GLfloat));
       memcpy(SphereShowWidget.UnselectedColor,UnselectedColor,4*sizeof(GLfloat));
 
+      free(SphereShowWidget.Spot);
       SphereShowWidget.Spot =
          (struct SpotType *) calloc(SphereShowWidget.Nspot,sizeof(struct SpotType));
       for(i=0;i<SphereShowWidget.Nspot;i++) {
@@ -4732,6 +4741,7 @@ void InitSphereWidgets(void)
       memcpy(VectorsWidget.SelectedColor,SelectedColor,4*sizeof(GLfloat));
       memcpy(VectorsWidget.UnselectedColor,UnselectedColor,4*sizeof(GLfloat));
 
+      free(VectorsWidget.Spot);
       VectorsWidget.Spot =
          (struct SpotType *) calloc(VectorsWidget.Nspot,sizeof(struct SpotType));
       for(i=0;i<VectorsWidget.Nspot;i++) {
@@ -4764,6 +4774,7 @@ void InitSphereWidgets(void)
       memcpy(FOVsWidget.SelectedColor,SelectedColor,4*sizeof(GLfloat));
       memcpy(FOVsWidget.UnselectedColor,UnselectedColor,4*sizeof(GLfloat));
 
+      free(FOVsWidget.Spot);
       FOVsWidget.Spot =
          (struct SpotType *) calloc(FOVsWidget.Nspot,sizeof(struct SpotType));
       for(i=0;i<FOVsWidget.Nspot;i++) {
@@ -4798,6 +4809,7 @@ void InitSphereWidgets(void)
       memcpy(GridsWidget.UnselectedColor,UnselectedColor,4*sizeof(GLfloat));
 
       GridsWidget.Nspot = 3;
+      free(GridsWidget.Spot);
       GridsWidget.Spot =
          (struct SpotType *) calloc(GridsWidget.Nspot,sizeof(struct SpotType));
       for(i=0;i<GridsWidget.Nspot;i++) {
@@ -4828,6 +4840,7 @@ void InitSphereWidgets(void)
       memcpy(AxesWidget.UnselectedColor,UnselectedColor,4*sizeof(GLfloat));
 
       AxesWidget.Nspot = 3;
+      free(AxesWidget.Spot);
       AxesWidget.Spot =
          (struct SpotType *) calloc(AxesWidget.Nspot,sizeof(struct SpotType));
       for(i=0;i<AxesWidget.Nspot;i++) {
@@ -4908,11 +4921,12 @@ void LoadCamLists(void)
          MwAlphaMask);
       LoadStars(StarCatFileName,BuckyPf,BuckyNeighbor,StarList,
          1.0);
-      LoadSkyGrid(30.0,5.0,0.1*SkyDistance,&MajSkyGridList,&MinSkyGridList);
+      LoadSkyGrid(30.0,5.0,0.1*SkyDistance,&MajSkyGridList,&MinSkyGridList,
+         Font8x11[CAM_FONT]);
       FermiSkyList = LoadSkyCube("./Model/","FermiSky",CGH,1.0);
-      /* Load1FGL("1FGL Source Catalog.txt",BuckyPf,BuckyNeighbor,FermiSourceList,1.0); */
-      /* LoadEgretCatalog("Egret Source Catalog.txt",BuckyPf,BuckyNeighbor,EgretSourceList,1.0); */
-      /* LoadPulsars("Pulsar Catalog.txt",BuckyPf,BuckyNeighbor,PulsarList,1.0); */
+      /* Load1FGL("1FGL Source Catalog.txt",BuckyPf,BuckyNeighbor,FermiSourceList,1.0,Font8x13[CAM_FONT]); */
+      /* LoadEgretCatalog("Egret Source Catalog.txt",BuckyPf,BuckyNeighbor,EgretSourceList,1.0,Font8x13[CAM_FONT]); */
+      /* LoadPulsars("Pulsar Catalog.txt",BuckyPf,BuckyNeighbor,PulsarList,1.0,Font8x13[CAM_FONT]); */
 
       SphereList = glGenLists(1);
       glNewList(SphereList,GL_COMPILE);
