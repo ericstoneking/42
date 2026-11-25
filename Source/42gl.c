@@ -82,6 +82,9 @@ void DrawWorldAsBackdrop(struct WorldType *W,double PosN[3],double svn[3],
       
       glUseProgram(WorldShaderProgram);
 
+      UniLoc = glGetUniformLocation(WorldShaderProgram,"OpticalDepthSamples");
+      glUniform1i(UniLoc,POV == &Eye ? 64 : 0);
+
       UniLoc = glGetUniformLocation(WorldShaderProgram,"HasAtmo");
       glUniform1i(UniLoc,A->Exists);
 
