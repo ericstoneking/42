@@ -224,7 +224,7 @@ EXTERN struct POVType *CurrentCameraPOV;
 
 void MeshToDisplayLists(struct MeshType *M);
 void UpdatePOV(struct POVType *POV);
-void CamRenderExec(void);
+void CamRenderExec(long AdvancePanZoom);
 void DrawMap(void);
 void DrawOrrery(void);
 void DrawUnitSphere(void);

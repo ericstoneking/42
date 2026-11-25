@@ -48,12 +48,14 @@ void MainLoop(void)
       long MaxCamFrame = 20000;
       char CamFileName[40];
       long Done = 0;
+      double LastCamDraw = glfwGetTime();
 
       while(!Done) {
 
          if (PauseFlag) {
             glfwMakeContextCurrent(CamWindow);
-            CamRenderExec();
+            LastCamDraw = glfwGetTime();
+            CamRenderExec(TRUE);
             glfwSwapBuffers(CamWindow);
             if (MapWindowExists) {
                glfwMakeContextCurrent(MapWindow);
@@ -79,7 +81,8 @@ void MainLoop(void)
             Done = SimStep();
             if (GLOutFlag) {
                glfwMakeContextCurrent(CamWindow);
-               CamRenderExec();
+               LastCamDraw = glfwGetTime();
+               CamRenderExec(TRUE);
                glfwSwapBuffers(CamWindow);
                if (MapWindowExists) {
                   glfwMakeContextCurrent(MapWindow);
@@ -105,6 +108,13 @@ void MainLoop(void)
                   printf("Captured Cam Frame %ld\n",CamFrame);
                   if (CamFrame > MaxCamFrame) CamFrame = 0;
                }
+               glfwMakeContextCurrent(NULL);
+            }
+            else if (TimeMode == REAL_TIME && glfwGetTime()-LastCamDraw >= 0.1) {
+               glfwMakeContextCurrent(CamWindow);
+               LastCamDraw = glfwGetTime();
+               CamRenderExec(FALSE);
+               glfwSwapBuffers(CamWindow);
                glfwMakeContextCurrent(NULL);
             }
          }

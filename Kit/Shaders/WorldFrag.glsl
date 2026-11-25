@@ -20,6 +20,7 @@ uniform samplerCube MapTexture;
 uniform samplerCube BumpTexture;                                       
 uniform samplerCube CloudGlossTexture;                                 
 uniform sampler1D RingTexture;                                         
+uniform int OpticalDepthSamples; // Zero preserves the onboard camera integration.
 uniform bool HasAtmo;
 uniform bool HasRing;  
 uniform vec3 GasColor;
@@ -60,7 +61,7 @@ vec3 ProjectRayOntoSphere(vec3 Pos, vec3 Axis, float Rad)
 /**********************************************************************/
 vec4 OpticalDepth(vec3 StartPt, vec3 EndPt, vec3 SunVec, float Rg)
 {
-      float du,dL;
+      float du,dL,InteriorEnd;
       float h,u;
       float DayODr = 0.0;
       float EclODr = 0.0;
@@ -70,7 +71,14 @@ vec4 OpticalDepth(vec3 StartPt, vec3 EndPt, vec3 SunVec, float Rg)
       vec3 Pt;
       vec4 OD;
       
-      du = 0.001;
+      if (OpticalDepthSamples > 0) {
+         du = 1.0/float(OpticalDepthSamples);
+         InteriorEnd = 1.0;
+      }
+      else {
+         du = 0.001;
+         InteriorEnd = 1.0-du;
+      }
       dL = du*length(EndPt-StartPt);
       
       /* Trapezoid Integration */
@@ -87,7 +95,7 @@ vec4 OpticalDepth(vec3 StartPt, vec3 EndPt, vec3 SunVec, float Rg)
          EclODm += 0.5*exp(-h/Hm);
       }
       
-      for(u=du;u<1.0-du;u+=du) {
+      for(u=du;u<InteriorEnd;u+=du) {
          Pt = (1.0-u)*StartPt + u*EndPt;
          h = length(Pt)-Rg;
          PoS = dot(Pt,SunVec);
