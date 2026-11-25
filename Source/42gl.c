@@ -851,14 +851,15 @@ void DrawCamHUD(struct POVType *POV)
       char Mode[3][20] = {"TRACK HOST","TRACK TARGET","FIXED IN HOST"};
       char WorldName[84];
       double RA,Dec;
-      GLfloat BoxColor[4] = {0.133,0.545,0.133,1.0};
-      GLfloat ClockColor[4] = {0.604,0.804,0.196,1.0};
-      GLfloat ProxOpsGridColor[4] = {1.0,1.0,1.0,0.5};
+      GLfloat White[4] = {1.0,1.0,1.0,1.0};
       GLfloat Black[4] = {0.0,0.0,0.0,1.0};
       int i;
       struct WidgetType *W;
       struct OrbitType *O;
 
+      glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_LINE_BIT);
+      glDisable(GL_DEPTH_TEST);
+      glLineWidth(1.0);
       glMatrixMode(GL_PROJECTION);
       glPushMatrix();
       glLoadIdentity();
@@ -873,7 +874,7 @@ void DrawCamHUD(struct POVType *POV)
       glDisable(GL_LIGHTING);
 
 /* .. Clock Box */
-      glColor4fv(BoxColor);
+      glColor4fv(White);
       glBegin(GL_LINE_LOOP);
       glVertex2i(2,2);
       glVertex2i(172,2);
@@ -881,7 +882,6 @@ void DrawCamHUD(struct POVType *POV)
       glVertex2i(2,60);
       glEnd();
 
-      glColor4fv(ClockColor);
       sprintf(s,"Sim Time = % 8.2f",SimTime);
       glRasterPos2i(10,20);
       DrawString(Font8x13[CAM_FONT],s);
@@ -1039,8 +1039,8 @@ void DrawCamHUD(struct POVType *POV)
       DrawString(Font8x13[CAM_FONT],"-");
 
 /* .. Boresight Direction */
+      glColor4fv(White);
       if (CamShow[N_AXES]) {
-         glColor4fv(NBrightColor);
          RA = atan2(-POV->CN[2][1],-POV->CN[2][0])*R2D;
          Dec = asin(-POV->CN[2][2])*R2D;
          sprintf(s,"View RA:% 5.2f Dec:% 5.2f",RA,Dec);
@@ -1048,21 +1048,18 @@ void DrawCamHUD(struct POVType *POV)
          DrawString(Font8x13[CAM_FONT],s);
       }
       if (CamShow[L_AXES]) {
-         glColor4fv(LBrightColor);
          sprintf(s,"View in L: [% 5.4f % 5.4f % 5.4f]",
             -POV->CL[2][0],-POV->CL[2][1],-POV->CL[2][2]);
          glRasterPos2i(POV->PixWidth-300,35);
          DrawString(Font8x13[CAM_FONT],s);
       }
       if (CamShow[F_AXES]) {
-         glColor4fv(FBrightColor);
          sprintf(s,"View in F: [% 5.4f % 5.4f % 5.4f]",
             -POV->CF[2][0],-POV->CF[2][1],-POV->CF[2][2]);
          glRasterPos2i(POV->PixWidth-300,50);
          DrawString(Font8x13[CAM_FONT],s);
       }
       if (CamShow[B_AXES]) {
-         glColor4fv(BBrightColor);
          sprintf(s,"View in B: [% 5.4f % 5.4f % 5.4f]",
             -POV->CB[2][0],-POV->CB[2][1],-POV->CB[2][2]);
          glRasterPos2i(POV->PixWidth-300,65);
@@ -1071,7 +1068,6 @@ void DrawCamHUD(struct POVType *POV)
 
 /* .. ProxOps Grid Spacing */
       if (CamShow[PROX_OPS]) {
-         glColor4fv(ProxOpsGridColor);
          glLineWidth(2.5);
          glBegin(GL_LINE_STRIP);
             glVertex2i(POV->PixWidth-120,POV->PixHeight-106);
@@ -1091,8 +1087,7 @@ void DrawCamHUD(struct POVType *POV)
 
       DrawAlphabet(POV);
 
-      glColor4fv(Black);
-      glEnable(GL_LIGHTING);
+      glPopAttrib();
 
       glMatrixMode(GL_PROJECTION);
       glPopMatrix();
@@ -2209,6 +2204,12 @@ void DrawBodies(struct POVType *POV)
 
 /* .. Tidy Up */
       glUseProgram(0);
+      if (ShadowsEnabled) {
+         /* Keep fixed-function draws from sampling the shadow map. */
+         glActiveTexture(GL_TEXTURE5);
+         glDisable(GL_TEXTURE_2D);
+      }
+      glActiveTexture(GL_TEXTURE0);
       glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE,Black);
       glMaterialfv(GL_FRONT,GL_SPECULAR,Black);
       glMaterialfv(GL_FRONT,GL_EMISSION,Black);
@@ -4393,11 +4394,10 @@ void DrawUnitSphere(void)
 /**********************************************************************/
 void InitCamWidgets(struct POVType *POV)
 {
-      GLfloat BorderColor[4] = {0.64,0.32,0.075,1.0};
-      GLfloat TextColor[4] = {0.8,0.44,0.0,1.0};
+      GLfloat BorderColor[4] = {1.0,1.0,1.0,1.0};
+      GLfloat TextColor[4] = {1.0,1.0,1.0,1.0};
       GLfloat SelectedColor[4] = {1.0,1.0,1.0,0.5};
       GLfloat UnselectedColor[4] = {1.0,1.0,1.0,0.3};
-      GLfloat CamShowColor[4] = {0.8,0.44,0.0,1.0};
       GLfloat ClearColor[4] = {0.0,0.0,0.0,0.0};
       long x0,y0;
       unsigned int Max;
@@ -4548,8 +4548,8 @@ void InitCamWidgets(struct POVType *POV)
       CamShowWidget.xmax = x0 + 30 + 8*Max;
       CamShowWidget.ymin = y0;
       CamShowWidget.ymax = y0 + 25 + 15*CAM_MENU_SIZE;
-      memcpy(CamShowWidget.BorderColor,CamShowColor,4*sizeof(GLfloat));
-      memcpy(CamShowWidget.TextColor,CamShowColor,4*sizeof(GLfloat));
+      memcpy(CamShowWidget.BorderColor,BorderColor,4*sizeof(GLfloat));
+      memcpy(CamShowWidget.TextColor,TextColor,4*sizeof(GLfloat));
       memcpy(CamShowWidget.SelectedColor,ClearColor,4*sizeof(GLfloat));
       memcpy(CamShowWidget.UnselectedColor,ClearColor,4*sizeof(GLfloat));
       CamShowWidget.Nspot = CAM_MENU_SIZE;
