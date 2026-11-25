@@ -2691,13 +2691,17 @@ void PanZoomPOV(struct POVType *POV)
 }
 /**********************************************************************/
 /*  Find POV location, orientation in RefOrb, N, H, etc               */
-void UpdatePOV(struct POVType *POV)
+static void UpdatePOVPose(struct POVType *POV)
 {
-      PanZoomPOV(POV);
-
       if (POV->Mode == TRACK_HOST) PovTrackHostMode(POV);
       else if (POV->Mode == TRACK_TARGET) PovTrackTargetMode(POV);
       else PovFixedInHostMode(POV);
+}
+/**********************************************************************/
+void UpdatePOV(struct POVType *POV)
+{
+      PanZoomPOV(POV);
+      UpdatePOVPose(POV);
 }
 /**********************************************************************/
 void FindModelMatrices(struct POVType *POV)
@@ -2743,10 +2747,11 @@ void FindModelMatrices(struct POVType *POV)
       }
 }
 /**********************************************************************/
-void CamRenderExec(void)
+void CamRenderExec(long AdvancePanZoom)
 {
       FindModelMatrices(&Eye);
-      UpdatePOV(&Eye);
+      if (AdvancePanZoom) UpdatePOV(&Eye);
+      else UpdatePOVPose(&Eye);
 
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       DrawFarScene(&Eye);
